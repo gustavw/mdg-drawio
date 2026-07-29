@@ -1,0 +1,10 @@
+# Exercises the legacy `page "Name"` multi-page syntax (still supported
+# alongside the newer `---` / `page:` frontmatter). Drives the action tracer
+# through the legacy page-splitting path.
+page "Alpha"
+c4.System(a1, "System Alpha", "First system.")
+c4.System(a2, "System Beta", "Second system.")
+c4.Rel(a1, a2, "Calls", description="")
+
+page "Bravo"
+c4.Container(b1, "Container One", "A container.", technology="Python")

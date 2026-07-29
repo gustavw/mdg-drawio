@@ -1,0 +1,53 @@
+---
+title: "General Shapes Coverage"
+mode: palette
+---
+
+use general
+
+general.General("General Shapes Coverage")
+    general.Rectangle(n1, "")  # 1. rectangle
+    general.RoundedRectangle(n2, "")  # 2. roundedRectangle
+    general.Text(n3, "Text")  # 3. text
+    general.Textbox(n4, "Heading", "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")  # 4. textbox
+    general.Ellipse(n5, "")  # 5. ellipse
+    general.Square(n6, "")  # 6. square
+    general.Circle(n7, "")  # 7. circle
+    general.Process(n8, "")  # 8. process
+    general.Diamond(n9, "")  # 9. diamond
+    general.Parallelogram(n10, "")  # 10. parallelogram
+    general.Hexagon(n11, "")  # 11. hexagon
+    general.Triangle(n12, "")  # 12. triangle
+    general.Cylinder(n13, "")  # 13. cylinder
+    general.Cloud(n14, "")  # 14. cloud
+    general.Document(n15, "")  # 15. document
+    general.InternalStorage(n16, "")  # 16. internalStorage
+    general.Cube(n17, "")  # 17. cube
+    general.Step(n18, "")  # 18. step
+    general.Trapezoid(n19, "")  # 19. trapezoid
+    general.Tape(n20, "")  # 20. tape
+    general.Note(n21, "")  # 21. note
+    general.Card(n22, "")  # 22. card
+    general.Callout(n23, "")  # 23. callout
+    general.Actor(n24, "Actor")  # 24. actor
+    general.Or(n25, "")  # 25. or
+    general.And(n26, "")  # 26. and
+    general.DataStorage(n27, "")  # 27. dataStorage
+    general.Container(n28, "")  # 28. container
+    general.VerticalContainer(n29, "Vertical Container")  # 29. verticalContainer
+    general.HorizontalContainer(n30, "Horizontal Container")  # 30. horizontalContainer
+    general.List(n31, "List")  # 31. list
+    general.ListItem(n32, "List Item")  # 32. listItem
+    general.Rel(None, None, "", type="curve")  # 33. Rel
+    general.Rel(None, None, "", type="bidirectionalArrow", variant=2)  # 34. Rel
+    general.Rel(None, None, "", type="arrow", variant=3)  # 35. Rel
+    general.Rel(None, None, "", type="dashedLine", variant=4)  # 36. Rel
+    general.Rel(None, None, "", type="dottedLine", variant=5)  # 37. Rel
+    general.Rel(None, None, "", type="line", variant=6)  # 38. Rel
+    general.Rel(None, None, "", type="bidirectionalConnector", variant=7)  # 39. Rel
+    general.Rel(None, None, "", type="connector", variant=8)  # 40. Rel
+    general.Rel(None, None, "", type="link", variant=9)  # 41. Rel
+    general.Rel(None, None, "", type="connector", variant=10)  # 42. Rel
+    general.Rel(None, None, "", type="connector", variant=11)  # 43. Rel
+    general.Rel(None, None, "", type="connector", variant=12)  # 44. Rel
+    general.Rel(None, None, "", type="connectorWithSymbol", variant=13)  # 45. Rel

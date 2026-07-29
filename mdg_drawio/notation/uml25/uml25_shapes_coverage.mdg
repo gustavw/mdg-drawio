@@ -1,0 +1,269 @@
+---
+title: "UML 2.5 Shapes Coverage"
+mode: palette
+---
+
+# NOTE ON SPELLING:
+# Several labels below preserve typos that exist in the live draw.io UML 2.5
+# palette source, kept verbatim so each entry stays byte-identical to the
+# draw.io tooltip/menu name for reliable association:
+#   - "preudostate"  (#39)  draw.io's spelling of "pseudostate"
+#   - "Occurence"    (#90)  draw.io's spelling of "Occurrence"
+#   - "Secification" (#123, #124)  draw.io's spelling of "Specification"
+# Corrected spellings are noted only in comments; do not "fix" the labels.
+#
+# NOTE ON uml25.Raw:
+# uml25.Raw is the generic fallback builder for palette entries that do not yet
+# have a dedicated shape function. It intentionally does NOT collide with entry
+# #1 "Diagram", which now uses the dedicated uml25.Diagram builder.
+#
+# NOTE ON ROW TYPES (nested children):
+# Nested rows are not all the same style. draw.io distinguishes them, so the DSL
+# uses semantic row types instead of a single overloaded Item:
+#   Item(id, text)               left-aligned member/content row (the default)
+#   Header(id, text)             center-aligned compartment label (e.g. "attributes",
+#                                "operations", "provided interfaces")
+#   Note(id, text)               bold stub, typically an internal-structure placeholder
+#                                (fontStyle=1)
+#   Divider(id, text="")         plain separator line
+#   Divider(id, text, dashed=True)   dashed separator, optional label
+#   Lane(id, text="")            partialRectangle swimlane cell (Activity Partition,
+#                                Lifeline timing lanes)
+# Right-aligned action rows (variable/self/value) are NOT rows here; they are passed
+# as arguments (variable=, binding=, value=) and the builder sets align=right.
+#
+# NOTE ON FIXED-PART ARGUMENTS:
+# Some shapes carry a fixed sub-element that draw.io pins to the template
+# (style part=1;resizeWidth=1) rather than a row that scales. Those are passed
+# as keyword arguments (keyword=, name=, body=, entry=, exit=, annotation=,
+# stream=, variable=, value=, binding=, multiplicity=, heading=, condition=,
+# node=, inv1=, inv2=) instead of nested uml25.Item rows. Genuine stackLayout
+# tables (attribute/operation/property/literal lists, etc.) remain nested so
+# they can grow.
+
+use uml25
+
+uml25.UML25("UML 2.5 Shapes Coverage")
+    uml25.Diagram(n1, "Diagram Heading")  # 1. Diagram
+    uml25.Comment(n2, "Comment1 body")  # 2. Comment
+    uml25.TemplateSignature(n3, "Template1 signature")  # 3. Template signature
+    uml25.TemplateSignature(n4, "Template parameter 1\nTemplate parameter 2", variant=2)  # 4. Template signature
+    uml25.Constraint(n5, "Constraint1 specification", keyword="<<keyword>>")  # 5. Constraint
+    uml25.Classifier(n6, "<<keyword>> Classifier1 {abstract}"):  # 6. Classifier
+        uml25.Header(c2, "attributes")
+        uml25.Item(c3, "attribute1")
+        uml25.Item(c4, "inherited attribute2")
+        uml25.Item(c5, "...")
+        uml25.Divider(c6, "")
+        uml25.Header(c7, "operations")
+        uml25.Item(c8, "operation1")
+    uml25.Classifier(n7, "Classifier1", variant=2)  # 7. Classifier
+    uml25.Classifier(n8, "Classifier1", variant=3):  # 8. Classifier
+        uml25.Header(c9, "internal structure")
+        uml25.Note(c10, "")
+    uml25.Association(n9, "Association1")  # 9. Association
+    uml25.Classifier(n10, "Instance1", variant=4):  # 10. Classifier
+        uml25.Item(c11, "slot1")
+        uml25.Divider(c12, "")
+        uml25.Header(c13, "internal structure")
+        uml25.Note(c14, "")
+    uml25.Instance(n11, "Instance1 value")  # 11. Instance
+    uml25.Classifier(n12, "<<enumeration>> Enum1", variant=5):  # 12. Classifier
+        uml25.Item(c15, "literal1")
+    uml25.InterfaceGeneralization(None, None, "Interface1, Interface2...")  # 13. Interface Generalization
+    uml25.RequiredInterface(None, None, "Interface1")  # 14. Required Interface
+    uml25.Property(n13, "0..1", name="Property1")  # 15. Property
+    uml25.Property(n14, "Property1", variant=2)  # 16. Property
+    uml25.Port(n15, "port1")  # 17. Port
+    uml25.PortWithProvidedInterface(n16, "")  # 18. Port with provided interface
+    uml25.PortWithRequiredInterface(n17, "")  # 19. Port with required interface
+    uml25.Component(n18, ""):  # 20. Component
+        uml25.Item(c17, "Component")
+        uml25.Divider(c18, "")
+        uml25.Header(c19, "provided interfaces")
+        uml25.Item(c20, "Interface1")
+        uml25.Divider(c21, "")
+        uml25.Header(c22, "required interfaces")
+        uml25.Item(c23, "Interface2")
+    uml25.Classifier(n19, "", variant=6):  # 21. Classifier
+        uml25.Header(c24, "Collaboration1")
+        uml25.Divider(c25, "", dashed=True)
+        uml25.Header(c26, "Classifier1")
+        uml25.Header(c27, "Collaboration use 1")
+        uml25.Item(c28, "Classifier2")
+    uml25.Package(n20, "Package1")  # 22. Package
+    uml25.Package(n21, "Package1", variant=2, element="Packaged element1")  # 23. Package
+    uml25.Package(n22, "Package", variant=3, body="Text")  # 24. Package
+    uml25.Model(n23, "Model1")  # 25. Model
+    uml25.Stereotype(n24, ""):  # 26. Stereotype
+        uml25.Item(c31, "<<stereotype1>>")
+        uml25.Item(c32, "stereotype property 1")
+        uml25.Item(c33, "stereotype property 2")
+    uml25.Class(n25, "Class1"):  # 27. Class
+        uml25.Header(c34, "<<stereotype1>>")
+        uml25.Item(c35, "stereotype property 1")
+    uml25.StereotypeLabel(n26, "<<stereotype1, stereotype2...>>")  # 28. Stereotype Label
+    uml25.Icon(n27, "icon")  # 29. Icon
+    uml25.Region(n28, "")  # 30. Region
+    uml25.State(n29, "State1 [invariant1] <<extended/final>>"):  # 31. State
+        uml25.Item(c36, "")
+        uml25.Divider(c37, "")
+        uml25.Item(c38, "behavior1")
+        uml25.Divider(c39, "")
+        uml25.Item(c40, "transition1")
+    uml25.State(n30, "State1", variant=2)  # 32. State
+    uml25.State(n31, "State", variant=3)  # 33. State
+    uml25.State(n32, "State1", variant=4)  # 34. State
+    uml25.State(n33, "State1, State2, ...", variant=5)  # 35. State
+    uml25.State(n34, "State1", variant=6)  # 36. State
+    uml25.StateWithEntryPoint(n35, "State1", entry="Entry1")  # 37. State with entry point
+    uml25.StateWithExitPoint(n36, "State1", exit="Exit1")  # 38. State with exit point
+    uml25.InitialPreudostateNode(n37, "")  # 39. Initial preudostate / node  (sic: "pseudostate")
+    uml25.FinalStateNode(n38, "")  # 40. Final state / node
+    uml25.ShallowHistory(n39, "H")  # 41. Shallow History
+    uml25.DeepHistory(n40, "H*")  # 42. Deep History
+    uml25.EntryPoint(n41, "")  # 43. Entry Point
+    uml25.ExitPointFlowFinalNode(n42, "")  # 44. Exit Point / Flow Final Node
+    uml25.Junction(n43, "")  # 45. Junction
+    uml25.ChoiceMergeNodeDecisionNode(n44, "")  # 46. Choice / Merge Node / Decision Node
+    uml25.Terminate(n45, "")  # 47. Terminate
+    uml25.JoinForkNode(n46, "")  # 48. Join/Fork Node
+    uml25.OpaqueAction(n47, "OpaqueAction1 spec.")  # 49. Opaque Action
+    uml25.Trigger(n48, "Trigger1 spec.")  # 50. Trigger
+    uml25.SendSignalAction(n49, "SendSignalAction1")  # 51. Send Signal Action
+    uml25.SingleExecution(n50, "<<singleExecution>>")  # 52. Single Execution
+    uml25.Parameter(n51, ""):  # 53. Parameter
+        uml25.Item(c43, "Parameter1 spec.")
+        uml25.Item(c44, "")
+    uml25.Action(n52, "Action1")  # 54. Action
+    uml25.ActivityPartition(n53, "<<external>> Action1 (partition1)")  # 55. Activity Partition
+    uml25.ObjectNode(n54, "ObjectNode1 [State1, State2...]", variant=2, annotation="{annotation1}")  # 56. Object Node
+    uml25.ActivityParameterNode(n55, "Parameter1 spec.", stream="{stream}")  # 57. Activity Parameter Node
+    uml25.ObjectNode(n56, "ObjectNode1", variant=3)  # 58. Object Node
+    uml25.Behavior(n57, "Behavior1 spec.", keyword="<<keyword>>")  # 59. Behavior
+    uml25.JoinNode(n58, "{joinSpec = join spec}")  # 60. Join Node
+    uml25.ActivityPartition(n59, "dimension1", variant=2):  # 61. Activity Partition
+        uml25.Lane(c48, "")
+        uml25.Lane(c49, "")
+        uml25.Lane(c50, "")
+    uml25.InterruptibleActivityRegion(n60, "")  # 62. Interruptible Activity Region
+    uml25.State(n61, "State1", variant=7)  # 63. State
+    uml25.ConstraintPreconditionPostcondition(n62, "Constraint1 spec.", keyword="<<keyword>>")  # 64. Constraint / Precondition / Postcondition
+    uml25.Port(n63, "Pin1 [State1] {control} Parameter1 spec.", variant=2)  # 65. Port
+    uml25.ObjectFlow(n64, "")  # 66. Object Flow
+    uml25.Pin(n65, "")  # 67. Pin
+    uml25.InputPin(n66, "")  # 68. Input Pin
+    uml25.InputPin(n67, "", variant=2)  # 69. Input Pin
+    uml25.OutputPin(n68, "")  # 70. Output Pin
+    uml25.OutputPin(n69, "", variant=2)  # 71. Output Pin
+    uml25.BehaviorAction(n70, "CallBehaviorAction1")  # 72. Behavior Action
+    uml25.CallOperationAction(n71, "Action1 (Operation1)")  # 73. Call Operation Action
+    uml25.ValueSpecificationAction(n72, "ValueSpecAction1 spec.")  # 74. Value Specification Action
+    uml25.ActionWithOutput(n73, "Action1", variable="variable1")  # 75. Action with output
+    uml25.ActionWithInput(n74, "Action1", variable="variable1")  # 76. Action with input
+    uml25.ReadSelfObjectAction(n75, "Action1", binding="self")  # 77. Read self object action
+    uml25.ValueSpecificationAction(n76, "Action1", variant=2, value="value1")  # 78. Value specification action
+    uml25.SendObjectAction(n77, "SendObjectAction1")  # 79. Send Object Action
+    uml25.AcceptEventAction(n78, "AcceptEventAction1")  # 80. Accept Event Action
+    uml25.TimeEventTrigger(n79, "")  # 81. Time Event Trigger
+    uml25.ActionWithParameters(n80, "Action1")  # 82. Action with Parameters
+    uml25.StructuredActivityNode(n81, "<<structured>>")  # 83. Structured Activity Node
+    uml25.Expansion(n82, "<<keyword>>"):  # 84. Expansion
+        uml25.Item(c56, "")
+        uml25.Item(c57, "")
+        uml25.Item(c58, "")
+        uml25.Item(c59, "")
+        uml25.Item(c60, "")
+        uml25.Item(c61, "")
+        uml25.Item(c62, "")
+        uml25.Item(c63, "")
+    uml25.ExecutionRegion(n83, "Action", multiplicity="*")  # 85. Execution region
+    uml25.ExecutionNodeWithAction(n84, "Action1"):  # 86. Execution node with action
+        uml25.Item(c65, "")
+        uml25.Item(c66, "")
+    uml25.Interaction(n85, "Interaction heading"):  # 87. Interaction
+        uml25.Item(c67, "Property1")
+        uml25.Item(c68, "Property2")
+    uml25.Lifelines(n86, "Lifeline1")  # 88. Lifelines
+    uml25.Lifelines(n87, "Lifeline2", variant=2):  # 89. Lifelines
+        uml25.Divider(c69, "")
+        uml25.Divider(c70, "")
+    uml25.DestructionOccurenceSpecification(n88, "Lifeline1"):  # 90. Destruction Occurence Specification  (sic: "Occurrence")
+        uml25.Divider(c71, "")
+    uml25.Interaction(n89, "Interaction heading", variant=2):  # 91. Interaction
+        uml25.Item(c72, "[constraint1]")
+        uml25.Divider(c73, "[constraint2]", dashed=True)
+    uml25.LifelineContinuation(n90, "Continuation1")  # 92. Lifeline Continuation
+    uml25.LifelineStateInvariant(n91, "Lifeline1", inv1="State1 inv.", inv2="{State2 inv.}")  # 93. Lifeline State Invariant
+    uml25.Interaction(n92, "Ref", variant=3, body="Interaction1")  # 94. Interaction
+    uml25.Lifeline(n93, "Lifeline1"):  # 95. Lifeline
+        uml25.Lane(c77, "")
+        uml25.Lane(c78, "")
+    uml25.UseCase(n94, "Class1", heading="Heading1")  # 96. Use Case
+    uml25.Observation(None, None, "observation")  # 97. Observation
+    uml25.TimeConstraint(None, None, "{Time constraint 1}")  # 98. Time constraint
+    uml25.DurationConstraint(None, None, "{Duration constraint 1}")  # 99. Duration constraint
+    uml25.Classifier(n95, "", variant=7):  # 100. Classifier
+        uml25.Note(c80, "UseCase1")
+        uml25.Divider(c81, "")
+        uml25.Header(c82, "extension points")
+        uml25.Item(c83, "Extension point 1")
+    uml25.ExtensionPointClassifier(n96, "", name="UseCase1"):  # 101. Extension Point Classifier
+        uml25.Header(c86, "extension points")
+        uml25.Item(c87, "Extension point 1")
+    uml25.Actor(n97, "Actor")  # 102. Actor
+    uml25.Actor(n98, "<<actor>> Actor1", variant=2)  # 103. Actor
+    uml25.Extension(n99, "Extension point 1", condition="Extend condition 1")  # 104. Extension
+    uml25.Deployment(n100, "DeploymentTarget1", node="Node1")  # 105. Deployment
+    uml25.DeploymentSpecification(n101, "<<deployment spec>> Deployment1")  # 106. Deployment Specification
+    uml25.Artifact(n102, "<<artifact>> Artifact1")  # 107. Artifact
+    uml25.InformationItem(n103, "InformationItem1")  # 108. Information item
+    uml25.TemplateBinding(None, None, "<<bind>>")  # 109. Template Binding
+    uml25.InnerClass(None, None)  # 110. Inner class
+    uml25.ElementPackageMergePackageImportSubstitution(None, None, "<<keyword>>")  # 111. Element / Package Merge / Package Import, Substitution
+    uml25.Constraint(None, None, "{constraint spec.}", variant=2)  # 112. Constraint
+    uml25.Dependency(None, None, "<<keyword>>")  # 113. Dependency
+    uml25.Dependency(n106, "", variant=2)  # 114. Dependency
+    uml25.Realization(None, None)  # 115. Realization
+    uml25.GeneralizationSet(None, None, "GeneralizationSet1")  # 116. Generalization Set
+    uml25.AssociationConnector(None, None)  # 117. Association / Connector / Instance Specification / Property / Connector End
+    uml25.AssociationNavigability(None, None)  # 118. Association / Connector / Instance Specification / Property / Connector End / Navigability notation
+    uml25.AssociationConnector(None, None, variant=2)  # 119. Association / Connector / Instance Specification / Property / Connector End
+    uml25.AssociationNonNavigability(None, None)  # 120. Association / Connector / Instance Specification / Property / Connector End / Non-Navigability notation
+    uml25.AssociationShared(None, None)  # 121. Association / Connector / Instance Specification / Property / Connector End / Shared Association
+    uml25.AssociationComposite(None, None)  # 122. Association / Connector / Instance Specification / Property / Connector End / Composite Association
+    uml25.AssociationInstanceSecification(n108, "")  # 123. Association / Instance Secification  (sic: "Specification")
+    uml25.AssociationInstanceSecification(n109, "", variant=2)  # 124. Association / Instance Secification  (sic: "Specification")
+    uml25.Redefine(None, None, "{redefines}")  # 125. Redefine
+    uml25.Qualifier(n111, "qualifier1")  # 126. Qualifier
+    uml25.Connector(None, None, "")  # 127. Connector
+    uml25.ProvidedInterface(None, None)  # 128. Provided Interface
+    uml25.RequiredInterface(None, None, variant=2)  # 129. Required Interface
+    uml25.StructuralFeature(None, None, "feature1")  # 130. Structural Feature
+    uml25.Usage(n113, "")  # 131. Usage
+    uml25.Collaboration(n114, "Collaboration1")  # 132. Collaboration
+    uml25.CollaborationUse(None, None, "<<occurence>>")  # 133. Collaboration Use
+    uml25.Extension(None, None, "{required}", variant=2)  # 134. Extension
+    uml25.Transition(None, None, "Transition1 spec.")  # 135. Transition
+    uml25.Activity(None, None, "{annotation1}")  # 136. Activity
+    uml25.ControlFlow(None, None, "<<multicast/multireceive>>")  # 137. Control Flow
+    uml25.Action(n117, "Action1", variant=2)  # 138. Action
+    uml25.ObjectNode(n118, "ObjectNode1", variant=4)  # 139. Object Node
+    uml25.Activity(n119, "", variant=2)  # 140. Activity
+    uml25.Activity(n120, "", variant=3)  # 141. Activity
+    uml25.Activity(None, None, variant=4)  # 142. Activity
+    uml25.Activity(None, None, variant=5)  # 143. Activity
+    uml25.Message(None, None, "Message1 label")  # 144. Message
+    uml25.MessageSynchronousCall(None, None)  # 145. Message, synchronous call
+    uml25.MessageReply(None, None)  # 146. Message, reply
+    uml25.MessageCreate(None, None)  # 147. Message, create
+    uml25.MessageLost(n121, "")  # 148. Message lost
+    uml25.MessageFound(n122, "")  # 149. Message found
+    uml25.Lifeline(n123, "", variant=2):  # 150. Lifeline
+        uml25.Item(c91, "LifeLine1")
+        uml25.Item(c92, "")
+    uml25.Message(n124, "Message1", variant=2)  # 151. Message
+    uml25.Message(n125, "Message1", variant=3)  # 152. Message
+    uml25.Extend(None, None, "<<extend>>")  # 153. Extend
+    uml25.Include(None, None, "<<include>>")  # 154. Include
+    uml25.Deploy(None, None, "<<deploy>>")  # 155. Deploy

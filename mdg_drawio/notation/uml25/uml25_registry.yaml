@@ -1,0 +1,7634 @@
+# UML 2.5 shape registry — agent-facing metadata for the uml25 draw.io DSL.
+# Conforms to the library-agnostic shape-registry schema (shape-registry.schema.json).
+# CORE fields are library-invariant (present for every shape in any library).
+# The METAMODEL block is library-specific and OPTIONAL: present only when a shape maps
+# to a metamodel element; pure-notation shapes (tag: none) omit it entirely.
+#
+# Provenance: metamodel data derived from the OMG UML 2.5.1 Abstract Syntax Metamodel
+# (UML.xmi). status: generated fields are machine-drafted — accept/reject per entry.
+
+library: uml25
+version: '2.5'
+provenance:
+  source_file: UML_2.5.drawio
+  palette: draw.io UML 2.5
+  shape_count: 155
+  pages:
+  - uml 2.5
+grammar:
+  spec: ../GRAMMAR.md
+  root: UML25
+  call: uml25.Function(node_id, "label", keyword=value, variant=N)
+  edge_call: 'uml25.Function(None, None, "label", variant=N)  # source/target resolved by connection'
+  positional:
+  - node_id
+  - label
+  variant: variant=N selects which palette shape of a function family (default 1).
+  nesting: A trailing colon (:) means child rows follow, indented 4 spaces under the call.
+  leaf: No trailing colon means the shape has no children.
+  ids: node_id and child ids (n1, c1, ...) are author-chosen and MUST be unique within the file. Placeholders
+    in examples are meant to be renamed and scaled.
+  args_vs_rows: Fixed template parts are passed as keyword args (keyword=, name=, body=, entry=, exit=,
+    annotation=, stream=, variable=, value=, binding=, multiplicity=, heading=, condition=, node=, inv1=,
+    inv2=). Repeating/scaling content goes in child rows.
+  row_types:
+    Item: left-aligned member/content row (default)
+    Header: center-aligned compartment label
+    Note: bold stub, e.g. internal-structure placeholder
+    Divider: separator line; Divider(id, text, dashed=True) for a dashed one
+    Lane: partialRectangle swimlane cell (Activity Partition, Lifeline)
+  labels: 'Keep literal markup in labels verbatim: guillemets <<keyword>>, braces {abstract}, brackets
+    [state], and \n for a line break.'
+  kinds:
+    vertex: a node shape; has args and/or rows
+    edge: a connector; author with (None, None, ...); has endpoints, no rows
+    diagram: a pre-composed fragment; buildable:false — pick real primitives instead (see related.see_also)
+row_types:
+- name: Item
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: Left-aligned member/content row (the default).
+- name: Header
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: Center-aligned compartment label (e.g. 'attributes', 'operations').
+- name: Note
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: Bold stub row, typically an internal-structure placeholder.
+- name: Divider
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  - name: dashed
+    required: false
+  summary: Separator line; dashed=True for a dashed one.
+- name: Lane
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: partialRectangle swimlane cell (Activity Partition, Lifeline timing lanes).
+shapes:
+- id: uml25.diagram.v1
+  menu_index: 1
+  kind: vertex
+  buildable: true
+  function: Diagram
+  variant: 1
+  menu_name: Diagram
+  render:
+    fingerprint: sha1:46bd575552f6
+  tag: none
+  status: generated
+  summary: A diagram frame (heading + content region).
+  discriminator: n/a
+  use_when:
+  - framing a diagram with a heading and content area
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.Diagram(n1, "Diagram Heading")
+- id: uml25.comment.v1
+  menu_index: 2
+  kind: vertex
+  buildable: true
+  function: Comment
+  variant: 1
+  menu_name: Comment
+  render:
+    fingerprint: sha1:22f1e8cf6349
+  tag: metaclass
+  status: generated
+  summary: A UML comment/note box, usually anchored to an element.
+  discriminator: n/a
+  use_when:
+  - attaching an explanatory note to a model element
+  avoid_when: []
+  aliases:
+  - note
+  - annotation
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.Comment(n1, "Comment1 body")
+  metamodel:
+    spec: uml-2.5
+    element: Comment
+- id: uml25.templatesignature.v1
+  menu_index: 3
+  kind: vertex
+  buildable: true
+  function: TemplateSignature
+  variant: 1
+  menu_name: Template signature
+  render:
+    fingerprint: sha1:a6c6d91ed664
+  tag: metaclass
+  status: reviewed
+  summary: A template signature showing formal template parameters.
+  discriminator: Single dashed parameter box labeled with the signature.
+  use_when:
+  - declaring the formal template parameters of a template
+  avoid_when:
+  - if you need multi-line dashed box listing several template parameters, use uml25.templatesignature.v2
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.templatesignature.v2
+    see_also:
+    - uml25.templatebinding.v1
+  example: |
+    uml25.TemplateSignature(n1, "Template1 signature")
+  metamodel:
+    spec: uml-2.5
+    element: TemplateSignature
+- id: uml25.templatesignature.v2
+  menu_index: 4
+  kind: vertex
+  buildable: true
+  function: TemplateSignature
+  variant: 2
+  menu_name: Template signature
+  render:
+    fingerprint: sha1:a6c6d91ed664
+  tag: metaclass
+  status: reviewed
+  summary: A template signature showing formal template parameters.
+  discriminator: Multi-line dashed box listing several template parameters (one per line).
+  use_when:
+  - declaring the formal template parameters of a template
+  avoid_when:
+  - if you need single dashed parameter box labeled with the signature, use uml25.templatesignature.v1
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.templatesignature.v1
+    see_also:
+    - uml25.templatebinding.v1
+  example: |
+    uml25.TemplateSignature(n1, "Template parameter 1\nTemplate parameter 2", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: TemplateSignature
+- id: uml25.constraint.v1
+  menu_index: 5
+  kind: vertex
+  buildable: true
+  function: Constraint
+  variant: 1
+  menu_name: Constraint
+  render:
+    fingerprint: sha1:22f1e8cf6349
+  tag: metaclass
+  status: reviewed
+  summary: A constraint specification, e.g. {condition}.
+  discriminator: Note-shaped box holding a constraint spec, with an optional «keyword».
+  use_when:
+  - stating a condition or restriction on one or more elements
+  avoid_when:
+  - if you need bare {constraint} text attached to an element, use uml25.constraint.v2
+  aliases:
+  - condition
+  - invariant
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: keyword
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.constraint.v2
+    see_also: []
+  example: |
+    uml25.Constraint(n1, "Constraint1 specification", keyword="<<keyword>>")
+  metamodel:
+    spec: uml-2.5
+    element: Constraint
+    is_a:
+    - PackageableElement
+    - NamedElement
+- id: uml25.classifier.v1
+  menu_index: 6
+  kind: vertex
+  buildable: true
+  function: Classifier
+  variant: 1
+  menu_name: Classifier
+  render:
+    fingerprint: sha1:06ded84c45e2
+  tag: metaclass
+  status: reviewed
+  summary: 'A classifier: a class-like type with optional compartments.'
+  discriminator: 'Full class box: attributes compartment AND operations compartment (Header+Items, divider,
+    Header+Items).'
+  use_when:
+  - modeling a type with attributes, operations, or internal structure
+  avoid_when:
+  - if you need name-only box, no compartments, use uml25.classifier.v2
+  - if you need bold name with a single 'internal structure' compartment, use uml25.classifier.v3
+  - if you need instance, use uml25.classifier.v4
+  aliases:
+  - class box
+  - type
+  - UML class
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Header
+    - Item
+    - Divider
+  related:
+    variants:
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    see_also:
+    - uml25.collaborationuse.v1
+    - uml25.extensionpointclassifier.v1
+    - uml25.generalizationset.v1
+    - uml25.interfacegeneralization.v1
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+    - uml25.usecase.v1
+  example: |
+    uml25.Classifier(n1, "<<keyword>> Classifier1 {abstract}"):
+        uml25.Header(n1, "attributes")
+        uml25.Item(c2, "attribute1")
+        uml25.Item(c3, "inherited attribute2")
+        uml25.Item(c4, "...")
+        uml25.Divider(c5, "")
+        uml25.Header(c6, "operations")
+        uml25.Item(c7, "operation1")
+  metamodel:
+    spec: uml-2.5
+    element: Classifier
+    is_a:
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.classifier.v2
+  menu_index: 7
+  kind: vertex
+  buildable: true
+  function: Classifier
+  variant: 2
+  menu_name: Classifier
+  render:
+    fingerprint: sha1:f7b9ff094a93
+  tag: metaclass
+  status: reviewed
+  summary: 'A classifier: a class-like type with optional compartments.'
+  discriminator: Name-only box, no compartments.
+  use_when:
+  - modeling a type with attributes, operations, or internal structure
+  avoid_when:
+  - if you need full class box, use uml25.classifier.v1
+  - if you need bold name with a single 'internal structure' compartment, use uml25.classifier.v3
+  - if you need instance, use uml25.classifier.v4
+  aliases:
+  - class box
+  - type
+  - UML class
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.classifier.v1
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    see_also:
+    - uml25.collaborationuse.v1
+    - uml25.extensionpointclassifier.v1
+    - uml25.generalizationset.v1
+    - uml25.interfacegeneralization.v1
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+    - uml25.usecase.v1
+  example: |
+    uml25.Classifier(n1, "Classifier1", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Classifier
+    is_a:
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.classifier.v3
+  menu_index: 8
+  kind: vertex
+  buildable: true
+  function: Classifier
+  variant: 3
+  menu_name: Classifier
+  render:
+    fingerprint: sha1:d64ca0b1bc73
+  tag: metaclass
+  status: reviewed
+  summary: 'A classifier: a class-like type with optional compartments.'
+  discriminator: Bold name with a single 'internal structure' compartment (Header + placeholder).
+  use_when:
+  - modeling a type with attributes, operations, or internal structure
+  avoid_when:
+  - if you need full class box, use uml25.classifier.v1
+  - if you need name-only box, no compartments, use uml25.classifier.v2
+  - if you need instance, use uml25.classifier.v4
+  aliases:
+  - class box
+  - type
+  - UML class
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Header
+    - Note
+  related:
+    variants:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    see_also:
+    - uml25.collaborationuse.v1
+    - uml25.extensionpointclassifier.v1
+    - uml25.generalizationset.v1
+    - uml25.interfacegeneralization.v1
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+    - uml25.usecase.v1
+  example: |
+    uml25.Classifier(n1, "Classifier1", variant=3):
+        uml25.Header(n1, "internal structure")
+        uml25.Note(c2, "")
+  metamodel:
+    spec: uml-2.5
+    element: Classifier
+    is_a:
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.association.v1
+  menu_index: 9
+  kind: vertex
+  buildable: true
+  function: Association
+  variant: 1
+  menu_name: Association
+  render:
+    fingerprint: sha1:144d1ea54c2f
+  tag: metaclass
+  status: generated
+  summary: An association between classifiers.
+  discriminator: n/a
+  use_when:
+  - showing a structural relationship between two classifiers
+  avoid_when: []
+  aliases:
+  - relationship
+  - link
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.associationcomposite.v1
+    - uml25.associationconnector.v1
+    - uml25.associationconnector.v2
+    - uml25.associationinstancesecification.v1
+    - uml25.associationinstancesecification.v2
+    - uml25.associationnavigability.v1
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.Association(n1, "Association1")
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.classifier.v4
+  menu_index: 10
+  kind: vertex
+  buildable: true
+  function: Classifier
+  variant: 4
+  menu_name: Classifier
+  render:
+    fingerprint: sha1:f77ee4571ea9
+  tag: metaclass
+  status: reviewed
+  summary: 'A classifier: a class-like type with optional compartments.'
+  discriminator: Instance (underlined name) with slot(s) plus an internal-structure compartment.
+  use_when:
+  - modeling a type with attributes, operations, or internal structure
+  avoid_when:
+  - if you need full class box, use uml25.classifier.v1
+  - if you need name-only box, no compartments, use uml25.classifier.v2
+  - if you need bold name with a single 'internal structure' compartment, use uml25.classifier.v3
+  aliases:
+  - class box
+  - type
+  - UML class
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Item
+    - Divider
+    - Header
+    - Note
+  related:
+    variants:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    see_also:
+    - uml25.collaborationuse.v1
+    - uml25.extensionpointclassifier.v1
+    - uml25.generalizationset.v1
+    - uml25.interfacegeneralization.v1
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+    - uml25.usecase.v1
+  example: |
+    uml25.Classifier(n1, "Instance1", variant=4):
+        uml25.Item(n1, "slot1")
+        uml25.Divider(c2, "")
+        uml25.Header(c3, "internal structure")
+        uml25.Note(c4, "")
+  metamodel:
+    spec: uml-2.5
+    element: Classifier
+    is_a:
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.instance.v1
+  menu_index: 11
+  kind: vertex
+  buildable: true
+  function: Instance
+  variant: 1
+  menu_name: Instance
+  render:
+    fingerprint: sha1:55d9bbd8bd90
+  tag: metaclass
+  status: generated
+  summary: An instance specification (a value of a classifier).
+  discriminator: n/a
+  use_when:
+  - showing a specific instance (value) of a classifier
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+  example: |
+    uml25.Instance(n1, "Instance1 value")
+  metamodel:
+    spec: uml-2.5
+    element: InstanceSpecification
+    is_a:
+    - DeploymentTarget
+    - NamedElement
+    - PackageableElement
+    - DeployedArtifact
+- id: uml25.classifier.v5
+  menu_index: 12
+  kind: vertex
+  buildable: true
+  function: Classifier
+  variant: 5
+  menu_name: Classifier
+  render:
+    fingerprint: sha1:e5f5b7e32fb4
+  tag: metaclass
+  status: reviewed
+  summary: 'A classifier: a class-like type with optional compartments.'
+  discriminator: «enumeration» with a literals compartment (Items only).
+  use_when:
+  - modeling a type with attributes, operations, or internal structure
+  avoid_when:
+  - if you need full class box, use uml25.classifier.v1
+  - if you need name-only box, no compartments, use uml25.classifier.v2
+  - if you need bold name with a single 'internal structure' compartment, use uml25.classifier.v3
+  aliases:
+  - class box
+  - type
+  - UML class
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Item
+  related:
+    variants:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    see_also:
+    - uml25.collaborationuse.v1
+    - uml25.extensionpointclassifier.v1
+    - uml25.generalizationset.v1
+    - uml25.interfacegeneralization.v1
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+    - uml25.usecase.v1
+  example: |
+    uml25.Classifier(n1, "<<enumeration>> Enum1", variant=5):
+        uml25.Item(n1, "literal1")
+  metamodel:
+    spec: uml-2.5
+    element: Classifier
+    is_a:
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.interfacegeneralization.v1
+  menu_index: 13
+  kind: edge
+  buildable: true
+  function: InterfaceGeneralization
+  variant: 1
+  menu_name: Interface Generalization
+  render:
+    fingerprint: sha1:d5df6df366d9
+  tag: notation
+  status: generated
+  summary: Generalization among interfaces.
+  discriminator: n/a
+  use_when:
+  - showing generalization among interfaces
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.portwithprovidedinterface.v1
+    - uml25.portwithrequiredinterface.v1
+    - uml25.providedinterface.v1
+    - uml25.requiredinterface.v1
+    - uml25.requiredinterface.v2
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.generalizationset.v1
+  example: |
+    uml25.InterfaceGeneralization(None, None, "Interface1, Interface2...")
+  metamodel:
+    spec: uml-2.5
+    element: Generalization
+    is_a:
+    - DirectedRelationship
+    - Relationship
+    endpoints:
+      source: Classifier
+      target: Interface
+      source_role: specific
+      target_role: general
+- id: uml25.requiredinterface.v1
+  menu_index: 14
+  kind: edge
+  buildable: true
+  function: RequiredInterface
+  variant: 1
+  menu_name: Required Interface
+  render:
+    fingerprint: sha1:7b1e7161ef2a
+  tag: notation
+  status: reviewed
+  summary: A required interface (socket) notation.
+  discriminator: Required-interface socket drawn as a node (half-circle) with an interface label.
+  use_when:
+  - showing an interface a component requires
+  avoid_when:
+  - if you need required-interface as an edge ending in an open socket, use uml25.requiredinterface.v2
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml25.requiredinterface.v2
+    see_also:
+    - uml25.interfacegeneralization.v1
+    - uml25.portwithprovidedinterface.v1
+    - uml25.portwithrequiredinterface.v1
+    - uml25.providedinterface.v1
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.RequiredInterface(None, None, "Interface1")
+  metamodel:
+    spec: uml-2.5
+    element: Interface
+    is_a:
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Port
+      target: Interface
+      source_role: requirer
+      target_role: required
+- id: uml25.property.v1
+  menu_index: 15
+  kind: vertex
+  buildable: true
+  function: Property
+  variant: 1
+  menu_name: Property
+  render:
+    fingerprint: sha1:615b851d982e
+  tag: metaclass
+  status: reviewed
+  summary: A property / part with multiplicity.
+  discriminator: 'Multiplicity-first form: label is the multiplicity (e.g. 0..1) with name= giving the
+    property name.'
+  use_when:
+  - showing a property or part with its multiplicity
+  avoid_when:
+  - if you need name-first form, use uml25.property.v2
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: name
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.property.v2
+    see_also:
+    - uml25.association.v1
+    - uml25.associationcomposite.v1
+    - uml25.associationconnector.v1
+    - uml25.associationconnector.v2
+    - uml25.associationnavigability.v1
+    - uml25.associationnonnavigability.v1
+    - uml25.associationshared.v1
+    - uml25.class.v1
+    - uml25.innerclass.v1
+    - uml25.providedinterface.v1
+    - uml25.requiredinterface.v1
+    - uml25.requiredinterface.v2
+  example: |
+    uml25.Property(n1, "0..1", name="Property1")
+  metamodel:
+    spec: uml-2.5
+    element: Property
+    is_a:
+    - ConnectableElement
+    - TypedElement
+    - NamedElement
+    - DeploymentTarget
+    - StructuralFeature
+    - MultiplicityElement
+    - Feature
+    - RedefinableElement
+- id: uml25.property.v2
+  menu_index: 16
+  kind: vertex
+  buildable: true
+  function: Property
+  variant: 2
+  menu_name: Property
+  render:
+    fingerprint: sha1:fb74f82044ba
+  tag: metaclass
+  status: reviewed
+  summary: A property / part with multiplicity.
+  discriminator: 'Name-first form: label is the property name, no separate multiplicity arg.'
+  use_when:
+  - showing a property or part with its multiplicity
+  avoid_when:
+  - if you need multiplicity-first form, use uml25.property.v1
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.property.v1
+    see_also:
+    - uml25.association.v1
+    - uml25.associationcomposite.v1
+    - uml25.associationconnector.v1
+    - uml25.associationconnector.v2
+    - uml25.associationnavigability.v1
+    - uml25.associationnonnavigability.v1
+    - uml25.associationshared.v1
+    - uml25.class.v1
+    - uml25.innerclass.v1
+    - uml25.providedinterface.v1
+    - uml25.requiredinterface.v1
+    - uml25.requiredinterface.v2
+  example: |
+    uml25.Property(n1, "Property1", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Property
+    is_a:
+    - ConnectableElement
+    - TypedElement
+    - NamedElement
+    - DeploymentTarget
+    - StructuralFeature
+    - MultiplicityElement
+    - Feature
+    - RedefinableElement
+- id: uml25.port.v1
+  menu_index: 17
+  kind: vertex
+  buildable: true
+  function: Port
+  variant: 1
+  menu_name: Port
+  render:
+    fingerprint: sha1:269aee8ed906
+  tag: metaclass
+  status: reviewed
+  summary: A port on a classifier or component.
+  discriminator: Small square port on a boundary, simple name.
+  use_when:
+  - showing an interaction point on a classifier or component
+  avoid_when:
+  - if you need pin-style port carrying a full [state]/{control}/parameter spec in its label, use uml25.port.v2
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.port.v2
+    see_also:
+    - uml25.providedinterface.v1
+    - uml25.requiredinterface.v1
+    - uml25.requiredinterface.v2
+  example: |
+    uml25.Port(n1, "port1")
+  metamodel:
+    spec: uml-2.5
+    element: Port
+    is_a:
+    - Property
+    - ConnectableElement
+    - TypedElement
+    - NamedElement
+    - DeploymentTarget
+    - StructuralFeature
+    - MultiplicityElement
+    - Feature
+    - RedefinableElement
+- id: uml25.portwithprovidedinterface.v1
+  menu_index: 18
+  kind: vertex
+  buildable: true
+  function: PortWithProvidedInterface
+  variant: 1
+  menu_name: Port with provided interface
+  render:
+    fingerprint: sha1:e6233976f9d3
+  tag: notation
+  status: generated
+  summary: A port exposing a provided interface (lollipop).
+  discriminator: n/a
+  use_when:
+  - showing a port that provides an interface
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.interfacegeneralization.v1
+    - uml25.portwithrequiredinterface.v1
+    - uml25.providedinterface.v1
+    - uml25.requiredinterface.v1
+    - uml25.requiredinterface.v2
+  example: |
+    uml25.PortWithProvidedInterface(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Port
+    is_a:
+    - Property
+    - ConnectableElement
+    - TypedElement
+    - NamedElement
+    - DeploymentTarget
+    - StructuralFeature
+    - MultiplicityElement
+    - Feature
+    - RedefinableElement
+- id: uml25.portwithrequiredinterface.v1
+  menu_index: 19
+  kind: vertex
+  buildable: true
+  function: PortWithRequiredInterface
+  variant: 1
+  menu_name: Port with required interface
+  render:
+    fingerprint: sha1:e6233976f9d3
+  tag: notation
+  status: generated
+  summary: A port exposing a required interface (socket).
+  discriminator: n/a
+  use_when:
+  - showing a port that requires an interface
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.interfacegeneralization.v1
+    - uml25.portwithprovidedinterface.v1
+    - uml25.providedinterface.v1
+    - uml25.requiredinterface.v1
+    - uml25.requiredinterface.v2
+  example: |
+    uml25.PortWithRequiredInterface(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Port
+    is_a:
+    - Property
+    - ConnectableElement
+    - TypedElement
+    - NamedElement
+    - DeploymentTarget
+    - StructuralFeature
+    - MultiplicityElement
+    - Feature
+    - RedefinableElement
+- id: uml25.component.v1
+  menu_index: 20
+  kind: vertex
+  buildable: true
+  function: Component
+  variant: 1
+  menu_name: Component
+  render:
+    fingerprint: sha1:1c80978020a5
+  tag: metaclass
+  status: generated
+  summary: A component with provided/required interface compartments.
+  discriminator: n/a
+  use_when:
+  - modeling a component and its provided/required interfaces
+  avoid_when: []
+  aliases:
+  - component box
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Item
+    - Divider
+    - Header
+  related:
+    variants: []
+    see_also:
+    - uml25.providedinterface.v1
+    - uml25.requiredinterface.v1
+    - uml25.requiredinterface.v2
+  example: |
+    uml25.Component(n1, ""):
+        uml25.Item(n1, "Component")
+        uml25.Divider(c2, "")
+        uml25.Header(c3, "provided interfaces")
+        uml25.Item(c4, "Interface1")
+        uml25.Divider(c5, "")
+        uml25.Header(c6, "required interfaces")
+        uml25.Item(c7, "Interface2")
+  metamodel:
+    spec: uml-2.5
+    element: Component
+    is_a:
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.classifier.v6
+  menu_index: 21
+  kind: vertex
+  buildable: true
+  function: Classifier
+  variant: 6
+  menu_name: Classifier
+  render:
+    fingerprint: sha1:2c8cd616bbbc
+  tag: metaclass
+  status: reviewed
+  summary: 'A classifier: a class-like type with optional compartments.'
+  discriminator: 'Collaboration composite: labeled parts/roles as Headers, no attribute list.'
+  use_when:
+  - modeling a type with attributes, operations, or internal structure
+  avoid_when:
+  - if you need full class box, use uml25.classifier.v1
+  - if you need name-only box, no compartments, use uml25.classifier.v2
+  - if you need bold name with a single 'internal structure' compartment, use uml25.classifier.v3
+  aliases:
+  - class box
+  - type
+  - UML class
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Header
+    - Divider
+    - Item
+  related:
+    variants:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v7
+    see_also:
+    - uml25.collaborationuse.v1
+    - uml25.extensionpointclassifier.v1
+    - uml25.generalizationset.v1
+    - uml25.interfacegeneralization.v1
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+    - uml25.usecase.v1
+  example: |
+    uml25.Classifier(n1, "", variant=6):
+        uml25.Header(n1, "Collaboration1")
+        uml25.Divider(c2, "", dashed=True)
+        uml25.Header(c3, "Classifier1")
+        uml25.Header(c4, "Collaboration use 1")
+        uml25.Item(c5, "Classifier2")
+  metamodel:
+    spec: uml-2.5
+    element: Classifier
+    is_a:
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.package.v1
+  menu_index: 22
+  kind: vertex
+  buildable: true
+  function: Package
+  variant: 1
+  menu_name: Package
+  render:
+    fingerprint: sha1:271e935a2a4a
+  tag: metaclass
+  status: reviewed
+  summary: A package grouping model elements.
+  discriminator: Empty folder shape (tabbed rectangle), name only.
+  use_when:
+  - grouping related model elements
+  avoid_when:
+  - if you need folder with a packaged-element listed via element=, use uml25.package.v2
+  - if you need folder with free body text via body=, use uml25.package.v3
+  aliases:
+  - folder
+  - namespace
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.package.v2
+    - uml25.package.v3
+    see_also:
+    - uml25.elementpackagemergepackageimportsubstitution.v1
+    - uml25.stereotype.v1
+    - uml25.stereotypelabel.v1
+  example: |
+    uml25.Package(n1, "Package1")
+  metamodel:
+    spec: uml-2.5
+    element: Package
+    is_a:
+    - PackageableElement
+    - NamedElement
+    - Namespace
+- id: uml25.package.v2
+  menu_index: 23
+  kind: vertex
+  buildable: true
+  function: Package
+  variant: 2
+  menu_name: Package
+  render:
+    fingerprint: sha1:f9a454a47a5c
+  tag: metaclass
+  status: reviewed
+  summary: A package grouping model elements.
+  discriminator: Folder with a packaged-element listed via element=.
+  use_when:
+  - grouping related model elements
+  avoid_when:
+  - if you need empty folder shape, use uml25.package.v1
+  - if you need folder with free body text via body=, use uml25.package.v3
+  aliases:
+  - folder
+  - namespace
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: element
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.package.v1
+    - uml25.package.v3
+    see_also:
+    - uml25.elementpackagemergepackageimportsubstitution.v1
+    - uml25.stereotype.v1
+    - uml25.stereotypelabel.v1
+  example: |
+    uml25.Package(n1, "Package1", variant=2, element="Packaged element1")
+  metamodel:
+    spec: uml-2.5
+    element: Package
+    is_a:
+    - PackageableElement
+    - NamedElement
+    - Namespace
+- id: uml25.package.v3
+  menu_index: 24
+  kind: vertex
+  buildable: true
+  function: Package
+  variant: 3
+  menu_name: Package
+  render:
+    fingerprint: sha1:302707604a50
+  tag: metaclass
+  status: reviewed
+  summary: A package grouping model elements.
+  discriminator: Folder with free body text via body=.
+  use_when:
+  - grouping related model elements
+  avoid_when:
+  - if you need empty folder shape, use uml25.package.v1
+  - if you need folder with a packaged-element listed via element=, use uml25.package.v2
+  aliases:
+  - folder
+  - namespace
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: body
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.package.v1
+    - uml25.package.v2
+    see_also:
+    - uml25.elementpackagemergepackageimportsubstitution.v1
+    - uml25.stereotype.v1
+    - uml25.stereotypelabel.v1
+  example: |
+    uml25.Package(n1, "Package", variant=3, body="Text")
+  metamodel:
+    spec: uml-2.5
+    element: Package
+    is_a:
+    - PackageableElement
+    - NamedElement
+    - Namespace
+- id: uml25.model.v1
+  menu_index: 25
+  kind: vertex
+  buildable: true
+  function: Model
+  variant: 1
+  menu_name: Model
+  render:
+    fingerprint: sha1:d0c3a11a80a2
+  tag: metaclass
+  status: generated
+  summary: A model (top-level package variant).
+  discriminator: n/a
+  use_when:
+  - representing a whole model as a top-level package
+  avoid_when: []
+  aliases:
+  - model package
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.Model(n1, "Model1")
+  metamodel:
+    spec: uml-2.5
+    element: Model
+    is_a:
+    - Package
+    - PackageableElement
+    - NamedElement
+    - Namespace
+- id: uml25.stereotype.v1
+  menu_index: 26
+  kind: vertex
+  buildable: true
+  function: Stereotype
+  variant: 1
+  menu_name: Stereotype
+  render:
+    fingerprint: sha1:e2bcb11ae5e6
+  tag: metaclass
+  status: generated
+  summary: A stereotype definition with properties.
+  discriminator: n/a
+  use_when:
+  - defining a stereotype and its properties in a profile
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Item
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.Stereotype(n1, ""):
+        uml25.Item(n1, "<<stereotype1>>")
+        uml25.Item(c2, "stereotype property 1")
+        uml25.Item(c3, "stereotype property 2")
+  metamodel:
+    spec: uml-2.5
+    element: Stereotype
+    is_a:
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.class.v1
+  menu_index: 27
+  kind: vertex
+  buildable: true
+  function: Class
+  variant: 1
+  menu_name: Class
+  render:
+    fingerprint: sha1:e895a06adeb3
+  tag: metaclass
+  status: generated
+  summary: A class, optionally with a stereotype and properties.
+  discriminator: n/a
+  use_when:
+  - modeling a class, optionally with a stereotype
+  avoid_when: []
+  aliases:
+  - class
+  - UML class
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Header
+    - Item
+  related:
+    variants: []
+    see_also:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.extension.v1
+    - uml25.extension.v2
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.Class(n1, "Class1"):
+        uml25.Header(n1, "<<stereotype1>>")
+        uml25.Item(c2, "stereotype property 1")
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.stereotypelabel.v1
+  menu_index: 28
+  kind: vertex
+  buildable: true
+  function: StereotypeLabel
+  variant: 1
+  menu_name: Stereotype Label
+  render:
+    fingerprint: sha1:fd43f2557456
+  tag: notation
+  status: generated
+  summary: A stereotype label «stereotype».
+  discriminator: n/a
+  use_when:
+  - labeling an element with one or more applied stereotypes
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.StereotypeLabel(n1, "<<stereotype1, stereotype2...>>")
+  metamodel:
+    spec: uml-2.5
+    element: Stereotype
+    is_a:
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.icon.v1
+  menu_index: 29
+  kind: vertex
+  buildable: true
+  function: Icon
+  variant: 1
+  menu_name: Icon
+  render:
+    fingerprint: sha1:3ca1dc1b06e7
+  tag: none
+  status: generated
+  summary: A small icon/keyword marker.
+  discriminator: n/a
+  use_when:
+  - placing a small keyword/icon marker
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.Icon(n1, "icon")
+- id: uml25.region.v1
+  menu_index: 30
+  kind: vertex
+  buildable: true
+  function: Region
+  variant: 1
+  menu_name: Region
+  render:
+    fingerprint: sha1:30359d4b5394
+  tag: metaclass
+  status: generated
+  summary: A composite state region.
+  discriminator: n/a
+  use_when:
+  - adding a region to a composite or orthogonal state
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+    - uml25.statewithentrypoint.v1
+    - uml25.statewithexitpoint.v1
+    - uml25.transition.v1
+  example: |
+    uml25.Region(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Region
+    is_a:
+    - Namespace
+    - NamedElement
+    - RedefinableElement
+- id: uml25.state.v1
+  menu_index: 31
+  kind: vertex
+  buildable: true
+  function: State
+  variant: 1
+  menu_name: State
+  render:
+    fingerprint: sha1:a10e3fc9837e
+  tag: metaclass
+  status: reviewed
+  summary: A state in a state machine.
+  discriminator: 'Composite state: rounded box with behavior/transition compartments (rows + dividers).'
+  use_when:
+  - representing a state in a state machine
+  avoid_when:
+  - if you need simple solid rounded state box, name only, use uml25.state.v2
+  - if you need dashed rounded state box, use uml25.state.v3
+  - if you need solid rounded state box, small arc — a plain simple state, use uml25.state.v4
+  aliases:
+  - state box
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Item
+    - Divider
+  related:
+    variants:
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+    see_also:
+    - uml25.behavior.v1
+    - uml25.deephistory.v1
+    - uml25.entrypoint.v1
+    - uml25.junction.v1
+    - uml25.region.v1
+    - uml25.shallowhistory.v1
+    - uml25.terminate.v1
+    - uml25.timeeventtrigger.v1
+    - uml25.trigger.v1
+  example: |
+    uml25.State(n1, "State1 [invariant1] <<extended/final>>"):
+        uml25.Item(n1, "")
+        uml25.Divider(c2, "")
+        uml25.Item(c3, "behavior1")
+        uml25.Divider(c4, "")
+        uml25.Item(c5, "transition1")
+  metamodel:
+    spec: uml-2.5
+    element: State
+    is_a:
+    - Namespace
+    - NamedElement
+    - Vertex
+    - RedefinableElement
+- id: uml25.state.v2
+  menu_index: 32
+  kind: vertex
+  buildable: true
+  function: State
+  variant: 2
+  menu_name: State
+  render:
+    fingerprint: sha1:a96ae5f920a8
+  tag: metaclass
+  status: reviewed
+  summary: A state in a state machine.
+  discriminator: Simple solid rounded state box, name only.
+  use_when:
+  - representing a state in a state machine
+  avoid_when:
+  - if you need composite state, use uml25.state.v1
+  - if you need dashed rounded state box, use uml25.state.v3
+  - if you need solid rounded state box, small arc — a plain simple state, use uml25.state.v4
+  aliases:
+  - state box
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.state.v1
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+    see_also:
+    - uml25.behavior.v1
+    - uml25.deephistory.v1
+    - uml25.entrypoint.v1
+    - uml25.junction.v1
+    - uml25.region.v1
+    - uml25.shallowhistory.v1
+    - uml25.terminate.v1
+    - uml25.timeeventtrigger.v1
+    - uml25.trigger.v1
+  example: |
+    uml25.State(n1, "State1", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: State
+    is_a:
+    - Namespace
+    - NamedElement
+    - Vertex
+    - RedefinableElement
+- id: uml25.state.v3
+  menu_index: 33
+  kind: vertex
+  buildable: true
+  function: State
+  variant: 3
+  menu_name: State
+  render:
+    fingerprint: sha1:b9f8551c6de3
+  tag: metaclass
+  status: reviewed
+  summary: A state in a state machine.
+  discriminator: Dashed rounded state box (variant styling), name only.
+  use_when:
+  - representing a state in a state machine
+  avoid_when:
+  - if you need composite state, use uml25.state.v1
+  - if you need simple solid rounded state box, name only, use uml25.state.v2
+  - if you need solid rounded state box, small arc — a plain simple state, use uml25.state.v4
+  aliases:
+  - state box
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+    see_also:
+    - uml25.behavior.v1
+    - uml25.deephistory.v1
+    - uml25.entrypoint.v1
+    - uml25.junction.v1
+    - uml25.region.v1
+    - uml25.shallowhistory.v1
+    - uml25.terminate.v1
+    - uml25.timeeventtrigger.v1
+    - uml25.trigger.v1
+  example: |
+    uml25.State(n1, "State", variant=3)
+  metamodel:
+    spec: uml-2.5
+    element: State
+    is_a:
+    - Namespace
+    - NamedElement
+    - Vertex
+    - RedefinableElement
+- id: uml25.state.v4
+  menu_index: 34
+  kind: vertex
+  buildable: true
+  function: State
+  variant: 4
+  menu_name: State
+  render:
+    fingerprint: sha1:9bf5e76a2fe4
+  tag: metaclass
+  status: reviewed
+  summary: A state in a state machine.
+  discriminator: Solid rounded state box, small arc — a plain simple state.
+  use_when:
+  - representing a state in a state machine
+  avoid_when:
+  - if you need composite state, use uml25.state.v1
+  - if you need simple solid rounded state box, name only, use uml25.state.v2
+  - if you need dashed rounded state box, use uml25.state.v3
+  aliases:
+  - state box
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+    see_also:
+    - uml25.behavior.v1
+    - uml25.deephistory.v1
+    - uml25.entrypoint.v1
+    - uml25.junction.v1
+    - uml25.region.v1
+    - uml25.shallowhistory.v1
+    - uml25.terminate.v1
+    - uml25.timeeventtrigger.v1
+    - uml25.trigger.v1
+  example: |
+    uml25.State(n1, "State1", variant=4)
+  metamodel:
+    spec: uml-2.5
+    element: State
+    is_a:
+    - Namespace
+    - NamedElement
+    - Vertex
+    - RedefinableElement
+- id: uml25.state.v5
+  menu_index: 35
+  kind: vertex
+  buildable: true
+  function: State
+  variant: 5
+  menu_name: State
+  render:
+    fingerprint: sha1:b9f8551c6de3
+  tag: metaclass
+  status: reviewed
+  summary: A state in a state machine.
+  discriminator: Solid rounded box holding a comma-separated list of states.
+  use_when:
+  - representing a state in a state machine
+  avoid_when:
+  - if you need composite state, use uml25.state.v1
+  - if you need simple solid rounded state box, name only, use uml25.state.v2
+  - if you need dashed rounded state box, use uml25.state.v3
+  aliases:
+  - state box
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v6
+    - uml25.state.v7
+    see_also:
+    - uml25.behavior.v1
+    - uml25.deephistory.v1
+    - uml25.entrypoint.v1
+    - uml25.junction.v1
+    - uml25.region.v1
+    - uml25.shallowhistory.v1
+    - uml25.terminate.v1
+    - uml25.timeeventtrigger.v1
+    - uml25.trigger.v1
+  example: |
+    uml25.State(n1, "State1, State2, ...", variant=5)
+  metamodel:
+    spec: uml-2.5
+    element: State
+    is_a:
+    - Namespace
+    - NamedElement
+    - Vertex
+    - RedefinableElement
+- id: uml25.state.v6
+  menu_index: 36
+  kind: vertex
+  buildable: true
+  function: State
+  variant: 6
+  menu_name: State
+  render:
+    fingerprint: sha1:96624525976b
+  tag: metaclass
+  status: reviewed
+  summary: A state in a state machine.
+  discriminator: umlState shape variant (state with region/marker styling), name only.
+  use_when:
+  - representing a state in a state machine
+  avoid_when:
+  - if you need composite state, use uml25.state.v1
+  - if you need simple solid rounded state box, name only, use uml25.state.v2
+  - if you need dashed rounded state box, use uml25.state.v3
+  aliases:
+  - state box
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v7
+    see_also:
+    - uml25.behavior.v1
+    - uml25.deephistory.v1
+    - uml25.entrypoint.v1
+    - uml25.junction.v1
+    - uml25.region.v1
+    - uml25.shallowhistory.v1
+    - uml25.terminate.v1
+    - uml25.timeeventtrigger.v1
+    - uml25.trigger.v1
+  example: |
+    uml25.State(n1, "State1", variant=6)
+  metamodel:
+    spec: uml-2.5
+    element: State
+    is_a:
+    - Namespace
+    - NamedElement
+    - Vertex
+    - RedefinableElement
+- id: uml25.statewithentrypoint.v1
+  menu_index: 37
+  kind: vertex
+  buildable: true
+  function: StateWithEntryPoint
+  variant: 1
+  menu_name: State with entry point
+  render:
+    fingerprint: sha1:aed132e0fec8
+  tag: notation
+  status: generated
+  summary: A state exposing an entry point.
+  discriminator: n/a
+  use_when:
+  - showing a state that exposes an entry point
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: entry
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.entrypoint.v1
+    - uml25.exitpointflowfinalnode.v1
+    - uml25.statewithexitpoint.v1
+    - uml25.behavior.v1
+    - uml25.deephistory.v1
+    - uml25.junction.v1
+    - uml25.region.v1
+    - uml25.shallowhistory.v1
+    - uml25.terminate.v1
+    - uml25.timeeventtrigger.v1
+    - uml25.trigger.v1
+  example: |
+    uml25.StateWithEntryPoint(n1, "State1", entry="Entry1")
+  metamodel:
+    spec: uml-2.5
+    element: State
+    is_a:
+    - Namespace
+    - NamedElement
+    - Vertex
+    - RedefinableElement
+- id: uml25.statewithexitpoint.v1
+  menu_index: 38
+  kind: vertex
+  buildable: true
+  function: StateWithExitPoint
+  variant: 1
+  menu_name: State with exit point
+  render:
+    fingerprint: sha1:e2082d8ec883
+  tag: notation
+  status: generated
+  summary: A state exposing an exit point.
+  discriminator: n/a
+  use_when:
+  - showing a state that exposes an exit point
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: exit
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.entrypoint.v1
+    - uml25.exitpointflowfinalnode.v1
+    - uml25.statewithentrypoint.v1
+    - uml25.behavior.v1
+    - uml25.deephistory.v1
+    - uml25.junction.v1
+    - uml25.region.v1
+    - uml25.shallowhistory.v1
+    - uml25.terminate.v1
+    - uml25.timeeventtrigger.v1
+    - uml25.trigger.v1
+  example: |
+    uml25.StateWithExitPoint(n1, "State1", exit="Exit1")
+  metamodel:
+    spec: uml-2.5
+    element: State
+    is_a:
+    - Namespace
+    - NamedElement
+    - Vertex
+    - RedefinableElement
+- id: uml25.initialpreudostatenode.v1
+  menu_index: 39
+  kind: vertex
+  buildable: true
+  function: InitialPreudostateNode
+  variant: 1
+  menu_name: 'Initial preudostate / node  (sic: "pseudostate")'
+  render:
+    fingerprint: sha1:1beb399ea8da
+  tag: notation
+  status: generated
+  summary: Initial pseudostate / activity initial node (filled dot).
+  discriminator: n/a
+  use_when:
+  - marking the start of a state machine or activity
+  avoid_when: []
+  aliases:
+  - start
+  - initial node
+  - black dot
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.choicemergenodedecisionnode.v1
+    - uml25.finalstatenode.v1
+    - uml25.joinforknode.v1
+    - uml25.joinnode.v1
+    - uml25.junction.v1
+    - uml25.terminate.v1
+  example: |
+    uml25.InitialPreudostateNode(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: InitialNode
+    is_a:
+    - ControlNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.finalstatenode.v1
+  menu_index: 40
+  kind: vertex
+  buildable: true
+  function: FinalStateNode
+  variant: 1
+  menu_name: Final state / node
+  render:
+    fingerprint: sha1:2bc98b5c2759
+  tag: notation
+  status: generated
+  summary: Final state / activity final node.
+  discriminator: n/a
+  use_when:
+  - marking completion of a state machine or activity
+  avoid_when: []
+  aliases:
+  - end
+  - final node
+  - bullseye
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.choicemergenodedecisionnode.v1
+    - uml25.initialpreudostatenode.v1
+    - uml25.joinforknode.v1
+    - uml25.joinnode.v1
+    - uml25.junction.v1
+    - uml25.terminate.v1
+  example: |
+    uml25.FinalStateNode(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: FinalNode
+    is_a:
+    - ControlNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.shallowhistory.v1
+  menu_index: 41
+  kind: vertex
+  buildable: true
+  function: ShallowHistory
+  variant: 1
+  menu_name: Shallow History
+  render:
+    fingerprint: sha1:c08e0bd90767
+  tag: notation
+  status: generated
+  summary: Shallow history pseudostate (H).
+  discriminator: n/a
+  use_when:
+  - returning to the most recent substate of a region
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.deephistory.v1
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+    - uml25.statewithentrypoint.v1
+    - uml25.statewithexitpoint.v1
+  example: |
+    uml25.ShallowHistory(n1, "H")
+  metamodel:
+    spec: uml-2.5
+    element: Pseudostate
+    is_a:
+    - Vertex
+    - NamedElement
+    - RedefinableElement
+- id: uml25.deephistory.v1
+  menu_index: 42
+  kind: vertex
+  buildable: true
+  function: DeepHistory
+  variant: 1
+  menu_name: Deep History
+  render:
+    fingerprint: sha1:c08e0bd90767
+  tag: notation
+  status: generated
+  summary: Deep history pseudostate (H*).
+  discriminator: n/a
+  use_when:
+  - returning to the full nested state configuration of a region
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.shallowhistory.v1
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+    - uml25.statewithentrypoint.v1
+    - uml25.statewithexitpoint.v1
+  example: |
+    uml25.DeepHistory(n1, "H*")
+  metamodel:
+    spec: uml-2.5
+    element: Pseudostate
+    is_a:
+    - Vertex
+    - NamedElement
+    - RedefinableElement
+- id: uml25.entrypoint.v1
+  menu_index: 43
+  kind: vertex
+  buildable: true
+  function: EntryPoint
+  variant: 1
+  menu_name: Entry Point
+  render:
+    fingerprint: sha1:a989ea0b3509
+  tag: notation
+  status: generated
+  summary: An entry point pseudostate on a state boundary.
+  discriminator: n/a
+  use_when:
+  - defining a named entry into a composite state
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.exitpointflowfinalnode.v1
+    - uml25.statewithentrypoint.v1
+    - uml25.statewithexitpoint.v1
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+  example: |
+    uml25.EntryPoint(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Pseudostate
+    is_a:
+    - Vertex
+    - NamedElement
+    - RedefinableElement
+- id: uml25.exitpointflowfinalnode.v1
+  menu_index: 44
+  kind: vertex
+  buildable: true
+  function: ExitPointFlowFinalNode
+  variant: 1
+  menu_name: Exit Point / Flow Final Node
+  render:
+    fingerprint: sha1:0d87a5570ede
+  tag: notation
+  status: generated
+  summary: Exit point pseudostate / flow final node.
+  discriminator: n/a
+  use_when:
+  - defining a named exit, or ending a single flow
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.entrypoint.v1
+    - uml25.statewithentrypoint.v1
+    - uml25.statewithexitpoint.v1
+  example: |
+    uml25.ExitPointFlowFinalNode(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: FlowFinalNode
+    is_a:
+    - FinalNode
+    - ControlNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.junction.v1
+  menu_index: 45
+  kind: vertex
+  buildable: true
+  function: Junction
+  variant: 1
+  menu_name: Junction
+  render:
+    fingerprint: sha1:1beb399ea8da
+  tag: metaclass
+  status: generated
+  summary: A junction pseudostate.
+  discriminator: n/a
+  use_when:
+  - chaining or branching transitions through a static point
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.choicemergenodedecisionnode.v1
+    - uml25.finalstatenode.v1
+    - uml25.initialpreudostatenode.v1
+    - uml25.joinforknode.v1
+    - uml25.joinnode.v1
+    - uml25.terminate.v1
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+    - uml25.statewithentrypoint.v1
+    - uml25.statewithexitpoint.v1
+  example: |
+    uml25.Junction(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Pseudostate
+    is_a:
+    - Vertex
+    - NamedElement
+    - RedefinableElement
+- id: uml25.choicemergenodedecisionnode.v1
+  menu_index: 46
+  kind: vertex
+  buildable: true
+  function: ChoiceMergeNodeDecisionNode
+  variant: 1
+  menu_name: Choice / Merge Node / Decision Node
+  render:
+    fingerprint: sha1:c43434de5d00
+  tag: notation
+  status: generated
+  summary: A choice / decision / merge node (diamond).
+  discriminator: n/a
+  use_when:
+  - branching or merging flow on a guard condition
+  avoid_when: []
+  aliases:
+  - diamond
+  - decision
+  - branch
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.finalstatenode.v1
+    - uml25.initialpreudostatenode.v1
+    - uml25.joinforknode.v1
+    - uml25.joinnode.v1
+    - uml25.junction.v1
+    - uml25.terminate.v1
+    - uml25.behavior.v1
+    - uml25.objectflow.v1
+  example: |
+    uml25.ChoiceMergeNodeDecisionNode(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: DecisionNode
+    is_a:
+    - ControlNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.terminate.v1
+  menu_index: 47
+  kind: vertex
+  buildable: true
+  function: Terminate
+  variant: 1
+  menu_name: Terminate
+  render:
+    fingerprint: sha1:8947d2d46c3f
+  tag: notation
+  status: generated
+  summary: A terminate pseudostate.
+  discriminator: n/a
+  use_when:
+  - terminating the state machine entirely
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.choicemergenodedecisionnode.v1
+    - uml25.finalstatenode.v1
+    - uml25.initialpreudostatenode.v1
+    - uml25.joinforknode.v1
+    - uml25.joinnode.v1
+    - uml25.junction.v1
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+    - uml25.statewithentrypoint.v1
+    - uml25.statewithexitpoint.v1
+  example: |
+    uml25.Terminate(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Pseudostate
+    is_a:
+    - Vertex
+    - NamedElement
+    - RedefinableElement
+- id: uml25.joinforknode.v1
+  menu_index: 48
+  kind: vertex
+  buildable: true
+  function: JoinForkNode
+  variant: 1
+  menu_name: Join/Fork Node
+  render:
+    fingerprint: sha1:aa3ef748545e
+  tag: notation
+  status: generated
+  summary: A join or fork node (bar).
+  discriminator: n/a
+  use_when:
+  - splitting into or synchronizing concurrent flows
+  avoid_when: []
+  aliases:
+  - bar
+  - sync bar
+  - fork
+  - join
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.choicemergenodedecisionnode.v1
+    - uml25.finalstatenode.v1
+    - uml25.initialpreudostatenode.v1
+    - uml25.joinnode.v1
+    - uml25.junction.v1
+    - uml25.terminate.v1
+  example: |
+    uml25.JoinForkNode(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: ForkNode
+    is_a:
+    - ControlNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.opaqueaction.v1
+  menu_index: 49
+  kind: vertex
+  buildable: true
+  function: OpaqueAction
+  variant: 1
+  menu_name: Opaque Action
+  render:
+    fingerprint: sha1:4bc4a8b712bb
+  tag: metaclass
+  status: generated
+  summary: An opaque action with a specification.
+  discriminator: n/a
+  use_when:
+  - representing an action whose behavior is given as text
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+  example: |
+    uml25.OpaqueAction(n1, "OpaqueAction1 spec.")
+  metamodel:
+    spec: uml-2.5
+    element: OpaqueAction
+    is_a:
+    - Action
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.trigger.v1
+  menu_index: 50
+  kind: vertex
+  buildable: true
+  function: Trigger
+  variant: 1
+  menu_name: Trigger
+  render:
+    fingerprint: sha1:7fcc36870981
+  tag: metaclass
+  status: generated
+  summary: A trigger specification.
+  discriminator: n/a
+  use_when:
+  - specifying what triggers a transition or action
+  avoid_when: []
+  aliases:
+  - event
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.port.v1
+    - uml25.port.v2
+    - uml25.portwithprovidedinterface.v1
+    - uml25.portwithrequiredinterface.v1
+  example: |
+    uml25.Trigger(n1, "Trigger1 spec.")
+  metamodel:
+    spec: uml-2.5
+    element: Trigger
+    is_a:
+    - NamedElement
+- id: uml25.sendsignalaction.v1
+  menu_index: 51
+  kind: vertex
+  buildable: true
+  function: SendSignalAction
+  variant: 1
+  menu_name: Send Signal Action
+  render:
+    fingerprint: sha1:592a2b782251
+  tag: metaclass
+  status: generated
+  summary: A send-signal action (convex pentagon).
+  discriminator: n/a
+  use_when:
+  - sending a signal asynchronously
+  avoid_when: []
+  aliases:
+  - send signal
+  - flag
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+  example: |
+    uml25.SendSignalAction(n1, "SendSignalAction1")
+  metamodel:
+    spec: uml-2.5
+    element: SendSignalAction
+    is_a:
+    - InvocationAction
+    - Action
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.singleexecution.v1
+  menu_index: 52
+  kind: vertex
+  buildable: true
+  function: SingleExecution
+  variant: 1
+  menu_name: Single Execution
+  render:
+    fingerprint: sha1:3af08e3a5fa5
+  tag: notation
+  status: generated
+  summary: A single-execution marker «singleExecution».
+  discriminator: n/a
+  use_when:
+  - marking an activity as single-execution
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.activitypartition.v1
+    - uml25.activitypartition.v2
+    - uml25.structuredactivitynode.v1
+  example: |
+    uml25.SingleExecution(n1, "<<singleExecution>>")
+  metamodel:
+    spec: uml-2.5
+    element: Activity
+    is_a:
+    - Behavior
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.parameter.v1
+  menu_index: 53
+  kind: vertex
+  buildable: true
+  function: Parameter
+  variant: 1
+  menu_name: Parameter
+  render:
+    fingerprint: sha1:af747a15a8a7
+  tag: metaclass
+  status: generated
+  summary: A parameter specification box.
+  discriminator: n/a
+  use_when:
+  - showing a parameter specification
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Item
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.Parameter(n1, ""):
+        uml25.Item(n1, "Parameter1 spec.")
+        uml25.Item(c2, "")
+  metamodel:
+    spec: uml-2.5
+    element: Parameter
+    is_a:
+    - MultiplicityElement
+    - ConnectableElement
+    - TypedElement
+    - NamedElement
+- id: uml25.action.v1
+  menu_index: 54
+  kind: vertex
+  buildable: true
+  function: Action
+  variant: 1
+  menu_name: Action
+  render:
+    fingerprint: sha1:b9f8551c6de3
+  tag: metaclass
+  status: reviewed
+  summary: An action node.
+  discriminator: Rounded action box with top-aligned label.
+  use_when:
+  - representing a single step of behavior in an activity
+  avoid_when:
+  - if you need rounded action box with default, use uml25.action.v2
+  aliases:
+  - activity step
+  - task
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.action.v2
+    see_also:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+  example: |
+    uml25.Action(n1, "Action1")
+  metamodel:
+    spec: uml-2.5
+    element: Action
+    is_a:
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.activitypartition.v1
+  menu_index: 55
+  kind: vertex
+  buildable: true
+  function: ActivityPartition
+  variant: 1
+  menu_name: Activity Partition
+  render:
+    fingerprint: sha1:497c99480486
+  tag: metaclass
+  status: reviewed
+  summary: An activity partition (swimlane).
+  discriminator: Single labeled partition frame («external» action in one partition).
+  use_when:
+  - assigning actions to a responsible party (swimlane)
+  avoid_when:
+  - if you need multi-lane swimlane table, use uml25.activitypartition.v2
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.activitypartition.v2
+    see_also: []
+  example: |
+    uml25.ActivityPartition(n1, "<<external>> Action1 (partition1)")
+  metamodel:
+    spec: uml-2.5
+    element: ActivityPartition
+    is_a:
+    - ActivityGroup
+    - NamedElement
+- id: uml25.objectnode.v2
+  menu_index: 56
+  kind: vertex
+  buildable: true
+  function: ObjectNode
+  variant: 2
+  menu_name: Object Node
+  render:
+    fingerprint: sha1:d7c2d31f044b
+  tag: metaclass
+  status: reviewed
+  summary: An object node in an activity.
+  discriminator: Rounded object node carrying [state] list plus an {annotation}.
+  use_when:
+  - showing data/objects flowing between actions
+  avoid_when:
+  - if you need ribbon/infographic-styled object node, use uml25.objectnode.v3
+  - if you need plain rectangular object node, name only, use uml25.objectnode.v4
+  aliases:
+  - data node
+  - pin object
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: annotation
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.objectnode.v3
+    - uml25.objectnode.v4
+    see_also:
+    - uml25.behavior.v1
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+    - uml25.statewithentrypoint.v1
+    - uml25.statewithexitpoint.v1
+  example: |
+    uml25.ObjectNode(n1, "ObjectNode1 [State1, State2...]", variant=2, annotation="{annotation1}")
+  metamodel:
+    spec: uml-2.5
+    element: ObjectNode
+    is_a:
+    - TypedElement
+    - NamedElement
+    - ActivityNode
+    - RedefinableElement
+- id: uml25.activityparameternode.v1
+  menu_index: 57
+  kind: vertex
+  buildable: true
+  function: ActivityParameterNode
+  variant: 1
+  menu_name: Activity Parameter Node
+  render:
+    fingerprint: sha1:d7c2d31f044b
+  tag: metaclass
+  status: generated
+  summary: An activity parameter node on the activity boundary.
+  discriminator: n/a
+  use_when:
+  - passing a parameter in or out at the activity boundary
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: stream
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.parameter.v1
+  example: |
+    uml25.ActivityParameterNode(n1, "Parameter1 spec.", stream="{stream}")
+  metamodel:
+    spec: uml-2.5
+    element: ActivityParameterNode
+    is_a:
+    - ObjectNode
+    - TypedElement
+    - NamedElement
+    - ActivityNode
+    - RedefinableElement
+- id: uml25.objectnode.v3
+  menu_index: 58
+  kind: vertex
+  buildable: true
+  function: ObjectNode
+  variant: 3
+  menu_name: Object Node
+  render:
+    fingerprint: sha1:a91506ccd147
+  tag: metaclass
+  status: reviewed
+  summary: An object node in an activity.
+  discriminator: Ribbon/infographic-styled object node (pennant shape), plain name.
+  use_when:
+  - showing data/objects flowing between actions
+  avoid_when:
+  - if you need rounded object node carrying [state] list plus an {annotation}, use uml25.objectnode.v2
+  - if you need plain rectangular object node, name only, use uml25.objectnode.v4
+  aliases:
+  - data node
+  - pin object
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.objectnode.v2
+    - uml25.objectnode.v4
+    see_also:
+    - uml25.behavior.v1
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+    - uml25.statewithentrypoint.v1
+    - uml25.statewithexitpoint.v1
+  example: |
+    uml25.ObjectNode(n1, "ObjectNode1", variant=3)
+  metamodel:
+    spec: uml-2.5
+    element: ObjectNode
+    is_a:
+    - TypedElement
+    - NamedElement
+    - ActivityNode
+    - RedefinableElement
+- id: uml25.behavior.v1
+  menu_index: 59
+  kind: vertex
+  buildable: true
+  function: Behavior
+  variant: 1
+  menu_name: Behavior
+  render:
+    fingerprint: sha1:e91dae4f50a2
+  tag: metaclass
+  status: generated
+  summary: A behavior specification.
+  discriminator: n/a
+  use_when:
+  - referencing an invoked behavior
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: keyword
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.parameter.v1
+  example: |
+    uml25.Behavior(n1, "Behavior1 spec.", keyword="<<keyword>>")
+  metamodel:
+    spec: uml-2.5
+    element: Behavior
+    is_a:
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.joinnode.v1
+  menu_index: 60
+  kind: vertex
+  buildable: true
+  function: JoinNode
+  variant: 1
+  menu_name: Join Node
+  render:
+    fingerprint: sha1:029312a3efa7
+  tag: metaclass
+  status: generated
+  summary: A join node with an optional join spec.
+  discriminator: n/a
+  use_when:
+  - synchronizing multiple incoming flows with a join spec
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.choicemergenodedecisionnode.v1
+    - uml25.finalstatenode.v1
+    - uml25.initialpreudostatenode.v1
+    - uml25.joinforknode.v1
+    - uml25.junction.v1
+    - uml25.terminate.v1
+  example: |
+    uml25.JoinNode(n1, "{joinSpec = join spec}")
+  metamodel:
+    spec: uml-2.5
+    element: JoinNode
+    is_a:
+    - ControlNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.activitypartition.v2
+  menu_index: 61
+  kind: vertex
+  buildable: true
+  function: ActivityPartition
+  variant: 2
+  menu_name: Activity Partition
+  render:
+    fingerprint: sha1:209de33067ec
+  tag: metaclass
+  status: reviewed
+  summary: An activity partition (swimlane).
+  discriminator: Multi-lane swimlane table (dimension with Lane rows).
+  use_when:
+  - assigning actions to a responsible party (swimlane)
+  avoid_when:
+  - if you need single labeled partition frame, use uml25.activitypartition.v1
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Lane
+  related:
+    variants:
+    - uml25.activitypartition.v1
+    see_also: []
+  example: |
+    uml25.ActivityPartition(n1, "dimension1", variant=2):
+        uml25.Lane(n1, "")
+        uml25.Lane(c2, "")
+        uml25.Lane(c3, "")
+  metamodel:
+    spec: uml-2.5
+    element: ActivityPartition
+    is_a:
+    - ActivityGroup
+    - NamedElement
+- id: uml25.interruptibleactivityregion.v1
+  menu_index: 62
+  kind: vertex
+  buildable: true
+  function: InterruptibleActivityRegion
+  variant: 1
+  menu_name: Interruptible Activity Region
+  render:
+    fingerprint: sha1:e25256dcd904
+  tag: metaclass
+  status: generated
+  summary: An interruptible activity region.
+  discriminator: n/a
+  use_when:
+  - grouping actions that can be interrupted by an event
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.InterruptibleActivityRegion(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: InterruptibleActivityRegion
+    is_a:
+    - ActivityGroup
+    - NamedElement
+- id: uml25.state.v7
+  menu_index: 63
+  kind: vertex
+  buildable: true
+  function: State
+  variant: 7
+  menu_name: State
+  render:
+    fingerprint: sha1:1530efa1a4db
+  tag: metaclass
+  status: reviewed
+  summary: A state in a state machine.
+  discriminator: Dashed rounded state box used as an alternate/annotated state.
+  use_when:
+  - representing a state in a state machine
+  avoid_when:
+  - if you need composite state, use uml25.state.v1
+  - if you need simple solid rounded state box, name only, use uml25.state.v2
+  - if you need dashed rounded state box, use uml25.state.v3
+  aliases:
+  - state box
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    see_also:
+    - uml25.behavior.v1
+    - uml25.deephistory.v1
+    - uml25.entrypoint.v1
+    - uml25.junction.v1
+    - uml25.region.v1
+    - uml25.shallowhistory.v1
+    - uml25.terminate.v1
+    - uml25.timeeventtrigger.v1
+    - uml25.trigger.v1
+  example: |
+    uml25.State(n1, "State1", variant=7)
+  metamodel:
+    spec: uml-2.5
+    element: State
+    is_a:
+    - Namespace
+    - NamedElement
+    - Vertex
+    - RedefinableElement
+- id: uml25.constraintpreconditionpostcondition.v1
+  menu_index: 64
+  kind: vertex
+  buildable: true
+  function: ConstraintPreconditionPostcondition
+  variant: 1
+  menu_name: Constraint / Precondition / Postcondition
+  render:
+    fingerprint: sha1:e91dae4f50a2
+  tag: notation
+  status: generated
+  summary: A constraint / pre- or post-condition.
+  discriminator: n/a
+  use_when:
+  - stating a pre- or post-condition on behavior
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: keyword
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.ConstraintPreconditionPostcondition(n1, "Constraint1 spec.", keyword="<<keyword>>")
+  metamodel:
+    spec: uml-2.5
+    element: Constraint
+    is_a:
+    - PackageableElement
+    - NamedElement
+- id: uml25.port.v2
+  menu_index: 65
+  kind: vertex
+  buildable: true
+  function: Port
+  variant: 2
+  menu_name: Port
+  render:
+    fingerprint: sha1:d6f41c835a76
+  tag: metaclass
+  status: reviewed
+  summary: A port on a classifier or component.
+  discriminator: Pin-style port carrying a full [state]/{control}/parameter spec in its label.
+  use_when:
+  - showing an interaction point on a classifier or component
+  avoid_when:
+  - if you need small square port on a boundary, simple name, use uml25.port.v1
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.port.v1
+    see_also:
+    - uml25.providedinterface.v1
+    - uml25.requiredinterface.v1
+    - uml25.requiredinterface.v2
+  example: |
+    uml25.Port(n1, "Pin1 [State1] {control} Parameter1 spec.", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Port
+    is_a:
+    - Property
+    - ConnectableElement
+    - TypedElement
+    - NamedElement
+    - DeploymentTarget
+    - StructuralFeature
+    - MultiplicityElement
+    - Feature
+    - RedefinableElement
+- id: uml25.objectflow.v1
+  menu_index: 66
+  kind: vertex
+  buildable: true
+  function: ObjectFlow
+  variant: 1
+  menu_name: Object Flow
+  render:
+    fingerprint: sha1:e6233976f9d3
+  tag: metaclass
+  status: generated
+  summary: An object flow edge.
+  discriminator: n/a
+  use_when:
+  - routing objects/data between activity nodes
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.controlflow.v1
+    - uml25.behavior.v1
+  example: |
+    uml25.ObjectFlow(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: ObjectFlow
+    is_a:
+    - ActivityEdge
+    - RedefinableElement
+    - NamedElement
+- id: uml25.pin.v1
+  menu_index: 67
+  kind: vertex
+  buildable: true
+  function: Pin
+  variant: 1
+  menu_name: Pin
+  render:
+    fingerprint: sha1:a531d10f32f5
+  tag: metaclass
+  status: generated
+  summary: A pin on an action.
+  discriminator: n/a
+  use_when:
+  - attaching an input/output pin to an action
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+  example: |
+    uml25.Pin(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Pin
+    is_a:
+    - ObjectNode
+    - TypedElement
+    - NamedElement
+    - ActivityNode
+    - RedefinableElement
+    - MultiplicityElement
+- id: uml25.inputpin.v1
+  menu_index: 68
+  kind: vertex
+  buildable: true
+  function: InputPin
+  variant: 1
+  menu_name: Input Pin
+  render:
+    fingerprint: sha1:e5e874a6167a
+  tag: metaclass
+  status: reviewed
+  summary: An input pin on an action.
+  discriminator: Input pin as a labeled port marker on the action edge.
+  use_when:
+  - showing an input consumed by an action
+  avoid_when:
+  - if you need input-pin glyph shape, use uml25.inputpin.v2
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.inputpin.v2
+    see_also:
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+    - uml25.pin.v1
+  example: |
+    uml25.InputPin(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: InputPin
+    is_a:
+    - Pin
+    - ObjectNode
+    - TypedElement
+    - NamedElement
+    - ActivityNode
+    - RedefinableElement
+    - MultiplicityElement
+- id: uml25.inputpin.v2
+  menu_index: 69
+  kind: vertex
+  buildable: true
+  function: InputPin
+  variant: 2
+  menu_name: Input Pin
+  render:
+    fingerprint: sha1:384f0590d5a6
+  tag: metaclass
+  status: reviewed
+  summary: An input pin on an action.
+  discriminator: Input-pin glyph shape (hollow) attached to the action body.
+  use_when:
+  - showing an input consumed by an action
+  avoid_when:
+  - if you need input pin as a labeled port marker on the action edge, use uml25.inputpin.v1
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.inputpin.v1
+    see_also:
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+    - uml25.pin.v1
+  example: |
+    uml25.InputPin(n1, "", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: InputPin
+    is_a:
+    - Pin
+    - ObjectNode
+    - TypedElement
+    - NamedElement
+    - ActivityNode
+    - RedefinableElement
+    - MultiplicityElement
+- id: uml25.outputpin.v1
+  menu_index: 70
+  kind: vertex
+  buildable: true
+  function: OutputPin
+  variant: 1
+  menu_name: Output Pin
+  render:
+    fingerprint: sha1:cf8ad5b358da
+  tag: metaclass
+  status: reviewed
+  summary: An output pin on an action.
+  discriminator: Output pin as a filled-glyph marker.
+  use_when:
+  - showing an output produced by an action
+  avoid_when:
+  - if you need output-pin glyph shape, flipped orientation, use uml25.outputpin.v2
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.outputpin.v2
+    see_also:
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+    - uml25.pin.v1
+  example: |
+    uml25.OutputPin(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: OutputPin
+    is_a:
+    - Pin
+    - ObjectNode
+    - TypedElement
+    - NamedElement
+    - ActivityNode
+    - RedefinableElement
+    - MultiplicityElement
+- id: uml25.outputpin.v2
+  menu_index: 71
+  kind: vertex
+  buildable: true
+  function: OutputPin
+  variant: 2
+  menu_name: Output Pin
+  render:
+    fingerprint: sha1:0c4619bfbcfc
+  tag: metaclass
+  status: reviewed
+  summary: An output pin on an action.
+  discriminator: Output-pin glyph shape, flipped orientation (points outward).
+  use_when:
+  - showing an output produced by an action
+  avoid_when:
+  - if you need output pin as a filled-glyph marker, use uml25.outputpin.v1
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.outputpin.v1
+    see_also:
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+    - uml25.pin.v1
+  example: |
+    uml25.OutputPin(n1, "", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: OutputPin
+    is_a:
+    - Pin
+    - ObjectNode
+    - TypedElement
+    - NamedElement
+    - ActivityNode
+    - RedefinableElement
+    - MultiplicityElement
+- id: uml25.behavioraction.v1
+  menu_index: 72
+  kind: vertex
+  buildable: true
+  function: BehaviorAction
+  variant: 1
+  menu_name: Behavior Action
+  render:
+    fingerprint: sha1:f372860fe320
+  tag: metaclass
+  status: generated
+  summary: A call-behavior action.
+  discriminator: n/a
+  use_when:
+  - invoking another behavior from within an activity
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.behavior.v1
+  example: |
+    uml25.BehaviorAction(n1, "CallBehaviorAction1")
+  metamodel:
+    spec: uml-2.5
+    element: CallBehaviorAction
+    is_a:
+    - CallAction
+    - InvocationAction
+    - Action
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.calloperationaction.v1
+  menu_index: 73
+  kind: vertex
+  buildable: true
+  function: CallOperationAction
+  variant: 1
+  menu_name: Call Operation Action
+  render:
+    fingerprint: sha1:b9f8551c6de3
+  tag: metaclass
+  status: generated
+  summary: A call-operation action.
+  discriminator: n/a
+  use_when:
+  - calling an operation on a target
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+  example: |
+    uml25.CallOperationAction(n1, "Action1 (Operation1)")
+  metamodel:
+    spec: uml-2.5
+    element: CallOperationAction
+    is_a:
+    - CallAction
+    - InvocationAction
+    - Action
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.valuespecificationaction.v1
+  menu_index: 74
+  kind: vertex
+  buildable: true
+  function: ValueSpecificationAction
+  variant: 1
+  menu_name: Value Specification Action
+  render:
+    fingerprint: sha1:497c99480486
+  tag: metaclass
+  status: reviewed
+  summary: A value-specification action.
+  discriminator: Standalone value-spec action box with its spec as the label.
+  use_when:
+  - producing a literal or computed value
+  avoid_when:
+  - if you need action producing a value, given via value=, use uml25.valuespecificationaction.v2
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.valuespecificationaction.v2
+    see_also:
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+  example: |
+    uml25.ValueSpecificationAction(n1, "ValueSpecAction1 spec.")
+  metamodel:
+    spec: uml-2.5
+    element: ValueSpecificationAction
+    is_a:
+    - Action
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.actionwithoutput.v1
+  menu_index: 75
+  kind: vertex
+  buildable: true
+  function: ActionWithOutput
+  variant: 1
+  menu_name: Action with output
+  render:
+    fingerprint: sha1:b9bc2cb189d3
+  tag: notation
+  status: generated
+  summary: An action producing an output value.
+  discriminator: n/a
+  use_when:
+  - an action that yields a named output value
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: variable
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+  example: |
+    uml25.ActionWithOutput(n1, "Action1", variable="variable1")
+  metamodel:
+    spec: uml-2.5
+    element: Action
+    is_a:
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.actionwithinput.v1
+  menu_index: 76
+  kind: vertex
+  buildable: true
+  function: ActionWithInput
+  variant: 1
+  menu_name: Action with input
+  render:
+    fingerprint: sha1:4a248c28bef8
+  tag: notation
+  status: generated
+  summary: An action consuming an input value.
+  discriminator: n/a
+  use_when:
+  - an action that takes a named input value
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: variable
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+  example: |
+    uml25.ActionWithInput(n1, "Action1", variable="variable1")
+  metamodel:
+    spec: uml-2.5
+    element: Action
+    is_a:
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.readselfobjectaction.v1
+  menu_index: 77
+  kind: vertex
+  buildable: true
+  function: ReadSelfObjectAction
+  variant: 1
+  menu_name: Read self object action
+  render:
+    fingerprint: sha1:4a248c28bef8
+  tag: metaclass
+  status: generated
+  summary: A read-self object action.
+  discriminator: n/a
+  use_when:
+  - reading the context (self) object
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: binding
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+  example: |
+    uml25.ReadSelfObjectAction(n1, "Action1", binding="self")
+  metamodel:
+    spec: uml-2.5
+    element: ReadSelfAction
+    is_a:
+    - Action
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.valuespecificationaction.v2
+  menu_index: 78
+  kind: vertex
+  buildable: true
+  function: ValueSpecificationAction
+  variant: 2
+  menu_name: Value specification action
+  render:
+    fingerprint: sha1:4a248c28bef8
+  tag: metaclass
+  status: reviewed
+  summary: A value-specification action.
+  discriminator: Action producing a value, given via value= (result pin form).
+  use_when:
+  - producing a literal or computed value
+  avoid_when:
+  - if you need standalone value-spec action box with its spec as the label, use uml25.valuespecificationaction.v1
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: value
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.valuespecificationaction.v1
+    see_also:
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+  example: |
+    uml25.ValueSpecificationAction(n1, "Action1", variant=2, value="value1")
+  metamodel:
+    spec: uml-2.5
+    element: ValueSpecificationAction
+    is_a:
+    - Action
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.sendobjectaction.v1
+  menu_index: 79
+  kind: vertex
+  buildable: true
+  function: SendObjectAction
+  variant: 1
+  menu_name: Send Object Action
+  render:
+    fingerprint: sha1:592a2b782251
+  tag: metaclass
+  status: generated
+  summary: A send-object action.
+  discriminator: n/a
+  use_when:
+  - sending an object to a target
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+  example: |
+    uml25.SendObjectAction(n1, "SendObjectAction1")
+  metamodel:
+    spec: uml-2.5
+    element: SendObjectAction
+    is_a:
+    - InvocationAction
+    - Action
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.accepteventaction.v1
+  menu_index: 80
+  kind: vertex
+  buildable: true
+  function: AcceptEventAction
+  variant: 1
+  menu_name: Accept Event Action
+  render:
+    fingerprint: sha1:8206444a7310
+  tag: metaclass
+  status: generated
+  summary: An accept-event action (concave pentagon).
+  discriminator: n/a
+  use_when:
+  - waiting for and accepting an event
+  avoid_when: []
+  aliases:
+  - receive event
+  - wait
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+    - uml25.timeeventtrigger.v1
+    - uml25.trigger.v1
+  example: |
+    uml25.AcceptEventAction(n1, "AcceptEventAction1")
+  metamodel:
+    spec: uml-2.5
+    element: AcceptEventAction
+    is_a:
+    - Action
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.timeeventtrigger.v1
+  menu_index: 81
+  kind: vertex
+  buildable: true
+  function: TimeEventTrigger
+  variant: 1
+  menu_name: Time Event Trigger
+  render:
+    fingerprint: sha1:17751ba98d99
+  tag: notation
+  status: generated
+  summary: A time-event trigger (hourglass).
+  discriminator: n/a
+  use_when:
+  - triggering on the passage of time
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.port.v1
+    - uml25.port.v2
+    - uml25.portwithprovidedinterface.v1
+    - uml25.portwithrequiredinterface.v1
+  example: |
+    uml25.TimeEventTrigger(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Trigger
+    is_a:
+    - NamedElement
+- id: uml25.actionwithparameters.v1
+  menu_index: 82
+  kind: vertex
+  buildable: true
+  function: ActionWithParameters
+  variant: 1
+  menu_name: Action with Parameters
+  render:
+    fingerprint: sha1:02893f0c081e
+  tag: notation
+  status: generated
+  summary: An action with parameter pins.
+  discriminator: n/a
+  use_when:
+  - an action with explicit parameter pins
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+  example: |
+    uml25.ActionWithParameters(n1, "Action1")
+  metamodel:
+    spec: uml-2.5
+    element: Action
+    is_a:
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.structuredactivitynode.v1
+  menu_index: 83
+  kind: vertex
+  buildable: true
+  function: StructuredActivityNode
+  variant: 1
+  menu_name: Structured Activity Node
+  render:
+    fingerprint: sha1:3389dadb04ff
+  tag: metaclass
+  status: generated
+  summary: A structured activity node «structured».
+  discriminator: n/a
+  use_when:
+  - grouping nodes into a structured sub-activity
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.activity.v1
+    - uml25.activity.v2
+    - uml25.activity.v3
+    - uml25.activity.v4
+    - uml25.activity.v5
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+    - uml25.singleexecution.v1
+  example: |
+    uml25.StructuredActivityNode(n1, "<<structured>>")
+  metamodel:
+    spec: uml-2.5
+    element: StructuredActivityNode
+    is_a:
+    - Namespace
+    - NamedElement
+    - ActivityGroup
+    - Action
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+- id: uml25.expansion.v1
+  menu_index: 84
+  kind: diagram
+  buildable: false
+  function: Expansion
+  variant: 1
+  menu_name: Expansion
+  render:
+    fingerprint: sha1:f6d6327c606f
+  tag: composite
+  status: generated
+  summary: An expansion region (composite; not a primitive).
+  discriminator: n/a
+  use_when:
+  - applying behavior to each element of a collection
+  avoid_when: []
+  aliases: []
+  related:
+    variants: []
+    see_also:
+    - uml25.structuredactivitynode.v1
+  example: |
+    # composite - do not assemble; use the primitive instead:
+    uml25.StructuredActivityNode(n1, "<<structured>>")
+  metamodel:
+    spec: uml-2.5
+    element: ExpansionRegion
+    is_a:
+    - StructuredActivityNode
+    - Namespace
+    - NamedElement
+    - ActivityGroup
+    - Action
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+- id: uml25.executionregion.v1
+  menu_index: 85
+  kind: vertex
+  buildable: true
+  function: ExecutionRegion
+  variant: 1
+  menu_name: Execution region
+  render:
+    fingerprint: sha1:d32df7c581f8
+  tag: notation
+  status: generated
+  summary: An execution region with multiplicity.
+  discriminator: n/a
+  use_when:
+  - showing a region executed a number of times
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: multiplicity
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.ExecutionRegion(n1, "Action", multiplicity="*")
+  metamodel:
+    spec: uml-2.5
+    element: ExpansionRegion
+    is_a:
+    - StructuredActivityNode
+    - Namespace
+    - NamedElement
+    - ActivityGroup
+    - Action
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+- id: uml25.executionnodewithaction.v1
+  menu_index: 86
+  kind: vertex
+  buildable: true
+  function: ExecutionNodeWithAction
+  variant: 1
+  menu_name: Execution node with action
+  render:
+    fingerprint: sha1:d32df7c581f8
+  tag: notation
+  status: generated
+  summary: An execution node containing an action.
+  discriminator: n/a
+  use_when:
+  - showing an execution node that contains an action
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Item
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.ExecutionNodeWithAction(n1, "Action1"):
+        uml25.Item(n1, "")
+        uml25.Item(c2, "")
+  metamodel:
+    spec: uml-2.5
+    element: ExecutionSpecification
+    is_a:
+    - InteractionFragment
+    - NamedElement
+- id: uml25.interaction.v1
+  menu_index: 87
+  kind: vertex
+  buildable: true
+  function: Interaction
+  variant: 1
+  menu_name: Interaction
+  render:
+    fingerprint: sha1:0bf96818c63b
+  tag: metaclass
+  status: reviewed
+  summary: An interaction frame (sd).
+  discriminator: sd frame listing properties as Item rows.
+  use_when:
+  - framing a sequence/interaction diagram
+  avoid_when:
+  - if you need sd frame with constraint rows separated by a divider, use uml25.interaction.v2
+  - if you need 'ref' interaction-use frame referencing another interaction via body=, use uml25.interaction.v3
+  aliases:
+  - sequence frame
+  - sd frame
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Item
+  related:
+    variants:
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+    see_also:
+    - uml25.action.v1
+    - uml25.action.v2
+    - uml25.actionwithinput.v1
+    - uml25.actionwithoutput.v1
+    - uml25.actionwithparameters.v1
+    - uml25.lifeline.v1
+    - uml25.lifeline.v2
+    - uml25.lifelines.v1
+    - uml25.lifelines.v2
+    - uml25.message.v1
+    - uml25.message.v2
+    - uml25.message.v3
+    - uml25.messagecreate.v1
+    - uml25.messagefound.v1
+    - uml25.messagelost.v1
+    - uml25.messagereply.v1
+    - uml25.messagesynchronouscall.v1
+  example: |
+    uml25.Interaction(n1, "Interaction heading"):
+        uml25.Item(n1, "Property1")
+        uml25.Item(c2, "Property2")
+  metamodel:
+    spec: uml-2.5
+    element: Interaction
+    is_a:
+    - InteractionFragment
+    - NamedElement
+    - Behavior
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.lifelines.v1
+  menu_index: 88
+  kind: vertex
+  buildable: true
+  function: Lifelines
+  variant: 1
+  menu_name: Lifelines
+  render:
+    fingerprint: sha1:85e3e82567c3
+  tag: notation
+  status: reviewed
+  summary: A lifeline head with its timeline.
+  discriminator: Single lifeline head with its timeline.
+  use_when:
+  - showing a participant and its timeline
+  avoid_when:
+  - if you need lifeline head with execution/activation bars, use uml25.lifelines.v2
+  aliases:
+  - participant
+  - lifeline head
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.lifelines.v2
+    see_also:
+    - uml25.destructionoccurencespecification.v1
+    - uml25.lifeline.v1
+    - uml25.lifeline.v2
+    - uml25.lifelinecontinuation.v1
+    - uml25.lifelinestateinvariant.v1
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+  example: |
+    uml25.Lifelines(n1, "Lifeline1")
+  metamodel:
+    spec: uml-2.5
+    element: Lifeline
+    is_a:
+    - NamedElement
+- id: uml25.lifelines.v2
+  menu_index: 89
+  kind: vertex
+  buildable: true
+  function: Lifelines
+  variant: 2
+  menu_name: Lifelines
+  render:
+    fingerprint: sha1:85e3e82567c3
+  tag: notation
+  status: reviewed
+  summary: A lifeline head with its timeline.
+  discriminator: Lifeline head with execution/activation bars (divider rows).
+  use_when:
+  - showing a participant and its timeline
+  avoid_when:
+  - if you need single lifeline head with its timeline, use uml25.lifelines.v1
+  aliases:
+  - participant
+  - lifeline head
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Divider
+  related:
+    variants:
+    - uml25.lifelines.v1
+    see_also:
+    - uml25.destructionoccurencespecification.v1
+    - uml25.lifeline.v1
+    - uml25.lifeline.v2
+    - uml25.lifelinecontinuation.v1
+    - uml25.lifelinestateinvariant.v1
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+  example: |
+    uml25.Lifelines(n1, "Lifeline2", variant=2):
+        uml25.Divider(n1, "")
+        uml25.Divider(c2, "")
+  metamodel:
+    spec: uml-2.5
+    element: Lifeline
+    is_a:
+    - NamedElement
+- id: uml25.destructionoccurencespecification.v1
+  menu_index: 90
+  kind: vertex
+  buildable: true
+  function: DestructionOccurenceSpecification
+  variant: 1
+  menu_name: 'Destruction Occurence Specification  (sic: "Occurrence")'
+  render:
+    fingerprint: sha1:85e3e82567c3
+  tag: metaclass
+  status: generated
+  summary: A destruction occurrence (X) on a lifeline.
+  discriminator: n/a
+  use_when:
+  - marking the destruction of a lifeline
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Divider
+  related:
+    variants: []
+    see_also:
+    - uml25.lifeline.v1
+    - uml25.lifeline.v2
+    - uml25.lifelinecontinuation.v1
+    - uml25.lifelines.v1
+    - uml25.lifelines.v2
+    - uml25.lifelinestateinvariant.v1
+  example: |
+    uml25.DestructionOccurenceSpecification(n1, "Lifeline1"):
+        uml25.Divider(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: DestructionOccurrenceSpecification
+    is_a:
+    - MessageOccurrenceSpecification
+    - MessageEnd
+    - NamedElement
+    - OccurrenceSpecification
+    - InteractionFragment
+- id: uml25.interaction.v2
+  menu_index: 91
+  kind: vertex
+  buildable: true
+  function: Interaction
+  variant: 2
+  menu_name: Interaction
+  render:
+    fingerprint: sha1:0bf96818c63b
+  tag: metaclass
+  status: reviewed
+  summary: An interaction frame (sd).
+  discriminator: sd frame with constraint rows separated by a divider.
+  use_when:
+  - framing a sequence/interaction diagram
+  avoid_when:
+  - if you need sd frame listing properties as item rows, use uml25.interaction.v1
+  - if you need 'ref' interaction-use frame referencing another interaction via body=, use uml25.interaction.v3
+  aliases:
+  - sequence frame
+  - sd frame
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Item
+    - Divider
+  related:
+    variants:
+    - uml25.interaction.v1
+    - uml25.interaction.v3
+    see_also:
+    - uml25.action.v1
+    - uml25.action.v2
+    - uml25.actionwithinput.v1
+    - uml25.actionwithoutput.v1
+    - uml25.actionwithparameters.v1
+    - uml25.lifeline.v1
+    - uml25.lifeline.v2
+    - uml25.lifelines.v1
+    - uml25.lifelines.v2
+    - uml25.message.v1
+    - uml25.message.v2
+    - uml25.message.v3
+    - uml25.messagecreate.v1
+    - uml25.messagefound.v1
+    - uml25.messagelost.v1
+    - uml25.messagereply.v1
+    - uml25.messagesynchronouscall.v1
+  example: |
+    uml25.Interaction(n1, "Interaction heading", variant=2):
+        uml25.Item(n1, "[constraint1]")
+        uml25.Divider(c2, "[constraint2]", dashed=True)
+  metamodel:
+    spec: uml-2.5
+    element: Interaction
+    is_a:
+    - InteractionFragment
+    - NamedElement
+    - Behavior
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.lifelinecontinuation.v1
+  menu_index: 92
+  kind: vertex
+  buildable: true
+  function: LifelineContinuation
+  variant: 1
+  menu_name: Lifeline Continuation
+  render:
+    fingerprint: sha1:a09ce554d4ed
+  tag: metaclass
+  status: generated
+  summary: An interaction continuation.
+  discriminator: n/a
+  use_when:
+  - marking an interaction continuation across fragments
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.destructionoccurencespecification.v1
+    - uml25.lifeline.v1
+    - uml25.lifeline.v2
+    - uml25.lifelines.v1
+    - uml25.lifelines.v2
+    - uml25.lifelinestateinvariant.v1
+  example: |
+    uml25.LifelineContinuation(n1, "Continuation1")
+  metamodel:
+    spec: uml-2.5
+    element: Continuation
+    is_a:
+    - InteractionFragment
+    - NamedElement
+- id: uml25.lifelinestateinvariant.v1
+  menu_index: 93
+  kind: vertex
+  buildable: true
+  function: LifelineStateInvariant
+  variant: 1
+  menu_name: Lifeline State Invariant
+  render:
+    fingerprint: sha1:87a58bd3cbb2
+  tag: metaclass
+  status: generated
+  summary: A state invariant on a lifeline.
+  discriminator: n/a
+  use_when:
+  - asserting a state invariant on a lifeline
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: inv1
+    required: false
+  - name: inv2
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.destructionoccurencespecification.v1
+    - uml25.lifeline.v1
+    - uml25.lifeline.v2
+    - uml25.lifelinecontinuation.v1
+    - uml25.lifelines.v1
+    - uml25.lifelines.v2
+  example: |
+    uml25.LifelineStateInvariant(n1, "Lifeline1", inv1="State1 inv.", inv2="{State2 inv.}")
+  metamodel:
+    spec: uml-2.5
+    element: StateInvariant
+    is_a:
+    - InteractionFragment
+    - NamedElement
+- id: uml25.interaction.v3
+  menu_index: 94
+  kind: vertex
+  buildable: true
+  function: Interaction
+  variant: 3
+  menu_name: Interaction
+  render:
+    fingerprint: sha1:18c0a4e2d88b
+  tag: metaclass
+  status: reviewed
+  summary: An interaction frame (sd).
+  discriminator: '''ref'' interaction-use frame referencing another interaction via body=.'
+  use_when:
+  - framing a sequence/interaction diagram
+  avoid_when:
+  - if you need sd frame listing properties as item rows, use uml25.interaction.v1
+  - if you need sd frame with constraint rows separated by a divider, use uml25.interaction.v2
+  aliases:
+  - sequence frame
+  - sd frame
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: body
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    see_also:
+    - uml25.action.v1
+    - uml25.action.v2
+    - uml25.actionwithinput.v1
+    - uml25.actionwithoutput.v1
+    - uml25.actionwithparameters.v1
+    - uml25.lifeline.v1
+    - uml25.lifeline.v2
+    - uml25.lifelines.v1
+    - uml25.lifelines.v2
+    - uml25.message.v1
+    - uml25.message.v2
+    - uml25.message.v3
+    - uml25.messagecreate.v1
+    - uml25.messagefound.v1
+    - uml25.messagelost.v1
+    - uml25.messagereply.v1
+    - uml25.messagesynchronouscall.v1
+  example: |
+    uml25.Interaction(n1, "Ref", variant=3, body="Interaction1")
+  metamodel:
+    spec: uml-2.5
+    element: Interaction
+    is_a:
+    - InteractionFragment
+    - NamedElement
+    - Behavior
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.lifeline.v1
+  menu_index: 95
+  kind: vertex
+  buildable: true
+  function: Lifeline
+  variant: 1
+  menu_name: Lifeline
+  render:
+    fingerprint: sha1:87a58bd3cbb2
+  tag: metaclass
+  status: reviewed
+  summary: A lifeline in a sequence diagram.
+  discriminator: Lifeline with timing/state Lane cells (buildable primitive).
+  use_when:
+  - representing a participant in a sequence diagram
+  avoid_when:
+  - if you need pre-composed lifeline fragment, use uml25.lifeline.v2
+  aliases:
+  - participant
+  - object lifeline
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Lane
+  related:
+    variants:
+    - uml25.lifeline.v2
+    see_also:
+    - uml25.destructionoccurencespecification.v1
+    - uml25.lifelinecontinuation.v1
+    - uml25.lifelines.v1
+    - uml25.lifelines.v2
+    - uml25.lifelinestateinvariant.v1
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+  example: |
+    uml25.Lifeline(n1, "Lifeline1"):
+        uml25.Lane(n1, "")
+        uml25.Lane(c2, "")
+  metamodel:
+    spec: uml-2.5
+    element: Lifeline
+    is_a:
+    - NamedElement
+- id: uml25.usecase.v1
+  menu_index: 96
+  kind: vertex
+  buildable: true
+  function: UseCase
+  variant: 1
+  menu_name: Use Case
+  render:
+    fingerprint: sha1:5b40fbc09a76
+  tag: metaclass
+  status: generated
+  summary: A use case (ellipse).
+  discriminator: n/a
+  use_when:
+  - representing a unit of externally visible functionality
+  avoid_when: []
+  aliases:
+  - use case oval
+  - ellipse
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: heading
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.extend.v1
+    - uml25.extension.v1
+    - uml25.extension.v2
+    - uml25.extensionpointclassifier.v1
+    - uml25.include.v1
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+  example: |
+    uml25.UseCase(n1, "Class1", heading="Heading1")
+  metamodel:
+    spec: uml-2.5
+    element: UseCase
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.observation.v1
+  menu_index: 97
+  kind: edge
+  buildable: true
+  function: Observation
+  variant: 1
+  menu_name: Observation
+  render:
+    fingerprint: sha1:24cc713708f3
+  tag: metaclass
+  status: generated
+  summary: A time/duration observation.
+  discriminator: n/a
+  use_when:
+  - referencing an observed time or duration
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.durationconstraint.v1
+    - uml25.timeconstraint.v1
+  example: |
+    uml25.Observation(None, None, "observation")
+  metamodel:
+    spec: uml-2.5
+    element: Observation
+    is_a:
+    - PackageableElement
+    - NamedElement
+    endpoints:
+      source: Observation
+      target: NamedElement
+      source_role: observation
+      target_role: event
+- id: uml25.timeconstraint.v1
+  menu_index: 98
+  kind: edge
+  buildable: true
+  function: TimeConstraint
+  variant: 1
+  menu_name: Time constraint
+  render:
+    fingerprint: sha1:24cc713708f3
+  tag: metaclass
+  status: generated
+  summary: A time constraint {..}.
+  discriminator: n/a
+  use_when:
+  - constraining when something must occur
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.durationconstraint.v1
+    - uml25.observation.v1
+  example: |
+    uml25.TimeConstraint(None, None, "{Time constraint 1}")
+  metamodel:
+    spec: uml-2.5
+    element: TimeConstraint
+    is_a:
+    - IntervalConstraint
+    - Constraint
+    - PackageableElement
+    - NamedElement
+    endpoints:
+      source: TimeConstraint
+      target: Element
+      source_role: constraint
+      target_role: constrainedElement
+- id: uml25.durationconstraint.v1
+  menu_index: 99
+  kind: edge
+  buildable: true
+  function: DurationConstraint
+  variant: 1
+  menu_name: Duration constraint
+  render:
+    fingerprint: sha1:277eba7bf8e4
+  tag: metaclass
+  status: generated
+  summary: A duration constraint {..}.
+  discriminator: n/a
+  use_when:
+  - constraining how long something may take
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.observation.v1
+    - uml25.timeconstraint.v1
+  example: |
+    uml25.DurationConstraint(None, None, "{Duration constraint 1}")
+  metamodel:
+    spec: uml-2.5
+    element: DurationConstraint
+    is_a:
+    - IntervalConstraint
+    - Constraint
+    - PackageableElement
+    - NamedElement
+    endpoints:
+      source: DurationConstraint
+      target: Element
+      source_role: constraint
+      target_role: constrainedElement
+- id: uml25.classifier.v7
+  menu_index: 100
+  kind: vertex
+  buildable: true
+  function: Classifier
+  variant: 7
+  menu_name: Classifier
+  render:
+    fingerprint: sha1:ddcc0b55cd7a
+  tag: metaclass
+  status: reviewed
+  summary: 'A classifier: a class-like type with optional compartments.'
+  discriminator: 'Use-case classifier: bold name + ''extension points'' compartment.'
+  use_when:
+  - modeling a type with attributes, operations, or internal structure
+  avoid_when:
+  - if you need full class box, use uml25.classifier.v1
+  - if you need name-only box, no compartments, use uml25.classifier.v2
+  - if you need bold name with a single 'internal structure' compartment, use uml25.classifier.v3
+  aliases:
+  - class box
+  - type
+  - UML class
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Note
+    - Divider
+    - Header
+    - Item
+  related:
+    variants:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    see_also:
+    - uml25.collaborationuse.v1
+    - uml25.extensionpointclassifier.v1
+    - uml25.generalizationset.v1
+    - uml25.interfacegeneralization.v1
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+    - uml25.usecase.v1
+  example: |
+    uml25.Classifier(n1, "", variant=7):
+        uml25.Note(n1, "UseCase1")
+        uml25.Divider(c2, "")
+        uml25.Header(c3, "extension points")
+        uml25.Item(c4, "Extension point 1")
+  metamodel:
+    spec: uml-2.5
+    element: Classifier
+    is_a:
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.extensionpointclassifier.v1
+  menu_index: 101
+  kind: vertex
+  buildable: true
+  function: ExtensionPointClassifier
+  variant: 1
+  menu_name: Extension Point Classifier
+  render:
+    fingerprint: sha1:1c80978020a5
+  tag: notation
+  status: generated
+  summary: A use case with an extension-points compartment.
+  discriminator: n/a
+  use_when:
+  - defining a use case with named extension points
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: name
+    required: false
+  rows:
+    allowed:
+    - Header
+    - Item
+  related:
+    variants: []
+    see_also:
+    - uml25.extend.v1
+    - uml25.extension.v1
+    - uml25.extension.v2
+    - uml25.include.v1
+    - uml25.usecase.v1
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+  example: |
+    uml25.ExtensionPointClassifier(n1, "", name="UseCase1"):
+        uml25.Header(n1, "extension points")
+        uml25.Item(c2, "Extension point 1")
+  metamodel:
+    spec: uml-2.5
+    element: UseCase
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.actor.v1
+  menu_index: 102
+  kind: vertex
+  buildable: true
+  function: Actor
+  variant: 1
+  menu_name: Actor
+  render:
+    fingerprint: sha1:2f2f985ea085
+  tag: metaclass
+  status: reviewed
+  summary: An actor.
+  discriminator: Stick-figure actor glyph.
+  use_when:
+  - representing an external role interacting with the system
+  avoid_when:
+  - if you need box form «actor», use uml25.actor.v2
+  aliases:
+  - stick figure
+  - user role
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.actor.v2
+    see_also: []
+  example: |
+    uml25.Actor(n1, "Actor")
+  metamodel:
+    spec: uml-2.5
+    element: Actor
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.actor.v2
+  menu_index: 103
+  kind: vertex
+  buildable: true
+  function: Actor
+  variant: 2
+  menu_name: Actor
+  render:
+    fingerprint: sha1:19b284c2a478
+  tag: metaclass
+  status: reviewed
+  summary: An actor.
+  discriminator: Box form «actor» (rectangle with keyword), used when a figure is undesired.
+  use_when:
+  - representing an external role interacting with the system
+  avoid_when:
+  - if you need stick-figure actor glyph, use uml25.actor.v1
+  aliases:
+  - stick figure
+  - user role
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.actor.v1
+    see_also: []
+  example: |
+    uml25.Actor(n1, "<<actor>> Actor1", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Actor
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.extension.v1
+  menu_index: 104
+  kind: vertex
+  buildable: true
+  function: Extension
+  variant: 1
+  menu_name: Extension
+  render:
+    fingerprint: sha1:e91dae4f50a2
+  tag: metaclass
+  status: reviewed
+  summary: An extend relationship / extension point.
+  discriminator: Extension-point note carrying an extend condition= .
+  use_when:
+  - defining an extend relationship or its extension point
+  avoid_when:
+  - if you need «extend»/{required} extension edge between use cases, use uml25.extension.v2
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: condition
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.extension.v2
+    see_also:
+    - uml25.extend.v1
+    - uml25.extensionpointclassifier.v1
+    - uml25.include.v1
+    - uml25.usecase.v1
+    - uml25.class.v1
+    - uml25.innerclass.v1
+  example: |
+    uml25.Extension(n1, "Extension point 1", condition="Extend condition 1")
+  metamodel:
+    spec: uml-2.5
+    element: Extension
+    is_a:
+    - Association
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.deployment.v1
+  menu_index: 105
+  kind: vertex
+  buildable: true
+  function: Deployment
+  variant: 1
+  menu_name: Deployment
+  render:
+    fingerprint: sha1:f44e401dd576
+  tag: metaclass
+  status: generated
+  summary: A deployment target node.
+  discriminator: n/a
+  use_when:
+  - showing a physical/execution node as a deployment target
+  avoid_when: []
+  aliases:
+  - node
+  - device
+  - cube
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: node
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.artifact.v1
+    - uml25.deploy.v1
+    - uml25.deploymentspecification.v1
+  example: |
+    uml25.Deployment(n1, "DeploymentTarget1", node="Node1")
+  metamodel:
+    spec: uml-2.5
+    element: Deployment
+    is_a:
+    - Dependency
+    - DirectedRelationship
+    - Relationship
+    - PackageableElement
+    - NamedElement
+- id: uml25.deploymentspecification.v1
+  menu_index: 106
+  kind: vertex
+  buildable: true
+  function: DeploymentSpecification
+  variant: 1
+  menu_name: Deployment Specification
+  render:
+    fingerprint: sha1:19b284c2a478
+  tag: metaclass
+  status: generated
+  summary: A deployment specification artifact.
+  discriminator: n/a
+  use_when:
+  - specifying deployment parameters for an artifact
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.artifact.v1
+    - uml25.deploy.v1
+    - uml25.deployment.v1
+  example: |
+    uml25.DeploymentSpecification(n1, "<<deployment spec>> Deployment1")
+  metamodel:
+    spec: uml-2.5
+    element: DeploymentSpecification
+    is_a:
+    - Artifact
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - DeployedArtifact
+- id: uml25.artifact.v1
+  menu_index: 107
+  kind: vertex
+  buildable: true
+  function: Artifact
+  variant: 1
+  menu_name: Artifact
+  render:
+    fingerprint: sha1:19b284c2a478
+  tag: metaclass
+  status: generated
+  summary: An artifact.
+  discriminator: n/a
+  use_when:
+  - representing a physical file or deployable artifact
+  avoid_when: []
+  aliases:
+  - file
+  - deployable
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.deploy.v1
+    - uml25.deployment.v1
+    - uml25.deploymentspecification.v1
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.Artifact(n1, "<<artifact>> Artifact1")
+  metamodel:
+    spec: uml-2.5
+    element: Artifact
+    is_a:
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - DeployedArtifact
+- id: uml25.informationitem.v1
+  menu_index: 108
+  kind: vertex
+  buildable: true
+  function: InformationItem
+  variant: 1
+  menu_name: Information item
+  render:
+    fingerprint: sha1:03cbf00c2636
+  tag: metaclass
+  status: generated
+  summary: An information item.
+  discriminator: n/a
+  use_when:
+  - abstracting information exchanged between elements
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+  example: |
+    uml25.InformationItem(n1, "InformationItem1")
+  metamodel:
+    spec: uml-2.5
+    element: InformationItem
+    is_a:
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml25.templatebinding.v1
+  menu_index: 109
+  kind: edge
+  buildable: true
+  function: TemplateBinding
+  variant: 1
+  menu_name: Template Binding
+  render:
+    fingerprint: sha1:6ff692913800
+  tag: metaclass
+  status: generated
+  summary: A template binding «bind».
+  discriminator: n/a
+  use_when:
+  - binding actual arguments to a template
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.templatesignature.v1
+    - uml25.templatesignature.v2
+  example: |
+    uml25.TemplateBinding(None, None, "<<bind>>")
+  metamodel:
+    spec: uml-2.5
+    element: TemplateBinding
+    is_a:
+    - DirectedRelationship
+    - Relationship
+- id: uml25.innerclass.v1
+  menu_index: 110
+  kind: edge
+  buildable: true
+  function: InnerClass
+  variant: 1
+  menu_name: Inner class
+  render:
+    fingerprint: sha1:196929cb8339
+  tag: notation
+  status: generated
+  summary: An inner-class (nesting) connector.
+  discriminator: n/a
+  use_when:
+  - showing a class nested inside another
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.extension.v1
+    - uml25.extension.v2
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.InnerClass(None, None)
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+    endpoints:
+      source: Class
+      target: Class
+      source_role: nestingClass
+      target_role: nestedClassifier
+- id: uml25.elementpackagemergepackageimportsubstitution.v1
+  menu_index: 111
+  kind: edge
+  buildable: true
+  function: ElementPackageMergePackageImportSubstitution
+  variant: 1
+  menu_name: Element / Package Merge / Package Import, Substitution
+  render:
+    fingerprint: sha1:cf5fef29fcca
+  tag: notation
+  status: generated
+  summary: A package merge/import or substitution dependency.
+  discriminator: n/a
+  use_when:
+  - showing package merge/import or substitution
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.dependency.v1
+    - uml25.dependency.v2
+    - uml25.realization.v1
+    - uml25.usage.v1
+    - uml25.package.v1
+    - uml25.package.v2
+    - uml25.package.v3
+  example: |
+    uml25.ElementPackageMergePackageImportSubstitution(None, None, "<<keyword>>")
+  metamodel:
+    spec: uml-2.5
+    element: PackageMerge
+    is_a:
+    - DirectedRelationship
+    - Relationship
+    endpoints:
+      source: Package
+      target: Package
+      source_role: receivingPackage
+      target_role: mergedPackage
+- id: uml25.constraint.v2
+  menu_index: 112
+  kind: edge
+  buildable: true
+  function: Constraint
+  variant: 2
+  menu_name: Constraint
+  render:
+    fingerprint: sha1:58177b669603
+  tag: metaclass
+  status: reviewed
+  summary: A constraint specification, e.g. {condition}.
+  discriminator: Bare {constraint} text attached to an element (no note box).
+  use_when:
+  - stating a condition or restriction on one or more elements
+  avoid_when:
+  - if you need note-shaped box holding a constraint spec, with an optional «keyword», use uml25.constraint.v1
+  aliases:
+  - condition
+  - invariant
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: null
+  related:
+    variants:
+    - uml25.constraint.v1
+    see_also: []
+  example: |
+    uml25.Constraint(None, None, "{constraint spec.}", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Constraint
+    is_a:
+    - PackageableElement
+    - NamedElement
+- id: uml25.dependency.v1
+  menu_index: 113
+  kind: edge
+  buildable: true
+  function: Dependency
+  variant: 1
+  menu_name: Dependency
+  render:
+    fingerprint: sha1:6ff692913800
+  tag: metaclass
+  status: reviewed
+  summary: A dependency edge.
+  discriminator: Dashed open-arrow dependency carrying a «keyword».
+  use_when:
+  - showing that one element depends on another
+  avoid_when:
+  - if you need plain dashed open-arrow dependency, no keyword, use uml25.dependency.v2
+  aliases:
+  - dashed arrow
+  - depends-on
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml25.dependency.v2
+    see_also:
+    - uml25.elementpackagemergepackageimportsubstitution.v1
+    - uml25.realization.v1
+    - uml25.usage.v1
+  example: |
+    uml25.Dependency(None, None, "<<keyword>>")
+  metamodel:
+    spec: uml-2.5
+    element: Dependency
+    is_a:
+    - DirectedRelationship
+    - Relationship
+    - PackageableElement
+    - NamedElement
+- id: uml25.dependency.v2
+  menu_index: 114
+  kind: vertex
+  buildable: true
+  function: Dependency
+  variant: 2
+  menu_name: Dependency
+  render:
+    fingerprint: sha1:264f266bfa08
+  tag: metaclass
+  status: reviewed
+  summary: A dependency edge.
+  discriminator: Plain dashed open-arrow dependency, no keyword.
+  use_when:
+  - showing that one element depends on another
+  avoid_when:
+  - if you need dashed open-arrow dependency carrying a «keyword», use uml25.dependency.v1
+  aliases:
+  - dashed arrow
+  - depends-on
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.dependency.v1
+    see_also:
+    - uml25.elementpackagemergepackageimportsubstitution.v1
+    - uml25.realization.v1
+    - uml25.usage.v1
+  example: |
+    uml25.Dependency(n1, "", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Dependency
+    is_a:
+    - DirectedRelationship
+    - Relationship
+    - PackageableElement
+    - NamedElement
+- id: uml25.realization.v1
+  menu_index: 115
+  kind: edge
+  buildable: true
+  function: Realization
+  variant: 1
+  menu_name: Realization
+  render:
+    fingerprint: sha1:0746583bf867
+  tag: metaclass
+  status: generated
+  summary: A realization edge.
+  discriminator: n/a
+  use_when:
+  - showing realization of a specification by an implementation
+  avoid_when: []
+  aliases:
+  - implements
+  - hollow triangle dashed
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.dependency.v1
+    - uml25.dependency.v2
+    - uml25.elementpackagemergepackageimportsubstitution.v1
+    - uml25.usage.v1
+  example: |
+    uml25.Realization(None, None)
+  metamodel:
+    spec: uml-2.5
+    element: Realization
+    is_a:
+    - Abstraction
+    - Dependency
+    - DirectedRelationship
+    - Relationship
+    - PackageableElement
+    - NamedElement
+    endpoints:
+      source: NamedElement
+      target: NamedElement
+      source_role: client
+      target_role: supplier
+- id: uml25.generalizationset.v1
+  menu_index: 116
+  kind: edge
+  buildable: true
+  function: GeneralizationSet
+  variant: 1
+  menu_name: Generalization Set
+  render:
+    fingerprint: sha1:3f0aafe05475
+  tag: metaclass
+  status: generated
+  summary: A generalization set.
+  discriminator: n/a
+  use_when:
+  - grouping generalizations that share a discriminator
+  avoid_when: []
+  aliases:
+  - inheritance set
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.interfacegeneralization.v1
+  example: |
+    uml25.GeneralizationSet(None, None, "GeneralizationSet1")
+  metamodel:
+    spec: uml-2.5
+    element: GeneralizationSet
+    is_a:
+    - PackageableElement
+    - NamedElement
+- id: uml25.associationconnector.v1
+  menu_index: 117
+  kind: edge
+  buildable: true
+  function: AssociationConnector
+  variant: 1
+  menu_name: Association / Connector / Instance Specification / Property / Connector End
+  render:
+    fingerprint: sha1:d6b38cc26870
+  tag: notation
+  status: reviewed
+  summary: An association / connector / property end.
+  discriminator: Plain association line, no arrowheads (endArrow=none both ends).
+  use_when:
+  - connecting parts, instances, or association ends
+  avoid_when:
+  - if you need association line with one open arrow end, use uml25.associationconnector.v2
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml25.associationconnector.v2
+    see_also:
+    - uml25.association.v1
+    - uml25.associationcomposite.v1
+    - uml25.associationinstancesecification.v1
+    - uml25.associationinstancesecification.v2
+    - uml25.associationnavigability.v1
+    - uml25.associationnonnavigability.v1
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.AssociationConnector(None, None)
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml25.associationnavigability.v1
+  menu_index: 118
+  kind: edge
+  buildable: true
+  function: AssociationNavigability
+  variant: 1
+  menu_name: Association / Connector / Instance Specification / Property / Connector End / Navigability
+    notation
+  render:
+    fingerprint: sha1:7155d6e9b2fe
+  tag: notation
+  status: generated
+  summary: An association end with navigability arrow.
+  discriminator: n/a
+  use_when:
+  - marking an association end as navigable
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.association.v1
+    - uml25.associationcomposite.v1
+    - uml25.associationconnector.v1
+    - uml25.associationconnector.v2
+    - uml25.associationinstancesecification.v1
+    - uml25.associationinstancesecification.v2
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.AssociationNavigability(None, None)
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml25.associationconnector.v2
+  menu_index: 119
+  kind: edge
+  buildable: true
+  function: AssociationConnector
+  variant: 2
+  menu_name: Association / Connector / Instance Specification / Property / Connector End
+  render:
+    fingerprint: sha1:a570a2952756
+  tag: notation
+  status: reviewed
+  summary: An association / connector / property end.
+  discriminator: Association line with one open arrow end (directed).
+  use_when:
+  - connecting parts, instances, or association ends
+  avoid_when:
+  - if you need plain association line, no arrowheads, use uml25.associationconnector.v1
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml25.associationconnector.v1
+    see_also:
+    - uml25.association.v1
+    - uml25.associationcomposite.v1
+    - uml25.associationinstancesecification.v1
+    - uml25.associationinstancesecification.v2
+    - uml25.associationnavigability.v1
+    - uml25.associationnonnavigability.v1
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.AssociationConnector(None, None, variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml25.associationnonnavigability.v1
+  menu_index: 120
+  kind: edge
+  buildable: true
+  function: AssociationNonNavigability
+  variant: 1
+  menu_name: Association / Connector / Instance Specification / Property / Connector End / Non-Navigability
+    notation
+  render:
+    fingerprint: sha1:5fbb27087017
+  tag: notation
+  status: generated
+  summary: An association end marked non-navigable (x).
+  discriminator: n/a
+  use_when:
+  - marking an association end as non-navigable
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.association.v1
+    - uml25.associationcomposite.v1
+    - uml25.associationconnector.v1
+    - uml25.associationconnector.v2
+    - uml25.associationinstancesecification.v1
+    - uml25.associationinstancesecification.v2
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.AssociationNonNavigability(None, None)
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml25.associationshared.v1
+  menu_index: 121
+  kind: edge
+  buildable: true
+  function: AssociationShared
+  variant: 1
+  menu_name: Association / Connector / Instance Specification / Property / Connector End / Shared Association
+  render:
+    fingerprint: sha1:b40303ff11a5
+  tag: notation
+  status: generated
+  summary: A shared aggregation (hollow diamond).
+  discriminator: n/a
+  use_when:
+  - showing shared aggregation (hollow diamond)
+  avoid_when: []
+  aliases:
+  - aggregation
+  - hollow diamond
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.association.v1
+    - uml25.associationcomposite.v1
+    - uml25.associationconnector.v1
+    - uml25.associationconnector.v2
+    - uml25.associationinstancesecification.v1
+    - uml25.associationinstancesecification.v2
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.AssociationShared(None, None)
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml25.associationcomposite.v1
+  menu_index: 122
+  kind: edge
+  buildable: true
+  function: AssociationComposite
+  variant: 1
+  menu_name: Association / Connector / Instance Specification / Property / Connector End / Composite Association
+  render:
+    fingerprint: sha1:1a694a204668
+  tag: notation
+  status: generated
+  summary: A composite aggregation (filled diamond).
+  discriminator: n/a
+  use_when:
+  - showing composition (filled diamond)
+  avoid_when: []
+  aliases:
+  - composition
+  - filled diamond
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.association.v1
+    - uml25.associationconnector.v1
+    - uml25.associationconnector.v2
+    - uml25.associationinstancesecification.v1
+    - uml25.associationinstancesecification.v2
+    - uml25.associationnavigability.v1
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.AssociationComposite(None, None)
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml25.associationinstancesecification.v1
+  menu_index: 123
+  kind: vertex
+  buildable: true
+  function: AssociationInstanceSecification
+  variant: 1
+  menu_name: 'Association / Instance Secification  (sic: "Specification")'
+  render:
+    fingerprint: sha1:6265e6676b2d
+  tag: notation
+  status: reviewed
+  summary: An association / instance specification link.
+  discriminator: Instance-level link (slim line) between instance specifications.
+  use_when:
+  - linking instance specifications
+  avoid_when:
+  - if you need instance link variant with alternate end styling, use uml25.associationinstancesecification.v2
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.associationinstancesecification.v2
+    see_also:
+    - uml25.association.v1
+    - uml25.associationcomposite.v1
+    - uml25.associationconnector.v1
+    - uml25.associationconnector.v2
+    - uml25.associationnavigability.v1
+    - uml25.associationnonnavigability.v1
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+  example: |
+    uml25.AssociationInstanceSecification(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: InstanceSpecification
+    is_a:
+    - DeploymentTarget
+    - NamedElement
+    - PackageableElement
+    - DeployedArtifact
+- id: uml25.associationinstancesecification.v2
+  menu_index: 124
+  kind: vertex
+  buildable: true
+  function: AssociationInstanceSecification
+  variant: 2
+  menu_name: 'Association / Instance Secification  (sic: "Specification")'
+  render:
+    fingerprint: sha1:46b87cead254
+  tag: notation
+  status: reviewed
+  summary: An association / instance specification link.
+  discriminator: Instance link variant with alternate end styling.
+  use_when:
+  - linking instance specifications
+  avoid_when:
+  - if you need instance-level link, use uml25.associationinstancesecification.v1
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.associationinstancesecification.v1
+    see_also:
+    - uml25.association.v1
+    - uml25.associationcomposite.v1
+    - uml25.associationconnector.v1
+    - uml25.associationconnector.v2
+    - uml25.associationnavigability.v1
+    - uml25.associationnonnavigability.v1
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+  example: |
+    uml25.AssociationInstanceSecification(n1, "", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: InstanceSpecification
+    is_a:
+    - DeploymentTarget
+    - NamedElement
+    - PackageableElement
+    - DeployedArtifact
+- id: uml25.redefine.v1
+  menu_index: 125
+  kind: edge
+  buildable: true
+  function: Redefine
+  variant: 1
+  menu_name: Redefine
+  render:
+    fingerprint: sha1:07b5fa90dd7f
+  tag: notation
+  status: generated
+  summary: A redefinition {redefines}.
+  discriminator: n/a
+  use_when:
+  - showing that an element redefines an inherited one
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: none
+  related:
+    variants: []
+    see_also:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+  example: |
+    uml25.Redefine(None, None, "{redefines}")
+  metamodel:
+    spec: uml-2.5
+    element: RedefinableElement
+    is_a:
+    - NamedElement
+- id: uml25.qualifier.v1
+  menu_index: 126
+  kind: vertex
+  buildable: true
+  function: Qualifier
+  variant: 1
+  menu_name: Qualifier
+  render:
+    fingerprint: sha1:19b284c2a478
+  tag: notation
+  status: generated
+  summary: An association qualifier.
+  discriminator: n/a
+  use_when:
+  - qualifying an association end with a key
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.association.v1
+    - uml25.associationcomposite.v1
+    - uml25.associationconnector.v1
+    - uml25.associationconnector.v2
+    - uml25.associationinstancesecification.v1
+    - uml25.associationinstancesecification.v2
+    - uml25.associationnavigability.v1
+    - uml25.associationnonnavigability.v1
+    - uml25.associationshared.v1
+    - uml25.class.v1
+    - uml25.innerclass.v1
+    - uml25.providedinterface.v1
+    - uml25.requiredinterface.v1
+    - uml25.requiredinterface.v2
+  example: |
+    uml25.Qualifier(n1, "qualifier1")
+  metamodel:
+    spec: uml-2.5
+    element: Property
+    is_a:
+    - ConnectableElement
+    - TypedElement
+    - NamedElement
+    - DeploymentTarget
+    - StructuralFeature
+    - MultiplicityElement
+    - Feature
+    - RedefinableElement
+- id: uml25.connector.v1
+  menu_index: 127
+  kind: edge
+  buildable: true
+  function: Connector
+  variant: 1
+  menu_name: Connector
+  render:
+    fingerprint: sha1:07b5fa90dd7f
+  tag: metaclass
+  status: generated
+  summary: A connector between parts.
+  discriminator: n/a
+  use_when:
+  - connecting two parts within a structured classifier
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: none
+  related:
+    variants: []
+    see_also:
+    - uml25.association.v1
+    - uml25.associationcomposite.v1
+    - uml25.associationconnector.v1
+    - uml25.associationconnector.v2
+    - uml25.associationinstancesecification.v1
+    - uml25.associationinstancesecification.v2
+    - uml25.associationnavigability.v1
+    - uml25.associationnonnavigability.v1
+    - uml25.associationshared.v1
+    - uml25.behavior.v1
+  example: |
+    uml25.Connector(None, None, "")
+  metamodel:
+    spec: uml-2.5
+    element: Connector
+    is_a:
+    - Feature
+    - RedefinableElement
+    - NamedElement
+- id: uml25.providedinterface.v1
+  menu_index: 128
+  kind: edge
+  buildable: true
+  function: ProvidedInterface
+  variant: 1
+  menu_name: Provided Interface
+  render:
+    fingerprint: sha1:b1011841d707
+  tag: notation
+  status: generated
+  summary: A provided interface (lollipop).
+  discriminator: n/a
+  use_when:
+  - showing an interface a component provides
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.interfacegeneralization.v1
+    - uml25.portwithprovidedinterface.v1
+    - uml25.portwithrequiredinterface.v1
+    - uml25.requiredinterface.v1
+    - uml25.requiredinterface.v2
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.ProvidedInterface(None, None)
+  metamodel:
+    spec: uml-2.5
+    element: Interface
+    is_a:
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Port
+      target: Interface
+      source_role: provider
+      target_role: provided
+- id: uml25.requiredinterface.v2
+  menu_index: 129
+  kind: edge
+  buildable: true
+  function: RequiredInterface
+  variant: 2
+  menu_name: Required Interface
+  render:
+    fingerprint: sha1:342b378c3dfa
+  tag: notation
+  status: reviewed
+  summary: A required interface (socket) notation.
+  discriminator: Required-interface as an edge ending in an open socket (oval endArrow).
+  use_when:
+  - showing an interface a component requires
+  avoid_when:
+  - if you need required-interface socket drawn as a node, use uml25.requiredinterface.v1
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml25.requiredinterface.v1
+    see_also:
+    - uml25.interfacegeneralization.v1
+    - uml25.portwithprovidedinterface.v1
+    - uml25.portwithrequiredinterface.v1
+    - uml25.providedinterface.v1
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.property.v1
+    - uml25.property.v2
+    - uml25.qualifier.v1
+  example: |
+    uml25.RequiredInterface(None, None, variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Interface
+    is_a:
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Port
+      target: Interface
+      source_role: requirer
+      target_role: required
+- id: uml25.structuralfeature.v1
+  menu_index: 130
+  kind: edge
+  buildable: true
+  function: StructuralFeature
+  variant: 1
+  menu_name: Structural Feature
+  render:
+    fingerprint: sha1:959e51f75267
+  tag: metaclass
+  status: generated
+  summary: A structural feature.
+  discriminator: n/a
+  use_when:
+  - referencing a structural feature
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.StructuralFeature(None, None, "feature1")
+  metamodel:
+    spec: uml-2.5
+    element: StructuralFeature
+    is_a:
+    - MultiplicityElement
+    - TypedElement
+    - NamedElement
+    - Feature
+    - RedefinableElement
+    endpoints:
+      source: StructuralFeature
+      target: Type
+      source_role: feature
+      target_role: type
+- id: uml25.usage.v1
+  menu_index: 131
+  kind: vertex
+  buildable: true
+  function: Usage
+  variant: 1
+  menu_name: Usage
+  render:
+    fingerprint: sha1:1fb03df7c581
+  tag: metaclass
+  status: generated
+  summary: A usage dependency.
+  discriminator: n/a
+  use_when:
+  - showing that one element uses another
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.dependency.v1
+    - uml25.dependency.v2
+    - uml25.elementpackagemergepackageimportsubstitution.v1
+    - uml25.realization.v1
+  example: |
+    uml25.Usage(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Usage
+    is_a:
+    - Dependency
+    - DirectedRelationship
+    - Relationship
+    - PackageableElement
+    - NamedElement
+- id: uml25.collaboration.v1
+  menu_index: 132
+  kind: vertex
+  buildable: true
+  function: Collaboration
+  variant: 1
+  menu_name: Collaboration
+  render:
+    fingerprint: sha1:7036a2b08d4b
+  tag: metaclass
+  status: generated
+  summary: A collaboration (dashed ellipse).
+  discriminator: n/a
+  use_when:
+  - showing a set of roles that cooperate
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml25.Collaboration(n1, "Collaboration1")
+  metamodel:
+    spec: uml-2.5
+    element: Collaboration
+    is_a:
+    - StructuredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - BehavioredClassifier
+- id: uml25.collaborationuse.v1
+  menu_index: 133
+  kind: edge
+  buildable: true
+  function: CollaborationUse
+  variant: 1
+  menu_name: Collaboration Use
+  render:
+    fingerprint: sha1:c16c480cab30
+  tag: metaclass
+  status: generated
+  summary: A collaboration use «occurrence».
+  discriminator: n/a
+  use_when:
+  - applying a collaboration to a specific context
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.collaboration.v1
+    - uml25.dependency.v1
+    - uml25.dependency.v2
+  example: |
+    uml25.CollaborationUse(None, None, "<<occurence>>")
+  metamodel:
+    spec: uml-2.5
+    element: CollaborationUse
+    is_a:
+    - NamedElement
+    endpoints:
+      source: Classifier
+      target: Collaboration
+      source_role: usingClassifier
+      target_role: type
+- id: uml25.extension.v2
+  menu_index: 134
+  kind: edge
+  buildable: true
+  function: Extension
+  variant: 2
+  menu_name: Extension
+  render:
+    fingerprint: sha1:6889a11d5d8d
+  tag: metaclass
+  status: reviewed
+  summary: An extend relationship / extension point.
+  discriminator: «extend»/{required} extension edge between use cases.
+  use_when:
+  - defining an extend relationship or its extension point
+  avoid_when:
+  - if you need extension-point note carrying an extend condition= , use uml25.extension.v1
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml25.extension.v1
+    see_also:
+    - uml25.extend.v1
+    - uml25.extensionpointclassifier.v1
+    - uml25.include.v1
+    - uml25.usecase.v1
+    - uml25.class.v1
+    - uml25.innerclass.v1
+  example: |
+    uml25.Extension(None, None, "{required}", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Extension
+    is_a:
+    - Association
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Stereotype
+      target: Class
+      source_role: ownedEnd
+      target_role: metaclass
+- id: uml25.transition.v1
+  menu_index: 135
+  kind: edge
+  buildable: true
+  function: Transition
+  variant: 1
+  menu_name: Transition
+  render:
+    fingerprint: sha1:a3be035c1630
+  tag: metaclass
+  status: generated
+  summary: A transition with a specification.
+  discriminator: n/a
+  use_when:
+  - showing a transition between states
+  avoid_when: []
+  aliases:
+  - arrow
+  - state transition
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.behavior.v1
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.region.v1
+    - uml25.timeeventtrigger.v1
+    - uml25.trigger.v1
+  example: |
+    uml25.Transition(None, None, "Transition1 spec.")
+  metamodel:
+    spec: uml-2.5
+    element: Transition
+    is_a:
+    - Namespace
+    - NamedElement
+    - RedefinableElement
+- id: uml25.activity.v1
+  menu_index: 136
+  kind: edge
+  buildable: true
+  function: Activity
+  variant: 1
+  menu_name: Activity
+  render:
+    fingerprint: sha1:4a952528b4d3
+  tag: metaclass
+  status: reviewed
+  summary: An activity (rounded frame).
+  discriminator: Rounded activity frame with an {annotation} label.
+  use_when:
+  - framing an activity (control/data flow) diagram
+  avoid_when:
+  - if you need empty rounded activity frame, use uml25.activity.v2
+  - if you need second empty rounded activity frame variant, use uml25.activity.v3
+  - if you need activity edge/relationship form, use uml25.activity.v4
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml25.activity.v2
+    - uml25.activity.v3
+    - uml25.activity.v4
+    - uml25.activity.v5
+    see_also:
+    - uml25.activitypartition.v1
+    - uml25.activitypartition.v2
+    - uml25.structuredactivitynode.v1
+  example: |
+    uml25.Activity(None, None, "{annotation1}")
+  metamodel:
+    spec: uml-2.5
+    element: Activity
+    is_a:
+    - Behavior
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.controlflow.v1
+  menu_index: 137
+  kind: edge
+  buildable: true
+  function: ControlFlow
+  variant: 1
+  menu_name: Control Flow
+  render:
+    fingerprint: sha1:b8782cdaf685
+  tag: metaclass
+  status: generated
+  summary: A control flow edge.
+  discriminator: n/a
+  use_when:
+  - sequencing actions with control tokens
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.objectflow.v1
+  example: |
+    uml25.ControlFlow(None, None, "<<multicast/multireceive>>")
+  metamodel:
+    spec: uml-2.5
+    element: ControlFlow
+    is_a:
+    - ActivityEdge
+    - RedefinableElement
+    - NamedElement
+    endpoints:
+      source: ActivityNode
+      target: ActivityNode
+      source_role: source
+      target_role: target
+- id: uml25.action.v2
+  menu_index: 138
+  kind: vertex
+  buildable: true
+  function: Action
+  variant: 2
+  menu_name: Action
+  render:
+    fingerprint: sha1:f8fd7f8833f5
+  tag: metaclass
+  status: reviewed
+  summary: An action node.
+  discriminator: Rounded action box with default (centered) label.
+  use_when:
+  - representing a single step of behavior in an activity
+  avoid_when:
+  - if you need rounded action box with top-aligned label, use uml25.action.v1
+  aliases:
+  - activity step
+  - task
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.action.v1
+    see_also:
+    - uml25.classifier.v1
+    - uml25.classifier.v2
+    - uml25.classifier.v3
+    - uml25.classifier.v4
+    - uml25.classifier.v5
+    - uml25.classifier.v6
+    - uml25.classifier.v7
+    - uml25.inputpin.v1
+    - uml25.inputpin.v2
+    - uml25.outputpin.v1
+    - uml25.outputpin.v2
+  example: |
+    uml25.Action(n1, "Action1", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Action
+    is_a:
+    - ExecutableNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml25.objectnode.v4
+  menu_index: 139
+  kind: vertex
+  buildable: true
+  function: ObjectNode
+  variant: 4
+  menu_name: Object Node
+  render:
+    fingerprint: sha1:dc5ebea57c20
+  tag: metaclass
+  status: reviewed
+  summary: An object node in an activity.
+  discriminator: Plain rectangular object node, name only.
+  use_when:
+  - showing data/objects flowing between actions
+  avoid_when:
+  - if you need rounded object node carrying [state] list plus an {annotation}, use uml25.objectnode.v2
+  - if you need ribbon/infographic-styled object node, use uml25.objectnode.v3
+  aliases:
+  - data node
+  - pin object
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.objectnode.v2
+    - uml25.objectnode.v3
+    see_also:
+    - uml25.behavior.v1
+    - uml25.state.v1
+    - uml25.state.v2
+    - uml25.state.v3
+    - uml25.state.v4
+    - uml25.state.v5
+    - uml25.state.v6
+    - uml25.state.v7
+    - uml25.statewithentrypoint.v1
+    - uml25.statewithexitpoint.v1
+  example: |
+    uml25.ObjectNode(n1, "ObjectNode1", variant=4)
+  metamodel:
+    spec: uml-2.5
+    element: ObjectNode
+    is_a:
+    - TypedElement
+    - NamedElement
+    - ActivityNode
+    - RedefinableElement
+- id: uml25.activity.v2
+  menu_index: 140
+  kind: vertex
+  buildable: true
+  function: Activity
+  variant: 2
+  menu_name: Activity
+  render:
+    fingerprint: sha1:c08e0bd90767
+  tag: metaclass
+  status: reviewed
+  summary: An activity (rounded frame).
+  discriminator: Empty rounded activity frame (container).
+  use_when:
+  - framing an activity (control/data flow) diagram
+  avoid_when:
+  - if you need rounded activity frame with an {annotation} label, use uml25.activity.v1
+  - if you need second empty rounded activity frame variant, use uml25.activity.v3
+  - if you need activity edge/relationship form, use uml25.activity.v4
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.activity.v1
+    - uml25.activity.v3
+    - uml25.activity.v4
+    - uml25.activity.v5
+    see_also:
+    - uml25.activitypartition.v1
+    - uml25.activitypartition.v2
+    - uml25.structuredactivitynode.v1
+  example: |
+    uml25.Activity(n1, "", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Activity
+    is_a:
+    - Behavior
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.activity.v3
+  menu_index: 141
+  kind: vertex
+  buildable: true
+  function: Activity
+  variant: 3
+  menu_name: Activity
+  render:
+    fingerprint: sha1:c08e0bd90767
+  tag: metaclass
+  status: reviewed
+  summary: An activity (rounded frame).
+  discriminator: Second empty rounded activity frame variant.
+  use_when:
+  - framing an activity (control/data flow) diagram
+  avoid_when:
+  - if you need rounded activity frame with an {annotation} label, use uml25.activity.v1
+  - if you need empty rounded activity frame, use uml25.activity.v2
+  - if you need activity edge/relationship form, use uml25.activity.v4
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.activity.v1
+    - uml25.activity.v2
+    - uml25.activity.v4
+    - uml25.activity.v5
+    see_also:
+    - uml25.activitypartition.v1
+    - uml25.activitypartition.v2
+    - uml25.structuredactivitynode.v1
+  example: |
+    uml25.Activity(n1, "", variant=3)
+  metamodel:
+    spec: uml-2.5
+    element: Activity
+    is_a:
+    - Behavior
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.activity.v4
+  menu_index: 142
+  kind: edge
+  buildable: true
+  function: Activity
+  variant: 4
+  menu_name: Activity
+  render:
+    fingerprint: sha1:1217a266403f
+  tag: metaclass
+  status: reviewed
+  summary: An activity (rounded frame).
+  discriminator: Activity edge/relationship form (variant 4).
+  use_when:
+  - framing an activity (control/data flow) diagram
+  avoid_when:
+  - if you need rounded activity frame with an {annotation} label, use uml25.activity.v1
+  - if you need empty rounded activity frame, use uml25.activity.v2
+  - if you need second empty rounded activity frame variant, use uml25.activity.v3
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: null
+  related:
+    variants:
+    - uml25.activity.v1
+    - uml25.activity.v2
+    - uml25.activity.v3
+    - uml25.activity.v5
+    see_also:
+    - uml25.activitypartition.v1
+    - uml25.activitypartition.v2
+    - uml25.structuredactivitynode.v1
+  example: |
+    uml25.Activity(None, None, variant=4)
+  metamodel:
+    spec: uml-2.5
+    element: Activity
+    is_a:
+    - Behavior
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.activity.v5
+  menu_index: 143
+  kind: edge
+  buildable: true
+  function: Activity
+  variant: 5
+  menu_name: Activity
+  render:
+    fingerprint: sha1:c4f454a9ed2e
+  tag: metaclass
+  status: reviewed
+  summary: An activity (rounded frame).
+  discriminator: Activity edge/relationship form (variant 5).
+  use_when:
+  - framing an activity (control/data flow) diagram
+  avoid_when:
+  - if you need rounded activity frame with an {annotation} label, use uml25.activity.v1
+  - if you need empty rounded activity frame, use uml25.activity.v2
+  - if you need second empty rounded activity frame variant, use uml25.activity.v3
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: null
+  related:
+    variants:
+    - uml25.activity.v1
+    - uml25.activity.v2
+    - uml25.activity.v3
+    - uml25.activity.v4
+    see_also:
+    - uml25.activitypartition.v1
+    - uml25.activitypartition.v2
+    - uml25.structuredactivitynode.v1
+  example: |
+    uml25.Activity(None, None, variant=5)
+  metamodel:
+    spec: uml-2.5
+    element: Activity
+    is_a:
+    - Behavior
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml25.message.v1
+  menu_index: 144
+  kind: edge
+  buildable: true
+  function: Message
+  variant: 1
+  menu_name: Message
+  render:
+    fingerprint: sha1:988f94e6ac69
+  tag: metaclass
+  status: reviewed
+  summary: An interaction message.
+  discriminator: Generic message edge with a label (arrow style set by connection).
+  use_when:
+  - showing a message exchanged between lifelines
+  avoid_when:
+  - if you need message rendered as a rounded node/box, use uml25.message.v2
+  - if you need second message-node variant, use uml25.message.v3
+  aliases:
+  - arrow
+  - call
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml25.message.v2
+    - uml25.message.v3
+    see_also:
+    - uml25.messagecreate.v1
+    - uml25.messagefound.v1
+    - uml25.messagelost.v1
+    - uml25.messagereply.v1
+    - uml25.messagesynchronouscall.v1
+    - uml25.connector.v1
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+  example: |
+    uml25.Message(None, None, "Message1 label")
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+    endpoints:
+      source: MessageEnd
+      target: MessageEnd
+      source_role: sendEvent
+      target_role: receiveEvent
+- id: uml25.messagesynchronouscall.v1
+  menu_index: 145
+  kind: edge
+  buildable: true
+  function: MessageSynchronousCall
+  variant: 1
+  menu_name: Message, synchronous call
+  render:
+    fingerprint: sha1:66020430ba55
+  tag: notation
+  status: generated
+  summary: A synchronous-call message (filled arrow).
+  discriminator: n/a
+  use_when:
+  - showing a synchronous (blocking) call
+  avoid_when: []
+  aliases:
+  - sync call
+  - solid arrow
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.message.v1
+    - uml25.message.v2
+    - uml25.message.v3
+    - uml25.messagecreate.v1
+    - uml25.messagefound.v1
+    - uml25.messagelost.v1
+    - uml25.connector.v1
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+  example: |
+    uml25.MessageSynchronousCall(None, None)
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+    endpoints:
+      source: MessageEnd
+      target: MessageEnd
+      source_role: sendEvent
+      target_role: receiveEvent
+- id: uml25.messagereply.v1
+  menu_index: 146
+  kind: edge
+  buildable: true
+  function: MessageReply
+  variant: 1
+  menu_name: Message, reply
+  render:
+    fingerprint: sha1:a29b5d317cb5
+  tag: notation
+  status: generated
+  summary: A reply message (dashed arrow).
+  discriminator: n/a
+  use_when:
+  - showing a reply to a call
+  avoid_when: []
+  aliases:
+  - return
+  - dashed arrow
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.message.v1
+    - uml25.message.v2
+    - uml25.message.v3
+    - uml25.messagecreate.v1
+    - uml25.messagefound.v1
+    - uml25.messagelost.v1
+    - uml25.connector.v1
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+  example: |
+    uml25.MessageReply(None, None)
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+    endpoints:
+      source: MessageEnd
+      target: MessageEnd
+      source_role: sendEvent
+      target_role: receiveEvent
+- id: uml25.messagecreate.v1
+  menu_index: 147
+  kind: edge
+  buildable: true
+  function: MessageCreate
+  variant: 1
+  menu_name: Message, create
+  render:
+    fingerprint: sha1:c16c480cab30
+  tag: notation
+  status: generated
+  summary: A create message.
+  discriminator: n/a
+  use_when:
+  - showing creation of a participant
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.message.v1
+    - uml25.message.v2
+    - uml25.message.v3
+    - uml25.messagefound.v1
+    - uml25.messagelost.v1
+    - uml25.messagereply.v1
+    - uml25.connector.v1
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+  example: |
+    uml25.MessageCreate(None, None)
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+    endpoints:
+      source: MessageEnd
+      target: MessageEnd
+      source_role: sendEvent
+      target_role: receiveEvent
+- id: uml25.messagelost.v1
+  menu_index: 148
+  kind: vertex
+  buildable: true
+  function: MessageLost
+  variant: 1
+  menu_name: Message lost
+  render:
+    fingerprint: sha1:1beb399ea8da
+  tag: notation
+  status: generated
+  summary: A lost message.
+  discriminator: n/a
+  use_when:
+  - showing a message whose receiver is unknown
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.message.v1
+    - uml25.message.v2
+    - uml25.message.v3
+    - uml25.messagecreate.v1
+    - uml25.messagefound.v1
+    - uml25.messagereply.v1
+    - uml25.connector.v1
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+  example: |
+    uml25.MessageLost(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+- id: uml25.messagefound.v1
+  menu_index: 149
+  kind: vertex
+  buildable: true
+  function: MessageFound
+  variant: 1
+  menu_name: Message found
+  render:
+    fingerprint: sha1:1beb399ea8da
+  tag: notation
+  status: generated
+  summary: A found message.
+  discriminator: n/a
+  use_when:
+  - showing a message whose sender is unknown
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also:
+    - uml25.message.v1
+    - uml25.message.v2
+    - uml25.message.v3
+    - uml25.messagecreate.v1
+    - uml25.messagelost.v1
+    - uml25.messagereply.v1
+    - uml25.connector.v1
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+  example: |
+    uml25.MessageFound(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+- id: uml25.lifeline.v2
+  menu_index: 150
+  kind: diagram
+  buildable: false
+  function: Lifeline
+  variant: 2
+  menu_name: Lifeline
+  render:
+    fingerprint: sha1:aa972c513db9
+  tag: metaclass
+  status: reviewed
+  summary: A lifeline in a sequence diagram.
+  discriminator: Pre-composed lifeline fragment (boxes + connector segments); not a primitive — build
+    from lifeline.v1.
+  use_when:
+  - representing a participant in a sequence diagram
+  avoid_when:
+  - if you need lifeline with timing/state lane cells, use uml25.lifeline.v1
+  aliases:
+  - participant
+  - object lifeline
+  related:
+    variants:
+    - uml25.lifeline.v1
+    see_also:
+    - uml25.lifeline.v1
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+  example: |
+    # composite - do not assemble; use the primitive instead:
+    uml25.Lifeline(n1, "Lifeline1"):
+        uml25.Lane(n1, "")
+        uml25.Lane(c2, "")
+  metamodel:
+    spec: uml-2.5
+    element: Lifeline
+    is_a:
+    - NamedElement
+- id: uml25.message.v2
+  menu_index: 151
+  kind: vertex
+  buildable: true
+  function: Message
+  variant: 2
+  menu_name: Message
+  render:
+    fingerprint: sha1:f8fd7f8833f5
+  tag: metaclass
+  status: reviewed
+  summary: An interaction message.
+  discriminator: Message rendered as a rounded node/box (Message1).
+  use_when:
+  - showing a message exchanged between lifelines
+  avoid_when:
+  - if you need generic message edge with a label, use uml25.message.v1
+  - if you need second message-node variant, use uml25.message.v3
+  aliases:
+  - arrow
+  - call
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.message.v1
+    - uml25.message.v3
+    see_also:
+    - uml25.messagecreate.v1
+    - uml25.messagefound.v1
+    - uml25.messagelost.v1
+    - uml25.messagereply.v1
+    - uml25.messagesynchronouscall.v1
+    - uml25.connector.v1
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+  example: |
+    uml25.Message(n1, "Message1", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+- id: uml25.message.v3
+  menu_index: 152
+  kind: vertex
+  buildable: true
+  function: Message
+  variant: 3
+  menu_name: Message
+  render:
+    fingerprint: sha1:f8fd7f8833f5
+  tag: metaclass
+  status: reviewed
+  summary: An interaction message.
+  discriminator: Second message-node variant.
+  use_when:
+  - showing a message exchanged between lifelines
+  avoid_when:
+  - if you need generic message edge with a label, use uml25.message.v1
+  - if you need message rendered as a rounded node/box, use uml25.message.v2
+  aliases:
+  - arrow
+  - call
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml25.message.v1
+    - uml25.message.v2
+    see_also:
+    - uml25.messagecreate.v1
+    - uml25.messagefound.v1
+    - uml25.messagelost.v1
+    - uml25.messagereply.v1
+    - uml25.messagesynchronouscall.v1
+    - uml25.connector.v1
+    - uml25.interaction.v1
+    - uml25.interaction.v2
+    - uml25.interaction.v3
+  example: |
+    uml25.Message(n1, "Message1", variant=3)
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+- id: uml25.extend.v1
+  menu_index: 153
+  kind: edge
+  buildable: true
+  function: Extend
+  variant: 1
+  menu_name: Extend
+  render:
+    fingerprint: sha1:c16c480cab30
+  tag: metaclass
+  status: generated
+  summary: An «extend» relationship.
+  discriminator: n/a
+  use_when:
+  - showing optional extending behavior between use cases
+  avoid_when: []
+  aliases:
+  - extend arrow
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.extension.v1
+    - uml25.extension.v2
+    - uml25.extensionpointclassifier.v1
+    - uml25.include.v1
+    - uml25.usecase.v1
+  example: |
+    uml25.Extend(None, None, "<<extend>>")
+  metamodel:
+    spec: uml-2.5
+    element: Extend
+    is_a:
+    - NamedElement
+    - DirectedRelationship
+    - Relationship
+    endpoints:
+      source: UseCase
+      target: UseCase
+      source_role: extension
+      target_role: extendedCase
+- id: uml25.include.v1
+  menu_index: 154
+  kind: edge
+  buildable: true
+  function: Include
+  variant: 1
+  menu_name: Include
+  render:
+    fingerprint: sha1:c16c480cab30
+  tag: metaclass
+  status: generated
+  summary: An «include» relationship.
+  discriminator: n/a
+  use_when:
+  - showing mandatory included behavior between use cases
+  avoid_when: []
+  aliases:
+  - include arrow
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.extend.v1
+    - uml25.extension.v1
+    - uml25.extension.v2
+    - uml25.extensionpointclassifier.v1
+    - uml25.usecase.v1
+  example: |
+    uml25.Include(None, None, "<<include>>")
+  metamodel:
+    spec: uml-2.5
+    element: Include
+    is_a:
+    - DirectedRelationship
+    - Relationship
+    - NamedElement
+    endpoints:
+      source: UseCase
+      target: UseCase
+      source_role: includingCase
+      target_role: addition
+- id: uml25.deploy.v1
+  menu_index: 155
+  kind: edge
+  buildable: true
+  function: Deploy
+  variant: 1
+  menu_name: Deploy
+  render:
+    fingerprint: sha1:c16c480cab30
+  tag: notation
+  status: generated
+  summary: A «deploy» dependency.
+  discriminator: n/a
+  use_when:
+  - deploying an artifact onto a node
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also:
+    - uml25.artifact.v1
+    - uml25.deployment.v1
+    - uml25.deploymentspecification.v1
+  example: |
+    uml25.Deploy(None, None, "<<deploy>>")
+  metamodel:
+    spec: uml-2.5
+    element: Deployment
+    is_a:
+    - Dependency
+    - DirectedRelationship
+    - Relationship
+    - PackageableElement
+    - NamedElement
+    endpoints:
+      source: DeploymentTarget
+      target: DeployedArtifact
+      source_role: location
+      target_role: deployedArtifact

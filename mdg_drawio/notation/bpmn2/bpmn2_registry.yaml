@@ -1,0 +1,8792 @@
+# BPMN 2.0 shape registry — agent-facing metadata for the bpmn2 draw.io DSL.
+# Conforms to the library-agnostic shape-registry schema (shape-registry.schema.json).
+# CORE fields library-invariant; METAMODEL block present only where a shape maps to a
+# metamodel element. Judgment fields are status: generated — accept/reject per entry.
+
+library: bpmn2
+version: '2.0'
+provenance:
+  source_file: BPMN_2.0.drawio
+  palette: draw.io BPMN 2.0
+  shape_count: 267
+  pages:
+  - BPMN 2.0  General
+  - BPMN 2.0  Tasks
+  - BPMN 2.0  Choreographies
+  - BPMN 2.0  Events
+  - BPMN 2.0  Gateways
+grammar:
+  spec: ../GRAMMAR.md
+  root: BPMN
+  notes:
+  - Pools and the cross-functional table use TableRowBoxPart/SwimlaneBoxPart rows.
+  - 'Lanes, Group and *Expanded sub-processes contain child nodes (contains: ''*'').'
+row_types:
+- name: TableRowBoxPart
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: Cross-functional table row (actor band); nests SwimlaneBoxPart cells.
+- name: SwimlaneBoxPart
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: Swimlane cell within a pool or table row.
+shapes:
+- id: bpmn2.dataobject.v1
+  menu_index: 1
+  kind: vertex
+  buildable: true
+  function: DataObject
+  variant: 1
+  menu_name: DataObject
+  render:
+    fingerprint: sha1:c2c489c8dc14
+  tag: metaclass
+  status: generated
+  summary: DataObject.
+  discriminator: TODO
+  use_when:
+  - using DataObject
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.dataobject.v2
+    see_also: []
+  example: |
+    bpmn2.DataObject(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: DataObject
+- id: bpmn2.dataobjectcollection.v1
+  menu_index: 2
+  kind: vertex
+  buildable: true
+  function: DataObjectCollection
+  variant: 1
+  menu_name: DataObjectCollection
+  render:
+    fingerprint: sha1:0e9612b1ea77
+  tag: metaclass
+  status: generated
+  summary: DataObjectCollection.
+  discriminator: n/a
+  use_when:
+  - using DataObjectCollection
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.DataObjectCollection(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: DataObjectCollection
+- id: bpmn2.datainput.v1
+  menu_index: 3
+  kind: vertex
+  buildable: true
+  function: DataInput
+  variant: 1
+  menu_name: DataInput
+  render:
+    fingerprint: sha1:ae03184297b8
+  tag: metaclass
+  status: generated
+  summary: DataInput.
+  discriminator: n/a
+  use_when:
+  - using DataInput
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.DataInput(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: DataInput
+- id: bpmn2.datainputcollection.v1
+  menu_index: 4
+  kind: vertex
+  buildable: true
+  function: DataInputCollection
+  variant: 1
+  menu_name: DataInputCollection
+  render:
+    fingerprint: sha1:6f333c67d9f0
+  tag: metaclass
+  status: generated
+  summary: DataInputCollection.
+  discriminator: n/a
+  use_when:
+  - using DataInputCollection
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.DataInputCollection(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: DataInputCollection
+- id: bpmn2.dataoutput.v1
+  menu_index: 5
+  kind: vertex
+  buildable: true
+  function: DataOutput
+  variant: 1
+  menu_name: DataOutput
+  render:
+    fingerprint: sha1:627e1a9eb54b
+  tag: metaclass
+  status: generated
+  summary: DataOutput.
+  discriminator: n/a
+  use_when:
+  - using DataOutput
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.DataOutput(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: DataOutput
+- id: bpmn2.dataoutputcollection.v1
+  menu_index: 6
+  kind: vertex
+  buildable: true
+  function: DataOutputCollection
+  variant: 1
+  menu_name: DataOutputCollection
+  render:
+    fingerprint: sha1:8aef770be30d
+  tag: metaclass
+  status: generated
+  summary: DataOutputCollection.
+  discriminator: n/a
+  use_when:
+  - using DataOutputCollection
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.DataOutputCollection(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: DataOutputCollection
+- id: bpmn2.datastore.v1
+  menu_index: 7
+  kind: vertex
+  buildable: true
+  function: DataStore
+  variant: 1
+  menu_name: DataStore
+  render:
+    fingerprint: sha1:aa5824501914
+  tag: metaclass
+  status: generated
+  summary: DataStore.
+  discriminator: n/a
+  use_when:
+  - using DataStore
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.DataStore(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: DataStore
+- id: bpmn2.dataobject.v2
+  menu_index: 8
+  kind: vertex
+  buildable: true
+  function: DataObject
+  variant: 2
+  menu_name: DataObject
+  render:
+    fingerprint: sha1:64e024853abe
+  tag: notation
+  status: generated
+  summary: DataObject.
+  discriminator: TODO
+  use_when:
+  - using DataObject
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.dataobject.v1
+    see_also: []
+  example: |
+    bpmn2.DataObject(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: DataObject
+- id: bpmn2.textannotation.v1
+  menu_index: 9
+  kind: vertex
+  buildable: true
+  function: TextAnnotation
+  variant: 1
+  menu_name: TextAnnotation
+  render:
+    fingerprint: sha1:256fd03de14c
+  tag: metaclass
+  status: generated
+  summary: TextAnnotation.
+  discriminator: n/a
+  use_when:
+  - using TextAnnotation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TextAnnotation(n1, "Text")
+  metamodel:
+    spec: bpmn-2.0
+    element: TextAnnotation
+- id: bpmn2.horizontallane.v1
+  menu_index: 10
+  kind: vertex
+  buildable: true
+  function: HorizontalLane
+  variant: 1
+  menu_name: HorizontalLane
+  render:
+    fingerprint: sha1:24bc42b52bbf
+  tag: metaclass
+  status: generated
+  summary: HorizontalLane.
+  discriminator: TODO
+  use_when:
+  - using HorizontalLane
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants:
+    - bpmn2.horizontallane.v2
+    - bpmn2.horizontallane.v3
+    see_also: []
+  example: |
+    bpmn2.HorizontalLane(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: HorizontalLane
+- id: bpmn2.verticallane.v1
+  menu_index: 11
+  kind: vertex
+  buildable: true
+  function: VerticalLane
+  variant: 1
+  menu_name: VerticalLane
+  render:
+    fingerprint: sha1:02540adfd3c2
+  tag: metaclass
+  status: generated
+  summary: VerticalLane.
+  discriminator: TODO
+  use_when:
+  - using VerticalLane
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants:
+    - bpmn2.verticallane.v2
+    - bpmn2.verticallane.v3
+    see_also: []
+  example: |
+    bpmn2.VerticalLane(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: VerticalLane
+- id: bpmn2.horizontallane.v2
+  menu_index: 12
+  kind: vertex
+  buildable: true
+  function: HorizontalLane
+  variant: 2
+  menu_name: HorizontalLane
+  render:
+    fingerprint: sha1:1182ac0f7708
+  tag: notation
+  status: generated
+  summary: HorizontalLane.
+  discriminator: TODO
+  use_when:
+  - using HorizontalLane
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants:
+    - bpmn2.horizontallane.v1
+    - bpmn2.horizontallane.v3
+    see_also: []
+  example: |
+    bpmn2.HorizontalLane(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: HorizontalLane
+- id: bpmn2.horizontallane.v3
+  menu_index: 13
+  kind: vertex
+  buildable: true
+  function: HorizontalLane
+  variant: 3
+  menu_name: HorizontalLane
+  render:
+    fingerprint: sha1:e6b045393bd4
+  tag: notation
+  status: generated
+  summary: HorizontalLane.
+  discriminator: TODO
+  use_when:
+  - using HorizontalLane
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants:
+    - bpmn2.horizontallane.v1
+    - bpmn2.horizontallane.v2
+    see_also: []
+  example: |
+    bpmn2.HorizontalLane(n1, "", variant=3)
+  metamodel:
+    spec: bpmn-2.0
+    element: HorizontalLane
+- id: bpmn2.verticallane.v2
+  menu_index: 14
+  kind: vertex
+  buildable: true
+  function: VerticalLane
+  variant: 2
+  menu_name: VerticalLane
+  render:
+    fingerprint: sha1:35610d5241ce
+  tag: notation
+  status: generated
+  summary: VerticalLane.
+  discriminator: TODO
+  use_when:
+  - using VerticalLane
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants:
+    - bpmn2.verticallane.v1
+    - bpmn2.verticallane.v3
+    see_also: []
+  example: |
+    bpmn2.VerticalLane(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: VerticalLane
+- id: bpmn2.verticallane.v3
+  menu_index: 15
+  kind: vertex
+  buildable: true
+  function: VerticalLane
+  variant: 3
+  menu_name: VerticalLane
+  render:
+    fingerprint: sha1:671d82c4d0ab
+  tag: notation
+  status: generated
+  summary: VerticalLane.
+  discriminator: TODO
+  use_when:
+  - using VerticalLane
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants:
+    - bpmn2.verticallane.v1
+    - bpmn2.verticallane.v2
+    see_also: []
+  example: |
+    bpmn2.VerticalLane(n1, "", variant=3)
+  metamodel:
+    spec: bpmn-2.0
+    element: VerticalLane
+- id: bpmn2.conversation.v1
+  menu_index: 16
+  kind: vertex
+  buildable: true
+  function: Conversation
+  variant: 1
+  menu_name: Conversation
+  render:
+    fingerprint: sha1:88d061950343
+  tag: metaclass
+  status: generated
+  summary: Conversation.
+  discriminator: n/a
+  use_when:
+  - using Conversation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Conversation(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Conversation
+- id: bpmn2.subconversation.v1
+  menu_index: 17
+  kind: vertex
+  buildable: true
+  function: SubConversation
+  variant: 1
+  menu_name: SubConversation
+  render:
+    fingerprint: sha1:7d6960552b76
+  tag: metaclass
+  status: generated
+  summary: SubConversation.
+  discriminator: n/a
+  use_when:
+  - using SubConversation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SubConversation(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SubConversation
+- id: bpmn2.callconversation.v1
+  menu_index: 18
+  kind: vertex
+  buildable: true
+  function: CallConversation
+  variant: 1
+  menu_name: CallConversation
+  render:
+    fingerprint: sha1:79fca534fce0
+  tag: metaclass
+  status: generated
+  summary: CallConversation.
+  discriminator: n/a
+  use_when:
+  - using CallConversation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CallConversation(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallConversation
+- id: bpmn2.callsubconversation.v1
+  menu_index: 19
+  kind: vertex
+  buildable: true
+  function: CallSubConversation
+  variant: 1
+  menu_name: CallSubConversation
+  render:
+    fingerprint: sha1:8192cd41d0d5
+  tag: metaclass
+  status: generated
+  summary: CallSubConversation.
+  discriminator: n/a
+  use_when:
+  - using CallSubConversation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CallSubConversation(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallSubConversation
+- id: bpmn2.annotation.v1
+  menu_index: 20
+  kind: vertex
+  buildable: true
+  function: Annotation
+  variant: 1
+  menu_name: Annotation
+  render:
+    fingerprint: sha1:db066098e868
+  tag: metaclass
+  status: generated
+  summary: Annotation.
+  discriminator: n/a
+  use_when:
+  - using Annotation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Annotation(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Annotation
+- id: bpmn2.crossfunctionalflowchart.v1
+  menu_index: 21
+  kind: vertex
+  buildable: true
+  function: CrossFunctionalFlowchart
+  variant: 1
+  menu_name: CrossFunctionalFlowchart
+  render:
+    fingerprint: sha1:4fc45ac893d0
+  tag: metaclass
+  status: generated
+  summary: CrossFunctionalFlowchart.
+  discriminator: n/a
+  use_when:
+  - using CrossFunctionalFlowchart
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - SwimlaneBoxPart
+    - TableRowBoxPart
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CrossFunctionalFlowchart(n1, "Cross-Functional Flowchart"):
+        bpmn2.TableRowBoxPart(c2, "Actor 1"):
+            bpmn2.SwimlaneBoxPart(c3, "Phase 1")
+            bpmn2.SwimlaneBoxPart(c4, "Phase 2")
+            bpmn2.SwimlaneBoxPart(c5, "Phase 3")
+        bpmn2.TableRowBoxPart(c6, "Actor 2"):
+            bpmn2.SwimlaneBoxPart(c7, "")
+            bpmn2.SwimlaneBoxPart(c8, "")
+            bpmn2.SwimlaneBoxPart(c9, "")
+        bpmn2.TableRowBoxPart(c10, "Actor 3"):
+            bpmn2.SwimlaneBoxPart(c11, "")
+            bpmn2.SwimlaneBoxPart(c12, "")
+            bpmn2.SwimlaneBoxPart(c13, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CrossFunctionalFlowchart
+- id: bpmn2.horizontalpool.v1
+  menu_index: 22
+  kind: vertex
+  buildable: true
+  function: HorizontalPool
+  variant: 1
+  menu_name: HorizontalPool
+  render:
+    fingerprint: sha1:d8b6bb9a7d38
+  tag: metaclass
+  status: generated
+  summary: HorizontalPool.
+  discriminator: TODO
+  use_when:
+  - using HorizontalPool
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - SwimlaneBoxPart
+  related:
+    variants:
+    - bpmn2.horizontalpool.v2
+    see_also: []
+  example: |
+    bpmn2.HorizontalPool(n1, "Pool"):
+        bpmn2.SwimlaneBoxPart(c2, "Lane 1")
+        bpmn2.SwimlaneBoxPart(c3, "Lane 2")
+        bpmn2.SwimlaneBoxPart(c4, "Lane 3")
+  metamodel:
+    spec: bpmn-2.0
+    element: HorizontalPool
+- id: bpmn2.horizontalpool.v2
+  menu_index: 23
+  kind: vertex
+  buildable: true
+  function: HorizontalPool
+  variant: 2
+  menu_name: HorizontalPool
+  render:
+    fingerprint: sha1:d97d2c1bcbad
+  tag: notation
+  status: generated
+  summary: HorizontalPool.
+  discriminator: TODO
+  use_when:
+  - using HorizontalPool
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - SwimlaneBoxPart
+  related:
+    variants:
+    - bpmn2.horizontalpool.v1
+    see_also: []
+  example: |
+    bpmn2.HorizontalPool(n1, "Pool", variant=2):
+        bpmn2.SwimlaneBoxPart(c2, "Lane 1")
+        bpmn2.SwimlaneBoxPart(c3, "Lane 2")
+        bpmn2.SwimlaneBoxPart(c4, "Lane 3")
+  metamodel:
+    spec: bpmn-2.0
+    element: HorizontalPool
+- id: bpmn2.horizontalswimlane.v1
+  menu_index: 24
+  kind: vertex
+  buildable: true
+  function: HorizontalSwimlane
+  variant: 1
+  menu_name: HorizontalSwimlane
+  render:
+    fingerprint: sha1:00757a3642aa
+  tag: metaclass
+  status: generated
+  summary: HorizontalSwimlane.
+  discriminator: n/a
+  use_when:
+  - using HorizontalSwimlane
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.HorizontalSwimlane(n1, "Lane")
+  metamodel:
+    spec: bpmn-2.0
+    element: HorizontalSwimlane
+- id: bpmn2.verticalpool.v1
+  menu_index: 25
+  kind: vertex
+  buildable: true
+  function: VerticalPool
+  variant: 1
+  menu_name: VerticalPool
+  render:
+    fingerprint: sha1:e99b897ba93f
+  tag: metaclass
+  status: generated
+  summary: VerticalPool.
+  discriminator: TODO
+  use_when:
+  - using VerticalPool
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - SwimlaneBoxPart
+  related:
+    variants:
+    - bpmn2.verticalpool.v2
+    see_also: []
+  example: |
+    bpmn2.VerticalPool(n1, "Pool"):
+        bpmn2.SwimlaneBoxPart(c2, "Lane 1")
+        bpmn2.SwimlaneBoxPart(c3, "Lane 2")
+        bpmn2.SwimlaneBoxPart(c4, "Lane 3")
+  metamodel:
+    spec: bpmn-2.0
+    element: VerticalPool
+- id: bpmn2.verticalpool.v2
+  menu_index: 26
+  kind: vertex
+  buildable: true
+  function: VerticalPool
+  variant: 2
+  menu_name: VerticalPool
+  render:
+    fingerprint: sha1:f0cdc8911883
+  tag: notation
+  status: generated
+  summary: VerticalPool.
+  discriminator: TODO
+  use_when:
+  - using VerticalPool
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - SwimlaneBoxPart
+  related:
+    variants:
+    - bpmn2.verticalpool.v1
+    see_also: []
+  example: |
+    bpmn2.VerticalPool(n1, "Pool", variant=2):
+        bpmn2.SwimlaneBoxPart(c2, "Lane 1")
+        bpmn2.SwimlaneBoxPart(c3, "Lane 2")
+        bpmn2.SwimlaneBoxPart(c4, "Lane 3")
+  metamodel:
+    spec: bpmn-2.0
+    element: VerticalPool
+- id: bpmn2.verticalswimlane.v1
+  menu_index: 27
+  kind: vertex
+  buildable: true
+  function: VerticalSwimlane
+  variant: 1
+  menu_name: VerticalSwimlane
+  render:
+    fingerprint: sha1:7d7b32b2e3b9
+  tag: metaclass
+  status: generated
+  summary: VerticalSwimlane.
+  discriminator: n/a
+  use_when:
+  - using VerticalSwimlane
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.VerticalSwimlane(n1, "Lane")
+  metamodel:
+    spec: bpmn-2.0
+    element: VerticalSwimlane
+- id: bpmn2.group.v1
+  menu_index: 28
+  kind: vertex
+  buildable: true
+  function: Group
+  variant: 1
+  menu_name: Group
+  render:
+    fingerprint: sha1:f1e0235c0c7c
+  tag: metaclass
+  status: generated
+  summary: Group.
+  discriminator: n/a
+  use_when:
+  - using Group
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Group(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Group
+- id: bpmn2.association.v1
+  menu_index: 29
+  kind: edge
+  buildable: true
+  function: Association
+  variant: 1
+  menu_name: Association
+  render:
+    fingerprint: sha1:ef758a49e6ce
+  tag: notation
+  status: generated
+  summary: Association.
+  discriminator: n/a
+  use_when:
+  - using Association
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Association(None, None)
+  metamodel:
+    spec: bpmn-2.0
+    element: Association
+- id: bpmn2.directionaldirecteddataassociation.v1
+  menu_index: 30
+  kind: edge
+  buildable: true
+  function: DirectionalDirectedDataAssociation
+  variant: 1
+  menu_name: DirectionalDirectedDataAssociation
+  render:
+    fingerprint: sha1:e85e00de9b6e
+  tag: notation
+  status: generated
+  summary: DirectionalDirectedDataAssociation.
+  discriminator: n/a
+  use_when:
+  - using DirectionalDirectedDataAssociation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.DirectionalDirectedDataAssociation(None, None)
+  metamodel:
+    spec: bpmn-2.0
+    element: DirectionalDirectedDataAssociation
+- id: bpmn2.bidirectionalassociation.v1
+  menu_index: 31
+  kind: edge
+  buildable: true
+  function: BiDirectionalAssociation
+  variant: 1
+  menu_name: BiDirectionalAssociation
+  render:
+    fingerprint: sha1:397ac6f8f81f
+  tag: notation
+  status: generated
+  summary: BiDirectionalAssociation.
+  discriminator: n/a
+  use_when:
+  - using BiDirectionalAssociation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.BiDirectionalAssociation(None, None)
+  metamodel:
+    spec: bpmn-2.0
+    element: BiDirectionalAssociation
+- id: bpmn2.dataassociation.v1
+  menu_index: 32
+  kind: edge
+  buildable: true
+  function: DataAssociation
+  variant: 1
+  menu_name: DataAssociation
+  render:
+    fingerprint: sha1:ef758a49e6ce
+  tag: notation
+  status: generated
+  summary: DataAssociation.
+  discriminator: n/a
+  use_when:
+  - using DataAssociation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.DataAssociation(None, None)
+  metamodel:
+    spec: bpmn-2.0
+    element: DataAssociation
+- id: bpmn2.conversationlink.v1
+  menu_index: 33
+  kind: edge
+  buildable: true
+  function: ConversationLink
+  variant: 1
+  menu_name: ConversationLink
+  render:
+    fingerprint: sha1:438d1de58a4e
+  tag: notation
+  status: generated
+  summary: ConversationLink.
+  discriminator: n/a
+  use_when:
+  - using ConversationLink
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConversationLink(None, None)
+  metamodel:
+    spec: bpmn-2.0
+    element: ConversationLink
+- id: bpmn2.sequenceflow.v1
+  menu_index: 34
+  kind: edge
+  buildable: true
+  function: SequenceFlow
+  variant: 1
+  menu_name: SequenceFlow
+  render:
+    fingerprint: sha1:20e2be618b54
+  tag: notation
+  status: generated
+  summary: SequenceFlow.
+  discriminator: n/a
+  use_when:
+  - using SequenceFlow
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SequenceFlow(None, None)
+  metamodel:
+    spec: bpmn-2.0
+    element: SequenceFlow
+- id: bpmn2.conditionalsequenceflow.v1
+  menu_index: 35
+  kind: edge
+  buildable: true
+  function: ConditionalSequenceFlow
+  variant: 1
+  menu_name: ConditionalSequenceFlow
+  render:
+    fingerprint: sha1:01195e257368
+  tag: notation
+  status: generated
+  summary: ConditionalSequenceFlow.
+  discriminator: n/a
+  use_when:
+  - using ConditionalSequenceFlow
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalSequenceFlow(None, None)
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalSequenceFlow
+- id: bpmn2.defaultsequenceflow.v1
+  menu_index: 36
+  kind: edge
+  buildable: true
+  function: DefaultSequenceFlow
+  variant: 1
+  menu_name: DefaultSequenceFlow
+  render:
+    fingerprint: sha1:c15061c43200
+  tag: notation
+  status: generated
+  summary: DefaultSequenceFlow.
+  discriminator: n/a
+  use_when:
+  - using DefaultSequenceFlow
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.DefaultSequenceFlow(None, None)
+  metamodel:
+    spec: bpmn-2.0
+    element: DefaultSequenceFlow
+- id: bpmn2.messageflow.v1
+  menu_index: 37
+  kind: edge
+  buildable: true
+  function: MessageFlow
+  variant: 1
+  menu_name: MessageFlow
+  render:
+    fingerprint: sha1:58744f06dc53
+  tag: notation
+  status: generated
+  summary: MessageFlow.
+  discriminator: n/a
+  use_when:
+  - using MessageFlow
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageFlow(None, None)
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageFlow
+- id: bpmn2.initiatingmessageflowwithdecorator.v1
+  menu_index: 38
+  kind: edge
+  buildable: true
+  function: InitiatingMessageFlowWithDecorator
+  variant: 1
+  menu_name: InitiatingMessageFlowWithDecorator
+  render:
+    fingerprint: sha1:454e57d8286d
+  tag: metaclass
+  status: generated
+  summary: InitiatingMessageFlowWithDecorator.
+  discriminator: n/a
+  use_when:
+  - using InitiatingMessageFlowWithDecorator
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.InitiatingMessageFlowWithDecorator(None, None, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: InitiatingMessageFlowWithDecorator
+- id: bpmn2.noninitiatingmessageflowwithdecorator.v1
+  menu_index: 39
+  kind: edge
+  buildable: true
+  function: NonInitiatingMessageFlowWithDecorator
+  variant: 1
+  menu_name: NonInitiatingMessageFlowWithDecorator
+  render:
+    fingerprint: sha1:454e57d8286d
+  tag: metaclass
+  status: generated
+  summary: NonInitiatingMessageFlowWithDecorator.
+  discriminator: n/a
+  use_when:
+  - using NonInitiatingMessageFlowWithDecorator
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.NonInitiatingMessageFlowWithDecorator(None, None, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: NonInitiatingMessageFlowWithDecorator
+- id: bpmn2.generictask.v1
+  menu_index: 40
+  kind: vertex
+  buildable: true
+  function: GenericTask
+  variant: 1
+  menu_name: GenericTask
+  render:
+    fingerprint: sha1:6c73d09fff98
+  tag: metaclass
+  status: generated
+  summary: GenericTask.
+  discriminator: n/a
+  use_when:
+  - using GenericTask
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.GenericTask(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: GenericTask
+- id: bpmn2.standardloop.v1
+  menu_index: 41
+  kind: vertex
+  buildable: true
+  function: StandardLoop
+  variant: 1
+  menu_name: StandardLoop
+  render:
+    fingerprint: sha1:208bf341208c
+  tag: metaclass
+  status: generated
+  summary: StandardLoop.
+  discriminator: TODO
+  use_when:
+  - using StandardLoop
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.standardloop.v2
+    see_also: []
+  example: |
+    bpmn2.StandardLoop(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: StandardLoop
+- id: bpmn2.standardloop.v2
+  menu_index: 42
+  kind: vertex
+  buildable: true
+  function: StandardLoop
+  variant: 2
+  menu_name: StandardLoop
+  render:
+    fingerprint: sha1:2f0de10e174a
+  tag: notation
+  status: generated
+  summary: StandardLoop.
+  discriminator: TODO
+  use_when:
+  - using StandardLoop
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.standardloop.v1
+    see_also: []
+  example: |
+    bpmn2.StandardLoop(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: StandardLoop
+- id: bpmn2.multiinstanceparallel.v1
+  menu_index: 43
+  kind: vertex
+  buildable: true
+  function: MultiInstanceParallel
+  variant: 1
+  menu_name: MultiInstanceParallel
+  render:
+    fingerprint: sha1:5c70a131300c
+  tag: metaclass
+  status: generated
+  summary: MultiInstanceParallel.
+  discriminator: TODO
+  use_when:
+  - using MultiInstanceParallel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.multiinstanceparallel.v2
+    see_also: []
+  example: |
+    bpmn2.MultiInstanceParallel(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultiInstanceParallel
+- id: bpmn2.multiinstanceparallel.v2
+  menu_index: 44
+  kind: vertex
+  buildable: true
+  function: MultiInstanceParallel
+  variant: 2
+  menu_name: MultiInstanceParallel
+  render:
+    fingerprint: sha1:3992206648de
+  tag: notation
+  status: generated
+  summary: MultiInstanceParallel.
+  discriminator: TODO
+  use_when:
+  - using MultiInstanceParallel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.multiinstanceparallel.v1
+    see_also: []
+  example: |
+    bpmn2.MultiInstanceParallel(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: MultiInstanceParallel
+- id: bpmn2.multiinstancesequential.v1
+  menu_index: 45
+  kind: vertex
+  buildable: true
+  function: MultiInstanceSequential
+  variant: 1
+  menu_name: MultiInstanceSequential
+  render:
+    fingerprint: sha1:6826921d2049
+  tag: metaclass
+  status: generated
+  summary: MultiInstanceSequential.
+  discriminator: TODO
+  use_when:
+  - using MultiInstanceSequential
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.multiinstancesequential.v2
+    see_also: []
+  example: |
+    bpmn2.MultiInstanceSequential(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultiInstanceSequential
+- id: bpmn2.multiinstancesequential.v2
+  menu_index: 46
+  kind: vertex
+  buildable: true
+  function: MultiInstanceSequential
+  variant: 2
+  menu_name: MultiInstanceSequential
+  render:
+    fingerprint: sha1:1938b425d414
+  tag: notation
+  status: generated
+  summary: MultiInstanceSequential.
+  discriminator: TODO
+  use_when:
+  - using MultiInstanceSequential
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.multiinstancesequential.v1
+    see_also: []
+  example: |
+    bpmn2.MultiInstanceSequential(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: MultiInstanceSequential
+- id: bpmn2.compensation.v1
+  menu_index: 47
+  kind: vertex
+  buildable: true
+  function: Compensation
+  variant: 1
+  menu_name: Compensation
+  render:
+    fingerprint: sha1:17c91a7a88e7
+  tag: metaclass
+  status: generated
+  summary: Compensation.
+  discriminator: TODO
+  use_when:
+  - using Compensation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.compensation.v2
+    see_also: []
+  example: |
+    bpmn2.Compensation(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Compensation
+- id: bpmn2.compensation.v2
+  menu_index: 48
+  kind: vertex
+  buildable: true
+  function: Compensation
+  variant: 2
+  menu_name: Compensation
+  render:
+    fingerprint: sha1:db730a847ce2
+  tag: notation
+  status: generated
+  summary: Compensation.
+  discriminator: TODO
+  use_when:
+  - using Compensation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.compensation.v1
+    see_also: []
+  example: |
+    bpmn2.Compensation(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: Compensation
+- id: bpmn2.loopandcompensation.v1
+  menu_index: 49
+  kind: vertex
+  buildable: true
+  function: LoopAndCompensation
+  variant: 1
+  menu_name: LoopAndCompensation
+  render:
+    fingerprint: sha1:2fef48d0f5f3
+  tag: metaclass
+  status: generated
+  summary: LoopAndCompensation.
+  discriminator: TODO
+  use_when:
+  - using LoopAndCompensation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.loopandcompensation.v2
+    see_also: []
+  example: |
+    bpmn2.LoopAndCompensation(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: LoopAndCompensation
+- id: bpmn2.loopandcompensation.v2
+  menu_index: 50
+  kind: vertex
+  buildable: true
+  function: LoopAndCompensation
+  variant: 2
+  menu_name: LoopAndCompensation
+  render:
+    fingerprint: sha1:e9d086c82100
+  tag: notation
+  status: generated
+  summary: LoopAndCompensation.
+  discriminator: TODO
+  use_when:
+  - using LoopAndCompensation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.loopandcompensation.v1
+    see_also: []
+  example: |
+    bpmn2.LoopAndCompensation(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: LoopAndCompensation
+- id: bpmn2.adhoccollapsed.v1
+  menu_index: 51
+  kind: vertex
+  buildable: true
+  function: AdHocCollapsed
+  variant: 1
+  menu_name: AdHocCollapsed
+  render:
+    fingerprint: sha1:8a52b847c17b
+  tag: metaclass
+  status: generated
+  summary: AdHocCollapsed.
+  discriminator: n/a
+  use_when:
+  - using AdHocCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.AdHocCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: AdHocCollapsed
+- id: bpmn2.adhocexpanded.v1
+  menu_index: 52
+  kind: vertex
+  buildable: true
+  function: AdHocExpanded
+  variant: 1
+  menu_name: AdHocExpanded
+  render:
+    fingerprint: sha1:7b94b706305b
+  tag: metaclass
+  status: generated
+  summary: AdHocExpanded.
+  discriminator: n/a
+  use_when:
+  - using AdHocExpanded
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.AdHocExpanded(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: AdHocExpanded
+- id: bpmn2.service.v1
+  menu_index: 53
+  kind: vertex
+  buildable: true
+  function: Service
+  variant: 1
+  menu_name: Service
+  render:
+    fingerprint: sha1:f1cb4571bfc4
+  tag: metaclass
+  status: generated
+  summary: Service.
+  discriminator: n/a
+  use_when:
+  - using Service
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Service(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Service
+- id: bpmn2.send.v1
+  menu_index: 54
+  kind: vertex
+  buildable: true
+  function: Send
+  variant: 1
+  menu_name: Send
+  render:
+    fingerprint: sha1:266b68e1617c
+  tag: metaclass
+  status: generated
+  summary: Send.
+  discriminator: n/a
+  use_when:
+  - using Send
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Send(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Send
+- id: bpmn2.receive.v1
+  menu_index: 55
+  kind: vertex
+  buildable: true
+  function: Receive
+  variant: 1
+  menu_name: Receive
+  render:
+    fingerprint: sha1:efc317efec3f
+  tag: metaclass
+  status: generated
+  summary: Receive.
+  discriminator: n/a
+  use_when:
+  - using Receive
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Receive(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Receive
+- id: bpmn2.user.v1
+  menu_index: 56
+  kind: vertex
+  buildable: true
+  function: User
+  variant: 1
+  menu_name: User
+  render:
+    fingerprint: sha1:301dffc86710
+  tag: metaclass
+  status: generated
+  summary: User.
+  discriminator: n/a
+  use_when:
+  - using User
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.User(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: User
+- id: bpmn2.manual.v1
+  menu_index: 57
+  kind: vertex
+  buildable: true
+  function: Manual
+  variant: 1
+  menu_name: Manual
+  render:
+    fingerprint: sha1:bef2428b7bc3
+  tag: metaclass
+  status: generated
+  summary: Manual.
+  discriminator: n/a
+  use_when:
+  - using Manual
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Manual(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Manual
+- id: bpmn2.businessrule.v1
+  menu_index: 58
+  kind: vertex
+  buildable: true
+  function: BusinessRule
+  variant: 1
+  menu_name: BusinessRule
+  render:
+    fingerprint: sha1:dc6c88d5916c
+  tag: metaclass
+  status: generated
+  summary: BusinessRule.
+  discriminator: n/a
+  use_when:
+  - using BusinessRule
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.BusinessRule(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: BusinessRule
+- id: bpmn2.script.v1
+  menu_index: 59
+  kind: vertex
+  buildable: true
+  function: Script
+  variant: 1
+  menu_name: Script
+  render:
+    fingerprint: sha1:029fe4f7b6f7
+  tag: metaclass
+  status: generated
+  summary: Script.
+  discriminator: n/a
+  use_when:
+  - using Script
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Script(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Script
+- id: bpmn2.subprocesscollapsed.v1
+  menu_index: 60
+  kind: vertex
+  buildable: true
+  function: SubProcessCollapsed
+  variant: 1
+  menu_name: SubProcessCollapsed
+  render:
+    fingerprint: sha1:c771ce143495
+  tag: metaclass
+  status: generated
+  summary: SubProcessCollapsed.
+  discriminator: n/a
+  use_when:
+  - using SubProcessCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SubProcessCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SubProcessCollapsed
+- id: bpmn2.transactioncollapsed.v1
+  menu_index: 61
+  kind: vertex
+  buildable: true
+  function: TransactionCollapsed
+  variant: 1
+  menu_name: TransactionCollapsed
+  render:
+    fingerprint: sha1:f6fe5cf7d51a
+  tag: metaclass
+  status: generated
+  summary: TransactionCollapsed.
+  discriminator: n/a
+  use_when:
+  - using TransactionCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TransactionCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TransactionCollapsed
+- id: bpmn2.transactionexpanded.v1
+  menu_index: 62
+  kind: vertex
+  buildable: true
+  function: TransactionExpanded
+  variant: 1
+  menu_name: TransactionExpanded
+  render:
+    fingerprint: sha1:829239daae8d
+  tag: metaclass
+  status: generated
+  summary: TransactionExpanded.
+  discriminator: n/a
+  use_when:
+  - using TransactionExpanded
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TransactionExpanded(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TransactionExpanded
+- id: bpmn2.messageeventsubprocessnoninterruptingcollapsed.v1
+  menu_index: 63
+  kind: vertex
+  buildable: true
+  function: MessageEventSubProcessNonInterruptingCollapsed
+  variant: 1
+  menu_name: MessageEventSubProcessNonInterruptingCollapsed
+  render:
+    fingerprint: sha1:832bacfa5df6
+  tag: metaclass
+  status: generated
+  summary: MessageEventSubProcessNonInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using MessageEventSubProcessNonInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageEventSubProcessNonInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageEventSubProcessNonInterruptingCollapsed
+- id: bpmn2.messageeventsubprocessinterruptingcollapsed.v1
+  menu_index: 64
+  kind: vertex
+  buildable: true
+  function: MessageEventSubProcessInterruptingCollapsed
+  variant: 1
+  menu_name: MessageEventSubProcessInterruptingCollapsed
+  render:
+    fingerprint: sha1:bf296cf3de67
+  tag: metaclass
+  status: generated
+  summary: MessageEventSubProcessInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using MessageEventSubProcessInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageEventSubProcessInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageEventSubProcessInterruptingCollapsed
+- id: bpmn2.timereventsubprocessnoninterruptingcollapsed.v1
+  menu_index: 65
+  kind: vertex
+  buildable: true
+  function: TimerEventSubProcessNonInterruptingCollapsed
+  variant: 1
+  menu_name: TimerEventSubProcessNonInterruptingCollapsed
+  render:
+    fingerprint: sha1:6e3088aef96e
+  tag: metaclass
+  status: generated
+  summary: TimerEventSubProcessNonInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using TimerEventSubProcessNonInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TimerEventSubProcessNonInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TimerEventSubProcessNonInterruptingCollapsed
+- id: bpmn2.timereventsubprocessinterruptingcollapsed.v1
+  menu_index: 66
+  kind: vertex
+  buildable: true
+  function: TimerEventSubProcessInterruptingCollapsed
+  variant: 1
+  menu_name: TimerEventSubProcessInterruptingCollapsed
+  render:
+    fingerprint: sha1:3fec7cfee943
+  tag: metaclass
+  status: generated
+  summary: TimerEventSubProcessInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using TimerEventSubProcessInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TimerEventSubProcessInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TimerEventSubProcessInterruptingCollapsed
+- id: bpmn2.conditionaleventsubprocessnoninterruptingcollapsed.v1
+  menu_index: 67
+  kind: vertex
+  buildable: true
+  function: ConditionalEventSubProcessNonInterruptingCollapsed
+  variant: 1
+  menu_name: ConditionalEventSubProcessNonInterruptingCollapsed
+  render:
+    fingerprint: sha1:82069b595854
+  tag: metaclass
+  status: generated
+  summary: ConditionalEventSubProcessNonInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using ConditionalEventSubProcessNonInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalEventSubProcessNonInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalEventSubProcessNonInterruptingCollapsed
+- id: bpmn2.conditionaleventsubprocessinterruptingcollapsed.v1
+  menu_index: 68
+  kind: vertex
+  buildable: true
+  function: ConditionalEventSubProcessInterruptingCollapsed
+  variant: 1
+  menu_name: ConditionalEventSubProcessInterruptingCollapsed
+  render:
+    fingerprint: sha1:e120ef5ac12c
+  tag: metaclass
+  status: generated
+  summary: ConditionalEventSubProcessInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using ConditionalEventSubProcessInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalEventSubProcessInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalEventSubProcessInterruptingCollapsed
+- id: bpmn2.signaleventsubprocessnoninterruptingcollapsed.v1
+  menu_index: 69
+  kind: vertex
+  buildable: true
+  function: SignalEventSubProcessNonInterruptingCollapsed
+  variant: 1
+  menu_name: SignalEventSubProcessNonInterruptingCollapsed
+  render:
+    fingerprint: sha1:62d0c2ebc687
+  tag: metaclass
+  status: generated
+  summary: SignalEventSubProcessNonInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using SignalEventSubProcessNonInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalEventSubProcessNonInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalEventSubProcessNonInterruptingCollapsed
+- id: bpmn2.signaleventsubprocessinterruptingcollapsed.v1
+  menu_index: 70
+  kind: vertex
+  buildable: true
+  function: SignalEventSubProcessInterruptingCollapsed
+  variant: 1
+  menu_name: SignalEventSubProcessInterruptingCollapsed
+  render:
+    fingerprint: sha1:c1121cebeb07
+  tag: metaclass
+  status: generated
+  summary: SignalEventSubProcessInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using SignalEventSubProcessInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalEventSubProcessInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalEventSubProcessInterruptingCollapsed
+- id: bpmn2.multipleeventsubprocessnoninterruptingcollapsed.v1
+  menu_index: 71
+  kind: vertex
+  buildable: true
+  function: MultipleEventSubProcessNonInterruptingCollapsed
+  variant: 1
+  menu_name: MultipleEventSubProcessNonInterruptingCollapsed
+  render:
+    fingerprint: sha1:826142575910
+  tag: metaclass
+  status: generated
+  summary: MultipleEventSubProcessNonInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using MultipleEventSubProcessNonInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleEventSubProcessNonInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleEventSubProcessNonInterruptingCollapsed
+- id: bpmn2.multipleeventsubprocessinterruptingcollapsed.v1
+  menu_index: 72
+  kind: vertex
+  buildable: true
+  function: MultipleEventSubProcessInterruptingCollapsed
+  variant: 1
+  menu_name: MultipleEventSubProcessInterruptingCollapsed
+  render:
+    fingerprint: sha1:9f0e9b1928bc
+  tag: metaclass
+  status: generated
+  summary: MultipleEventSubProcessInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using MultipleEventSubProcessInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleEventSubProcessInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleEventSubProcessInterruptingCollapsed
+- id: bpmn2.parallelmultipleeventsubprocessnoninterruptingcollapsed.v1
+  menu_index: 73
+  kind: vertex
+  buildable: true
+  function: ParallelMultipleEventSubProcessNonInterruptingCollapsed
+  variant: 1
+  menu_name: ParallelMultipleEventSubProcessNonInterruptingCollapsed
+  render:
+    fingerprint: sha1:05b53ca06289
+  tag: metaclass
+  status: generated
+  summary: ParallelMultipleEventSubProcessNonInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultipleEventSubProcessNonInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultipleEventSubProcessNonInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultipleEventSubProcessNonInterruptingCollapsed
+- id: bpmn2.parallelmultipleeventsubprocessinterruptingcollapsed.v1
+  menu_index: 74
+  kind: vertex
+  buildable: true
+  function: ParallelMultipleEventSubProcessInterruptingCollapsed
+  variant: 1
+  menu_name: ParallelMultipleEventSubProcessInterruptingCollapsed
+  render:
+    fingerprint: sha1:2dcb70fe181c
+  tag: metaclass
+  status: generated
+  summary: ParallelMultipleEventSubProcessInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultipleEventSubProcessInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultipleEventSubProcessInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultipleEventSubProcessInterruptingCollapsed
+- id: bpmn2.escalationeventsubprocessnoninterruptingcollapsed.v1
+  menu_index: 75
+  kind: vertex
+  buildable: true
+  function: EscalationEventSubProcessNonInterruptingCollapsed
+  variant: 1
+  menu_name: EscalationEventSubProcessNonInterruptingCollapsed
+  render:
+    fingerprint: sha1:526991cbaddf
+  tag: metaclass
+  status: generated
+  summary: EscalationEventSubProcessNonInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using EscalationEventSubProcessNonInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EscalationEventSubProcessNonInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationEventSubProcessNonInterruptingCollapsed
+- id: bpmn2.escalationeventsubprocessinterruptingcollapsed.v1
+  menu_index: 76
+  kind: vertex
+  buildable: true
+  function: EscalationEventSubProcessInterruptingCollapsed
+  variant: 1
+  menu_name: EscalationEventSubProcessInterruptingCollapsed
+  render:
+    fingerprint: sha1:6acb5a7ffb0c
+  tag: metaclass
+  status: generated
+  summary: EscalationEventSubProcessInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using EscalationEventSubProcessInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EscalationEventSubProcessInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationEventSubProcessInterruptingCollapsed
+- id: bpmn2.erroreventsubprocessinterruptingcollapsed.v1
+  menu_index: 77
+  kind: vertex
+  buildable: true
+  function: ErrorEventSubProcessInterruptingCollapsed
+  variant: 1
+  menu_name: ErrorEventSubProcessInterruptingCollapsed
+  render:
+    fingerprint: sha1:f909dfd64039
+  tag: metaclass
+  status: generated
+  summary: ErrorEventSubProcessInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using ErrorEventSubProcessInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ErrorEventSubProcessInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ErrorEventSubProcessInterruptingCollapsed
+- id: bpmn2.compensationeventsubprocessinterruptingcollapsed.v1
+  menu_index: 78
+  kind: vertex
+  buildable: true
+  function: CompensationEventSubProcessInterruptingCollapsed
+  variant: 1
+  menu_name: CompensationEventSubProcessInterruptingCollapsed
+  render:
+    fingerprint: sha1:fd42865c7702
+  tag: metaclass
+  status: generated
+  summary: CompensationEventSubProcessInterruptingCollapsed.
+  discriminator: n/a
+  use_when:
+  - using CompensationEventSubProcessInterruptingCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CompensationEventSubProcessInterruptingCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CompensationEventSubProcessInterruptingCollapsed
+- id: bpmn2.eventsubprocessexpanded.v1
+  menu_index: 79
+  kind: vertex
+  buildable: true
+  function: EventSubProcessExpanded
+  variant: 1
+  menu_name: EventSubProcessExpanded
+  render:
+    fingerprint: sha1:51a26518e57b
+  tag: metaclass
+  status: generated
+  summary: EventSubProcessExpanded.
+  discriminator: n/a
+  use_when:
+  - using EventSubProcessExpanded
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EventSubProcessExpanded(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EventSubProcessExpanded
+- id: bpmn2.callactivity.v1
+  menu_index: 80
+  kind: vertex
+  buildable: true
+  function: CallActivity
+  variant: 1
+  menu_name: CallActivity
+  render:
+    fingerprint: sha1:e3d1cb638f5b
+  tag: metaclass
+  status: generated
+  summary: CallActivity.
+  discriminator: n/a
+  use_when:
+  - using CallActivity
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CallActivity(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallActivity
+- id: bpmn2.usercallactivity.v1
+  menu_index: 81
+  kind: vertex
+  buildable: true
+  function: UserCallActivity
+  variant: 1
+  menu_name: UserCallActivity
+  render:
+    fingerprint: sha1:4a883ee4c9ee
+  tag: metaclass
+  status: generated
+  summary: UserCallActivity.
+  discriminator: n/a
+  use_when:
+  - using UserCallActivity
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.UserCallActivity(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: UserCallActivity
+- id: bpmn2.manualcallactivity.v1
+  menu_index: 82
+  kind: vertex
+  buildable: true
+  function: ManualCallActivity
+  variant: 1
+  menu_name: ManualCallActivity
+  render:
+    fingerprint: sha1:0f2ce8f40d9e
+  tag: metaclass
+  status: generated
+  summary: ManualCallActivity.
+  discriminator: n/a
+  use_when:
+  - using ManualCallActivity
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ManualCallActivity(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ManualCallActivity
+- id: bpmn2.businessrulecallactivity.v1
+  menu_index: 83
+  kind: vertex
+  buildable: true
+  function: BusinessRuleCallActivity
+  variant: 1
+  menu_name: BusinessRuleCallActivity
+  render:
+    fingerprint: sha1:054fe47f8bc9
+  tag: metaclass
+  status: generated
+  summary: BusinessRuleCallActivity.
+  discriminator: n/a
+  use_when:
+  - using BusinessRuleCallActivity
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.BusinessRuleCallActivity(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: BusinessRuleCallActivity
+- id: bpmn2.scriptcallactivity.v1
+  menu_index: 84
+  kind: vertex
+  buildable: true
+  function: ScriptCallActivity
+  variant: 1
+  menu_name: ScriptCallActivity
+  render:
+    fingerprint: sha1:97d83375458d
+  tag: metaclass
+  status: generated
+  summary: ScriptCallActivity.
+  discriminator: n/a
+  use_when:
+  - using ScriptCallActivity
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ScriptCallActivity(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ScriptCallActivity
+- id: bpmn2.callactivitycollapsed.v1
+  menu_index: 85
+  kind: vertex
+  buildable: true
+  function: CallActivityCollapsed
+  variant: 1
+  menu_name: CallActivityCollapsed
+  render:
+    fingerprint: sha1:443106352ad8
+  tag: metaclass
+  status: generated
+  summary: CallActivityCollapsed.
+  discriminator: n/a
+  use_when:
+  - using CallActivityCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CallActivityCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallActivityCollapsed
+- id: bpmn2.callactivityexpanded.v1
+  menu_index: 86
+  kind: vertex
+  buildable: true
+  function: CallActivityExpanded
+  variant: 1
+  menu_name: CallActivityExpanded
+  render:
+    fingerprint: sha1:f53a204b63a9
+  tag: metaclass
+  status: generated
+  summary: CallActivityExpanded.
+  discriminator: n/a
+  use_when:
+  - using CallActivityExpanded
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CallActivityExpanded(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallActivityExpanded
+- id: bpmn2.choreographytask.v1
+  menu_index: 87
+  kind: vertex
+  buildable: true
+  function: ChoreographyTask
+  variant: 1
+  menu_name: ChoreographyTask
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: metaclass
+  status: generated
+  summary: ChoreographyTask.
+  discriminator: TODO
+  use_when:
+  - using ChoreographyTask
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.choreographytask.v2
+    see_also: []
+  example: |
+    bpmn2.ChoreographyTask(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ChoreographyTask
+- id: bpmn2.choreographytaskloop.v1
+  menu_index: 88
+  kind: vertex
+  buildable: true
+  function: ChoreographyTaskLoop
+  variant: 1
+  menu_name: ChoreographyTaskLoop
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: metaclass
+  status: generated
+  summary: ChoreographyTaskLoop.
+  discriminator: TODO
+  use_when:
+  - using ChoreographyTaskLoop
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.choreographytaskloop.v2
+    see_also: []
+  example: |
+    bpmn2.ChoreographyTaskLoop(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ChoreographyTaskLoop
+- id: bpmn2.choreographytasksequentialmultiinstance.v1
+  menu_index: 89
+  kind: vertex
+  buildable: true
+  function: ChoreographyTaskSequentialMultiInstance
+  variant: 1
+  menu_name: ChoreographyTaskSequentialMultiInstance
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: metaclass
+  status: generated
+  summary: ChoreographyTaskSequentialMultiInstance.
+  discriminator: TODO
+  use_when:
+  - using ChoreographyTaskSequentialMultiInstance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.choreographytasksequentialmultiinstance.v2
+    see_also: []
+  example: |
+    bpmn2.ChoreographyTaskSequentialMultiInstance(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ChoreographyTaskSequentialMultiInstance
+- id: bpmn2.choreographytaskparallelmultiinstance.v1
+  menu_index: 90
+  kind: vertex
+  buildable: true
+  function: ChoreographyTaskParallelMultiInstance
+  variant: 1
+  menu_name: ChoreographyTaskParallelMultiInstance
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: metaclass
+  status: generated
+  summary: ChoreographyTaskParallelMultiInstance.
+  discriminator: TODO
+  use_when:
+  - using ChoreographyTaskParallelMultiInstance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.choreographytaskparallelmultiinstance.v2
+    see_also: []
+  example: |
+    bpmn2.ChoreographyTaskParallelMultiInstance(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ChoreographyTaskParallelMultiInstance
+- id: bpmn2.subchoreographycollapsed.v1
+  menu_index: 91
+  kind: vertex
+  buildable: true
+  function: SubChoreographyCollapsed
+  variant: 1
+  menu_name: SubChoreographyCollapsed
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: metaclass
+  status: generated
+  summary: SubChoreographyCollapsed.
+  discriminator: TODO
+  use_when:
+  - using SubChoreographyCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.subchoreographycollapsed.v2
+    see_also: []
+  example: |
+    bpmn2.SubChoreographyCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SubChoreographyCollapsed
+- id: bpmn2.subchoreographyloopcollapsed.v1
+  menu_index: 92
+  kind: vertex
+  buildable: true
+  function: SubChoreographyLoopCollapsed
+  variant: 1
+  menu_name: SubChoreographyLoopCollapsed
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: metaclass
+  status: generated
+  summary: SubChoreographyLoopCollapsed.
+  discriminator: TODO
+  use_when:
+  - using SubChoreographyLoopCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.subchoreographyloopcollapsed.v2
+    see_also: []
+  example: |
+    bpmn2.SubChoreographyLoopCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SubChoreographyLoopCollapsed
+- id: bpmn2.subchoreographysequentialmultiinstancecollapsed.v1
+  menu_index: 93
+  kind: vertex
+  buildable: true
+  function: SubChoreographySequentialMultiInstanceCollapsed
+  variant: 1
+  menu_name: SubChoreographySequentialMultiInstanceCollapsed
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: metaclass
+  status: generated
+  summary: SubChoreographySequentialMultiInstanceCollapsed.
+  discriminator: TODO
+  use_when:
+  - using SubChoreographySequentialMultiInstanceCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.subchoreographysequentialmultiinstancecollapsed.v2
+    see_also: []
+  example: |
+    bpmn2.SubChoreographySequentialMultiInstanceCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SubChoreographySequentialMultiInstanceCollapsed
+- id: bpmn2.subchoreographyparallelmultiinstancecollapsed.v1
+  menu_index: 94
+  kind: vertex
+  buildable: true
+  function: SubChoreographyParallelMultiInstanceCollapsed
+  variant: 1
+  menu_name: SubChoreographyParallelMultiInstanceCollapsed
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: metaclass
+  status: generated
+  summary: SubChoreographyParallelMultiInstanceCollapsed.
+  discriminator: TODO
+  use_when:
+  - using SubChoreographyParallelMultiInstanceCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.subchoreographyparallelmultiinstancecollapsed.v2
+    see_also: []
+  example: |
+    bpmn2.SubChoreographyParallelMultiInstanceCollapsed(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SubChoreographyParallelMultiInstanceCollapsed
+- id: bpmn2.subchoreographyexpanded.v1
+  menu_index: 95
+  kind: vertex
+  buildable: true
+  function: SubChoreographyExpanded
+  variant: 1
+  menu_name: SubChoreographyExpanded
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: metaclass
+  status: generated
+  summary: SubChoreographyExpanded.
+  discriminator: TODO
+  use_when:
+  - using SubChoreographyExpanded
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants:
+    - bpmn2.subchoreographyexpanded.v2
+    see_also: []
+  example: |
+    bpmn2.SubChoreographyExpanded(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SubChoreographyExpanded
+- id: bpmn2.bzzzzt.v1
+  menu_index: 96
+  kind: vertex
+  buildable: true
+  function: Bzzzzt
+  variant: 1
+  menu_name: Bzzzzt
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: metaclass
+  status: generated
+  summary: Bzzzzt.
+  discriminator: n/a
+  use_when:
+  - using Bzzzzt
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Bzzzzt(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Bzzzzt
+- id: bpmn2.callchoreographycallingglobal.v1
+  menu_index: 97
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingGlobal
+  variant: 1
+  menu_name: CallChoreographyCallingGlobal
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: metaclass
+  status: generated
+  summary: CallChoreographyCallingGlobal.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingGlobal
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingglobal.v2
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingGlobal(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingGlobal
+- id: bpmn2.callchoreographycallinggloballoop.v1
+  menu_index: 98
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingGlobalLoop
+  variant: 1
+  menu_name: CallChoreographyCallingGlobalLoop
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: metaclass
+  status: generated
+  summary: CallChoreographyCallingGlobalLoop.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingGlobalLoop
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallinggloballoop.v2
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingGlobalLoop(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingGlobalLoop
+- id: bpmn2.callchoreographycallingglobalsequentialmultiinstance.v1
+  menu_index: 99
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingGlobalSequentialMultiInstance
+  variant: 1
+  menu_name: CallChoreographyCallingGlobalSequentialMultiInstance
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: metaclass
+  status: generated
+  summary: CallChoreographyCallingGlobalSequentialMultiInstance.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingGlobalSequentialMultiInstance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingglobalsequentialmultiinstance.v2
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingGlobalSequentialMultiInstance(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingGlobalSequentialMultiInstance
+- id: bpmn2.callchoreographycallingglobalparallelmultiinstance.v1
+  menu_index: 100
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingGlobalParallelMultiInstance
+  variant: 1
+  menu_name: CallChoreographyCallingGlobalParallelMultiInstance
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: metaclass
+  status: generated
+  summary: CallChoreographyCallingGlobalParallelMultiInstance.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingGlobalParallelMultiInstance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingglobalparallelmultiinstance.v2
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingGlobalParallelMultiInstance(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingGlobalParallelMultiInstance
+- id: bpmn2.callchoreographycallingachoreography.v1
+  menu_index: 101
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingAChoreography
+  variant: 1
+  menu_name: CallChoreographyCallingAChoreography
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: metaclass
+  status: generated
+  summary: CallChoreographyCallingAChoreography.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingAChoreography
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingachoreography.v2
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingAChoreography(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingAChoreography
+- id: bpmn2.callchoreographycallingachoreographyloop.v1
+  menu_index: 102
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingAChoreographyLoop
+  variant: 1
+  menu_name: CallChoreographyCallingAChoreographyLoop
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: metaclass
+  status: generated
+  summary: CallChoreographyCallingAChoreographyLoop.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingAChoreographyLoop
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingachoreographyloop.v2
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingAChoreographyLoop(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingAChoreographyLoop
+- id: bpmn2.callchoreographycallingachoreographysequentialmultiinstance.v1
+  menu_index: 103
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingAChoreographySequentialMultiInstance
+  variant: 1
+  menu_name: CallChoreographyCallingAChoreographySequentialMultiInstance
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: metaclass
+  status: generated
+  summary: CallChoreographyCallingAChoreographySequentialMultiInstance.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingAChoreographySequentialMultiInstance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingachoreographysequentialmultiinstance.v2
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingAChoreographySequentialMultiInstance(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingAChoreographySequentialMultiInstance
+- id: bpmn2.callchoreographycallingachoreographyparallelmultiinstance.v1
+  menu_index: 104
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingAChoreographyParallelMultiInstance
+  variant: 1
+  menu_name: CallChoreographyCallingAChoreographyParallelMultiInstance
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: metaclass
+  status: generated
+  summary: CallChoreographyCallingAChoreographyParallelMultiInstance.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingAChoreographyParallelMultiInstance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingachoreographyparallelmultiinstance.v2
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingAChoreographyParallelMultiInstance(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingAChoreographyParallelMultiInstance
+- id: bpmn2.choreographytask.v2
+  menu_index: 105
+  kind: vertex
+  buildable: true
+  function: ChoreographyTask
+  variant: 2
+  menu_name: ChoreographyTask
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: notation
+  status: generated
+  summary: ChoreographyTask.
+  discriminator: TODO
+  use_when:
+  - using ChoreographyTask
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.choreographytask.v1
+    see_also: []
+  example: |
+    bpmn2.ChoreographyTask(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: ChoreographyTask
+- id: bpmn2.choreographytaskloop.v2
+  menu_index: 106
+  kind: vertex
+  buildable: true
+  function: ChoreographyTaskLoop
+  variant: 2
+  menu_name: ChoreographyTaskLoop
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: notation
+  status: generated
+  summary: ChoreographyTaskLoop.
+  discriminator: TODO
+  use_when:
+  - using ChoreographyTaskLoop
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.choreographytaskloop.v1
+    see_also: []
+  example: |
+    bpmn2.ChoreographyTaskLoop(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: ChoreographyTaskLoop
+- id: bpmn2.choreographytasksequentialmultiinstance.v2
+  menu_index: 107
+  kind: vertex
+  buildable: true
+  function: ChoreographyTaskSequentialMultiInstance
+  variant: 2
+  menu_name: ChoreographyTaskSequentialMultiInstance
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: notation
+  status: generated
+  summary: ChoreographyTaskSequentialMultiInstance.
+  discriminator: TODO
+  use_when:
+  - using ChoreographyTaskSequentialMultiInstance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.choreographytasksequentialmultiinstance.v1
+    see_also: []
+  example: |
+    bpmn2.ChoreographyTaskSequentialMultiInstance(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: ChoreographyTaskSequentialMultiInstance
+- id: bpmn2.choreographytaskparallelmultiinstance.v2
+  menu_index: 108
+  kind: vertex
+  buildable: true
+  function: ChoreographyTaskParallelMultiInstance
+  variant: 2
+  menu_name: ChoreographyTaskParallelMultiInstance
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: notation
+  status: generated
+  summary: ChoreographyTaskParallelMultiInstance.
+  discriminator: TODO
+  use_when:
+  - using ChoreographyTaskParallelMultiInstance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.choreographytaskparallelmultiinstance.v1
+    see_also: []
+  example: |
+    bpmn2.ChoreographyTaskParallelMultiInstance(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: ChoreographyTaskParallelMultiInstance
+- id: bpmn2.subchoreographycollapsed.v2
+  menu_index: 109
+  kind: vertex
+  buildable: true
+  function: SubChoreographyCollapsed
+  variant: 2
+  menu_name: SubChoreographyCollapsed
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: notation
+  status: generated
+  summary: SubChoreographyCollapsed.
+  discriminator: TODO
+  use_when:
+  - using SubChoreographyCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.subchoreographycollapsed.v1
+    see_also: []
+  example: |
+    bpmn2.SubChoreographyCollapsed(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: SubChoreographyCollapsed
+- id: bpmn2.subchoreographyloopcollapsed.v2
+  menu_index: 110
+  kind: vertex
+  buildable: true
+  function: SubChoreographyLoopCollapsed
+  variant: 2
+  menu_name: SubChoreographyLoopCollapsed
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: notation
+  status: generated
+  summary: SubChoreographyLoopCollapsed.
+  discriminator: TODO
+  use_when:
+  - using SubChoreographyLoopCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.subchoreographyloopcollapsed.v1
+    see_also: []
+  example: |
+    bpmn2.SubChoreographyLoopCollapsed(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: SubChoreographyLoopCollapsed
+- id: bpmn2.subchoreographysequentialmultiinstancecollapsed.v2
+  menu_index: 111
+  kind: vertex
+  buildable: true
+  function: SubChoreographySequentialMultiInstanceCollapsed
+  variant: 2
+  menu_name: SubChoreographySequentialMultiInstanceCollapsed
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: notation
+  status: generated
+  summary: SubChoreographySequentialMultiInstanceCollapsed.
+  discriminator: TODO
+  use_when:
+  - using SubChoreographySequentialMultiInstanceCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.subchoreographysequentialmultiinstancecollapsed.v1
+    see_also: []
+  example: |
+    bpmn2.SubChoreographySequentialMultiInstanceCollapsed(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: SubChoreographySequentialMultiInstanceCollapsed
+- id: bpmn2.subchoreographyparallelmultiinstancecollapsed.v2
+  menu_index: 112
+  kind: vertex
+  buildable: true
+  function: SubChoreographyParallelMultiInstanceCollapsed
+  variant: 2
+  menu_name: SubChoreographyParallelMultiInstanceCollapsed
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: notation
+  status: generated
+  summary: SubChoreographyParallelMultiInstanceCollapsed.
+  discriminator: TODO
+  use_when:
+  - using SubChoreographyParallelMultiInstanceCollapsed
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.subchoreographyparallelmultiinstancecollapsed.v1
+    see_also: []
+  example: |
+    bpmn2.SubChoreographyParallelMultiInstanceCollapsed(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: SubChoreographyParallelMultiInstanceCollapsed
+- id: bpmn2.subchoreographyexpanded.v2
+  menu_index: 113
+  kind: vertex
+  buildable: true
+  function: SubChoreographyExpanded
+  variant: 2
+  menu_name: SubChoreographyExpanded
+  render:
+    fingerprint: sha1:537977c594e4
+  tag: notation
+  status: generated
+  summary: SubChoreographyExpanded.
+  discriminator: TODO
+  use_when:
+  - using SubChoreographyExpanded
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants:
+    - bpmn2.subchoreographyexpanded.v1
+    see_also: []
+  example: |
+    bpmn2.SubChoreographyExpanded(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: SubChoreographyExpanded
+- id: bpmn2.callchoreographycallingglobal.v2
+  menu_index: 114
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingGlobal
+  variant: 2
+  menu_name: CallChoreographyCallingGlobal
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: notation
+  status: generated
+  summary: CallChoreographyCallingGlobal.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingGlobal
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingglobal.v1
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingGlobal(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingGlobal
+- id: bpmn2.callchoreographycallinggloballoop.v2
+  menu_index: 115
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingGlobalLoop
+  variant: 2
+  menu_name: CallChoreographyCallingGlobalLoop
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: notation
+  status: generated
+  summary: CallChoreographyCallingGlobalLoop.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingGlobalLoop
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallinggloballoop.v1
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingGlobalLoop(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingGlobalLoop
+- id: bpmn2.callchoreographycallingglobalsequentialmultiinstance.v2
+  menu_index: 116
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingGlobalSequentialMultiInstance
+  variant: 2
+  menu_name: CallChoreographyCallingGlobalSequentialMultiInstance
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: notation
+  status: generated
+  summary: CallChoreographyCallingGlobalSequentialMultiInstance.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingGlobalSequentialMultiInstance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingglobalsequentialmultiinstance.v1
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingGlobalSequentialMultiInstance(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingGlobalSequentialMultiInstance
+- id: bpmn2.callchoreographycallingglobalparallelmultiinstance.v2
+  menu_index: 117
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingGlobalParallelMultiInstance
+  variant: 2
+  menu_name: CallChoreographyCallingGlobalParallelMultiInstance
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: notation
+  status: generated
+  summary: CallChoreographyCallingGlobalParallelMultiInstance.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingGlobalParallelMultiInstance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingglobalparallelmultiinstance.v1
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingGlobalParallelMultiInstance(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingGlobalParallelMultiInstance
+- id: bpmn2.callchoreographycallingachoreography.v2
+  menu_index: 118
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingAChoreography
+  variant: 2
+  menu_name: CallChoreographyCallingAChoreography
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: notation
+  status: generated
+  summary: CallChoreographyCallingAChoreography.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingAChoreography
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingachoreography.v1
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingAChoreography(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingAChoreography
+- id: bpmn2.callchoreographycallingachoreographyloop.v2
+  menu_index: 119
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingAChoreographyLoop
+  variant: 2
+  menu_name: CallChoreographyCallingAChoreographyLoop
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: notation
+  status: generated
+  summary: CallChoreographyCallingAChoreographyLoop.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingAChoreographyLoop
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingachoreographyloop.v1
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingAChoreographyLoop(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingAChoreographyLoop
+- id: bpmn2.callchoreographycallingachoreographysequentialmultiinstance.v2
+  menu_index: 120
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingAChoreographySequentialMultiInstance
+  variant: 2
+  menu_name: CallChoreographyCallingAChoreographySequentialMultiInstance
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: notation
+  status: generated
+  summary: CallChoreographyCallingAChoreographySequentialMultiInstance.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingAChoreographySequentialMultiInstance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingachoreographysequentialmultiinstance.v1
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingAChoreographySequentialMultiInstance(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingAChoreographySequentialMultiInstance
+- id: bpmn2.callchoreographycallingachoreographyparallelmultiinstance.v2
+  menu_index: 121
+  kind: vertex
+  buildable: true
+  function: CallChoreographyCallingAChoreographyParallelMultiInstance
+  variant: 2
+  menu_name: CallChoreographyCallingAChoreographyParallelMultiInstance
+  render:
+    fingerprint: sha1:098e331d2a06
+  tag: notation
+  status: generated
+  summary: CallChoreographyCallingAChoreographyParallelMultiInstance.
+  discriminator: TODO
+  use_when:
+  - using CallChoreographyCallingAChoreographyParallelMultiInstance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.callchoreographycallingachoreographyparallelmultiinstance.v1
+    see_also: []
+  example: |
+    bpmn2.CallChoreographyCallingAChoreographyParallelMultiInstance(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: CallChoreographyCallingAChoreographyParallelMultiInstance
+- id: bpmn2.participantinitiatingtop.v1
+  menu_index: 122
+  kind: vertex
+  buildable: true
+  function: ParticipantInitiatingTop
+  variant: 1
+  menu_name: ParticipantInitiatingTop
+  render:
+    fingerprint: sha1:cb120d95d684
+  tag: metaclass
+  status: generated
+  summary: ParticipantInitiatingTop.
+  discriminator: n/a
+  use_when:
+  - using ParticipantInitiatingTop
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantInitiatingTop(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantInitiatingTop
+- id: bpmn2.participantinitiatingtopwithdecorator.v1
+  menu_index: 123
+  kind: vertex
+  buildable: true
+  function: ParticipantInitiatingTopWithDecorator
+  variant: 1
+  menu_name: ParticipantInitiatingTopWithDecorator
+  render:
+    fingerprint: sha1:cb120d95d684
+  tag: metaclass
+  status: generated
+  summary: ParticipantInitiatingTopWithDecorator.
+  discriminator: n/a
+  use_when:
+  - using ParticipantInitiatingTopWithDecorator
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantInitiatingTopWithDecorator(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantInitiatingTopWithDecorator
+- id: bpmn2.additionalparticipantinitiating.v1
+  menu_index: 124
+  kind: vertex
+  buildable: true
+  function: AdditionalParticipantInitiating
+  variant: 1
+  menu_name: AdditionalParticipantInitiating
+  render:
+    fingerprint: sha1:432b64a4d409
+  tag: metaclass
+  status: generated
+  summary: AdditionalParticipantInitiating.
+  discriminator: n/a
+  use_when:
+  - using AdditionalParticipantInitiating
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.AdditionalParticipantInitiating(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: AdditionalParticipantInitiating
+- id: bpmn2.participantinitiatingbottom.v1
+  menu_index: 125
+  kind: vertex
+  buildable: true
+  function: ParticipantInitiatingBottom
+  variant: 1
+  menu_name: ParticipantInitiatingBottom
+  render:
+    fingerprint: sha1:95168b8729a0
+  tag: metaclass
+  status: generated
+  summary: ParticipantInitiatingBottom.
+  discriminator: n/a
+  use_when:
+  - using ParticipantInitiatingBottom
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantInitiatingBottom(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantInitiatingBottom
+- id: bpmn2.participantinitiatingbottomwithdecorator.v1
+  menu_index: 126
+  kind: vertex
+  buildable: true
+  function: ParticipantInitiatingBottomWithDecorator
+  variant: 1
+  menu_name: ParticipantInitiatingBottomWithDecorator
+  render:
+    fingerprint: sha1:95168b8729a0
+  tag: metaclass
+  status: generated
+  summary: ParticipantInitiatingBottomWithDecorator.
+  discriminator: n/a
+  use_when:
+  - using ParticipantInitiatingBottomWithDecorator
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantInitiatingBottomWithDecorator(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantInitiatingBottomWithDecorator
+- id: bpmn2.participantinitiatingmultiinstancetop.v1
+  menu_index: 127
+  kind: vertex
+  buildable: true
+  function: ParticipantInitiatingMultiInstanceTop
+  variant: 1
+  menu_name: ParticipantInitiatingMultiInstanceTop
+  render:
+    fingerprint: sha1:c2fc06227db8
+  tag: metaclass
+  status: generated
+  summary: ParticipantInitiatingMultiInstanceTop.
+  discriminator: n/a
+  use_when:
+  - using ParticipantInitiatingMultiInstanceTop
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantInitiatingMultiInstanceTop(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantInitiatingMultiInstanceTop
+- id: bpmn2.participantinitiatingmultiinstancetopwithdecorator.v1
+  menu_index: 128
+  kind: vertex
+  buildable: true
+  function: ParticipantInitiatingMultiInstanceTopWithDecorator
+  variant: 1
+  menu_name: ParticipantInitiatingMultiInstanceTopWithDecorator
+  render:
+    fingerprint: sha1:c2fc06227db8
+  tag: metaclass
+  status: generated
+  summary: ParticipantInitiatingMultiInstanceTopWithDecorator.
+  discriminator: n/a
+  use_when:
+  - using ParticipantInitiatingMultiInstanceTopWithDecorator
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantInitiatingMultiInstanceTopWithDecorator(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantInitiatingMultiInstanceTopWithDecorator
+- id: bpmn2.additionalparticipantinitiatingmultiinstancebottom.v1
+  menu_index: 129
+  kind: vertex
+  buildable: true
+  function: AdditionalParticipantInitiatingMultiInstanceBottom
+  variant: 1
+  menu_name: AdditionalParticipantInitiatingMultiInstanceBottom
+  render:
+    fingerprint: sha1:af31e8b25b37
+  tag: metaclass
+  status: generated
+  summary: AdditionalParticipantInitiatingMultiInstanceBottom.
+  discriminator: n/a
+  use_when:
+  - using AdditionalParticipantInitiatingMultiInstanceBottom
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.AdditionalParticipantInitiatingMultiInstanceBottom(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: AdditionalParticipantInitiatingMultiInstanceBottom
+- id: bpmn2.participantinitiatingmultiinstancebottom.v1
+  menu_index: 130
+  kind: vertex
+  buildable: true
+  function: ParticipantInitiatingMultiInstanceBottom
+  variant: 1
+  menu_name: ParticipantInitiatingMultiInstanceBottom
+  render:
+    fingerprint: sha1:0960769e56a4
+  tag: metaclass
+  status: generated
+  summary: ParticipantInitiatingMultiInstanceBottom.
+  discriminator: n/a
+  use_when:
+  - using ParticipantInitiatingMultiInstanceBottom
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantInitiatingMultiInstanceBottom(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantInitiatingMultiInstanceBottom
+- id: bpmn2.participantinitiatingmultiinstancebottomwithdecorator.v1
+  menu_index: 131
+  kind: vertex
+  buildable: true
+  function: ParticipantInitiatingMultiInstanceBottomWithDecorator
+  variant: 1
+  menu_name: ParticipantInitiatingMultiInstanceBottomWithDecorator
+  render:
+    fingerprint: sha1:0960769e56a4
+  tag: metaclass
+  status: generated
+  summary: ParticipantInitiatingMultiInstanceBottomWithDecorator.
+  discriminator: n/a
+  use_when:
+  - using ParticipantInitiatingMultiInstanceBottomWithDecorator
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantInitiatingMultiInstanceBottomWithDecorator(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantInitiatingMultiInstanceBottomWithDecorator
+- id: bpmn2.participantnoninitiatingtop.v1
+  menu_index: 132
+  kind: vertex
+  buildable: true
+  function: ParticipantNonInitiatingTop
+  variant: 1
+  menu_name: ParticipantNonInitiatingTop
+  render:
+    fingerprint: sha1:2e6c60d3be0c
+  tag: metaclass
+  status: generated
+  summary: ParticipantNonInitiatingTop.
+  discriminator: n/a
+  use_when:
+  - using ParticipantNonInitiatingTop
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantNonInitiatingTop(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantNonInitiatingTop
+- id: bpmn2.participantnoninitiatingtopwithdecorator.v1
+  menu_index: 133
+  kind: vertex
+  buildable: true
+  function: ParticipantNonInitiatingTopWithDecorator
+  variant: 1
+  menu_name: ParticipantNonInitiatingTopWithDecorator
+  render:
+    fingerprint: sha1:2e6c60d3be0c
+  tag: metaclass
+  status: generated
+  summary: ParticipantNonInitiatingTopWithDecorator.
+  discriminator: n/a
+  use_when:
+  - using ParticipantNonInitiatingTopWithDecorator
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantNonInitiatingTopWithDecorator(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantNonInitiatingTopWithDecorator
+- id: bpmn2.additionalparticipantnoninitiating.v1
+  menu_index: 134
+  kind: vertex
+  buildable: true
+  function: AdditionalParticipantNonInitiating
+  variant: 1
+  menu_name: AdditionalParticipantNonInitiating
+  render:
+    fingerprint: sha1:e448e0bce440
+  tag: metaclass
+  status: generated
+  summary: AdditionalParticipantNonInitiating.
+  discriminator: n/a
+  use_when:
+  - using AdditionalParticipantNonInitiating
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.AdditionalParticipantNonInitiating(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: AdditionalParticipantNonInitiating
+- id: bpmn2.participantnoninitiatingbottom.v1
+  menu_index: 135
+  kind: vertex
+  buildable: true
+  function: ParticipantNonInitiatingBottom
+  variant: 1
+  menu_name: ParticipantNonInitiatingBottom
+  render:
+    fingerprint: sha1:058d9757026f
+  tag: metaclass
+  status: generated
+  summary: ParticipantNonInitiatingBottom.
+  discriminator: n/a
+  use_when:
+  - using ParticipantNonInitiatingBottom
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantNonInitiatingBottom(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantNonInitiatingBottom
+- id: bpmn2.participantnoninitiatingbottomwithdecorator.v1
+  menu_index: 136
+  kind: vertex
+  buildable: true
+  function: ParticipantNonInitiatingBottomWithDecorator
+  variant: 1
+  menu_name: ParticipantNonInitiatingBottomWithDecorator
+  render:
+    fingerprint: sha1:058d9757026f
+  tag: metaclass
+  status: generated
+  summary: ParticipantNonInitiatingBottomWithDecorator.
+  discriminator: n/a
+  use_when:
+  - using ParticipantNonInitiatingBottomWithDecorator
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantNonInitiatingBottomWithDecorator(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantNonInitiatingBottomWithDecorator
+- id: bpmn2.participantnoninitiatingmultiinstancetop.v1
+  menu_index: 137
+  kind: vertex
+  buildable: true
+  function: ParticipantNonInitiatingMultiInstanceTop
+  variant: 1
+  menu_name: ParticipantNonInitiatingMultiInstanceTop
+  render:
+    fingerprint: sha1:5b8ea7020514
+  tag: metaclass
+  status: generated
+  summary: ParticipantNonInitiatingMultiInstanceTop.
+  discriminator: n/a
+  use_when:
+  - using ParticipantNonInitiatingMultiInstanceTop
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantNonInitiatingMultiInstanceTop(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantNonInitiatingMultiInstanceTop
+- id: bpmn2.participantnoninitiatingmultiinstancetopwithdecorator.v1
+  menu_index: 138
+  kind: vertex
+  buildable: true
+  function: ParticipantNonInitiatingMultiInstanceTopWithDecorator
+  variant: 1
+  menu_name: ParticipantNonInitiatingMultiInstanceTopWithDecorator
+  render:
+    fingerprint: sha1:5b8ea7020514
+  tag: metaclass
+  status: generated
+  summary: ParticipantNonInitiatingMultiInstanceTopWithDecorator.
+  discriminator: n/a
+  use_when:
+  - using ParticipantNonInitiatingMultiInstanceTopWithDecorator
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantNonInitiatingMultiInstanceTopWithDecorator(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantNonInitiatingMultiInstanceTopWithDecorator
+- id: bpmn2.additionalparticipantnoninitiatingmultiinstancebottom.v1
+  menu_index: 139
+  kind: vertex
+  buildable: true
+  function: AdditionalParticipantNonInitiatingMultiInstanceBottom
+  variant: 1
+  menu_name: AdditionalParticipantNonInitiatingMultiInstanceBottom
+  render:
+    fingerprint: sha1:8ce5c06237a4
+  tag: metaclass
+  status: generated
+  summary: AdditionalParticipantNonInitiatingMultiInstanceBottom.
+  discriminator: n/a
+  use_when:
+  - using AdditionalParticipantNonInitiatingMultiInstanceBottom
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.AdditionalParticipantNonInitiatingMultiInstanceBottom(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: AdditionalParticipantNonInitiatingMultiInstanceBottom
+- id: bpmn2.participantnoninitiatingmultiinstancebottom.v1
+  menu_index: 140
+  kind: vertex
+  buildable: true
+  function: ParticipantNonInitiatingMultiInstanceBottom
+  variant: 1
+  menu_name: ParticipantNonInitiatingMultiInstanceBottom
+  render:
+    fingerprint: sha1:a5d7662dce00
+  tag: metaclass
+  status: generated
+  summary: ParticipantNonInitiatingMultiInstanceBottom.
+  discriminator: n/a
+  use_when:
+  - using ParticipantNonInitiatingMultiInstanceBottom
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantNonInitiatingMultiInstanceBottom(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantNonInitiatingMultiInstanceBottom
+- id: bpmn2.participantnoninitiatingmultiinstancebottomwithdecorator.v1
+  menu_index: 141
+  kind: vertex
+  buildable: true
+  function: ParticipantNonInitiatingMultiInstanceBottomWithDecorator
+  variant: 1
+  menu_name: ParticipantNonInitiatingMultiInstanceBottomWithDecorator
+  render:
+    fingerprint: sha1:a5d7662dce00
+  tag: metaclass
+  status: generated
+  summary: ParticipantNonInitiatingMultiInstanceBottomWithDecorator.
+  discriminator: n/a
+  use_when:
+  - using ParticipantNonInitiatingMultiInstanceBottomWithDecorator
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParticipantNonInitiatingMultiInstanceBottomWithDecorator(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParticipantNonInitiatingMultiInstanceBottomWithDecorator
+- id: bpmn2.nonestart.v1
+  menu_index: 142
+  kind: vertex
+  buildable: true
+  function: NoneStart
+  variant: 1
+  menu_name: NoneStart
+  render:
+    fingerprint: sha1:20dac2801281
+  tag: metaclass
+  status: generated
+  summary: NoneStart.
+  discriminator: n/a
+  use_when:
+  - using NoneStart
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.NoneStart(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: NoneStart
+- id: bpmn2.noneintermediatethrowing.v1
+  menu_index: 143
+  kind: vertex
+  buildable: true
+  function: NoneIntermediateThrowing
+  variant: 1
+  menu_name: NoneIntermediateThrowing
+  render:
+    fingerprint: sha1:10aad79dbf08
+  tag: metaclass
+  status: generated
+  summary: NoneIntermediateThrowing.
+  discriminator: n/a
+  use_when:
+  - using NoneIntermediateThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.NoneIntermediateThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: NoneIntermediateThrowing
+- id: bpmn2.end.v1
+  menu_index: 144
+  kind: vertex
+  buildable: true
+  function: End
+  variant: 1
+  menu_name: End
+  render:
+    fingerprint: sha1:daf33d335572
+  tag: metaclass
+  status: generated
+  summary: End.
+  discriminator: TODO
+  use_when:
+  - using End
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.end.v2
+    see_also: []
+  example: |
+    bpmn2.End(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: End
+- id: bpmn2.messagestartinterrupting.v1
+  menu_index: 145
+  kind: vertex
+  buildable: true
+  function: MessageStartInterrupting
+  variant: 1
+  menu_name: MessageStartInterrupting
+  render:
+    fingerprint: sha1:7e1640b1a27d
+  tag: metaclass
+  status: generated
+  summary: MessageStartInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MessageStartInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageStartInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageStartInterrupting
+- id: bpmn2.messagestartnoninterrupting.v1
+  menu_index: 146
+  kind: vertex
+  buildable: true
+  function: MessageStartNonInterrupting
+  variant: 1
+  menu_name: MessageStartNonInterrupting
+  render:
+    fingerprint: sha1:be1e11b58bda
+  tag: metaclass
+  status: generated
+  summary: MessageStartNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MessageStartNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageStartNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageStartNonInterrupting
+- id: bpmn2.messageintermediatethrowing.v1
+  menu_index: 147
+  kind: vertex
+  buildable: true
+  function: MessageIntermediateThrowing
+  variant: 1
+  menu_name: MessageIntermediateThrowing
+  render:
+    fingerprint: sha1:9cfb24cf85ce
+  tag: metaclass
+  status: generated
+  summary: MessageIntermediateThrowing.
+  discriminator: n/a
+  use_when:
+  - using MessageIntermediateThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageIntermediateThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageIntermediateThrowing
+- id: bpmn2.messageintermediatecatching.v1
+  menu_index: 148
+  kind: vertex
+  buildable: true
+  function: MessageIntermediateCatching
+  variant: 1
+  menu_name: MessageIntermediateCatching
+  render:
+    fingerprint: sha1:4b1bb94e1b7f
+  tag: metaclass
+  status: generated
+  summary: MessageIntermediateCatching.
+  discriminator: n/a
+  use_when:
+  - using MessageIntermediateCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageIntermediateCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageIntermediateCatching
+- id: bpmn2.messageintermediateboundaryinterrupting.v1
+  menu_index: 149
+  kind: vertex
+  buildable: true
+  function: MessageIntermediateBoundaryInterrupting
+  variant: 1
+  menu_name: MessageIntermediateBoundaryInterrupting
+  render:
+    fingerprint: sha1:1e3622c8a882
+  tag: metaclass
+  status: generated
+  summary: MessageIntermediateBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MessageIntermediateBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageIntermediateBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageIntermediateBoundaryInterrupting
+- id: bpmn2.messageintermediateboundarynoninterrupting.v1
+  menu_index: 150
+  kind: vertex
+  buildable: true
+  function: MessageIntermediateBoundaryNonInterrupting
+  variant: 1
+  menu_name: MessageIntermediateBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:8433bc5cab11
+  tag: metaclass
+  status: generated
+  summary: MessageIntermediateBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MessageIntermediateBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageIntermediateBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageIntermediateBoundaryNonInterrupting
+- id: bpmn2.messageend.v1
+  menu_index: 151
+  kind: vertex
+  buildable: true
+  function: MessageEnd
+  variant: 1
+  menu_name: MessageEnd
+  render:
+    fingerprint: sha1:eb9828afb03f
+  tag: metaclass
+  status: generated
+  summary: MessageEnd.
+  discriminator: TODO
+  use_when:
+  - using MessageEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.messageend.v2
+    see_also: []
+  example: |
+    bpmn2.MessageEnd(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageEnd
+- id: bpmn2.timerstartinterrupting.v1
+  menu_index: 152
+  kind: vertex
+  buildable: true
+  function: TimerStartInterrupting
+  variant: 1
+  menu_name: TimerStartInterrupting
+  render:
+    fingerprint: sha1:f03050964d16
+  tag: metaclass
+  status: generated
+  summary: TimerStartInterrupting.
+  discriminator: n/a
+  use_when:
+  - using TimerStartInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TimerStartInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TimerStartInterrupting
+- id: bpmn2.timerstartnoninterrupting.v1
+  menu_index: 153
+  kind: vertex
+  buildable: true
+  function: TimerStartNonInterrupting
+  variant: 1
+  menu_name: TimerStartNonInterrupting
+  render:
+    fingerprint: sha1:7906b8b06746
+  tag: metaclass
+  status: generated
+  summary: TimerStartNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using TimerStartNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TimerStartNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TimerStartNonInterrupting
+- id: bpmn2.timerintermediatecatching.v1
+  menu_index: 154
+  kind: vertex
+  buildable: true
+  function: TimerIntermediateCatching
+  variant: 1
+  menu_name: TimerIntermediateCatching
+  render:
+    fingerprint: sha1:0b90d95d235c
+  tag: metaclass
+  status: generated
+  summary: TimerIntermediateCatching.
+  discriminator: n/a
+  use_when:
+  - using TimerIntermediateCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TimerIntermediateCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TimerIntermediateCatching
+- id: bpmn2.timerintermediateboundaryinterrupting.v1
+  menu_index: 155
+  kind: vertex
+  buildable: true
+  function: TimerIntermediateBoundaryInterrupting
+  variant: 1
+  menu_name: TimerIntermediateBoundaryInterrupting
+  render:
+    fingerprint: sha1:56ca9bd666f5
+  tag: metaclass
+  status: generated
+  summary: TimerIntermediateBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using TimerIntermediateBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TimerIntermediateBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TimerIntermediateBoundaryInterrupting
+- id: bpmn2.timerintermediateboundarynoninterrupting.v1
+  menu_index: 156
+  kind: vertex
+  buildable: true
+  function: TimerIntermediateBoundaryNonInterrupting
+  variant: 1
+  menu_name: TimerIntermediateBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:b0f282d91045
+  tag: metaclass
+  status: generated
+  summary: TimerIntermediateBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using TimerIntermediateBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TimerIntermediateBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TimerIntermediateBoundaryNonInterrupting
+- id: bpmn2.escalationstartinterrupting.v1
+  menu_index: 157
+  kind: vertex
+  buildable: true
+  function: EscalationStartInterrupting
+  variant: 1
+  menu_name: EscalationStartInterrupting
+  render:
+    fingerprint: sha1:fe0cc9faa2b5
+  tag: metaclass
+  status: generated
+  summary: EscalationStartInterrupting.
+  discriminator: n/a
+  use_when:
+  - using EscalationStartInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EscalationStartInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationStartInterrupting
+- id: bpmn2.escalationstartnoninterrupting.v1
+  menu_index: 158
+  kind: vertex
+  buildable: true
+  function: EscalationStartNonInterrupting
+  variant: 1
+  menu_name: EscalationStartNonInterrupting
+  render:
+    fingerprint: sha1:f19a7d65e2f3
+  tag: metaclass
+  status: generated
+  summary: EscalationStartNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using EscalationStartNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EscalationStartNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationStartNonInterrupting
+- id: bpmn2.escalationintermediateboundarythrowing.v1
+  menu_index: 159
+  kind: vertex
+  buildable: true
+  function: EscalationIntermediateBoundaryThrowing
+  variant: 1
+  menu_name: EscalationIntermediateBoundaryThrowing
+  render:
+    fingerprint: sha1:f47e264e29e5
+  tag: metaclass
+  status: generated
+  summary: EscalationIntermediateBoundaryThrowing.
+  discriminator: n/a
+  use_when:
+  - using EscalationIntermediateBoundaryThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EscalationIntermediateBoundaryThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationIntermediateBoundaryThrowing
+- id: bpmn2.escalationintermediateboundaryinterrupting.v1
+  menu_index: 160
+  kind: vertex
+  buildable: true
+  function: EscalationIntermediateBoundaryInterrupting
+  variant: 1
+  menu_name: EscalationIntermediateBoundaryInterrupting
+  render:
+    fingerprint: sha1:df66ad2bffb2
+  tag: metaclass
+  status: generated
+  summary: EscalationIntermediateBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using EscalationIntermediateBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EscalationIntermediateBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationIntermediateBoundaryInterrupting
+- id: bpmn2.escalationintermediatenoninterrupting.v1
+  menu_index: 161
+  kind: vertex
+  buildable: true
+  function: EscalationIntermediateNonInterrupting
+  variant: 1
+  menu_name: EscalationIntermediateNonInterrupting
+  render:
+    fingerprint: sha1:7dd9008f24a3
+  tag: metaclass
+  status: generated
+  summary: EscalationIntermediateNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using EscalationIntermediateNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EscalationIntermediateNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationIntermediateNonInterrupting
+- id: bpmn2.escalationend.v1
+  menu_index: 162
+  kind: vertex
+  buildable: true
+  function: EscalationEnd
+  variant: 1
+  menu_name: EscalationEnd
+  render:
+    fingerprint: sha1:13968b8573b4
+  tag: metaclass
+  status: generated
+  summary: EscalationEnd.
+  discriminator: TODO
+  use_when:
+  - using EscalationEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.escalationend.v2
+    see_also: []
+  example: |
+    bpmn2.EscalationEnd(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationEnd
+- id: bpmn2.errorstartinterrupting.v1
+  menu_index: 163
+  kind: vertex
+  buildable: true
+  function: ErrorStartInterrupting
+  variant: 1
+  menu_name: ErrorStartInterrupting
+  render:
+    fingerprint: sha1:9ef98a9218d1
+  tag: metaclass
+  status: generated
+  summary: ErrorStartInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ErrorStartInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ErrorStartInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ErrorStartInterrupting
+- id: bpmn2.errorintermediateboundaryinterrupting.v1
+  menu_index: 164
+  kind: vertex
+  buildable: true
+  function: ErrorIntermediateBoundaryInterrupting
+  variant: 1
+  menu_name: ErrorIntermediateBoundaryInterrupting
+  render:
+    fingerprint: sha1:8674bdfe93a7
+  tag: metaclass
+  status: generated
+  summary: ErrorIntermediateBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ErrorIntermediateBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ErrorIntermediateBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ErrorIntermediateBoundaryInterrupting
+- id: bpmn2.errorend.v1
+  menu_index: 165
+  kind: vertex
+  buildable: true
+  function: ErrorEnd
+  variant: 1
+  menu_name: ErrorEnd
+  render:
+    fingerprint: sha1:b19c598c5bab
+  tag: metaclass
+  status: generated
+  summary: ErrorEnd.
+  discriminator: TODO
+  use_when:
+  - using ErrorEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.errorend.v2
+    see_also: []
+  example: |
+    bpmn2.ErrorEnd(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ErrorEnd
+- id: bpmn2.compensationstartinterrupting.v1
+  menu_index: 166
+  kind: vertex
+  buildable: true
+  function: CompensationStartInterrupting
+  variant: 1
+  menu_name: CompensationStartInterrupting
+  render:
+    fingerprint: sha1:ca22e4577aab
+  tag: metaclass
+  status: generated
+  summary: CompensationStartInterrupting.
+  discriminator: n/a
+  use_when:
+  - using CompensationStartInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CompensationStartInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CompensationStartInterrupting
+- id: bpmn2.compensationintermediatethrowing.v1
+  menu_index: 167
+  kind: vertex
+  buildable: true
+  function: CompensationIntermediateThrowing
+  variant: 1
+  menu_name: CompensationIntermediateThrowing
+  render:
+    fingerprint: sha1:7dd375deb180
+  tag: metaclass
+  status: generated
+  summary: CompensationIntermediateThrowing.
+  discriminator: n/a
+  use_when:
+  - using CompensationIntermediateThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CompensationIntermediateThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CompensationIntermediateThrowing
+- id: bpmn2.compensationintermediateboundaryinterrupting.v1
+  menu_index: 168
+  kind: vertex
+  buildable: true
+  function: CompensationIntermediateBoundaryInterrupting
+  variant: 1
+  menu_name: CompensationIntermediateBoundaryInterrupting
+  render:
+    fingerprint: sha1:16653b08c068
+  tag: metaclass
+  status: generated
+  summary: CompensationIntermediateBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using CompensationIntermediateBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CompensationIntermediateBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CompensationIntermediateBoundaryInterrupting
+- id: bpmn2.compensationend.v1
+  menu_index: 169
+  kind: vertex
+  buildable: true
+  function: CompensationEnd
+  variant: 1
+  menu_name: CompensationEnd
+  render:
+    fingerprint: sha1:0bf696f36539
+  tag: metaclass
+  status: generated
+  summary: CompensationEnd.
+  discriminator: TODO
+  use_when:
+  - using CompensationEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.compensationend.v2
+    see_also: []
+  example: |
+    bpmn2.CompensationEnd(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CompensationEnd
+- id: bpmn2.conditionalstartinterrupting.v1
+  menu_index: 170
+  kind: vertex
+  buildable: true
+  function: ConditionalStartInterrupting
+  variant: 1
+  menu_name: ConditionalStartInterrupting
+  render:
+    fingerprint: sha1:322f1492f12d
+  tag: metaclass
+  status: generated
+  summary: ConditionalStartInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ConditionalStartInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalStartInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalStartInterrupting
+- id: bpmn2.conditionalstartnoninterrupting.v1
+  menu_index: 171
+  kind: vertex
+  buildable: true
+  function: ConditionalStartNonInterrupting
+  variant: 1
+  menu_name: ConditionalStartNonInterrupting
+  render:
+    fingerprint: sha1:d119f2d4780b
+  tag: metaclass
+  status: generated
+  summary: ConditionalStartNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ConditionalStartNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalStartNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalStartNonInterrupting
+- id: bpmn2.conditionalintermediatecatching.v1
+  menu_index: 172
+  kind: vertex
+  buildable: true
+  function: ConditionalIntermediateCatching
+  variant: 1
+  menu_name: ConditionalIntermediateCatching
+  render:
+    fingerprint: sha1:c68d795f7579
+  tag: metaclass
+  status: generated
+  summary: ConditionalIntermediateCatching.
+  discriminator: n/a
+  use_when:
+  - using ConditionalIntermediateCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalIntermediateCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalIntermediateCatching
+- id: bpmn2.conditionalintermediateboundaryinterrupting.v1
+  menu_index: 173
+  kind: vertex
+  buildable: true
+  function: ConditionalIntermediateBoundaryInterrupting
+  variant: 1
+  menu_name: ConditionalIntermediateBoundaryInterrupting
+  render:
+    fingerprint: sha1:5760ba920078
+  tag: metaclass
+  status: generated
+  summary: ConditionalIntermediateBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ConditionalIntermediateBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalIntermediateBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalIntermediateBoundaryInterrupting
+- id: bpmn2.conditionalintermediateboundarynoninterrupting.v1
+  menu_index: 174
+  kind: vertex
+  buildable: true
+  function: ConditionalIntermediateBoundaryNonInterrupting
+  variant: 1
+  menu_name: ConditionalIntermediateBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:6f23aa31cfba
+  tag: metaclass
+  status: generated
+  summary: ConditionalIntermediateBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ConditionalIntermediateBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalIntermediateBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalIntermediateBoundaryNonInterrupting
+- id: bpmn2.linkintermediatecatching.v1
+  menu_index: 175
+  kind: vertex
+  buildable: true
+  function: LinkIntermediateCatching
+  variant: 1
+  menu_name: LinkIntermediateCatching
+  render:
+    fingerprint: sha1:20cfae72c35c
+  tag: metaclass
+  status: generated
+  summary: LinkIntermediateCatching.
+  discriminator: n/a
+  use_when:
+  - using LinkIntermediateCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.LinkIntermediateCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: LinkIntermediateCatching
+- id: bpmn2.linkintermediatethrowing.v1
+  menu_index: 176
+  kind: vertex
+  buildable: true
+  function: LinkIntermediateThrowing
+  variant: 1
+  menu_name: LinkIntermediateThrowing
+  render:
+    fingerprint: sha1:5043dac8d336
+  tag: metaclass
+  status: generated
+  summary: LinkIntermediateThrowing.
+  discriminator: n/a
+  use_when:
+  - using LinkIntermediateThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.LinkIntermediateThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: LinkIntermediateThrowing
+- id: bpmn2.signalstartinterrupting.v1
+  menu_index: 177
+  kind: vertex
+  buildable: true
+  function: SignalStartInterrupting
+  variant: 1
+  menu_name: SignalStartInterrupting
+  render:
+    fingerprint: sha1:fe7a2f52ebaa
+  tag: metaclass
+  status: generated
+  summary: SignalStartInterrupting.
+  discriminator: n/a
+  use_when:
+  - using SignalStartInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalStartInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalStartInterrupting
+- id: bpmn2.signalstartnoninterrupting.v1
+  menu_index: 178
+  kind: vertex
+  buildable: true
+  function: SignalStartNonInterrupting
+  variant: 1
+  menu_name: SignalStartNonInterrupting
+  render:
+    fingerprint: sha1:c7a31fdccfd0
+  tag: metaclass
+  status: generated
+  summary: SignalStartNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using SignalStartNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalStartNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalStartNonInterrupting
+- id: bpmn2.signalintermediatecatching.v1
+  menu_index: 179
+  kind: vertex
+  buildable: true
+  function: SignalIntermediateCatching
+  variant: 1
+  menu_name: SignalIntermediateCatching
+  render:
+    fingerprint: sha1:cfcf48e32999
+  tag: metaclass
+  status: generated
+  summary: SignalIntermediateCatching.
+  discriminator: n/a
+  use_when:
+  - using SignalIntermediateCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalIntermediateCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalIntermediateCatching
+- id: bpmn2.signalintermediatethrowing.v1
+  menu_index: 180
+  kind: vertex
+  buildable: true
+  function: SignalIntermediateThrowing
+  variant: 1
+  menu_name: SignalIntermediateThrowing
+  render:
+    fingerprint: sha1:55f7ec630baa
+  tag: metaclass
+  status: generated
+  summary: SignalIntermediateThrowing.
+  discriminator: n/a
+  use_when:
+  - using SignalIntermediateThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalIntermediateThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalIntermediateThrowing
+- id: bpmn2.signalintermediateboundaryinterrupting.v1
+  menu_index: 181
+  kind: vertex
+  buildable: true
+  function: SignalIntermediateBoundaryInterrupting
+  variant: 1
+  menu_name: SignalIntermediateBoundaryInterrupting
+  render:
+    fingerprint: sha1:42b897357770
+  tag: metaclass
+  status: generated
+  summary: SignalIntermediateBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using SignalIntermediateBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalIntermediateBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalIntermediateBoundaryInterrupting
+- id: bpmn2.signalintermediateboundarynoninterrupting.v1
+  menu_index: 182
+  kind: vertex
+  buildable: true
+  function: SignalIntermediateBoundaryNonInterrupting
+  variant: 1
+  menu_name: SignalIntermediateBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:4a87e21cb2c0
+  tag: metaclass
+  status: generated
+  summary: SignalIntermediateBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using SignalIntermediateBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalIntermediateBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalIntermediateBoundaryNonInterrupting
+- id: bpmn2.signalend.v1
+  menu_index: 183
+  kind: vertex
+  buildable: true
+  function: SignalEnd
+  variant: 1
+  menu_name: SignalEnd
+  render:
+    fingerprint: sha1:a337870821a5
+  tag: metaclass
+  status: generated
+  summary: SignalEnd.
+  discriminator: TODO
+  use_when:
+  - using SignalEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.signalend.v2
+    see_also: []
+  example: |
+    bpmn2.SignalEnd(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalEnd
+- id: bpmn2.multiplestartinterrupting.v1
+  menu_index: 184
+  kind: vertex
+  buildable: true
+  function: MultipleStartInterrupting
+  variant: 1
+  menu_name: MultipleStartInterrupting
+  render:
+    fingerprint: sha1:5e3d98d0efc8
+  tag: metaclass
+  status: generated
+  summary: MultipleStartInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MultipleStartInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleStartInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleStartInterrupting
+- id: bpmn2.multiplestartnoninterrupting.v1
+  menu_index: 185
+  kind: vertex
+  buildable: true
+  function: MultipleStartNonInterrupting
+  variant: 1
+  menu_name: MultipleStartNonInterrupting
+  render:
+    fingerprint: sha1:4eb68a5bc309
+  tag: metaclass
+  status: generated
+  summary: MultipleStartNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MultipleStartNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleStartNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleStartNonInterrupting
+- id: bpmn2.multipleintermediatecatching.v1
+  menu_index: 186
+  kind: vertex
+  buildable: true
+  function: MultipleIntermediateCatching
+  variant: 1
+  menu_name: MultipleIntermediateCatching
+  render:
+    fingerprint: sha1:854fbbb4882a
+  tag: metaclass
+  status: generated
+  summary: MultipleIntermediateCatching.
+  discriminator: n/a
+  use_when:
+  - using MultipleIntermediateCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleIntermediateCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleIntermediateCatching
+- id: bpmn2.multipleintermediatethrowing.v1
+  menu_index: 187
+  kind: vertex
+  buildable: true
+  function: MultipleIntermediateThrowing
+  variant: 1
+  menu_name: MultipleIntermediateThrowing
+  render:
+    fingerprint: sha1:6f6fdaac39dc
+  tag: metaclass
+  status: generated
+  summary: MultipleIntermediateThrowing.
+  discriminator: n/a
+  use_when:
+  - using MultipleIntermediateThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleIntermediateThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleIntermediateThrowing
+- id: bpmn2.multipleintermediateboundaryinterrupting.v1
+  menu_index: 188
+  kind: vertex
+  buildable: true
+  function: MultipleIntermediateBoundaryInterrupting
+  variant: 1
+  menu_name: MultipleIntermediateBoundaryInterrupting
+  render:
+    fingerprint: sha1:3ed0e66e3f6c
+  tag: metaclass
+  status: generated
+  summary: MultipleIntermediateBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MultipleIntermediateBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleIntermediateBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleIntermediateBoundaryInterrupting
+- id: bpmn2.multipleintermediateboundarynoninterrupting.v1
+  menu_index: 189
+  kind: vertex
+  buildable: true
+  function: MultipleIntermediateBoundaryNonInterrupting
+  variant: 1
+  menu_name: MultipleIntermediateBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:d672b5669e55
+  tag: metaclass
+  status: generated
+  summary: MultipleIntermediateBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MultipleIntermediateBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleIntermediateBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleIntermediateBoundaryNonInterrupting
+- id: bpmn2.multipleend.v1
+  menu_index: 190
+  kind: vertex
+  buildable: true
+  function: MultipleEnd
+  variant: 1
+  menu_name: MultipleEnd
+  render:
+    fingerprint: sha1:8b8c2610d9df
+  tag: metaclass
+  status: generated
+  summary: MultipleEnd.
+  discriminator: TODO
+  use_when:
+  - using MultipleEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.multipleend.v2
+    see_also: []
+  example: |
+    bpmn2.MultipleEnd(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleEnd
+- id: bpmn2.parallelmultiplestartinterrupting.v1
+  menu_index: 191
+  kind: vertex
+  buildable: true
+  function: ParallelMultipleStartInterrupting
+  variant: 1
+  menu_name: ParallelMultipleStartInterrupting
+  render:
+    fingerprint: sha1:1419dd206486
+  tag: metaclass
+  status: generated
+  summary: ParallelMultipleStartInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultipleStartInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultipleStartInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultipleStartInterrupting
+- id: bpmn2.parallelmultiplestartnoninterrupting.v1
+  menu_index: 192
+  kind: vertex
+  buildable: true
+  function: ParallelMultipleStartNonInterrupting
+  variant: 1
+  menu_name: ParallelMultipleStartNonInterrupting
+  render:
+    fingerprint: sha1:789a70e79614
+  tag: metaclass
+  status: generated
+  summary: ParallelMultipleStartNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultipleStartNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultipleStartNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultipleStartNonInterrupting
+- id: bpmn2.parallelmultipleintermediatecatching.v1
+  menu_index: 193
+  kind: vertex
+  buildable: true
+  function: ParallelMultipleIntermediateCatching
+  variant: 1
+  menu_name: ParallelMultipleIntermediateCatching
+  render:
+    fingerprint: sha1:fe77eb46021a
+  tag: metaclass
+  status: generated
+  summary: ParallelMultipleIntermediateCatching.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultipleIntermediateCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultipleIntermediateCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultipleIntermediateCatching
+- id: bpmn2.parallelmultipleintermediateboundaryinterrupting.v1
+  menu_index: 194
+  kind: vertex
+  buildable: true
+  function: ParallelMultipleIntermediateBoundaryInterrupting
+  variant: 1
+  menu_name: ParallelMultipleIntermediateBoundaryInterrupting
+  render:
+    fingerprint: sha1:94bb826f6859
+  tag: metaclass
+  status: generated
+  summary: ParallelMultipleIntermediateBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultipleIntermediateBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultipleIntermediateBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultipleIntermediateBoundaryInterrupting
+- id: bpmn2.parallelmultipleintermediateboundarynoninterrupting.v1
+  menu_index: 195
+  kind: vertex
+  buildable: true
+  function: ParallelMultipleIntermediateBoundaryNonInterrupting
+  variant: 1
+  menu_name: ParallelMultipleIntermediateBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:cc4d6d60a309
+  tag: metaclass
+  status: generated
+  summary: ParallelMultipleIntermediateBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultipleIntermediateBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultipleIntermediateBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultipleIntermediateBoundaryNonInterrupting
+- id: bpmn2.cancelintermediateboundaryinterrupting.v1
+  menu_index: 196
+  kind: vertex
+  buildable: true
+  function: CancelIntermediateBoundaryInterrupting
+  variant: 1
+  menu_name: CancelIntermediateBoundaryInterrupting
+  render:
+    fingerprint: sha1:2237d6946f06
+  tag: metaclass
+  status: generated
+  summary: CancelIntermediateBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using CancelIntermediateBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CancelIntermediateBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CancelIntermediateBoundaryInterrupting
+- id: bpmn2.cancelend.v1
+  menu_index: 197
+  kind: vertex
+  buildable: true
+  function: CancelEnd
+  variant: 1
+  menu_name: CancelEnd
+  render:
+    fingerprint: sha1:1e9c14705a61
+  tag: metaclass
+  status: generated
+  summary: CancelEnd.
+  discriminator: TODO
+  use_when:
+  - using CancelEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.cancelend.v2
+    see_also: []
+  example: |
+    bpmn2.CancelEnd(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CancelEnd
+- id: bpmn2.terminate.v1
+  menu_index: 198
+  kind: vertex
+  buildable: true
+  function: Terminate
+  variant: 1
+  menu_name: Terminate
+  render:
+    fingerprint: sha1:1827d7af85b0
+  tag: metaclass
+  status: generated
+  summary: Terminate.
+  discriminator: TODO
+  use_when:
+  - using Terminate
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.terminate.v2
+    see_also: []
+  example: |
+    bpmn2.Terminate(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Terminate
+- id: bpmn2.exclusive.v1
+  menu_index: 199
+  kind: vertex
+  buildable: true
+  function: Exclusive
+  variant: 1
+  menu_name: Exclusive
+  render:
+    fingerprint: sha1:8ea612cfc262
+  tag: metaclass
+  status: generated
+  summary: Exclusive.
+  discriminator: TODO
+  use_when:
+  - using Exclusive
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.exclusive.v2
+    see_also: []
+  example: |
+    bpmn2.Exclusive(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Exclusive
+- id: bpmn2.exclusive.v2
+  menu_index: 200
+  kind: vertex
+  buildable: true
+  function: Exclusive
+  variant: 2
+  menu_name: Exclusive
+  render:
+    fingerprint: sha1:afa558c434d8
+  tag: notation
+  status: generated
+  summary: Exclusive.
+  discriminator: TODO
+  use_when:
+  - using Exclusive
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.exclusive.v1
+    see_also: []
+  example: |
+    bpmn2.Exclusive(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: Exclusive
+- id: bpmn2.inclusive.v1
+  menu_index: 201
+  kind: vertex
+  buildable: true
+  function: Inclusive
+  variant: 1
+  menu_name: Inclusive
+  render:
+    fingerprint: sha1:95ff7557b441
+  tag: metaclass
+  status: generated
+  summary: Inclusive.
+  discriminator: n/a
+  use_when:
+  - using Inclusive
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Inclusive(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Inclusive
+- id: bpmn2.parallel.v1
+  menu_index: 202
+  kind: vertex
+  buildable: true
+  function: Parallel
+  variant: 1
+  menu_name: Parallel
+  render:
+    fingerprint: sha1:1f0e0b156b01
+  tag: metaclass
+  status: generated
+  summary: Parallel.
+  discriminator: n/a
+  use_when:
+  - using Parallel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Parallel(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Parallel
+- id: bpmn2.complex.v1
+  menu_index: 203
+  kind: vertex
+  buildable: true
+  function: Complex
+  variant: 1
+  menu_name: Complex
+  render:
+    fingerprint: sha1:5dc111e25e7b
+  tag: metaclass
+  status: generated
+  summary: Complex.
+  discriminator: n/a
+  use_when:
+  - using Complex
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Complex(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Complex
+- id: bpmn2.start.v1
+  menu_index: 204
+  kind: vertex
+  buildable: true
+  function: Start
+  variant: 1
+  menu_name: Start
+  render:
+    fingerprint: sha1:ec46d1c243f6
+  tag: metaclass
+  status: generated
+  summary: Start.
+  discriminator: n/a
+  use_when:
+  - using Start
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Start(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Start
+- id: bpmn2.intermediate.v1
+  menu_index: 205
+  kind: vertex
+  buildable: true
+  function: Intermediate
+  variant: 1
+  menu_name: Intermediate
+  render:
+    fingerprint: sha1:16264427f28a
+  tag: metaclass
+  status: generated
+  summary: Intermediate.
+  discriminator: n/a
+  use_when:
+  - using Intermediate
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Intermediate(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Intermediate
+- id: bpmn2.end.v2
+  menu_index: 206
+  kind: vertex
+  buildable: true
+  function: End
+  variant: 2
+  menu_name: End
+  render:
+    fingerprint: sha1:95ff7557b441
+  tag: notation
+  status: generated
+  summary: End.
+  discriminator: TODO
+  use_when:
+  - using End
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.end.v1
+    see_also: []
+  example: |
+    bpmn2.End(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: End
+- id: bpmn2.message.v1
+  menu_index: 207
+  kind: vertex
+  buildable: true
+  function: Message
+  variant: 1
+  menu_name: Message
+  render:
+    fingerprint: sha1:f4db62e68528
+  tag: metaclass
+  status: generated
+  summary: Message.
+  discriminator: n/a
+  use_when:
+  - using Message
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Message(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Message
+- id: bpmn2.messageinterrupting.v1
+  menu_index: 208
+  kind: vertex
+  buildable: true
+  function: MessageInterrupting
+  variant: 1
+  menu_name: MessageInterrupting
+  render:
+    fingerprint: sha1:9c9f5b839412
+  tag: metaclass
+  status: generated
+  summary: MessageInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MessageInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageInterrupting
+- id: bpmn2.messagenoninterrupting.v1
+  menu_index: 209
+  kind: vertex
+  buildable: true
+  function: MessageNonInterrupting
+  variant: 1
+  menu_name: MessageNonInterrupting
+  render:
+    fingerprint: sha1:fb25a389e08c
+  tag: metaclass
+  status: generated
+  summary: MessageNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MessageNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageNonInterrupting
+- id: bpmn2.messagecatching.v1
+  menu_index: 210
+  kind: vertex
+  buildable: true
+  function: MessageCatching
+  variant: 1
+  menu_name: MessageCatching
+  render:
+    fingerprint: sha1:ceff3dfa851e
+  tag: metaclass
+  status: generated
+  summary: MessageCatching.
+  discriminator: n/a
+  use_when:
+  - using MessageCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageCatching
+- id: bpmn2.messageboundaryinterrupting.v1
+  menu_index: 211
+  kind: vertex
+  buildable: true
+  function: MessageBoundaryInterrupting
+  variant: 1
+  menu_name: MessageBoundaryInterrupting
+  render:
+    fingerprint: sha1:168c1a0e2ca5
+  tag: metaclass
+  status: generated
+  summary: MessageBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MessageBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageBoundaryInterrupting
+- id: bpmn2.messageboundarynoninterrupting.v1
+  menu_index: 212
+  kind: vertex
+  buildable: true
+  function: MessageBoundaryNonInterrupting
+  variant: 1
+  menu_name: MessageBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:6b1c11c385b0
+  tag: metaclass
+  status: generated
+  summary: MessageBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MessageBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageBoundaryNonInterrupting
+- id: bpmn2.messagethrowing.v1
+  menu_index: 213
+  kind: vertex
+  buildable: true
+  function: MessageThrowing
+  variant: 1
+  menu_name: MessageThrowing
+  render:
+    fingerprint: sha1:b1aadd218231
+  tag: metaclass
+  status: generated
+  summary: MessageThrowing.
+  discriminator: n/a
+  use_when:
+  - using MessageThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MessageThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageThrowing
+- id: bpmn2.messageend.v2
+  menu_index: 214
+  kind: vertex
+  buildable: true
+  function: MessageEnd
+  variant: 2
+  menu_name: MessageEnd
+  render:
+    fingerprint: sha1:170f0279ad8a
+  tag: notation
+  status: generated
+  summary: MessageEnd.
+  discriminator: TODO
+  use_when:
+  - using MessageEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.messageend.v1
+    see_also: []
+  example: |
+    bpmn2.MessageEnd(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: MessageEnd
+- id: bpmn2.timer.v1
+  menu_index: 215
+  kind: vertex
+  buildable: true
+  function: Timer
+  variant: 1
+  menu_name: Timer
+  render:
+    fingerprint: sha1:da8deff28e4b
+  tag: metaclass
+  status: generated
+  summary: Timer.
+  discriminator: n/a
+  use_when:
+  - using Timer
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Timer(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Timer
+- id: bpmn2.timerinterrupting.v1
+  menu_index: 216
+  kind: vertex
+  buildable: true
+  function: TimerInterrupting
+  variant: 1
+  menu_name: TimerInterrupting
+  render:
+    fingerprint: sha1:ac6c0cfd9bb5
+  tag: metaclass
+  status: generated
+  summary: TimerInterrupting.
+  discriminator: n/a
+  use_when:
+  - using TimerInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TimerInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TimerInterrupting
+- id: bpmn2.timernoninterrupting.v1
+  menu_index: 217
+  kind: vertex
+  buildable: true
+  function: TimerNonInterrupting
+  variant: 1
+  menu_name: TimerNonInterrupting
+  render:
+    fingerprint: sha1:2e1a81911541
+  tag: metaclass
+  status: generated
+  summary: TimerNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using TimerNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TimerNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TimerNonInterrupting
+- id: bpmn2.timercatching.v1
+  menu_index: 218
+  kind: vertex
+  buildable: true
+  function: TimerCatching
+  variant: 1
+  menu_name: TimerCatching
+  render:
+    fingerprint: sha1:d8eb83df909b
+  tag: metaclass
+  status: generated
+  summary: TimerCatching.
+  discriminator: n/a
+  use_when:
+  - using TimerCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TimerCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TimerCatching
+- id: bpmn2.timerboundaryinterrupting.v1
+  menu_index: 219
+  kind: vertex
+  buildable: true
+  function: TimerBoundaryInterrupting
+  variant: 1
+  menu_name: TimerBoundaryInterrupting
+  render:
+    fingerprint: sha1:3ebd6441f637
+  tag: metaclass
+  status: generated
+  summary: TimerBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using TimerBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TimerBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TimerBoundaryInterrupting
+- id: bpmn2.timerboundarynoninterrupting.v1
+  menu_index: 220
+  kind: vertex
+  buildable: true
+  function: TimerBoundaryNonInterrupting
+  variant: 1
+  menu_name: TimerBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:0467e2eda6ff
+  tag: metaclass
+  status: generated
+  summary: TimerBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using TimerBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.TimerBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: TimerBoundaryNonInterrupting
+- id: bpmn2.escalationinterrupting.v1
+  menu_index: 221
+  kind: vertex
+  buildable: true
+  function: EscalationInterrupting
+  variant: 1
+  menu_name: EscalationInterrupting
+  render:
+    fingerprint: sha1:57c280056a74
+  tag: metaclass
+  status: generated
+  summary: EscalationInterrupting.
+  discriminator: n/a
+  use_when:
+  - using EscalationInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EscalationInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationInterrupting
+- id: bpmn2.escalationnoninterrupting.v1
+  menu_index: 222
+  kind: vertex
+  buildable: true
+  function: EscalationNonInterrupting
+  variant: 1
+  menu_name: EscalationNonInterrupting
+  render:
+    fingerprint: sha1:8887b3e625a5
+  tag: metaclass
+  status: generated
+  summary: EscalationNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using EscalationNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EscalationNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationNonInterrupting
+- id: bpmn2.escalationboundaryinterrupting.v1
+  menu_index: 223
+  kind: vertex
+  buildable: true
+  function: EscalationBoundaryInterrupting
+  variant: 1
+  menu_name: EscalationBoundaryInterrupting
+  render:
+    fingerprint: sha1:92ee7363963e
+  tag: metaclass
+  status: generated
+  summary: EscalationBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using EscalationBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EscalationBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationBoundaryInterrupting
+- id: bpmn2.escalationboundarynoninterrupting.v1
+  menu_index: 224
+  kind: vertex
+  buildable: true
+  function: EscalationBoundaryNonInterrupting
+  variant: 1
+  menu_name: EscalationBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:0885f911e8d1
+  tag: metaclass
+  status: generated
+  summary: EscalationBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using EscalationBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EscalationBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationBoundaryNonInterrupting
+- id: bpmn2.escalationthrowing.v1
+  menu_index: 225
+  kind: vertex
+  buildable: true
+  function: EscalationThrowing
+  variant: 1
+  menu_name: EscalationThrowing
+  render:
+    fingerprint: sha1:614b9a16cd11
+  tag: metaclass
+  status: generated
+  summary: EscalationThrowing.
+  discriminator: n/a
+  use_when:
+  - using EscalationThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.EscalationThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationThrowing
+- id: bpmn2.escalationend.v2
+  menu_index: 226
+  kind: vertex
+  buildable: true
+  function: EscalationEnd
+  variant: 2
+  menu_name: EscalationEnd
+  render:
+    fingerprint: sha1:1e62af26ba97
+  tag: notation
+  status: generated
+  summary: EscalationEnd.
+  discriminator: TODO
+  use_when:
+  - using EscalationEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.escalationend.v1
+    see_also: []
+  example: |
+    bpmn2.EscalationEnd(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: EscalationEnd
+- id: bpmn2.conditional.v1
+  menu_index: 227
+  kind: vertex
+  buildable: true
+  function: Conditional
+  variant: 1
+  menu_name: Conditional
+  render:
+    fingerprint: sha1:a5753c6bed55
+  tag: metaclass
+  status: generated
+  summary: Conditional.
+  discriminator: n/a
+  use_when:
+  - using Conditional
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Conditional(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Conditional
+- id: bpmn2.conditionalinterrupting.v1
+  menu_index: 228
+  kind: vertex
+  buildable: true
+  function: ConditionalInterrupting
+  variant: 1
+  menu_name: ConditionalInterrupting
+  render:
+    fingerprint: sha1:84ae12a4f572
+  tag: metaclass
+  status: generated
+  summary: ConditionalInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ConditionalInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalInterrupting
+- id: bpmn2.conditionalnoninterrupting.v1
+  menu_index: 229
+  kind: vertex
+  buildable: true
+  function: ConditionalNonInterrupting
+  variant: 1
+  menu_name: ConditionalNonInterrupting
+  render:
+    fingerprint: sha1:24335969dc71
+  tag: metaclass
+  status: generated
+  summary: ConditionalNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ConditionalNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalNonInterrupting
+- id: bpmn2.conditionalcatching.v1
+  menu_index: 230
+  kind: vertex
+  buildable: true
+  function: ConditionalCatching
+  variant: 1
+  menu_name: ConditionalCatching
+  render:
+    fingerprint: sha1:ee9d09a1b476
+  tag: metaclass
+  status: generated
+  summary: ConditionalCatching.
+  discriminator: n/a
+  use_when:
+  - using ConditionalCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalCatching
+- id: bpmn2.conditionalboundaryinterrupting.v1
+  menu_index: 231
+  kind: vertex
+  buildable: true
+  function: ConditionalBoundaryInterrupting
+  variant: 1
+  menu_name: ConditionalBoundaryInterrupting
+  render:
+    fingerprint: sha1:cc4cf4fab750
+  tag: metaclass
+  status: generated
+  summary: ConditionalBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ConditionalBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalBoundaryInterrupting
+- id: bpmn2.conditionalboundarynoninterrupting.v1
+  menu_index: 232
+  kind: vertex
+  buildable: true
+  function: ConditionalBoundaryNonInterrupting
+  variant: 1
+  menu_name: ConditionalBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:44a06aa19e71
+  tag: metaclass
+  status: generated
+  summary: ConditionalBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ConditionalBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ConditionalBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ConditionalBoundaryNonInterrupting
+- id: bpmn2.linkcatching.v1
+  menu_index: 233
+  kind: vertex
+  buildable: true
+  function: LinkCatching
+  variant: 1
+  menu_name: LinkCatching
+  render:
+    fingerprint: sha1:4f819f50c494
+  tag: metaclass
+  status: generated
+  summary: LinkCatching.
+  discriminator: n/a
+  use_when:
+  - using LinkCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.LinkCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: LinkCatching
+- id: bpmn2.linkthrowing.v1
+  menu_index: 234
+  kind: vertex
+  buildable: true
+  function: LinkThrowing
+  variant: 1
+  menu_name: LinkThrowing
+  render:
+    fingerprint: sha1:d1fb96e9c0a1
+  tag: metaclass
+  status: generated
+  summary: LinkThrowing.
+  discriminator: n/a
+  use_when:
+  - using LinkThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.LinkThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: LinkThrowing
+- id: bpmn2.errorinterrupting.v1
+  menu_index: 235
+  kind: vertex
+  buildable: true
+  function: ErrorInterrupting
+  variant: 1
+  menu_name: ErrorInterrupting
+  render:
+    fingerprint: sha1:c4c45bf255c1
+  tag: metaclass
+  status: generated
+  summary: ErrorInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ErrorInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ErrorInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ErrorInterrupting
+- id: bpmn2.errorboundaryinterrupting.v1
+  menu_index: 236
+  kind: vertex
+  buildable: true
+  function: ErrorBoundaryInterrupting
+  variant: 1
+  menu_name: ErrorBoundaryInterrupting
+  render:
+    fingerprint: sha1:5076eef6e9d3
+  tag: metaclass
+  status: generated
+  summary: ErrorBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ErrorBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ErrorBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ErrorBoundaryInterrupting
+- id: bpmn2.errorend.v2
+  menu_index: 237
+  kind: vertex
+  buildable: true
+  function: ErrorEnd
+  variant: 2
+  menu_name: ErrorEnd
+  render:
+    fingerprint: sha1:c737393103b9
+  tag: notation
+  status: generated
+  summary: ErrorEnd.
+  discriminator: TODO
+  use_when:
+  - using ErrorEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.errorend.v1
+    see_also: []
+  example: |
+    bpmn2.ErrorEnd(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: ErrorEnd
+- id: bpmn2.cancelboundaryinterrupting.v1
+  menu_index: 238
+  kind: vertex
+  buildable: true
+  function: CancelBoundaryInterrupting
+  variant: 1
+  menu_name: CancelBoundaryInterrupting
+  render:
+    fingerprint: sha1:7898d37c6241
+  tag: metaclass
+  status: generated
+  summary: CancelBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using CancelBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CancelBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CancelBoundaryInterrupting
+- id: bpmn2.cancelend.v2
+  menu_index: 239
+  kind: vertex
+  buildable: true
+  function: CancelEnd
+  variant: 2
+  menu_name: CancelEnd
+  render:
+    fingerprint: sha1:fe6d693267a7
+  tag: notation
+  status: generated
+  summary: CancelEnd.
+  discriminator: TODO
+  use_when:
+  - using CancelEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.cancelend.v1
+    see_also: []
+  example: |
+    bpmn2.CancelEnd(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: CancelEnd
+- id: bpmn2.compensationinterrupting.v1
+  menu_index: 240
+  kind: vertex
+  buildable: true
+  function: CompensationInterrupting
+  variant: 1
+  menu_name: CompensationInterrupting
+  render:
+    fingerprint: sha1:4c0d82a7e0ea
+  tag: metaclass
+  status: generated
+  summary: CompensationInterrupting.
+  discriminator: n/a
+  use_when:
+  - using CompensationInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CompensationInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CompensationInterrupting
+- id: bpmn2.compensationboundaryinterrupting.v1
+  menu_index: 241
+  kind: vertex
+  buildable: true
+  function: CompensationBoundaryInterrupting
+  variant: 1
+  menu_name: CompensationBoundaryInterrupting
+  render:
+    fingerprint: sha1:38dcef3e5370
+  tag: metaclass
+  status: generated
+  summary: CompensationBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using CompensationBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CompensationBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CompensationBoundaryInterrupting
+- id: bpmn2.compensationthrowing.v1
+  menu_index: 242
+  kind: vertex
+  buildable: true
+  function: CompensationThrowing
+  variant: 1
+  menu_name: CompensationThrowing
+  render:
+    fingerprint: sha1:567327bab619
+  tag: metaclass
+  status: generated
+  summary: CompensationThrowing.
+  discriminator: n/a
+  use_when:
+  - using CompensationThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.CompensationThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: CompensationThrowing
+- id: bpmn2.compensationend.v2
+  menu_index: 243
+  kind: vertex
+  buildable: true
+  function: CompensationEnd
+  variant: 2
+  menu_name: CompensationEnd
+  render:
+    fingerprint: sha1:4585e297bb02
+  tag: notation
+  status: generated
+  summary: CompensationEnd.
+  discriminator: TODO
+  use_when:
+  - using CompensationEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.compensationend.v1
+    see_also: []
+  example: |
+    bpmn2.CompensationEnd(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: CompensationEnd
+- id: bpmn2.signal.v1
+  menu_index: 244
+  kind: vertex
+  buildable: true
+  function: Signal
+  variant: 1
+  menu_name: Signal
+  render:
+    fingerprint: sha1:e329714d5562
+  tag: metaclass
+  status: generated
+  summary: Signal.
+  discriminator: n/a
+  use_when:
+  - using Signal
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Signal(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Signal
+- id: bpmn2.signalinterrupting.v1
+  menu_index: 245
+  kind: vertex
+  buildable: true
+  function: SignalInterrupting
+  variant: 1
+  menu_name: SignalInterrupting
+  render:
+    fingerprint: sha1:1a83ace91a28
+  tag: metaclass
+  status: generated
+  summary: SignalInterrupting.
+  discriminator: n/a
+  use_when:
+  - using SignalInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalInterrupting
+- id: bpmn2.signalnoninterrupting.v1
+  menu_index: 246
+  kind: vertex
+  buildable: true
+  function: SignalNonInterrupting
+  variant: 1
+  menu_name: SignalNonInterrupting
+  render:
+    fingerprint: sha1:105c9a1c3729
+  tag: metaclass
+  status: generated
+  summary: SignalNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using SignalNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalNonInterrupting
+- id: bpmn2.signalcatching.v1
+  menu_index: 247
+  kind: vertex
+  buildable: true
+  function: SignalCatching
+  variant: 1
+  menu_name: SignalCatching
+  render:
+    fingerprint: sha1:70f22e6e8b4b
+  tag: metaclass
+  status: generated
+  summary: SignalCatching.
+  discriminator: n/a
+  use_when:
+  - using SignalCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalCatching
+- id: bpmn2.signalboundaryinterrupting.v1
+  menu_index: 248
+  kind: vertex
+  buildable: true
+  function: SignalBoundaryInterrupting
+  variant: 1
+  menu_name: SignalBoundaryInterrupting
+  render:
+    fingerprint: sha1:0a0831cd09cb
+  tag: metaclass
+  status: generated
+  summary: SignalBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using SignalBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalBoundaryInterrupting
+- id: bpmn2.signalboundarynoninterrupting.v1
+  menu_index: 249
+  kind: vertex
+  buildable: true
+  function: SignalBoundaryNonInterrupting
+  variant: 1
+  menu_name: SignalBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:bd915617d084
+  tag: metaclass
+  status: generated
+  summary: SignalBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using SignalBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalBoundaryNonInterrupting
+- id: bpmn2.signalthrowing.v1
+  menu_index: 250
+  kind: vertex
+  buildable: true
+  function: SignalThrowing
+  variant: 1
+  menu_name: SignalThrowing
+  render:
+    fingerprint: sha1:a3a42094d7d3
+  tag: metaclass
+  status: generated
+  summary: SignalThrowing.
+  discriminator: n/a
+  use_when:
+  - using SignalThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.SignalThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalThrowing
+- id: bpmn2.signalend.v2
+  menu_index: 251
+  kind: vertex
+  buildable: true
+  function: SignalEnd
+  variant: 2
+  menu_name: SignalEnd
+  render:
+    fingerprint: sha1:fd0ccee5096f
+  tag: notation
+  status: generated
+  summary: SignalEnd.
+  discriminator: TODO
+  use_when:
+  - using SignalEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.signalend.v1
+    see_also: []
+  example: |
+    bpmn2.SignalEnd(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: SignalEnd
+- id: bpmn2.multiple.v1
+  menu_index: 252
+  kind: vertex
+  buildable: true
+  function: Multiple
+  variant: 1
+  menu_name: Multiple
+  render:
+    fingerprint: sha1:c47f4afce4cb
+  tag: metaclass
+  status: generated
+  summary: Multiple.
+  discriminator: n/a
+  use_when:
+  - using Multiple
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.Multiple(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: Multiple
+- id: bpmn2.multipleinterrupting.v1
+  menu_index: 253
+  kind: vertex
+  buildable: true
+  function: MultipleInterrupting
+  variant: 1
+  menu_name: MultipleInterrupting
+  render:
+    fingerprint: sha1:8d8cc1041a5c
+  tag: metaclass
+  status: generated
+  summary: MultipleInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MultipleInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleInterrupting
+- id: bpmn2.multiplenoninterrupting.v1
+  menu_index: 254
+  kind: vertex
+  buildable: true
+  function: MultipleNonInterrupting
+  variant: 1
+  menu_name: MultipleNonInterrupting
+  render:
+    fingerprint: sha1:9aaa7b22fbfe
+  tag: metaclass
+  status: generated
+  summary: MultipleNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MultipleNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleNonInterrupting
+- id: bpmn2.multiplecatching.v1
+  menu_index: 255
+  kind: vertex
+  buildable: true
+  function: MultipleCatching
+  variant: 1
+  menu_name: MultipleCatching
+  render:
+    fingerprint: sha1:397cd496cfb1
+  tag: metaclass
+  status: generated
+  summary: MultipleCatching.
+  discriminator: n/a
+  use_when:
+  - using MultipleCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleCatching
+- id: bpmn2.multipleboundaryinterrupting.v1
+  menu_index: 256
+  kind: vertex
+  buildable: true
+  function: MultipleBoundaryInterrupting
+  variant: 1
+  menu_name: MultipleBoundaryInterrupting
+  render:
+    fingerprint: sha1:27b69ddaca14
+  tag: metaclass
+  status: generated
+  summary: MultipleBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MultipleBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleBoundaryInterrupting
+- id: bpmn2.multipleboundarynoninterrupting.v1
+  menu_index: 257
+  kind: vertex
+  buildable: true
+  function: MultipleBoundaryNonInterrupting
+  variant: 1
+  menu_name: MultipleBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:fb21e0cee774
+  tag: metaclass
+  status: generated
+  summary: MultipleBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using MultipleBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleBoundaryNonInterrupting
+- id: bpmn2.multiplethrowing.v1
+  menu_index: 258
+  kind: vertex
+  buildable: true
+  function: MultipleThrowing
+  variant: 1
+  menu_name: MultipleThrowing
+  render:
+    fingerprint: sha1:2e6982e843cf
+  tag: metaclass
+  status: generated
+  summary: MultipleThrowing.
+  discriminator: n/a
+  use_when:
+  - using MultipleThrowing
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleThrowing(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleThrowing
+- id: bpmn2.multipleend.v2
+  menu_index: 259
+  kind: vertex
+  buildable: true
+  function: MultipleEnd
+  variant: 2
+  menu_name: MultipleEnd
+  render:
+    fingerprint: sha1:9f8be3cb2e37
+  tag: notation
+  status: generated
+  summary: MultipleEnd.
+  discriminator: TODO
+  use_when:
+  - using MultipleEnd
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.multipleend.v1
+    see_also: []
+  example: |
+    bpmn2.MultipleEnd(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleEnd
+- id: bpmn2.multiplestart.v1
+  menu_index: 260
+  kind: vertex
+  buildable: true
+  function: MultipleStart
+  variant: 1
+  menu_name: MultipleStart
+  render:
+    fingerprint: sha1:8213f2e59b70
+  tag: metaclass
+  status: generated
+  summary: MultipleStart.
+  discriminator: n/a
+  use_when:
+  - using MultipleStart
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.MultipleStart(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: MultipleStart
+- id: bpmn2.parallelmultiple.v1
+  menu_index: 261
+  kind: vertex
+  buildable: true
+  function: ParallelMultiple
+  variant: 1
+  menu_name: ParallelMultiple
+  render:
+    fingerprint: sha1:e7e838156a5a
+  tag: metaclass
+  status: generated
+  summary: ParallelMultiple.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultiple
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultiple(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultiple
+- id: bpmn2.parallelmultipleinterrupting.v1
+  menu_index: 262
+  kind: vertex
+  buildable: true
+  function: ParallelMultipleInterrupting
+  variant: 1
+  menu_name: ParallelMultipleInterrupting
+  render:
+    fingerprint: sha1:dae1f1208e16
+  tag: metaclass
+  status: generated
+  summary: ParallelMultipleInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultipleInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultipleInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultipleInterrupting
+- id: bpmn2.parallelmultiplenoninterrupting.v1
+  menu_index: 263
+  kind: vertex
+  buildable: true
+  function: ParallelMultipleNonInterrupting
+  variant: 1
+  menu_name: ParallelMultipleNonInterrupting
+  render:
+    fingerprint: sha1:198b6a560d6a
+  tag: metaclass
+  status: generated
+  summary: ParallelMultipleNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultipleNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultipleNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultipleNonInterrupting
+- id: bpmn2.parallelmultiplecatching.v1
+  menu_index: 264
+  kind: vertex
+  buildable: true
+  function: ParallelMultipleCatching
+  variant: 1
+  menu_name: ParallelMultipleCatching
+  render:
+    fingerprint: sha1:8cc5664c6a36
+  tag: metaclass
+  status: generated
+  summary: ParallelMultipleCatching.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultipleCatching
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultipleCatching(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultipleCatching
+- id: bpmn2.parallelmultipleboundaryinterrupting.v1
+  menu_index: 265
+  kind: vertex
+  buildable: true
+  function: ParallelMultipleBoundaryInterrupting
+  variant: 1
+  menu_name: ParallelMultipleBoundaryInterrupting
+  render:
+    fingerprint: sha1:a63a7fcb208b
+  tag: metaclass
+  status: generated
+  summary: ParallelMultipleBoundaryInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultipleBoundaryInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultipleBoundaryInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultipleBoundaryInterrupting
+- id: bpmn2.parallelmultipleboundarynoninterrupting.v1
+  menu_index: 266
+  kind: vertex
+  buildable: true
+  function: ParallelMultipleBoundaryNonInterrupting
+  variant: 1
+  menu_name: ParallelMultipleBoundaryNonInterrupting
+  render:
+    fingerprint: sha1:442d993d3ad8
+  tag: metaclass
+  status: generated
+  summary: ParallelMultipleBoundaryNonInterrupting.
+  discriminator: n/a
+  use_when:
+  - using ParallelMultipleBoundaryNonInterrupting
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    bpmn2.ParallelMultipleBoundaryNonInterrupting(n1, "")
+  metamodel:
+    spec: bpmn-2.0
+    element: ParallelMultipleBoundaryNonInterrupting
+- id: bpmn2.terminate.v2
+  menu_index: 267
+  kind: vertex
+  buildable: true
+  function: Terminate
+  variant: 2
+  menu_name: Terminate
+  render:
+    fingerprint: sha1:dbcb63d6c29c
+  tag: notation
+  status: generated
+  summary: Terminate.
+  discriminator: TODO
+  use_when:
+  - using Terminate
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - bpmn2.terminate.v1
+    see_also: []
+  example: |
+    bpmn2.Terminate(n1, "", variant=2)
+  metamodel:
+    spec: bpmn-2.0
+    element: Terminate

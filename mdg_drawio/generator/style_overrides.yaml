@@ -1,0 +1,31 @@
+# Per-type rendering overrides ("corrections").
+#
+# Each entry deviates a shape from its raw palette rendering where an override
+# reads better. Two independent sections per type, both optional:
+#
+#   overrides:
+#     <node.type>:                # e.g. "uml.Package", "c4.Container"
+#       style:                    # draw.io style tokens merged onto the palette
+#         <attr>: <value>         #   base style at generation (null deletes it)
+#       padding:                  # extra inner padding (px) added on top of the
+#         top: <px>               #   layout's default inset — clears headers so
+#         right: <px>             #   inner shapes don't collide with a top label
+#         bottom: <px>
+#         left: <px>
+#
+# The mechanism is notation-agnostic — add any "<library>.<Shape>" key. Style
+# is consumed by the generator; padding is consumed by the layout (via convert).
+# Explicit per-node overrides still win over these (applied afterwards).
+
+overrides:
+  uml.Package:
+    # Pin the folder header/label to the top-left instead of the palette default
+    # (centered). Matches the conventional package look.
+    style:
+      align: left
+      verticalAlign: top
+    # Because the header now sits at the top, give inner shapes extra top
+    # clearance so they don't collide with it. Header-derived: the folder tab
+    # (tabHeight 14) plus its label spacing (~10) ≈ 24 px.
+    padding:
+      top: 24

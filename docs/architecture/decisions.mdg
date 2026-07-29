@@ -1,0 +1,16 @@
+---
+title: "Architecture Decisions for mdg-drawio"
+page: "Decisions"
+mode: layered
+---
+
+uml.UML("[Decisions] mdg-drawio architecture decision records")
+
+uml.Package(decisions, "Architecture Decisions"):
+    uml.Class(adr_0001, "ADR-0001 — Contracts is a dependency-free shared kernel")
+    uml.Class(adr_0002, "ADR-0002 — Registries and styles are pre-loaded once at startup")
+    uml.Class(adr_0003, "ADR-0003 — Generated XML is validated before writing")
+    uml.Class(adr_0004, "ADR-0004 — Manual layout is preserved across regenerations")
+    uml.Class(adr_0005, "ADR-0005 — All layout modes share one BaseLayout/Result contract")
+    uml.Class(adr_0006, "ADR-0006 — Style identity is a normalized fingerprint")
+    uml.Class(adr_0007, "ADR-0007 — Generation never calls notation at runtime")

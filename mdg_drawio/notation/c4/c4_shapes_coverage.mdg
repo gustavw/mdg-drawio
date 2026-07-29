@@ -1,0 +1,29 @@
+---
+title: "C4 Shapes Coverage"
+mode: palette
+---
+
+use c4
+
+c4.C4("C4 Shapes Coverage")
+    c4.Person(p1, "Person name", "Description of person.", technology="")  # 1. Person
+    c4.Person_Ext(p2, "External person name", "Description of external person.", technology="")  # 2. Person_Ext
+    c4.System(s1, "System name", "Description of software system.", technology="")  # 3. System
+    c4.System_Ext(s2, "External system name", "Description of external software system.", technology="")  # 4. System_Ext
+    c4.Container(c1, "Container name", "Description of container.", technology="")  # 5. Container
+    c4.ContainerDb(db1, "Container name", "Description of storage container.", technology="")  # 6. ContainerDb
+    c4.ContainerMicroservice(m1, "Container name", "Description of microservice container.", technology="")  # 7. ContainerMicroservice
+    c4.ContainerQueue(q1, "Container name", "Description of message broker container.", technology="")  # 8. ContainerQueue
+    c4.ContainerWebBrowser(wb1, "Container name", "Description of web browser container.", technology="")  # 9. ContainerWebBrowser
+    c4.Component(co1, "Component name", "Description of component.", technology="")  # 10. Component
+    c4.Rel(None, None, "e.g. Makes API calls", description="", technology="e.g. JSON/HTTP")  # 11. Rel
+    c4.Rel(None, None, "e.g. Visits pages", description="", variant=2)  # 12. Rel
+    c4.Rel(None, None, "", description="", variant=3)  # 13. Rel
+    c4.System_Boundary(sysboundary, "System name"):  # 14. System_Boundary
+        c4.Container(sbc1, "Container name", "Description of container.", technology="")
+    c4.Container_Boundary(cntboundary, "Container name"):  # 15. Container_Boundary
+        c4.Component(cbc1, "Component name", "Description of component.", technology="")
+    c4.Context_DiagramTitle(t1, "[System Context] Diagram title", "Diagram short description")  # 16. Context_DiagramTitle
+    c4.Container_DiagramTitle(t2, "[Containers] Diagram title", "Diagram short description")  # 17. Container_DiagramTitle
+    c4.Component_DiagramTitle(t3, "[Components] Diagram title", "Diagram short description")  # 18. Component_DiagramTitle
+    c4.Legend(legend1, "Legend")  # 19. Legend

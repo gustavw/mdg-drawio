@@ -1,0 +1,37 @@
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="mdg-drawio" type="device">
+  <diagram id="diagram-0" name="Decisions">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1560" pageHeight="1170" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="[Decisions] mdg-drawio architecture decision records" value="[Decisions] mdg-drawio architecture decision records" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40.0" y="40.0" width="120.0" height="60.0" as="geometry" />
+        </mxCell>
+        <mxCell id="decisions" value="Architecture Decisions" style="shape=folder;fontStyle=1;spacingTop=10;tabWidth=40;tabHeight=14;tabPosition=left;html=1;whiteSpace=wrap;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="40.0" y="140.0" width="220.0" height="990.0" as="geometry" />
+        </mxCell>
+        <mxCell id="adr_0001" value="ADR-0001 — Contracts is a dependency-free shared kernel" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="decisions">
+          <mxGeometry x="30.0" y="30.0" width="160.0" height="90.0" as="geometry" />
+        </mxCell>
+        <mxCell id="adr_0002" value="ADR-0002 — Registries and styles are pre-loaded once at startup" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="decisions">
+          <mxGeometry x="30.0" y="160.0" width="160.0" height="90.0" as="geometry" />
+        </mxCell>
+        <mxCell id="adr_0003" value="ADR-0003 — Generated XML is validated before writing" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="decisions">
+          <mxGeometry x="30.0" y="290.0" width="160.0" height="90.0" as="geometry" />
+        </mxCell>
+        <mxCell id="adr_0004" value="ADR-0004 — Manual layout is preserved across regenerations" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="decisions">
+          <mxGeometry x="30.0" y="420.0" width="160.0" height="90.0" as="geometry" />
+        </mxCell>
+        <mxCell id="adr_0005" value="ADR-0005 — All layout modes share one BaseLayout/Result contract" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="decisions">
+          <mxGeometry x="30.0" y="550.0" width="160.0" height="90.0" as="geometry" />
+        </mxCell>
+        <mxCell id="adr_0006" value="ADR-0006 — Style identity is a normalized fingerprint" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="decisions">
+          <mxGeometry x="30.0" y="680.0" width="160.0" height="90.0" as="geometry" />
+        </mxCell>
+        <mxCell id="adr_0007" value="ADR-0007 — Generation never calls notation at runtime" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="decisions">
+          <mxGeometry x="30.0" y="810.0" width="160.0" height="90.0" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

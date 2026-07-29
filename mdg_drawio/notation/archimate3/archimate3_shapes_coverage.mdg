@@ -1,0 +1,179 @@
+---
+title: "ArchiMate 3.2 Shapes Coverage"
+mode: palette
+---
+
+use archimate3
+
+archimate3.ArchiMate3("ArchiMate 3.2 Shapes Coverage")
+
+    # ── Archimate 3 / Generic ──
+    archimate3.GenericActiveStructure(n1, "Internal Active Structure Element")  # 1. GenericActiveStructure
+    archimate3.GenericCollaboration(n2, "Collaboration")  # 2. GenericCollaboration
+    archimate3.GenericCollaboration(n3, "", variant=2)  # 3. GenericCollaboration
+    archimate3.GenericInterface(n4, "Interface")  # 4. GenericInterface
+    archimate3.GenericInterface(n5, "", variant=2)  # 5. GenericInterface
+    archimate3.InternalBehaviorElement(n6, "Internal Behavior Element")  # 6. InternalBehaviorElement
+    archimate3.GenericProcess(n7, "Process")  # 7. GenericProcess
+    archimate3.GenericProcess(n8, "", variant=2)  # 8. GenericProcess
+    archimate3.GenericFunction(n9, "Function")  # 9. GenericFunction
+    archimate3.GenericFunction(n10, "", variant=2)  # 10. GenericFunction
+    archimate3.GenericInteraction(n11, "Interaction")  # 11. GenericInteraction
+    archimate3.GenericInteraction(n12, "", variant=2)  # 12. GenericInteraction
+    archimate3.GenericService(n13, "Service")  # 13. GenericService
+    archimate3.GenericService(n14, "", variant=2)  # 14. GenericService
+    archimate3.GenericEvent(n15, "Event")  # 15. GenericEvent
+    archimate3.GenericEvent(n16, "", variant=2)  # 16. GenericEvent
+    archimate3.GenericPassiveStructure(n17, "Passive Structure Element")  # 17. GenericPassiveStructure
+    archimate3.GenericPassiveStructure(n18, "", variant=2)  # 18. GenericPassiveStructure
+    archimate3.MotivationElement(n19, "Motivation Element")  # 19. MotivationElement
+    archimate3.Grouping(n20, "Grouping")  # 20. Grouping
+    archimate3.Grouping(n21, "", variant=2)  # 21. Grouping
+    archimate3.Location(n22, "Location")  # 22. Location
+    archimate3.Location(n23, "", variant=2)  # 23. Location
+
+    # ── Archimate 3 / Relationships ──
+    archimate3.Composition(None, None)  # 24. Composition
+    archimate3.Aggregation(None, None)  # 25. Aggregation
+    archimate3.Assignment(None, None)  # 26. Assignment
+    archimate3.Realization(None, None)  # 27. Realization
+    archimate3.Serving(None, None)  # 28. Serving
+    archimate3.Access(None, None)  # 29. Access
+    archimate3.Access(None, None, variant=3)  # 30. Access
+    archimate3.Access(None, None, variant=2)  # 31. Access
+    archimate3.Influence(None, None, "+/-")  # 32. Influence
+    archimate3.Association(None, None)  # 33. Association
+    archimate3.Association(None, None, variant=2)  # 34. Association
+    archimate3.Triggering(None, None)  # 35. Triggering
+    archimate3.Flow(None, None)  # 36. Flow
+    archimate3.Specialization(None, None)  # 37. Specialization
+    archimate3.Junction(n24, "")  # 38. Junction
+    archimate3.OrJunction(n25, "")  # 39. OrJunction
+
+    # ── Archimate 3 / Motivation ──
+    archimate3.Stakeholder(n26, "Stakeholder")  # 40. Stakeholder
+    archimate3.Stakeholder(n27, "", variant=2)  # 41. Stakeholder
+    archimate3.Driver(n28, "Driver")  # 42. Driver
+    archimate3.Driver(n29, "", variant=2)  # 43. Driver
+    archimate3.Assessment(n30, "Assessment")  # 44. Assessment
+    archimate3.Assessment(n31, "", variant=2)  # 45. Assessment
+    archimate3.Goal(n32, "Goal")  # 46. Goal
+    archimate3.Goal(n33, "", variant=2)  # 47. Goal
+    archimate3.Outcome(n34, "Outcome")  # 48. Outcome
+    archimate3.Outcome(n35, "", variant=2)  # 49. Outcome
+    archimate3.Principle(n36, "Principle")  # 50. Principle
+    archimate3.Principle(n37, "", variant=2)  # 51. Principle
+    archimate3.Requirement(n38, "Requirement")  # 52. Requirement
+    archimate3.Requirement(n39, "", variant=2)  # 53. Requirement
+    archimate3.Constraint(n40, "Constraint")  # 54. Constraint
+    archimate3.Constraint(n41, "", variant=2)  # 55. Constraint
+    archimate3.Meaning(n42, "Meaning")  # 56. Meaning
+    archimate3.Meaning(n43, "", variant=2)  # 57. Meaning
+    archimate3.Value(n44, "Value")  # 58. Value
+    archimate3.Value(n45, "", variant=2)  # 59. Value
+
+    # ── Archimate 3 / Strategy ──
+    archimate3.Resource(n46, "Resource")  # 60. Resource
+    archimate3.Resource(n47, "", variant=2)  # 61. Resource
+    archimate3.Capability(n48, "Capability")  # 62. Capability
+    archimate3.Capability(n49, "", variant=2)  # 63. Capability
+    archimate3.ValueStream(n50, "Value Stream")  # 64. ValueStream
+    archimate3.ValueStream(n51, "", variant=2)  # 65. ValueStream
+    archimate3.CourseOfAction(n52, "Course of Action")  # 66. CourseOfAction
+    archimate3.CourseOfAction(n53, "", variant=2)  # 67. CourseOfAction
+
+    # ── Archimate 3 / Business ──
+    archimate3.BusinessActor(n54, "Business Actor", variant=2)  # 68. BusinessActor
+    archimate3.BusinessActor(n55, "")  # 69. BusinessActor
+    archimate3.BusinessRole(n56, "Business Role")  # 70. BusinessRole
+    archimate3.BusinessRole(n57, "", variant=2)  # 71. BusinessRole
+    archimate3.BusinessCollaboration(n58, "Business Collaboration")  # 72. BusinessCollaboration
+    archimate3.BusinessCollaboration(n59, "", variant=2)  # 73. BusinessCollaboration
+    archimate3.BusinessInterface(n60, "Business Interface")  # 74. BusinessInterface
+    archimate3.BusinessInterface(n61, "", variant=2)  # 75. BusinessInterface
+    archimate3.BusinessProcess(n62, "Business Process")  # 76. BusinessProcess
+    archimate3.BusinessProcess(n63, "", variant=2)  # 77. BusinessProcess
+    archimate3.BusinessFunction(n64, "Business Function")  # 78. BusinessFunction
+    archimate3.BusinessFunction(n65, "", variant=2)  # 79. BusinessFunction
+    archimate3.BusinessInteraction(n66, "Business Interaction")  # 80. BusinessInteraction
+    archimate3.BusinessInteraction(n67, "", variant=2)  # 81. BusinessInteraction
+    archimate3.BusinessEvent(n68, "Business Event")  # 82. BusinessEvent
+    archimate3.BusinessEvent(n69, "", variant=2)  # 83. BusinessEvent
+    archimate3.BusinessService(n70, "Business Service")  # 84. BusinessService
+    archimate3.BusinessService(n71, "", variant=2)  # 85. BusinessService
+    archimate3.BusinessObject(n72, "Business Object")  # 86. BusinessObject
+    archimate3.BusinessObject(n73, "", variant=2)  # 87. BusinessObject
+    archimate3.Contract(n74, "Contract")  # 88. Contract
+    archimate3.Contract(n75, "", variant=2)  # 89. Contract
+    archimate3.Representation(n76, "Representation")  # 90. Representation
+    archimate3.Representation(n77, "", variant=2)  # 91. Representation
+    archimate3.Product(n78, "Product")  # 92. Product
+    archimate3.Product(n79, "", variant=2)  # 93. Product
+
+    # ── Archimate 3 / Application ──
+    archimate3.ApplicationComponent(n80, "Application Component")  # 94. ApplicationComponent
+    archimate3.ApplicationComponent(n81, "", variant=2)  # 95. ApplicationComponent
+    archimate3.ApplicationCollaboration(n82, "Application Collaboration")  # 96. ApplicationCollaboration
+    archimate3.ApplicationCollaboration(n83, "", variant=2)  # 97. ApplicationCollaboration
+    archimate3.ApplicationInterface(n84, "Application Interface")  # 98. ApplicationInterface
+    archimate3.ApplicationInterface(n85, "", variant=2)  # 99. ApplicationInterface
+    archimate3.ApplicationFunction(n86, "Application Function")  # 100. ApplicationFunction
+    archimate3.ApplicationFunction(n87, "", variant=2)  # 101. ApplicationFunction
+    archimate3.ApplicationInteraction(n88, "Application Interaction")  # 102. ApplicationInteraction
+    archimate3.ApplicationInteraction(n89, "", variant=2)  # 103. ApplicationInteraction
+    archimate3.ApplicationProcess(n90, "Application Process")  # 104. ApplicationProcess
+    archimate3.ApplicationProcess(n91, "", variant=2)  # 105. ApplicationProcess
+    archimate3.ApplicationEvent(n92, "Application Event")  # 106. ApplicationEvent
+    archimate3.ApplicationEvent(n93, "", variant=2)  # 107. ApplicationEvent
+    archimate3.ApplicationService(n94, "Application Service")  # 108. ApplicationService
+    archimate3.ApplicationService(n95, "", variant=2)  # 109. ApplicationService
+    archimate3.DataObject(n96, "Data Object")  # 110. DataObject
+    archimate3.DataObject(n97, "", variant=2)  # 111. DataObject
+
+    # ── Archimate 3 / Technology ──
+    archimate3.Node(n98, "Node")  # 112. Node
+    archimate3.Node(n99, "", variant=2)  # 113. Node
+    archimate3.Device(n100, "Device")  # 114. Device
+    archimate3.Device(n101, "", variant=2)  # 115. Device
+    archimate3.SystemSoftware(n102, "System Software")  # 116. SystemSoftware
+    archimate3.SystemSoftware(n103, "", variant=2)  # 117. SystemSoftware
+    archimate3.TechnologyCollaboration(n104, "Technology Collaboration")  # 118. TechnologyCollaboration
+    archimate3.TechnologyCollaboration(n105, "", variant=2)  # 119. TechnologyCollaboration
+    archimate3.TechnologyInterface(n106, "Technology Interface")  # 120. TechnologyInterface
+    archimate3.TechnologyInterface(n107, "", variant=2)  # 121. TechnologyInterface
+    archimate3.Path(n108, "Path")  # 122. Path
+    archimate3.Path(n109, "", variant=2)  # 123. Path
+    archimate3.CommunicationNetwork(n110, "Communication Network")  # 124. CommunicationNetwork
+    archimate3.CommunicationNetwork(n111, "", variant=2)  # 125. CommunicationNetwork
+    archimate3.TechnologyFunction(n112, "Technology Function")  # 126. TechnologyFunction
+    archimate3.TechnologyFunction(n113, "", variant=2)  # 127. TechnologyFunction
+    archimate3.TechnologyProcess(n114, "Technology Process")  # 128. TechnologyProcess
+    archimate3.TechnologyProcess(n115, "", variant=2)  # 129. TechnologyProcess
+    archimate3.TechnologyInteraction(n116, "Technology Interaction")  # 130. TechnologyInteraction
+    archimate3.TechnologyInteraction(n117, "", variant=2)  # 131. TechnologyInteraction
+    archimate3.TechnologyEvent(n118, "Technology Event")  # 132. TechnologyEvent
+    archimate3.TechnologyEvent(n119, "", variant=2)  # 133. TechnologyEvent
+    archimate3.TechnologyService(n120, "Technology Service")  # 134. TechnologyService
+    archimate3.TechnologyService(n121, "", variant=2)  # 135. TechnologyService
+    archimate3.Artifact(n122, "Artifact")  # 136. Artifact
+    archimate3.Artifact(n123, "", variant=2)  # 137. Artifact
+    archimate3.Equipment(n124, "Equipment")  # 138. Equipment
+    archimate3.Equipment(n125, "", variant=2)  # 139. Equipment
+    archimate3.Facility(n126, "Facility")  # 140. Facility
+    archimate3.Facility(n127, "", variant=2)  # 141. Facility
+    archimate3.DistributionNetwork(n128, "Distribution Network")  # 142. DistributionNetwork
+    archimate3.DistributionNetwork(n129, "", variant=2)  # 143. DistributionNetwork
+    archimate3.Material(n130, "Material")  # 144. Material
+    archimate3.Material(n131, "", variant=2)  # 145. Material
+
+    # ── Archimate 3 / Implementation and Migration ──
+    archimate3.WorkPackage(n132, "Work Package")  # 146. WorkPackage
+    archimate3.WorkPackage(n133, "", variant=2)  # 147. WorkPackage
+    archimate3.Deliverable(n134, "Deliverable")  # 148. Deliverable
+    archimate3.Deliverable(n135, "", variant=2)  # 149. Deliverable
+    archimate3.ImplementationEvent(n136, "Implementation Event")  # 150. ImplementationEvent
+    archimate3.ImplementationEvent(n137, "", variant=2)  # 151. ImplementationEvent
+    archimate3.Plateau(n138, "Plateau")  # 152. Plateau
+    archimate3.Plateau(n139, "", variant=2)  # 153. Plateau
+    archimate3.Gap(n140, "Gap")  # 154. Gap
+    archimate3.Gap(n141, "", variant=2)  # 155. Gap

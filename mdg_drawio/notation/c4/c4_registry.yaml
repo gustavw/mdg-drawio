@@ -1,0 +1,721 @@
+# C4 shape registry — agent-facing metadata for the c4 draw.io DSL.
+# Conforms to the library-agnostic shape-registry schema (shape-registry.schema.json).
+# CORE fields library-invariant; METAMODEL block present only where a shape maps to a
+# metamodel element. Judgment fields are status: generated — accept/reject per entry.
+
+library: c4
+version: '1'
+provenance:
+  source_file: C4.drawio
+  palette: draw.io C4
+  shape_count: 19
+  pages:
+  - C4
+grammar:
+  spec: ../GRAMMAR.md
+  root: C4
+  notes:
+  - 'System_Boundary and Container_Boundary contain child nodes (contains: ''*'').'
+  - DiagramTitle and Legend shapes are annotations, not model elements.
+shapes:
+- id: c4.person.v1
+  menu_index: 1
+  kind: vertex
+  buildable: true
+  function: Person
+  variant: 1
+  menu_name: Person
+  render:
+    fingerprint: sha1:3c1a1ae346ef
+  tag: metaclass
+  status: generated
+  summary: Person.
+  discriminator: n/a
+  use_when:
+  - using Person
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.Person(n1, "Person name", "Description of person.", technology="")
+  metamodel:
+    spec: c4
+    element: Person
+    classification:
+      external: 'false'
+- id: c4.person_ext.v1
+  menu_index: 2
+  kind: vertex
+  buildable: true
+  function: Person_Ext
+  variant: 1
+  menu_name: Person_Ext
+  render:
+    fingerprint: sha1:114729141e37
+  tag: notation
+  status: generated
+  summary: Person_Ext.
+  discriminator: n/a
+  use_when:
+  - using Person_Ext
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.Person_Ext(n1, "External person name", "Description of external person.", technology="")
+  metamodel:
+    spec: c4
+    element: Person
+    classification:
+      external: 'true'
+- id: c4.system.v1
+  menu_index: 3
+  kind: vertex
+  buildable: true
+  function: System
+  variant: 1
+  menu_name: System
+  render:
+    fingerprint: sha1:2e5303d2a9b3
+  tag: metaclass
+  status: generated
+  summary: System.
+  discriminator: n/a
+  use_when:
+  - using System
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.System(n1, "System name", "Description of software system.", technology="")
+  metamodel:
+    spec: c4
+    element: SoftwareSystem
+    classification:
+      external: 'false'
+- id: c4.system_ext.v1
+  menu_index: 4
+  kind: vertex
+  buildable: true
+  function: System_Ext
+  variant: 1
+  menu_name: System_Ext
+  render:
+    fingerprint: sha1:7ba1540f4603
+  tag: notation
+  status: generated
+  summary: System_Ext.
+  discriminator: n/a
+  use_when:
+  - using System_Ext
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.System_Ext(n1, "External system name", "Description of external software system.", technology="")
+  metamodel:
+    spec: c4
+    element: SoftwareSystem
+    classification:
+      external: 'true'
+- id: c4.container.v1
+  menu_index: 5
+  kind: vertex
+  buildable: true
+  function: Container
+  variant: 1
+  menu_name: Container
+  render:
+    fingerprint: sha1:fbe5aed0bc1b
+  tag: metaclass
+  status: generated
+  summary: Container.
+  discriminator: n/a
+  use_when:
+  - using Container
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.Container(n1, "Container name", "Description of container.", technology="")
+  metamodel:
+    spec: c4
+    element: Container
+    classification:
+      external: 'false'
+- id: c4.containerdb.v1
+  menu_index: 6
+  kind: vertex
+  buildable: true
+  function: ContainerDb
+  variant: 1
+  menu_name: ContainerDb
+  render:
+    fingerprint: sha1:b8eaeb44b45c
+  tag: notation
+  status: generated
+  summary: ContainerDb.
+  discriminator: n/a
+  use_when:
+  - using ContainerDb
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.ContainerDb(n1, "Container name", "Description of storage container.", technology="")
+  metamodel:
+    spec: c4
+    element: Container
+    classification:
+      technology_hint: database
+- id: c4.containermicroservice.v1
+  menu_index: 7
+  kind: vertex
+  buildable: true
+  function: ContainerMicroservice
+  variant: 1
+  menu_name: ContainerMicroservice
+  render:
+    fingerprint: sha1:715a665984fe
+  tag: notation
+  status: generated
+  summary: ContainerMicroservice.
+  discriminator: n/a
+  use_when:
+  - using ContainerMicroservice
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.ContainerMicroservice(n1, "Container name", "Description of microservice container.", technology="")
+  metamodel:
+    spec: c4
+    element: Container
+    classification:
+      technology_hint: microservice
+- id: c4.containerqueue.v1
+  menu_index: 8
+  kind: vertex
+  buildable: true
+  function: ContainerQueue
+  variant: 1
+  menu_name: ContainerQueue
+  render:
+    fingerprint: sha1:0f3b82acd86f
+  tag: notation
+  status: generated
+  summary: ContainerQueue.
+  discriminator: n/a
+  use_when:
+  - using ContainerQueue
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.ContainerQueue(n1, "Container name", "Description of message broker container.", technology="")
+  metamodel:
+    spec: c4
+    element: Container
+    classification:
+      technology_hint: message_broker
+- id: c4.containerwebbrowser.v1
+  menu_index: 9
+  kind: vertex
+  buildable: true
+  function: ContainerWebBrowser
+  variant: 1
+  menu_name: ContainerWebBrowser
+  render:
+    fingerprint: sha1:d568197e43ae
+  tag: notation
+  status: generated
+  summary: ContainerWebBrowser.
+  discriminator: n/a
+  use_when:
+  - using ContainerWebBrowser
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.ContainerWebBrowser(n1, "Container name", "Description of web browser container.", technology="")
+  metamodel:
+    spec: c4
+    element: Container
+    classification:
+      technology_hint: web_browser
+- id: c4.component.v1
+  menu_index: 10
+  kind: vertex
+  buildable: true
+  function: Component
+  variant: 1
+  menu_name: Component
+  render:
+    fingerprint: sha1:a2d23be5cb46
+  tag: metaclass
+  status: generated
+  summary: Component.
+  discriminator: n/a
+  use_when:
+  - using Component
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.Component(n1, "Component name", "Description of component.", technology="")
+  metamodel:
+    spec: c4
+    element: Component
+- id: c4.rel.v1
+  menu_index: 11
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 1
+  menu_name: Rel
+  render:
+    fingerprint: sha1:972289297c73
+  tag: metaclass
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: technology
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - c4.rel.v2
+    - c4.rel.v3
+    see_also: []
+  example: |
+    c4.Rel(None, None, "e.g. Makes API calls", description="", technology="e.g. JSON/HTTP")
+  metamodel:
+    spec: c4
+    element: Relationship
+    endpoints:
+      source: Element
+      target: Element
+- id: c4.rel.v2
+  menu_index: 12
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 2
+  menu_name: Rel
+  render:
+    fingerprint: sha1:972289297c73
+  tag: notation
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - c4.rel.v1
+    - c4.rel.v3
+    see_also: []
+  example: |
+    c4.Rel(None, None, "e.g. Visits pages", description="")
+  metamodel:
+    spec: c4
+    element: Relationship
+    endpoints:
+      source: Element
+      target: Element
+- id: c4.rel.v3
+  menu_index: 13
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 3
+  menu_name: Rel
+  render:
+    fingerprint: sha1:972289297c73
+  tag: notation
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - c4.rel.v1
+    - c4.rel.v2
+    see_also: []
+  example: |
+    c4.Rel(None, None, "", description="")
+  metamodel:
+    spec: c4
+    element: Relationship
+    endpoints:
+      source: Element
+      target: Element
+- id: c4.system_boundary.v1
+  menu_index: 14
+  kind: vertex
+  buildable: true
+  function: System_Boundary
+  variant: 1
+  menu_name: System_Boundary
+  render:
+    fingerprint: sha1:3dd6e586eb26
+  tag: metaclass
+  status: generated
+  summary: System_Boundary.
+  discriminator: n/a
+  use_when:
+  - using System_Boundary
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.System_Boundary(b1, "System name"):
+        c4.Container(c1, "Container name", "Description of container.")
+  metamodel:
+    spec: c4
+    element: SystemBoundary
+- id: c4.container_boundary.v1
+  menu_index: 15
+  kind: vertex
+  buildable: true
+  function: Container_Boundary
+  variant: 1
+  menu_name: Container_Boundary
+  render:
+    fingerprint: sha1:3dd6e586eb26
+  tag: metaclass
+  status: generated
+  summary: Container_Boundary.
+  discriminator: n/a
+  use_when:
+  - using Container_Boundary
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.Container_Boundary(b1, "Container name"):
+        c4.Component(c1, "Component name", "Description of component.")
+  metamodel:
+    spec: c4
+    element: ContainerBoundary
+- id: c4.context_diagramtitle.v1
+  menu_index: 16
+  kind: vertex
+  buildable: true
+  function: Context_DiagramTitle
+  variant: 1
+  menu_name: Context_DiagramTitle
+  render:
+    fingerprint: sha1:b06f9f8acca9
+  tag: none
+  status: generated
+  summary: Context_DiagramTitle.
+  discriminator: n/a
+  use_when:
+  - using Context_DiagramTitle
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.Context_DiagramTitle(t1, "[System Context] Diagram title", "Diagram short description")
+- id: c4.container_diagramtitle.v1
+  menu_index: 17
+  kind: vertex
+  buildable: true
+  function: Container_DiagramTitle
+  variant: 1
+  menu_name: Container_DiagramTitle
+  render:
+    fingerprint: sha1:b06f9f8acca9
+  tag: none
+  status: generated
+  summary: Container_DiagramTitle.
+  discriminator: n/a
+  use_when:
+  - using Container_DiagramTitle
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.Container_DiagramTitle(t1, "[Containers] Diagram title", "Diagram short description")
+- id: c4.component_diagramtitle.v1
+  menu_index: 18
+  kind: vertex
+  buildable: true
+  function: Component_DiagramTitle
+  variant: 1
+  menu_name: Component_DiagramTitle
+  render:
+    fingerprint: sha1:b06f9f8acca9
+  tag: none
+  status: generated
+  summary: Component_DiagramTitle.
+  discriminator: n/a
+  use_when:
+  - using Component_DiagramTitle
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  - name: technology
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.Component_DiagramTitle(t1, "[Components] Diagram title", "Diagram short description")
+- id: c4.legend.v1
+  menu_index: 19
+  kind: vertex
+  buildable: true
+  function: Legend
+  variant: 1
+  menu_name: Legend
+  render:
+    fingerprint: sha1:563fb712eea0
+  tag: none
+  status: generated
+  summary: Legend.
+  discriminator: n/a
+  use_when:
+  - using Legend
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    c4.Legend(l1, "Legend")

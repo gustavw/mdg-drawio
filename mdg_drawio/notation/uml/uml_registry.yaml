@@ -1,0 +1,2677 @@
+# UML (general) shape registry — agent-facing metadata for the uml draw.io DSL.
+# Conforms to the library-agnostic shape-registry schema (shape-registry.schema.json).
+# Same structure as the uml25 registry; CORE fields library-invariant, METAMODEL block
+# present only where a shape maps to a UML metaclass. Pure-notation shapes (Item, Divider,
+# Spacer, Title, Frame) omit the metamodel block.
+#
+# NOTE: the general 'uml' palette DSL uses bare function calls (Object(...), not uml.Object(...)),
+# per its own 'use uml' convention; examples are kept verbatim.
+# Provenance: metamodel data from the OMG UML 2.5.1 metamodel (UML.xmi). status: generated.
+
+library: uml
+version: classic
+provenance:
+  source_file: UML.drawio
+  palette: draw.io UML (classic)
+  shape_count: 65
+  pages:
+  - uml
+grammar:
+  spec: ../GRAMMAR.md
+  root: UML
+  notes:
+  - Compartment children use Item/Divider/CompositeLabel rows.
+row_types:
+- name: Item
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: Compartment member row (field, method).
+- name: Divider
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: Separator line between compartments.
+- name: CompositeLabel
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: Label row of a composite shape.
+shapes:
+- id: uml.object.v1
+  menu_index: 1
+  kind: vertex
+  buildable: true
+  function: Object
+  variant: 1
+  menu_name: Object
+  render:
+    fingerprint: sha1:dc5ebea57c20
+  tag: metaclass
+  status: generated
+  summary: An object (instance specification).
+  discriminator: TODO
+  use_when:
+  - showing an object instance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml.object.v2
+    see_also: []
+  example: |
+    uml.Object(n1, "Object")
+  metamodel:
+    spec: uml-2.5
+    element: InstanceSpecification
+    is_a:
+    - DeploymentTarget
+    - NamedElement
+    - PackageableElement
+    - DeployedArtifact
+- id: uml.interface.v1
+  menu_index: 2
+  kind: vertex
+  buildable: true
+  function: Interface
+  variant: 1
+  menu_name: Interface
+  render:
+    fingerprint: sha1:dc5ebea57c20
+  tag: metaclass
+  status: generated
+  summary: An interface.
+  discriminator: TODO
+  use_when:
+  - declaring an interface
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml.interface.v2
+    see_also: []
+  example: |
+    uml.Interface(n1, "Interface")
+  metamodel:
+    spec: uml-2.5
+    element: Interface
+    is_a:
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml.class.v1
+  menu_index: 3
+  kind: vertex
+  buildable: true
+  function: Class
+  variant: 1
+  menu_name: Class
+  render:
+    fingerprint: sha1:26592ca228e8
+  tag: metaclass
+  status: generated
+  summary: A class with attribute/operation compartments.
+  discriminator: TODO
+  use_when:
+  - modeling a class with fields and methods
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Item
+    - Divider
+  related:
+    variants:
+    - uml.class.v2
+    - uml.class.v3
+    - uml.class.v4
+    - uml.class.v5
+    see_also: []
+  example: |
+    uml.Class(n1, "Classname"):
+        uml.Item(n1, "+ field: type")
+        uml.Divider(c2, "")
+        uml.Item(c3, "+ method(type): type")
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.class.v2
+  menu_index: 4
+  kind: vertex
+  buildable: true
+  function: Class
+  variant: 2
+  menu_name: Class 2
+  render:
+    fingerprint: sha1:766116893b92
+  tag: metaclass
+  status: generated
+  summary: A class with attribute/operation compartments.
+  discriminator: TODO
+  use_when:
+  - modeling a class with fields and methods
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Item
+  related:
+    variants:
+    - uml.class.v1
+    - uml.class.v3
+    - uml.class.v4
+    - uml.class.v5
+    see_also: []
+  example: |
+    uml.Class(n1, "Classname", variant=2):
+        uml.Item(n1, "+ field: type")
+        uml.Item(c2, "+ field: type")
+        uml.Item(c3, "+ field: type")
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.item.v1
+  menu_index: 5
+  kind: vertex
+  buildable: true
+  function: Item
+  variant: 1
+  menu_name: Item 1
+  render:
+    fingerprint: sha1:a4c96eef3fc1
+  tag: none
+  status: generated
+  summary: A single attribute or operation row.
+  discriminator: TODO
+  use_when:
+  - adding a field or method row
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml.item.v2
+    see_also: []
+  example: |
+    uml.Item(n1, "+ item: attribute")
+- id: uml.item.v2
+  menu_index: 6
+  kind: vertex
+  buildable: true
+  function: Item
+  variant: 2
+  menu_name: Item 2
+  render:
+    fingerprint: sha1:9f091a232782
+  tag: none
+  status: generated
+  summary: A single attribute or operation row.
+  discriminator: TODO
+  use_when:
+  - adding a field or method row
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml.item.v1
+    see_also: []
+  example: |
+    uml.Item(n1, "item: attribute", variant=2)
+- id: uml.divider.v1
+  menu_index: 7
+  kind: vertex
+  buildable: true
+  function: Divider
+  variant: 1
+  menu_name: Divider
+  render:
+    fingerprint: sha1:284299c7e57c
+  tag: none
+  status: generated
+  summary: A compartment separator.
+  discriminator: n/a
+  use_when:
+  - using Divider
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Divider(n1, "")
+- id: uml.spacer.v1
+  menu_index: 8
+  kind: vertex
+  buildable: true
+  function: Spacer
+  variant: 1
+  menu_name: Spacer
+  render:
+    fingerprint: sha1:014f4218b2e4
+  tag: none
+  status: generated
+  summary: Blank spacing in a shape.
+  discriminator: n/a
+  use_when:
+  - using Spacer
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Spacer(n1, "")
+- id: uml.title.v1
+  menu_index: 9
+  kind: vertex
+  buildable: true
+  function: Title
+  variant: 1
+  menu_name: Title
+  render:
+    fingerprint: sha1:303989c9f6cd
+  tag: none
+  status: generated
+  summary: A title label.
+  discriminator: n/a
+  use_when:
+  - using Title
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Title(n1, "Title")
+- id: uml.component.v1
+  menu_index: 10
+  kind: vertex
+  buildable: true
+  function: Component
+  variant: 1
+  menu_name: Component
+  render:
+    fingerprint: sha1:315d2718b1ab
+  tag: metaclass
+  status: generated
+  summary: A component.
+  discriminator: n/a
+  use_when:
+  - modeling a component
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Component(n1, "Component")
+  metamodel:
+    spec: uml-2.5
+    element: Component
+    is_a:
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.componentwithattributes.v1
+  menu_index: 11
+  kind: vertex
+  buildable: true
+  function: ComponentWithAttributes
+  variant: 1
+  menu_name: Component with Attributes
+  render:
+    fingerprint: sha1:537036f30a89
+  tag: notation
+  status: generated
+  summary: A component with an attributes compartment.
+  discriminator: n/a
+  use_when:
+  - using ComponentWithAttributes
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.ComponentWithAttributes(n1, "Component")
+  metamodel:
+    spec: uml-2.5
+    element: Component
+    is_a:
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.block.v1
+  menu_index: 12
+  kind: vertex
+  buildable: true
+  function: Block
+  variant: 1
+  menu_name: Block
+  render:
+    fingerprint: sha1:f83390d23d93
+  tag: notation
+  status: generated
+  summary: A SysML-style block.
+  discriminator: n/a
+  use_when:
+  - using Block
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Block(n1, "Block")
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.module.v1
+  menu_index: 13
+  kind: vertex
+  buildable: true
+  function: Module
+  variant: 1
+  menu_name: Module
+  render:
+    fingerprint: sha1:1fee510a1425
+  tag: notation
+  status: generated
+  summary: A module.
+  discriminator: n/a
+  use_when:
+  - using Module
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Module(n1, "Module")
+  metamodel:
+    spec: uml-2.5
+    element: Component
+    is_a:
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.package.v1
+  menu_index: 14
+  kind: vertex
+  buildable: true
+  function: Package
+  variant: 1
+  menu_name: Package
+  render:
+    fingerprint: sha1:04c703a903f5
+  tag: metaclass
+  status: generated
+  summary: A package.
+  discriminator: n/a
+  use_when:
+  - grouping elements
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Package(n1, "package")
+  metamodel:
+    spec: uml-2.5
+    element: Package
+    is_a:
+    - PackageableElement
+    - NamedElement
+    - Namespace
+- id: uml.object.v2
+  menu_index: 15
+  kind: vertex
+  buildable: true
+  function: Object
+  variant: 2
+  menu_name: Object (with attributes)
+  render:
+    fingerprint: sha1:ea74c4de8ae8
+  tag: metaclass
+  status: generated
+  summary: An object (instance specification).
+  discriminator: TODO
+  use_when:
+  - showing an object instance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml.object.v1
+    see_also: []
+  example: |
+    uml.Object(n1, "Object", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: InstanceSpecification
+    is_a:
+    - DeploymentTarget
+    - NamedElement
+    - PackageableElement
+    - DeployedArtifact
+- id: uml.entity.v1
+  menu_index: 16
+  kind: vertex
+  buildable: true
+  function: Entity
+  variant: 1
+  menu_name: Entity
+  render:
+    fingerprint: sha1:ea74c4de8ae8
+  tag: notation
+  status: generated
+  summary: An entity.
+  discriminator: n/a
+  use_when:
+  - using Entity
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Entity(n1, "Entity")
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.class.v3
+  menu_index: 17
+  kind: vertex
+  buildable: true
+  function: Class
+  variant: 3
+  menu_name: Class 3
+  render:
+    fingerprint: sha1:ea74c4de8ae8
+  tag: metaclass
+  status: generated
+  summary: A class with attribute/operation compartments.
+  discriminator: TODO
+  use_when:
+  - modeling a class with fields and methods
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml.class.v1
+    - uml.class.v2
+    - uml.class.v4
+    - uml.class.v5
+    see_also: []
+  example: |
+    uml.Class(n1, "Class 3", variant=3)
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.class.v4
+  menu_index: 18
+  kind: vertex
+  buildable: true
+  function: Class
+  variant: 4
+  menu_name: Class 4
+  render:
+    fingerprint: sha1:ea74c4de8ae8
+  tag: metaclass
+  status: generated
+  summary: A class with attribute/operation compartments.
+  discriminator: TODO
+  use_when:
+  - modeling a class with fields and methods
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml.class.v1
+    - uml.class.v2
+    - uml.class.v3
+    - uml.class.v5
+    see_also: []
+  example: |
+    uml.Class(n1, "Class 4", variant=4)
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.class.v5
+  menu_index: 19
+  kind: vertex
+  buildable: true
+  function: Class
+  variant: 5
+  menu_name: Class 5
+  render:
+    fingerprint: sha1:ea74c4de8ae8
+  tag: metaclass
+  status: generated
+  summary: A class with attribute/operation compartments.
+  discriminator: TODO
+  use_when:
+  - modeling a class with fields and methods
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml.class.v1
+    - uml.class.v2
+    - uml.class.v3
+    - uml.class.v4
+    see_also: []
+  example: |
+    uml.Class(n1, "Class 5", variant=5)
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.interface.v2
+  menu_index: 20
+  kind: vertex
+  buildable: true
+  function: Interface
+  variant: 2
+  menu_name: Interface 2
+  render:
+    fingerprint: sha1:ea74c4de8ae8
+  tag: metaclass
+  status: generated
+  summary: An interface.
+  discriminator: TODO
+  use_when:
+  - declaring an interface
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml.interface.v1
+    see_also: []
+  example: |
+    uml.Interface(n1, "Interface 2", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Interface
+    is_a:
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml.providedrequiredinterface.v1
+  menu_index: 21
+  kind: vertex
+  buildable: true
+  function: ProvidedRequiredInterface
+  variant: 1
+  menu_name: Provided/Required Interface
+  render:
+    fingerprint: sha1:d2c6e7e1b183
+  tag: notation
+  status: generated
+  summary: A ball-and-socket provided/required interface.
+  discriminator: n/a
+  use_when:
+  - using ProvidedRequiredInterface
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.ProvidedRequiredInterface(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Interface
+    is_a:
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml.requiredinterface.v1
+  menu_index: 22
+  kind: vertex
+  buildable: true
+  function: RequiredInterface
+  variant: 1
+  menu_name: Required Interface
+  render:
+    fingerprint: sha1:1dee814e2339
+  tag: notation
+  status: generated
+  summary: A required interface (socket).
+  discriminator: TODO
+  use_when:
+  - using RequiredInterface
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml.requiredinterface.v2
+    see_also: []
+  example: |
+    uml.RequiredInterface(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Interface
+    is_a:
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml.requiredinterface.v2
+  menu_index: 23
+  kind: vertex
+  buildable: true
+  function: RequiredInterface
+  variant: 2
+  menu_name: Required Interface (data)
+  render:
+    fingerprint: sha1:acf41d4d7c61
+  tag: notation
+  status: generated
+  summary: A required interface (socket).
+  discriminator: TODO
+  use_when:
+  - using RequiredInterface
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml.requiredinterface.v1
+    see_also: []
+  example: |
+    uml.RequiredInterface(n1, "", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Interface
+    is_a:
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml.lollipopnotation.v1
+  menu_index: 24
+  kind: vertex
+  buildable: true
+  function: LollipopNotation
+  variant: 1
+  menu_name: Lollipop Notation (data)
+  render:
+    fingerprint: sha1:acf41d4d7c61
+  tag: notation
+  status: generated
+  summary: A provided interface (lollipop).
+  discriminator: n/a
+  use_when:
+  - using LollipopNotation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.LollipopNotation(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Interface
+    is_a:
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml.boundaryobject.v1
+  menu_index: 25
+  kind: vertex
+  buildable: true
+  function: BoundaryObject
+  variant: 1
+  menu_name: Boundary Object
+  render:
+    fingerprint: sha1:c4820d02e5ff
+  tag: notation
+  status: generated
+  summary: A «boundary» object (Jacobson).
+  discriminator: n/a
+  use_when:
+  - using BoundaryObject
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.BoundaryObject(n1, "Boundary Object")
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.entityobject.v1
+  menu_index: 26
+  kind: vertex
+  buildable: true
+  function: EntityObject
+  variant: 1
+  menu_name: Entity Object
+  render:
+    fingerprint: sha1:79e94f225c18
+  tag: notation
+  status: generated
+  summary: An «entity» object (Jacobson).
+  discriminator: n/a
+  use_when:
+  - using EntityObject
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.EntityObject(n1, "Entity Object")
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.controlobject.v1
+  menu_index: 27
+  kind: vertex
+  buildable: true
+  function: ControlObject
+  variant: 1
+  menu_name: Control Object
+  render:
+    fingerprint: sha1:a208a59a7145
+  tag: notation
+  status: generated
+  summary: A «control» object (Jacobson).
+  discriminator: n/a
+  use_when:
+  - using ControlObject
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.ControlObject(n1, "Control Object")
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.actor.v1
+  menu_index: 28
+  kind: vertex
+  buildable: true
+  function: Actor
+  variant: 1
+  menu_name: Actor
+  render:
+    fingerprint: sha1:2f2f985ea085
+  tag: metaclass
+  status: generated
+  summary: An actor.
+  discriminator: n/a
+  use_when:
+  - showing an external role
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Actor(n1, "Actor")
+  metamodel:
+    spec: uml-2.5
+    element: Actor
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml.usecase.v1
+  menu_index: 29
+  kind: vertex
+  buildable: true
+  function: UseCase
+  variant: 1
+  menu_name: Use Case
+  render:
+    fingerprint: sha1:3ca1dc1b06e7
+  tag: metaclass
+  status: generated
+  summary: A use case.
+  discriminator: n/a
+  use_when:
+  - representing system functionality
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.UseCase(n1, "Use Case")
+  metamodel:
+    spec: uml-2.5
+    element: UseCase
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+- id: uml.start.v1
+  menu_index: 30
+  kind: vertex
+  buildable: true
+  function: Start
+  variant: 1
+  menu_name: Start
+  render:
+    fingerprint: sha1:a5d21459cb6c
+  tag: notation
+  status: generated
+  summary: An initial node.
+  discriminator: n/a
+  use_when:
+  - using Start
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Start(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: InitialNode
+    is_a:
+    - ControlNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml.activity.v1
+  menu_index: 31
+  kind: vertex
+  buildable: true
+  function: Activity
+  variant: 1
+  menu_name: Activity
+  render:
+    fingerprint: sha1:4f728661b24d
+  tag: metaclass
+  status: generated
+  summary: An activity/action node.
+  discriminator: n/a
+  use_when:
+  - showing an activity step
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Activity(n1, "Activity")
+  metamodel:
+    spec: uml-2.5
+    element: Activity
+    is_a:
+    - Behavior
+    - Class
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+- id: uml.compositestate.v1
+  menu_index: 32
+  kind: vertex
+  buildable: true
+  function: CompositeState
+  variant: 1
+  menu_name: Composite State
+  render:
+    fingerprint: sha1:6cdd35231afa
+  tag: notation
+  status: generated
+  summary: A composite state.
+  discriminator: n/a
+  use_when:
+  - showing a state with substates
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - CompositeLabel
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.CompositeState(n1, "Composite State"):
+        uml.CompositeLabel(n1, "Subtitle")
+  metamodel:
+    spec: uml-2.5
+    element: State
+    is_a:
+    - Namespace
+    - NamedElement
+    - Vertex
+    - RedefinableElement
+- id: uml.condition.v1
+  menu_index: 33
+  kind: vertex
+  buildable: true
+  function: Condition
+  variant: 1
+  menu_name: Condition
+  render:
+    fingerprint: sha1:166a3b3aa029
+  tag: notation
+  status: generated
+  summary: A decision/condition node.
+  discriminator: n/a
+  use_when:
+  - using Condition
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Condition(n1, "Condition")
+  metamodel:
+    spec: uml-2.5
+    element: DecisionNode
+    is_a:
+    - ControlNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml.forkjoin.v1
+  menu_index: 34
+  kind: vertex
+  buildable: true
+  function: ForkJoin
+  variant: 1
+  menu_name: Fork/Join
+  render:
+    fingerprint: sha1:3fbb935ab5a4
+  tag: notation
+  status: generated
+  summary: A fork/join bar.
+  discriminator: n/a
+  use_when:
+  - using ForkJoin
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.ForkJoin(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: ForkNode
+    is_a:
+    - ControlNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml.end.v1
+  menu_index: 35
+  kind: vertex
+  buildable: true
+  function: End
+  variant: 1
+  menu_name: End
+  render:
+    fingerprint: sha1:8c0d781e0cf6
+  tag: notation
+  status: generated
+  summary: A final node.
+  discriminator: n/a
+  use_when:
+  - using End
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.End(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: ActivityFinalNode
+    is_a:
+    - FinalNode
+    - ControlNode
+    - ActivityNode
+    - RedefinableElement
+    - NamedElement
+- id: uml.lifeline.v1
+  menu_index: 36
+  kind: vertex
+  buildable: true
+  function: Lifeline
+  variant: 1
+  menu_name: Lifeline
+  render:
+    fingerprint: sha1:87a58bd3cbb2
+  tag: metaclass
+  status: generated
+  summary: A sequence lifeline.
+  discriminator: n/a
+  use_when:
+  - showing a sequence participant
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Lifeline(n1, ":Object")
+  metamodel:
+    spec: uml-2.5
+    element: Lifeline
+    is_a:
+    - NamedElement
+- id: uml.actorlifeline.v1
+  menu_index: 37
+  kind: vertex
+  buildable: true
+  function: ActorLifeline
+  variant: 1
+  menu_name: Actor Lifeline
+  render:
+    fingerprint: sha1:0232be838e3f
+  tag: notation
+  status: generated
+  summary: An actor lifeline.
+  discriminator: n/a
+  use_when:
+  - using ActorLifeline
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.ActorLifeline(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Lifeline
+    is_a:
+    - NamedElement
+- id: uml.boundarylifeline.v1
+  menu_index: 38
+  kind: vertex
+  buildable: true
+  function: BoundaryLifeline
+  variant: 1
+  menu_name: Boundary Lifeline
+  render:
+    fingerprint: sha1:93a8152c717f
+  tag: notation
+  status: generated
+  summary: A boundary lifeline.
+  discriminator: n/a
+  use_when:
+  - using BoundaryLifeline
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.BoundaryLifeline(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Lifeline
+    is_a:
+    - NamedElement
+- id: uml.entitylifeline.v1
+  menu_index: 39
+  kind: vertex
+  buildable: true
+  function: EntityLifeline
+  variant: 1
+  menu_name: Entity Lifeline
+  render:
+    fingerprint: sha1:cee6ffed4d96
+  tag: notation
+  status: generated
+  summary: An entity lifeline.
+  discriminator: n/a
+  use_when:
+  - using EntityLifeline
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.EntityLifeline(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Lifeline
+    is_a:
+    - NamedElement
+- id: uml.controllifeline.v1
+  menu_index: 40
+  kind: vertex
+  buildable: true
+  function: ControlLifeline
+  variant: 1
+  menu_name: Control Lifeline
+  render:
+    fingerprint: sha1:48059e73f4e8
+  tag: notation
+  status: generated
+  summary: A control lifeline.
+  discriminator: n/a
+  use_when:
+  - using ControlLifeline
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.ControlLifeline(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Lifeline
+    is_a:
+    - NamedElement
+- id: uml.frame.v1
+  menu_index: 41
+  kind: vertex
+  buildable: true
+  function: Frame
+  variant: 1
+  menu_name: Frame
+  render:
+    fingerprint: sha1:3ecd0abe19f5
+  tag: none
+  status: generated
+  summary: A diagram frame.
+  discriminator: n/a
+  use_when:
+  - using Frame
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Frame(n1, "frame")
+- id: uml.destruction.v1
+  menu_index: 42
+  kind: vertex
+  buildable: true
+  function: Destruction
+  variant: 1
+  menu_name: Destruction
+  render:
+    fingerprint: sha1:938a91f6977a
+  tag: notation
+  status: generated
+  summary: A destruction marker (X).
+  discriminator: n/a
+  use_when:
+  - using Destruction
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Destruction(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: DestructionOccurrenceSpecification
+    is_a:
+    - MessageOccurrenceSpecification
+    - MessageEnd
+    - NamedElement
+    - OccurrenceSpecification
+    - InteractionFragment
+- id: uml.foundmessage.v1
+  menu_index: 43
+  kind: vertex
+  buildable: true
+  function: FoundMessage
+  variant: 1
+  menu_name: Found Message
+  render:
+    fingerprint: sha1:f3302ed8e62e
+  tag: notation
+  status: generated
+  summary: A found message / activation.
+  discriminator: TODO
+  use_when:
+  - using FoundMessage
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - uml.foundmessage.v2
+    - uml.foundmessage.v3
+    see_also: []
+  example: |
+    uml.FoundMessage(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+- id: uml.synchronousinvocation.v1
+  menu_index: 44
+  kind: vertex
+  buildable: true
+  function: SynchronousInvocation
+  variant: 1
+  menu_name: Synchronous Invocation
+  render:
+    fingerprint: sha1:f3302ed8e62e
+  tag: notation
+  status: generated
+  summary: A synchronous call activation.
+  discriminator: n/a
+  use_when:
+  - using SynchronousInvocation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.SynchronousInvocation(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+- id: uml.selfcall.v1
+  menu_index: 45
+  kind: vertex
+  buildable: true
+  function: SelfCall
+  variant: 1
+  menu_name: Self Call
+  render:
+    fingerprint: sha1:f3302ed8e62e
+  tag: notation
+  status: generated
+  summary: A self-call activation.
+  discriminator: n/a
+  use_when:
+  - using SelfCall
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.SelfCall(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+- id: uml.callback.v1
+  menu_index: 46
+  kind: vertex
+  buildable: true
+  function: Callback
+  variant: 1
+  menu_name: Callback
+  render:
+    fingerprint: sha1:f3302ed8e62e
+  tag: notation
+  status: generated
+  summary: A callback activation.
+  discriminator: n/a
+  use_when:
+  - using Callback
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Callback(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+- id: uml.activationbar.v1
+  menu_index: 47
+  kind: vertex
+  buildable: true
+  function: ActivationBar
+  variant: 1
+  menu_name: Activation Bar
+  render:
+    fingerprint: sha1:f3302ed8e62e
+  tag: notation
+  status: generated
+  summary: An execution/activation bar.
+  discriminator: n/a
+  use_when:
+  - using ActivationBar
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.ActivationBar(n1, "")
+  metamodel:
+    spec: uml-2.5
+    element: ExecutionSpecification
+    is_a:
+    - InteractionFragment
+    - NamedElement
+- id: uml.foundmessage.v2
+  menu_index: 48
+  kind: edge
+  buildable: true
+  function: FoundMessage
+  variant: 2
+  menu_name: Found Message 1
+  render:
+    fingerprint: sha1:13ea3e1eda9c
+  tag: notation
+  status: generated
+  summary: A found message / activation.
+  discriminator: TODO
+  use_when:
+  - using FoundMessage
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml.foundmessage.v1
+    - uml.foundmessage.v3
+    see_also: []
+  example: |
+    uml.FoundMessage(None, None, "dispatch", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+    endpoints:
+      source: MessageEnd
+      target: MessageEnd
+      source_role: sendEvent
+      target_role: receiveEvent
+- id: uml.foundmessage.v3
+  menu_index: 49
+  kind: edge
+  buildable: true
+  function: FoundMessage
+  variant: 3
+  menu_name: Found Message 2
+  render:
+    fingerprint: sha1:98b182c396ae
+  tag: notation
+  status: generated
+  summary: A found message / activation.
+  discriminator: TODO
+  use_when:
+  - using FoundMessage
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml.foundmessage.v1
+    - uml.foundmessage.v2
+    see_also: []
+  example: |
+    uml.FoundMessage(None, None, "dispatch", variant=3)
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+    endpoints:
+      source: MessageEnd
+      target: MessageEnd
+      source_role: sendEvent
+      target_role: receiveEvent
+- id: uml.message.v1
+  menu_index: 50
+  kind: edge
+  buildable: true
+  function: Message
+  variant: 1
+  menu_name: Message
+  render:
+    fingerprint: sha1:ae0c96b56a28
+  tag: metaclass
+  status: generated
+  summary: A sequence message.
+  discriminator: n/a
+  use_when:
+  - showing a message between lifelines
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Message(None, None, "dispatch")
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+    endpoints:
+      source: MessageEnd
+      target: MessageEnd
+      source_role: sendEvent
+      target_role: receiveEvent
+- id: uml.return.v1
+  menu_index: 51
+  kind: edge
+  buildable: true
+  function: Return
+  variant: 1
+  menu_name: Return
+  render:
+    fingerprint: sha1:2e5d1c16cff8
+  tag: notation
+  status: generated
+  summary: A return message.
+  discriminator: n/a
+  use_when:
+  - using Return
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Return(None, None, "return")
+  metamodel:
+    spec: uml-2.5
+    element: Message
+    is_a:
+    - NamedElement
+    endpoints:
+      source: MessageEnd
+      target: MessageEnd
+      source_role: sendEvent
+      target_role: receiveEvent
+- id: uml.relation.v1
+  menu_index: 52
+  kind: edge
+  buildable: true
+  function: Relation
+  variant: 1
+  menu_name: Relation 1
+  render:
+    fingerprint: sha1:8bccde826b55
+  tag: notation
+  status: generated
+  summary: A labeled relation/association.
+  discriminator: TODO
+  use_when:
+  - using Relation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: source_label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml.relation.v2
+    see_also: []
+  example: |
+    uml.Relation(None, None, "name", source_label="1")
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml.association.v1
+  menu_index: 53
+  kind: edge
+  buildable: true
+  function: Association
+  variant: 1
+  menu_name: Association 1
+  render:
+    fingerprint: sha1:716566b0e2d7
+  tag: metaclass
+  status: generated
+  summary: An association.
+  discriminator: TODO
+  use_when:
+  - relating two classifiers
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: source_label
+    required: false
+  - name: target_label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml.association.v2
+    - uml.association.v3
+    see_also: []
+  example: |
+    uml.Association(None, None, "", source_label="parent", target_label="child")
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml.aggregation.v1
+  menu_index: 54
+  kind: edge
+  buildable: true
+  function: Aggregation
+  variant: 1
+  menu_name: Aggregation 1
+  render:
+    fingerprint: sha1:6308084c2e77
+  tag: notation
+  status: generated
+  summary: An aggregation (hollow diamond).
+  discriminator: TODO
+  use_when:
+  - using Aggregation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml.aggregation.v2
+    see_also: []
+  example: |
+    uml.Aggregation(None, None, "1")
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml.composition.v1
+  menu_index: 55
+  kind: edge
+  buildable: true
+  function: Composition
+  variant: 1
+  menu_name: Composition 1
+  render:
+    fingerprint: sha1:f6fda5799495
+  tag: notation
+  status: generated
+  summary: A composition (filled diamond).
+  discriminator: TODO
+  use_when:
+  - using Composition
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml.composition.v2
+    see_also: []
+  example: |
+    uml.Composition(None, None, "1")
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml.relation.v2
+  menu_index: 56
+  kind: edge
+  buildable: true
+  function: Relation
+  variant: 2
+  menu_name: Relation 2
+  render:
+    fingerprint: sha1:27a232bf51c7
+  tag: notation
+  status: generated
+  summary: A labeled relation/association.
+  discriminator: TODO
+  use_when:
+  - using Relation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: source_label
+    required: false
+  - name: target_label
+    required: false
+  - name: label_vertical_align
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml.relation.v1
+    see_also: []
+  example: |
+    uml.Relation(None, None, "Relation", variant=2, source_label="0..n", target_label="1", label_vertical_align="top")
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml.dependency.v1
+  menu_index: 57
+  kind: edge
+  buildable: true
+  function: Dependency
+  variant: 1
+  menu_name: Dependency
+  render:
+    fingerprint: sha1:24e9afec231a
+  tag: metaclass
+  status: generated
+  summary: A dependency.
+  discriminator: n/a
+  use_when:
+  - showing a dependency
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Dependency(None, None, "Use")
+  metamodel:
+    spec: uml-2.5
+    element: Dependency
+    is_a:
+    - DirectedRelationship
+    - Relationship
+    - PackageableElement
+    - NamedElement
+    endpoints:
+      source: NamedElement
+      target: NamedElement
+      source_role: client
+      target_role: supplier
+- id: uml.generalization.v1
+  menu_index: 58
+  kind: edge
+  buildable: true
+  function: Generalization
+  variant: 1
+  menu_name: Generalization
+  render:
+    fingerprint: sha1:414d89e59802
+  tag: metaclass
+  status: generated
+  summary: A generalization.
+  discriminator: n/a
+  use_when:
+  - showing inheritance
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Generalization(None, None, "Extends")
+  metamodel:
+    spec: uml-2.5
+    element: Generalization
+    is_a:
+    - DirectedRelationship
+    - Relationship
+    endpoints:
+      source: Classifier
+      target: Classifier
+      source_role: specific
+      target_role: general
+- id: uml.association.v2
+  menu_index: 59
+  kind: edge
+  buildable: true
+  function: Association
+  variant: 2
+  menu_name: Association 2
+  render:
+    fingerprint: sha1:4227f31dfece
+  tag: metaclass
+  status: generated
+  summary: An association.
+  discriminator: TODO
+  use_when:
+  - relating two classifiers
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml.association.v1
+    - uml.association.v3
+    see_also: []
+  example: |
+    uml.Association(None, None, "", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml.innerclass.v1
+  menu_index: 60
+  kind: edge
+  buildable: true
+  function: InnerClass
+  variant: 1
+  menu_name: Inner Class
+  render:
+    fingerprint: sha1:a2c1487d6e6e
+  tag: notation
+  status: generated
+  summary: A nested (inner) class link.
+  discriminator: n/a
+  use_when:
+  - using InnerClass
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.InnerClass(None, None, "")
+  metamodel:
+    spec: uml-2.5
+    element: Class
+    is_a:
+    - BehavioredClassifier
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    - EncapsulatedClassifier
+    - StructuredClassifier
+    endpoints:
+      source: null
+      target: Classifier
+      source_role: nestingClass
+      target_role: nestedClassifier
+- id: uml.terminate.v1
+  menu_index: 61
+  kind: edge
+  buildable: true
+  function: Terminate
+  variant: 1
+  menu_name: Terminate
+  render:
+    fingerprint: sha1:565feb4dbcb5
+  tag: notation
+  status: generated
+  summary: A terminate node.
+  discriminator: n/a
+  use_when:
+  - using Terminate
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Terminate(None, None, "")
+  metamodel:
+    spec: uml-2.5
+    element: Pseudostate
+    is_a:
+    - Vertex
+    - NamedElement
+    - RedefinableElement
+- id: uml.implementation.v1
+  menu_index: 62
+  kind: edge
+  buildable: true
+  function: Implementation
+  variant: 1
+  menu_name: Implementation
+  render:
+    fingerprint: sha1:02ac2a4ca590
+  tag: notation
+  status: generated
+  summary: A realization/implementation.
+  discriminator: n/a
+  use_when:
+  - using Implementation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    uml.Implementation(None, None, "")
+  metamodel:
+    spec: uml-2.5
+    element: Realization
+    is_a:
+    - Abstraction
+    - Dependency
+    - DirectedRelationship
+    - Relationship
+    - PackageableElement
+    - NamedElement
+    endpoints:
+      source: NamedElement
+      target: NamedElement
+      source_role: client
+      target_role: supplier
+- id: uml.aggregation.v2
+  menu_index: 63
+  kind: edge
+  buildable: true
+  function: Aggregation
+  variant: 2
+  menu_name: Aggregation 2
+  render:
+    fingerprint: sha1:ab30671af2e3
+  tag: notation
+  status: generated
+  summary: An aggregation (hollow diamond).
+  discriminator: TODO
+  use_when:
+  - using Aggregation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml.aggregation.v1
+    see_also: []
+  example: |
+    uml.Aggregation(None, None, "", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml.composition.v2
+  menu_index: 64
+  kind: edge
+  buildable: true
+  function: Composition
+  variant: 2
+  menu_name: Composition 2
+  render:
+    fingerprint: sha1:606a47c9de74
+  tag: notation
+  status: generated
+  summary: A composition (filled diamond).
+  discriminator: TODO
+  use_when:
+  - using Composition
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml.composition.v1
+    see_also: []
+  example: |
+    uml.Composition(None, None, "", variant=2)
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd
+- id: uml.association.v3
+  menu_index: 65
+  kind: edge
+  buildable: true
+  function: Association
+  variant: 3
+  menu_name: Association 3
+  render:
+    fingerprint: sha1:b783b6082b8c
+  tag: metaclass
+  status: generated
+  summary: An association.
+  discriminator: TODO
+  use_when:
+  - relating two classifiers
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - uml.association.v1
+    - uml.association.v2
+    see_also: []
+  example: |
+    uml.Association(None, None, "", variant=3)
+  metamodel:
+    spec: uml-2.5
+    element: Association
+    is_a:
+    - Relationship
+    - Classifier
+    - Namespace
+    - NamedElement
+    - Type
+    - PackageableElement
+    - RedefinableElement
+    endpoints:
+      source: Property
+      target: Property
+      source_role: memberEnd
+      target_role: memberEnd

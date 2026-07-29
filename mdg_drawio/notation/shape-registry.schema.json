@@ -1,0 +1,308 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/shape-registry.schema.json",
+  "title": "Diagram Shape Registry",
+  "description": "Library-agnostic schema for agent-facing shape registries (v2). UML 2.5 is the first instance; BPMN2, ERD, ArchiMate3, C4, etc. reuse the same structure. CORE fields are library-invariant; the optional METAMODEL block is library-specific and namespaced by its `spec`. v2 adds: render.fingerprint (binds each shape to its palette cell), contains (containment children, distinct from compartment rows), row_types (signatures of legal row children), and a required grammar block pointing at the canonical DSL spec.",
+  "type": "object",
+  "required": ["library", "version", "provenance", "grammar", "shapes"],
+  "additionalProperties": false,
+  "properties": {
+    "library": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+$",
+      "description": "The library/namespace this registry describes (e.g. uml25, bpmn2, erd, archimate3, c4, general)."
+    },
+    "version": {
+      "type": "string",
+      "description": "Version of the NOTATION the palette implements (e.g. '2.5', '3.2', '2.0'). Use '1' for unversioned notations and 'classic' for legacy palettes."
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["source_file", "palette", "shape_count"],
+      "additionalProperties": true,
+      "properties": {
+        "source_file": {
+          "type": "string",
+          "description": "The draw.io palette fixture this registry was derived from (e.g. UML_2.5.drawio)."
+        },
+        "palette": {
+          "type": "string",
+          "description": "Human-readable palette name (e.g. 'draw.io UML 2.5')."
+        },
+        "shape_count": { "type": "integer", "minimum": 1 },
+        "pages": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Palette page names in MENU order. menu_index runs sequentially across pages in this order. Required to join registry entries to the palette data, whose pages may be stored in a different order."
+        }
+      }
+    },
+    "grammar": {
+      "type": "object",
+      "description": "DSL grammar documentation. `spec` points at the canonical language spec; everything else is library-specific notes.",
+      "required": ["spec", "root"],
+      "additionalProperties": true,
+      "properties": {
+        "spec": {
+          "type": "string",
+          "description": "Path to the canonical DSL grammar spec, relative to this registry file (e.g. ../GRAMMAR.md)."
+        },
+        "root": {
+          "type": "string",
+          "description": "The document-root builder function for this library (e.g. UML25, BPMN, C4). Not a palette shape; defined by the grammar spec."
+        }
+      }
+    },
+    "row_types": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/row_type" },
+      "description": "Signatures of the row-child types legal inside this library's shapes (everything referenced by any shape's rows.allowed). Row types are DSL constructs, not palette entries."
+    },
+    "shapes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/shape" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "description": "Fully-qualified, stable shape id: <library>.<function-lowercased>.v<N>.",
+      "pattern": "^[a-z0-9]+\\.[a-z0-9_]+\\.v[0-9]+$"
+    },
+    "arg": {
+      "type": "object",
+      "required": ["name", "required"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "required": { "type": "boolean" }
+      }
+    },
+    "row_type": {
+      "type": "object",
+      "required": ["name", "summary"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "description": "Row-type name as used in rows.allowed and in DSL calls (e.g. Item, Header, Lane)." },
+        "summary": { "type": "string" },
+        "args": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/arg" }
+        }
+      }
+    },
+    "render": {
+      "type": "object",
+      "description": "Binds this registry entry to its palette cell. The fingerprint is a hash of the NORMALIZED style string of the entry's anchor cell (see mdg_drawio.notation._core.normalize); the style strings themselves live in generated data (not committed). Build tooling must fail loudly when a fingerprint no longer matches the palette.",
+      "required": ["fingerprint"],
+      "additionalProperties": false,
+      "properties": {
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^sha1:[0-9a-f]{12}$"
+        }
+      }
+    },
+    "shape": {
+      "type": "object",
+      "description": "A single palette shape. CORE fields are always present; kind-conditional and metamodel sections apply per the rules below.",
+      "required": [
+        "id", "menu_index", "kind", "buildable", "function", "variant",
+        "menu_name", "render", "tag", "status", "summary", "discriminator",
+        "use_when", "related", "example"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "menu_index": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Position in the source palette menu, counted sequentially across pages in provenance.pages order. Re-derivable and validated against the source via render.fingerprint."
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["vertex", "edge", "diagram"],
+          "description": "vertex = node (may have rows or contains); edge = connector (has endpoints); diagram = pre-composed fragment (neither)."
+        },
+        "buildable": {
+          "type": "boolean",
+          "description": "false for pre-composed fragments an agent should not assemble; it should pick a real primitive instead (see related.see_also)."
+        },
+        "function": { "type": "string", "description": "DSL function name (UpperCamelCase)." },
+        "variant": { "type": "integer", "minimum": 1 },
+        "menu_name": { "type": "string", "description": "Verbatim source palette/tooltip label." },
+        "render": { "$ref": "#/$defs/render" },
+        "tag": {
+          "type": "string",
+          "enum": ["metaclass", "notation", "composite", "none"],
+          "description": "metaclass = the shape IS a metamodel element; notation = a rendering variant of one; composite = a pre-composed fragment; none = pure notation with no metamodel element. Library-invariant concept."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["generated", "drafted", "reviewed"],
+          "description": "Provenance of the judgment fields: generated = machine-drafted boilerplate; drafted = substantive machine/LLM draft, not human-verified; reviewed = human/spec-verified. reviewed entries must not contain TODO markers or placeholder text (enforced by tests)."
+        },
+        "summary": { "type": "string" },
+        "discriminator": {
+          "type": "string",
+          "description": "How this variant differs visibly from its siblings; 'n/a' for single-variant functions."
+        },
+        "use_when": { "type": "array", "items": { "type": "string" } },
+        "avoid_when": { "type": "array", "items": { "type": "string" } },
+        "aliases": { "type": "array", "items": { "type": "string" } },
+        "args": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/arg" },
+          "description": "Positional/keyword arguments of the DSL call."
+        },
+        "rows": {
+          "type": "object",
+          "description": "Nested child-ROW schema for vertices: compartment content that stacks inside the shape (e.g. class members, table rows). Distinct from `contains`.",
+          "required": ["allowed"],
+          "additionalProperties": false,
+          "properties": {
+            "allowed": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Legal child row types for this shape (must be defined in row_types)."
+            }
+          }
+        },
+        "contains": {
+          "type": "object",
+          "description": "CONTAINMENT schema for container vertices (boundaries, groupings, lanes, frames): child NODES placed inside the container. Mutually exclusive with non-empty rows.allowed. A colon-block under a shape with `contains` nests child nodes; under a shape with non-empty rows it nests rows; a shape with neither cannot take a block.",
+          "required": ["allowed"],
+          "additionalProperties": false,
+          "properties": {
+            "allowed": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Legal child node functions, or '*' for any vertex of the same library."
+            }
+          }
+        },
+        "containment": {
+          "type": "object",
+          "description": "Layout hints for how child nodes inside this container are arranged. Only meaningful on shapes that also have `contains`.",
+          "additionalProperties": false,
+          "properties": {
+            "strategy": {
+              "type": "string",
+              "enum": ["stack", "grid", "freeform"],
+              "description": "How children are laid out: stack (vertical, one per row), grid (balanced ceil(sqrt(n)) columns), freeform (children positioned by the main layout algorithm, container auto-sized around them)."
+            },
+            "start_size": {
+              "type": "number",
+              "description": "Header/footer offset in pixels before the first child row."
+            },
+            "child_gap": {
+              "type": "number",
+              "description": "Gap between child nodes in pixels."
+            },
+            "padding": {
+              "type": "object",
+              "description": "Padding inside the container boundary.",
+              "additionalProperties": false,
+              "properties": {
+                "top": { "type": "number" },
+                "right": { "type": "number" },
+                "bottom": { "type": "number" },
+                "left": { "type": "number" }
+              }
+            }
+          }
+        },
+        "endpoints": {
+          "type": "object",
+          "description": "Universal (library-invariant) connector endpoints for edges. Spec-typed source/target live under metamodel.endpoints.",
+          "additionalProperties": false,
+          "properties": {
+            "direction": {
+              "type": ["string", "null"],
+              "enum": ["source_to_target", "bidirectional", "none", null]
+            }
+          }
+        },
+        "related": {
+          "type": "object",
+          "required": ["variants", "see_also"],
+          "additionalProperties": false,
+          "properties": {
+            "variants": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+            "see_also": { "type": "array", "items": { "$ref": "#/$defs/id" } }
+          }
+        },
+        "example": { "type": "string", "description": "A copy-pasteable DSL call with placeholder ids, namespaced as <library>.<Function>(...)." },
+        "metamodel": { "$ref": "#/$defs/metamodel" }
+      },
+      "allOf": [
+        {
+          "description": "kind-conditional: vertices have rows, edges have endpoints, diagrams have neither.",
+          "if": { "properties": { "kind": { "const": "vertex" } } },
+          "then": { "required": ["rows"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "edge" } } },
+          "then": { "required": ["endpoints"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "diagram" } } },
+          "then": {
+            "not": { "anyOf": [ { "required": ["rows"] }, { "required": ["endpoints"] }, { "required": ["contains"] } ] }
+          }
+        },
+        {
+          "description": "rows/contains exclusivity: a container shape must not also declare row children.",
+          "if": { "required": ["contains"] },
+          "then": {
+            "properties": { "rows": { "properties": { "allowed": { "maxItems": 0 } } } }
+          }
+        },
+        {
+          "description": "metamodel-conditional: tag:none forbids the metamodel block; any other tag requires it.",
+          "if": { "properties": { "tag": { "const": "none" } } },
+          "then": { "not": { "required": ["metamodel"] } },
+          "else": { "required": ["metamodel"] }
+        }
+      ]
+    },
+    "metamodel": {
+      "type": "object",
+      "description": "Library-specific extension. Namespaced by `spec` so BPMN2/ERD/ArchiMate3/C4 reuse the same slot with their own vocabularies. Structure is validated; element/is_a VALUES are not (left to generation scripts, or an optional per-spec vocabulary schema).",
+      "required": ["spec", "element"],
+      "additionalProperties": false,
+      "properties": {
+        "spec": {
+          "type": "string",
+          "description": "Which metamodel this block conforms to. Extend this enum as libraries are added.",
+          "enum": ["uml-2.5", "bpmn-2.0", "erd", "archimate-3", "c4"]
+        },
+        "element": {
+          "type": "string",
+          "description": "The metamodel element/metaclass name this shape represents."
+        },
+        "is_a": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Generalization/inheritance chain from the metamodel (most specific first)."
+        },
+        "endpoints": {
+          "type": "object",
+          "description": "Spec-typed connector endpoints (edges only). Source/target are metamodel element names.",
+          "additionalProperties": false,
+          "properties": {
+            "source": { "type": ["string", "null"] },
+            "target": { "type": ["string", "null"] },
+            "source_role": { "type": ["string", "null"] },
+            "target_role": { "type": ["string", "null"] }
+          }
+        },
+        "classification": {
+          "type": "object",
+          "description": "Optional spec-specific taxonomy dimensions (e.g. ArchiMate layer/aspect, BPMN element group, C4 external flag). Keys vary by spec; values are strings or null. This is the sanctioned place for library-specific categorization without loosening the core metamodel fields.",
+          "additionalProperties": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

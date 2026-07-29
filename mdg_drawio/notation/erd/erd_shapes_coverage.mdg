@@ -1,0 +1,72 @@
+---
+title: "Entity Relation Shapes Coverage"
+mode: palette
+---
+
+use erd
+
+erd.ERD("Entity Relation Shapes Coverage")
+    erd.Table(r1c1, "Table"):  # 1. Table 1
+        erd.RowKey(r1c1v1, "UniqueID", key="PK")
+        erd.Row(r1c1v2, "Row 1")
+        erd.Row(r1c1v3, "Row 2")
+        erd.Row(r1c1v4, "Row 3")
+    erd.Table(r1c2, "Table", variant=2):  # 2. Table 2
+        erd.RowKey(r1c2v1, "Row 1", key="PK,FK1")
+        erd.RowKey(r1c2v2, "Row 2", key="PK,FK2")
+        erd.Row(r1c2v3, "Row 3")
+        erd.Row(r1c2v4, "Row 4")
+    erd.RowKey(r1c3, "Row")  # 3. Table Row 1
+    erd.RowKey(r1c4, "UniqueID", key="FK", variant=2)  # 4. Table Row 2
+    erd.RowKey(r1c5, "UniqueID", key="PK", variant=3)  # 5. Table Row 3
+    erd.List(r2c1, "List"):  # 6. List
+        erd.Item(r2c1v1, "Item 1")
+        erd.Item(r2c1v2, "Item 2")
+        erd.Item(r2c1v3, "Item 3")
+    erd.Item(r2c2, "Item")  # 7. List Item 1
+    erd.Item(r2c3, "Item", variant=2)  # 8. List Item 2
+    erd.Item(r2c4, "", variant=3)  # 9. List Item 3
+    erd.EntityTable(r2c5, "Entity"):  # 10. Entity
+        erd.EntityText(r2c5v1, {BlockEntityText})
+    erd.EntityRect(r3c1, "Entity")  # 11. Entity
+    erd.EntityRounded(r3c2, "Entity")  # 12. Entity (Rounded)
+    erd.WeakEntity(r3c3, "Entity")  # 13. Weak Entity
+    erd.Attribute(r3c4, "Attribute")  # 14. Attribute
+    erd.KeyAttribute(r3c5, "Attribute")  # 15. Key Attribute
+    erd.WeakKeyAttribute(r4c1, "Attribute")  # 16. Weak Key Attribute
+    erd.DerivedAttribute(r4c2, "Attribute")  # 17. Derived Attribute
+    erd.MultivalueAttribute(r4c3, "Attribute")  # 18. Multivalue Attribute
+    erd.AssociativeEntity(r4c4, "Associative\nEntity")  # 19. Associative Entity
+    erd.Relationship(r4c5, "Relationship")  # 20. Relationship
+    erd.IdentifyingRelationship(r5c1, "Relationship")  # 21. Identifying Relationship
+    erd.Cloud(r5c2, "Cloud")  # 22. Cloud
+    erd.Hierarchy(r5c3, ""):  # 23. Hierarchy
+        erd.Anchor(r5c3v1, "main"):
+            erd.Anchor(r5c3v2, "sub")
+    erd.Note(r5c4, "Note")  # 24. Note
+    erd.Rel(None, None, "")  # 25. Untitled Relation
+    erd.Rel(None, None, "", target_label="1", variant=2)  # 26. Mandatory Participation (0:1)
+    erd.Rel(None, None, "", target_label="N", variant=3)  # 27. Mandatory Participation (0:N)
+    erd.Rel(None, None, "", source_label="M", target_label="N", variant=4)  # 28. Mandatory Participation (M:N)
+    erd.OptionalRel(None, None, "", target_label="1")  # 29. Optional Participation (0:1)
+    erd.OptionalRel(None, None, "", target_label="N", variant=2)  # 30. Optional Participation (0:N)
+    erd.OptionalRel(None, None, "", source_label="M", target_label="N", variant=3)  # 31. Optional Participation (M:N)
+    erd.RecursiveRel(None, None, "", target_label="1")  # 32. Recursive Relationship (0:1)
+    erd.RecursiveRel(None, None, "", target_label="N", variant=2)  # 33. Recursive Relationship (0:N)
+    erd.RecursiveRel(None, None, "", source_label="M", target_label="N", variant=3)  # 34. Recursive Relationship (M:N)
+    erd.ZeroToMany(None, None, "")  # 35. 0 to Many Optional
+    erd.OneToMany(None, None, "")  # 36. 1 to Many
+    erd.MandOne(None, None, "")  # 37. 1 Mandatory
+    erd.OneToOne(None, None, "")  # 38. 1 to 1
+    erd.One(None, None, "")  # 39. 1
+    erd.ZeroToOne(None, None, "")  # 40. 0 to 1
+    erd.Many(None, None, "")  # 41. Many
+    erd.ManyToMany(None, None, "")  # 42. Many to Many
+    erd.ZeroToManyZeroToOne(None, None, "")  # 43. 1 Optional to Many Optional
+    erd.ZeroToManyMandOne(None, None, "")  # 44. 1 Mandatory to Many Optional
+    erd.ZeroToOneMandOne(None, None, "")  # 45. 1 Mandatory to 1 Optional
+    erd.OneToManyMandOne(None, None, "")  # 46. 1 Mandatory to Many Mandatory
+    erd.OneToManyZeroToOne(None, None, "")  # 47. 1 Optional to Many Mandatory
+    erd.OneToManyOneToMany(None, None, "")  # 48. Many Mandatory to Many Mandatory
+    erd.OneToManyZeroToMany(None, None, "")  # 49. Many Optional to Many Mandatory
+    erd.ZeroToManyZeroToMany(None, None, "")  # 50. Many Optional to Many Optional

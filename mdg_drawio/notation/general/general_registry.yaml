@@ -1,0 +1,1583 @@
+# General shape registry — agent-facing metadata for the general draw.io DSL.
+# Conforms to the library-agnostic shape-registry schema (shape-registry.schema.json).
+# CORE fields library-invariant; METAMODEL block present only where a shape maps to a
+# metamodel element. Judgment fields are status: generated — accept/reject per entry.
+
+library: general
+version: '1'
+provenance:
+  source_file: General.drawio
+  palette: draw.io General
+  shape_count: 45
+  pages:
+  - general
+grammar:
+  spec: ../GRAMMAR.md
+  root: General
+  notes:
+  - Function names are UpperCamelCase since v2; pre-v2 lowercase names are kept in aliases.
+  - Container, HorizontalContainer and VerticalContainer contain child nodes.
+  - Only the first palette page ('general') is registered; 'misc' and 'advanced' are not.
+shapes:
+- id: general.rectangle.v1
+  menu_index: 1
+  kind: vertex
+  buildable: true
+  function: Rectangle
+  variant: 1
+  menu_name: rectangle
+  render:
+    fingerprint: sha1:fe1702cde274
+  tag: none
+  status: generated
+  summary: rectangle.
+  discriminator: n/a
+  use_when:
+  - using rectangle
+  avoid_when: []
+  aliases:
+  - rectangle
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Rectangle(n1, "")
+- id: general.roundedrectangle.v1
+  menu_index: 2
+  kind: vertex
+  buildable: true
+  function: RoundedRectangle
+  variant: 1
+  menu_name: roundedRectangle
+  render:
+    fingerprint: sha1:c40958324ca9
+  tag: none
+  status: generated
+  summary: roundedRectangle.
+  discriminator: n/a
+  use_when:
+  - using roundedRectangle
+  avoid_when: []
+  aliases:
+  - roundedRectangle
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.RoundedRectangle(n1, "")
+- id: general.text.v1
+  menu_index: 3
+  kind: vertex
+  buildable: true
+  function: Text
+  variant: 1
+  menu_name: text
+  render:
+    fingerprint: sha1:da39a3ee5e6b
+  tag: none
+  status: generated
+  summary: text.
+  discriminator: n/a
+  use_when:
+  - using text
+  avoid_when: []
+  aliases:
+  - text
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Text(n1, "Text")
+- id: general.textbox.v1
+  menu_index: 4
+  kind: vertex
+  buildable: true
+  function: Textbox
+  variant: 1
+  menu_name: textbox
+  render:
+    fingerprint: sha1:c23b79451c13
+  tag: none
+  status: generated
+  summary: textbox.
+  discriminator: n/a
+  use_when:
+  - using textbox
+  avoid_when: []
+  aliases:
+  - textbox
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: description
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Textbox(n1, "Heading", "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
+- id: general.ellipse.v1
+  menu_index: 5
+  kind: vertex
+  buildable: true
+  function: Ellipse
+  variant: 1
+  menu_name: ellipse
+  render:
+    fingerprint: sha1:3ca1dc1b06e7
+  tag: none
+  status: generated
+  summary: ellipse.
+  discriminator: n/a
+  use_when:
+  - using ellipse
+  avoid_when: []
+  aliases:
+  - ellipse
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Ellipse(n1, "")
+- id: general.square.v1
+  menu_index: 6
+  kind: vertex
+  buildable: true
+  function: Square
+  variant: 1
+  menu_name: square
+  render:
+    fingerprint: sha1:4e2ab0ae9dd4
+  tag: none
+  status: generated
+  summary: square.
+  discriminator: n/a
+  use_when:
+  - using square
+  avoid_when: []
+  aliases:
+  - square
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Square(n1, "")
+- id: general.circle.v1
+  menu_index: 7
+  kind: vertex
+  buildable: true
+  function: Circle
+  variant: 1
+  menu_name: circle
+  render:
+    fingerprint: sha1:181f3cf8e7a3
+  tag: none
+  status: generated
+  summary: circle.
+  discriminator: n/a
+  use_when:
+  - using circle
+  avoid_when: []
+  aliases:
+  - circle
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Circle(n1, "")
+- id: general.process.v1
+  menu_index: 8
+  kind: vertex
+  buildable: true
+  function: Process
+  variant: 1
+  menu_name: process
+  render:
+    fingerprint: sha1:5361779e4be4
+  tag: none
+  status: generated
+  summary: process.
+  discriminator: n/a
+  use_when:
+  - using process
+  avoid_when: []
+  aliases:
+  - process
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Process(n1, "")
+- id: general.diamond.v1
+  menu_index: 9
+  kind: vertex
+  buildable: true
+  function: Diamond
+  variant: 1
+  menu_name: diamond
+  render:
+    fingerprint: sha1:39536f62489a
+  tag: none
+  status: generated
+  summary: diamond.
+  discriminator: n/a
+  use_when:
+  - using diamond
+  avoid_when: []
+  aliases:
+  - diamond
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Diamond(n1, "")
+- id: general.parallelogram.v1
+  menu_index: 10
+  kind: vertex
+  buildable: true
+  function: Parallelogram
+  variant: 1
+  menu_name: parallelogram
+  render:
+    fingerprint: sha1:5a4c8309d8f2
+  tag: none
+  status: generated
+  summary: parallelogram.
+  discriminator: n/a
+  use_when:
+  - using parallelogram
+  avoid_when: []
+  aliases:
+  - parallelogram
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Parallelogram(n1, "")
+- id: general.hexagon.v1
+  menu_index: 11
+  kind: vertex
+  buildable: true
+  function: Hexagon
+  variant: 1
+  menu_name: hexagon
+  render:
+    fingerprint: sha1:0f5c86fa11d1
+  tag: none
+  status: generated
+  summary: hexagon.
+  discriminator: n/a
+  use_when:
+  - using hexagon
+  avoid_when: []
+  aliases:
+  - hexagon
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Hexagon(n1, "")
+- id: general.triangle.v1
+  menu_index: 12
+  kind: vertex
+  buildable: true
+  function: Triangle
+  variant: 1
+  menu_name: triangle
+  render:
+    fingerprint: sha1:2cca5f95b5a7
+  tag: none
+  status: generated
+  summary: triangle.
+  discriminator: n/a
+  use_when:
+  - using triangle
+  avoid_when: []
+  aliases:
+  - triangle
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Triangle(n1, "")
+- id: general.cylinder.v1
+  menu_index: 13
+  kind: vertex
+  buildable: true
+  function: Cylinder
+  variant: 1
+  menu_name: cylinder
+  render:
+    fingerprint: sha1:81a1979d41e5
+  tag: none
+  status: generated
+  summary: cylinder.
+  discriminator: n/a
+  use_when:
+  - using cylinder
+  avoid_when: []
+  aliases:
+  - cylinder
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Cylinder(n1, "")
+- id: general.cloud.v1
+  menu_index: 14
+  kind: vertex
+  buildable: true
+  function: Cloud
+  variant: 1
+  menu_name: cloud
+  render:
+    fingerprint: sha1:7ffd4fa98cd5
+  tag: none
+  status: generated
+  summary: cloud.
+  discriminator: n/a
+  use_when:
+  - using cloud
+  avoid_when: []
+  aliases:
+  - cloud
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Cloud(n1, "")
+- id: general.document.v1
+  menu_index: 15
+  kind: vertex
+  buildable: true
+  function: Document
+  variant: 1
+  menu_name: document
+  render:
+    fingerprint: sha1:7b1b725bbd1f
+  tag: none
+  status: generated
+  summary: document.
+  discriminator: n/a
+  use_when:
+  - using document
+  avoid_when: []
+  aliases:
+  - document
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Document(n1, "")
+- id: general.internalstorage.v1
+  menu_index: 16
+  kind: vertex
+  buildable: true
+  function: InternalStorage
+  variant: 1
+  menu_name: internalStorage
+  render:
+    fingerprint: sha1:672d29eefbf8
+  tag: none
+  status: generated
+  summary: internalStorage.
+  discriminator: n/a
+  use_when:
+  - using internalStorage
+  avoid_when: []
+  aliases:
+  - internalStorage
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.InternalStorage(n1, "")
+- id: general.cube.v1
+  menu_index: 17
+  kind: vertex
+  buildable: true
+  function: Cube
+  variant: 1
+  menu_name: cube
+  render:
+    fingerprint: sha1:e751bb64baf0
+  tag: none
+  status: generated
+  summary: cube.
+  discriminator: n/a
+  use_when:
+  - using cube
+  avoid_when: []
+  aliases:
+  - cube
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Cube(n1, "")
+- id: general.step.v1
+  menu_index: 18
+  kind: vertex
+  buildable: true
+  function: Step
+  variant: 1
+  menu_name: step
+  render:
+    fingerprint: sha1:293356c5bc28
+  tag: none
+  status: generated
+  summary: step.
+  discriminator: n/a
+  use_when:
+  - using step
+  avoid_when: []
+  aliases:
+  - step
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Step(n1, "")
+- id: general.trapezoid.v1
+  menu_index: 19
+  kind: vertex
+  buildable: true
+  function: Trapezoid
+  variant: 1
+  menu_name: trapezoid
+  render:
+    fingerprint: sha1:15c768d357e2
+  tag: none
+  status: generated
+  summary: trapezoid.
+  discriminator: n/a
+  use_when:
+  - using trapezoid
+  avoid_when: []
+  aliases:
+  - trapezoid
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Trapezoid(n1, "")
+- id: general.tape.v1
+  menu_index: 20
+  kind: vertex
+  buildable: true
+  function: Tape
+  variant: 1
+  menu_name: tape
+  render:
+    fingerprint: sha1:04dd1e91bad5
+  tag: none
+  status: generated
+  summary: tape.
+  discriminator: n/a
+  use_when:
+  - using tape
+  avoid_when: []
+  aliases:
+  - tape
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Tape(n1, "")
+- id: general.note.v1
+  menu_index: 21
+  kind: vertex
+  buildable: true
+  function: Note
+  variant: 1
+  menu_name: note
+  render:
+    fingerprint: sha1:52c380448dee
+  tag: none
+  status: generated
+  summary: note.
+  discriminator: n/a
+  use_when:
+  - using note
+  avoid_when: []
+  aliases:
+  - note
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Note(n1, "")
+- id: general.card.v1
+  menu_index: 22
+  kind: vertex
+  buildable: true
+  function: Card
+  variant: 1
+  menu_name: card
+  render:
+    fingerprint: sha1:2bc0e3341251
+  tag: none
+  status: generated
+  summary: card.
+  discriminator: n/a
+  use_when:
+  - using card
+  avoid_when: []
+  aliases:
+  - card
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Card(n1, "")
+- id: general.callout.v1
+  menu_index: 23
+  kind: vertex
+  buildable: true
+  function: Callout
+  variant: 1
+  menu_name: callout
+  render:
+    fingerprint: sha1:b8494ceacfee
+  tag: none
+  status: generated
+  summary: callout.
+  discriminator: n/a
+  use_when:
+  - using callout
+  avoid_when: []
+  aliases:
+  - callout
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Callout(n1, "")
+- id: general.actor.v1
+  menu_index: 24
+  kind: vertex
+  buildable: true
+  function: Actor
+  variant: 1
+  menu_name: actor
+  render:
+    fingerprint: sha1:5d5248eae9f4
+  tag: none
+  status: generated
+  summary: actor.
+  discriminator: n/a
+  use_when:
+  - using actor
+  avoid_when: []
+  aliases:
+  - actor
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Actor(n1, "Actor")
+- id: general.or.v1
+  menu_index: 25
+  kind: vertex
+  buildable: true
+  function: Or
+  variant: 1
+  menu_name: or
+  render:
+    fingerprint: sha1:438b627704b7
+  tag: none
+  status: generated
+  summary: or.
+  discriminator: n/a
+  use_when:
+  - using or
+  avoid_when: []
+  aliases:
+  - or
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Or(n1, "")
+- id: general.and.v1
+  menu_index: 26
+  kind: vertex
+  buildable: true
+  function: And
+  variant: 1
+  menu_name: and
+  render:
+    fingerprint: sha1:fbf554c49cdc
+  tag: none
+  status: generated
+  summary: and.
+  discriminator: n/a
+  use_when:
+  - using and
+  avoid_when: []
+  aliases:
+  - and
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.And(n1, "")
+- id: general.datastorage.v1
+  menu_index: 27
+  kind: vertex
+  buildable: true
+  function: DataStorage
+  variant: 1
+  menu_name: dataStorage
+  render:
+    fingerprint: sha1:24c1558c7d6e
+  tag: none
+  status: generated
+  summary: dataStorage.
+  discriminator: n/a
+  use_when:
+  - using dataStorage
+  avoid_when: []
+  aliases:
+  - dataStorage
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.DataStorage(n1, "")
+- id: general.container.v1
+  menu_index: 28
+  kind: vertex
+  buildable: true
+  function: Container
+  variant: 1
+  menu_name: container
+  render:
+    fingerprint: sha1:37e923117e9a
+  tag: none
+  status: generated
+  summary: container.
+  discriminator: n/a
+  use_when:
+  - using container
+  avoid_when: []
+  aliases:
+  - container
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.Container(n1, "")
+- id: general.verticalcontainer.v1
+  menu_index: 29
+  kind: vertex
+  buildable: true
+  function: VerticalContainer
+  variant: 1
+  menu_name: verticalContainer
+  render:
+    fingerprint: sha1:4cb9f9a2aa24
+  tag: none
+  status: generated
+  summary: verticalContainer.
+  discriminator: n/a
+  use_when:
+  - using verticalContainer
+  avoid_when: []
+  aliases:
+  - verticalContainer
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.VerticalContainer(n1, "Vertical Container")
+- id: general.horizontalcontainer.v1
+  menu_index: 30
+  kind: vertex
+  buildable: true
+  function: HorizontalContainer
+  variant: 1
+  menu_name: horizontalContainer
+  render:
+    fingerprint: sha1:69368f63cd61
+  tag: none
+  status: generated
+  summary: horizontalContainer.
+  discriminator: n/a
+  use_when:
+  - using horizontalContainer
+  avoid_when: []
+  aliases:
+  - horizontalContainer
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.HorizontalContainer(n1, "Horizontal Container")
+- id: general.list.v1
+  menu_index: 31
+  kind: vertex
+  buildable: true
+  function: List
+  variant: 1
+  menu_name: list
+  render:
+    fingerprint: sha1:89be3b3fa6bd
+  tag: none
+  status: generated
+  summary: list.
+  discriminator: n/a
+  use_when:
+  - using list
+  avoid_when: []
+  aliases:
+  - list
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.List(n1, "List")
+- id: general.listitem.v1
+  menu_index: 32
+  kind: vertex
+  buildable: true
+  function: ListItem
+  variant: 1
+  menu_name: listItem
+  render:
+    fingerprint: sha1:e66f6eafa152
+  tag: none
+  status: generated
+  summary: listItem.
+  discriminator: n/a
+  use_when:
+  - using listItem
+  avoid_when: []
+  aliases:
+  - listItem
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    general.ListItem(n1, "List Item")
+- id: general.rel.v1
+  menu_index: 33
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 1
+  menu_name: Rel
+  render:
+    fingerprint: sha1:0104c4d7a3df
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v10
+    - general.rel.v11
+    - general.rel.v12
+    - general.rel.v13
+    - general.rel.v2
+    - general.rel.v3
+    - general.rel.v4
+    - general.rel.v5
+    - general.rel.v6
+    - general.rel.v7
+    - general.rel.v8
+    - general.rel.v9
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="curve")
+- id: general.rel.v2
+  menu_index: 34
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 2
+  menu_name: Rel
+  render:
+    fingerprint: sha1:a12525b9cba9
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v1
+    - general.rel.v10
+    - general.rel.v11
+    - general.rel.v12
+    - general.rel.v13
+    - general.rel.v3
+    - general.rel.v4
+    - general.rel.v5
+    - general.rel.v6
+    - general.rel.v7
+    - general.rel.v8
+    - general.rel.v9
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="bidirectionalArrow")
+- id: general.rel.v3
+  menu_index: 35
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 3
+  menu_name: Rel
+  render:
+    fingerprint: sha1:bacbf29b5516
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v1
+    - general.rel.v10
+    - general.rel.v11
+    - general.rel.v12
+    - general.rel.v13
+    - general.rel.v2
+    - general.rel.v4
+    - general.rel.v5
+    - general.rel.v6
+    - general.rel.v7
+    - general.rel.v8
+    - general.rel.v9
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="arrow")
+- id: general.rel.v4
+  menu_index: 36
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 4
+  menu_name: Rel
+  render:
+    fingerprint: sha1:cb4ccde45f8a
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v1
+    - general.rel.v10
+    - general.rel.v11
+    - general.rel.v12
+    - general.rel.v13
+    - general.rel.v2
+    - general.rel.v3
+    - general.rel.v5
+    - general.rel.v6
+    - general.rel.v7
+    - general.rel.v8
+    - general.rel.v9
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="dashedLine")
+- id: general.rel.v5
+  menu_index: 37
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 5
+  menu_name: Rel
+  render:
+    fingerprint: sha1:e21201ab9727
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v1
+    - general.rel.v10
+    - general.rel.v11
+    - general.rel.v12
+    - general.rel.v13
+    - general.rel.v2
+    - general.rel.v3
+    - general.rel.v4
+    - general.rel.v6
+    - general.rel.v7
+    - general.rel.v8
+    - general.rel.v9
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="dottedLine")
+- id: general.rel.v6
+  menu_index: 38
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 6
+  menu_name: Rel
+  render:
+    fingerprint: sha1:cd45a7bf4a94
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v1
+    - general.rel.v10
+    - general.rel.v11
+    - general.rel.v12
+    - general.rel.v13
+    - general.rel.v2
+    - general.rel.v3
+    - general.rel.v4
+    - general.rel.v5
+    - general.rel.v7
+    - general.rel.v8
+    - general.rel.v9
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="line")
+- id: general.rel.v7
+  menu_index: 39
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 7
+  menu_name: Rel
+  render:
+    fingerprint: sha1:10d43a858605
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v1
+    - general.rel.v10
+    - general.rel.v11
+    - general.rel.v12
+    - general.rel.v13
+    - general.rel.v2
+    - general.rel.v3
+    - general.rel.v4
+    - general.rel.v5
+    - general.rel.v6
+    - general.rel.v8
+    - general.rel.v9
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="bidirectionalConnector")
+- id: general.rel.v8
+  menu_index: 40
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 8
+  menu_name: Rel
+  render:
+    fingerprint: sha1:4f6e4ccaf173
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v1
+    - general.rel.v10
+    - general.rel.v11
+    - general.rel.v12
+    - general.rel.v13
+    - general.rel.v2
+    - general.rel.v3
+    - general.rel.v4
+    - general.rel.v5
+    - general.rel.v6
+    - general.rel.v7
+    - general.rel.v9
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="connector")
+- id: general.rel.v9
+  menu_index: 41
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 9
+  menu_name: Rel
+  render:
+    fingerprint: sha1:293f726eb0f1
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v1
+    - general.rel.v10
+    - general.rel.v11
+    - general.rel.v12
+    - general.rel.v13
+    - general.rel.v2
+    - general.rel.v3
+    - general.rel.v4
+    - general.rel.v5
+    - general.rel.v6
+    - general.rel.v7
+    - general.rel.v8
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="link")
+- id: general.rel.v10
+  menu_index: 42
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 10
+  menu_name: Rel
+  render:
+    fingerprint: sha1:4f6e4ccaf173
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v1
+    - general.rel.v11
+    - general.rel.v12
+    - general.rel.v13
+    - general.rel.v2
+    - general.rel.v3
+    - general.rel.v4
+    - general.rel.v5
+    - general.rel.v6
+    - general.rel.v7
+    - general.rel.v8
+    - general.rel.v9
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="connector")
+- id: general.rel.v11
+  menu_index: 43
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 11
+  menu_name: Rel
+  render:
+    fingerprint: sha1:4f6e4ccaf173
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v1
+    - general.rel.v10
+    - general.rel.v12
+    - general.rel.v13
+    - general.rel.v2
+    - general.rel.v3
+    - general.rel.v4
+    - general.rel.v5
+    - general.rel.v6
+    - general.rel.v7
+    - general.rel.v8
+    - general.rel.v9
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="connector")
+- id: general.rel.v12
+  menu_index: 44
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 12
+  menu_name: Rel
+  render:
+    fingerprint: sha1:4f6e4ccaf173
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v1
+    - general.rel.v10
+    - general.rel.v11
+    - general.rel.v13
+    - general.rel.v2
+    - general.rel.v3
+    - general.rel.v4
+    - general.rel.v5
+    - general.rel.v6
+    - general.rel.v7
+    - general.rel.v8
+    - general.rel.v9
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="connector")
+- id: general.rel.v13
+  menu_index: 45
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 13
+  menu_name: Rel
+  render:
+    fingerprint: sha1:4f6e4ccaf173
+  tag: none
+  status: generated
+  summary: Rel.
+  discriminator: TODO
+  use_when:
+  - using Rel
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: type
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - general.rel.v1
+    - general.rel.v10
+    - general.rel.v11
+    - general.rel.v12
+    - general.rel.v2
+    - general.rel.v3
+    - general.rel.v4
+    - general.rel.v5
+    - general.rel.v6
+    - general.rel.v7
+    - general.rel.v8
+    - general.rel.v9
+    see_also: []
+  example: |
+    general.Rel(None, None, "", type="connectorWithSymbol")

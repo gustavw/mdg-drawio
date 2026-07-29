@@ -1,0 +1,128 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mdg_drawio"
+version = "0.1.0"
+description = "Generate draw.io diagrams from compact JSON documents"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+authors = [
+  { name = "MdgDrawio contributors" }
+]
+keywords = ["drawio", "diagrams", "xml", "generator"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Code Generators"
+]
+dependencies = [
+  "PyYAML>=6"
+]
+
+[project.scripts]
+mdg = "mdg_drawio:main"
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.10",
+  "ruff>=0.15",
+  "pytest>=7",
+  "coverage[toml]>=7",
+  "jsonschema>=4",
+  "types-PyYAML",
+  "types-jsonschema"
+]
+
+[project.urls]
+Repository = "https://github.com/your-org/mdg-drawio"
+"Bug Tracker" = "https://github.com/your-org/mdg-drawio/issues"
+
+[tool.setuptools.packages.find]
+include = ["mdg_drawio*"]
+
+# The generated style sidecars (mdg_drawio/generated_data/) are draw.io-derived
+# copyright material: never committed, never shipped in wheels. Users run
+# `make build-data`. Only the committed notation registries are package data.
+[tool.setuptools.package-data]
+mdg_drawio = [
+  "notation/**/*.yaml",
+  "notation/**/*.mdg",
+  "notation/**/*.json",
+  "notation/**/*.md",
+  "generator/*.yaml"
+]
+[tool.setuptools.exclude-package-data]
+mdg_drawio = ["generated_data/**"]
+
+
+[tool.coverage.run]
+source = ["mdg_drawio"]
+omit = ["*/__main__.py"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+exclude = ["tools/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "C901"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+# Enforce the project convention that every module opts into PEP 563 semantics.
+# ruff's I002 then flags (and --fix adds) any file missing the future import,
+# so the convention can no longer silently drift.
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["C901"]
+# one-shot migration tool: wide mapping tables and one linear pipeline
+# function are clearer than the split-up alternatives
+"scripts/migrate_registry_v2.py" = ["E501", "C901"]
+# sys.path bootstrap for direct invocation must precede the local imports
+"scripts/analyze_dead_code.py" = ["E402", "I001"]
+# renderer holds CSS/JS/HTML template strings; line-length limits don't apply
+"scripts/dashboard_render.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["mdg_drawio", "tests", "scripts"]
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pylsp.plugins.black]
+enabled = true
+line_length = 88
+
+[tool.pylsp.plugins.ruff]
+enabled = true
+# ruff covers linting; disable the overlapping built-in linters below
+
+[tool.pylsp.plugins.pycodestyle]
+enabled = false
+
+[tool.pylsp.plugins.pyflakes]
+enabled = false
+
+[tool.pylsp.plugins.mccabe]
+enabled = false
+
+[tool.pylsp.plugins.autopep8]
+enabled = false
+
+[tool.pylsp.plugins.yapf]
+enabled = false

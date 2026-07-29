@@ -1,0 +1,145 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DrawIO Export",
+  "description": "Structured JSON representation of a .drawio file with full round-trip fidelity.",
+  "type": "object",
+  "required": ["source_file", "host", "diagrams"],
+  "additionalProperties": false,
+  "properties": {
+    "source_file": {
+      "type": "string",
+      "description": "Original filename (e.g. test_general_shapes.drawio)"
+    },
+    "host": {
+      "type": "string",
+      "description": "Value of the host attribute on the <mxfile> root element"
+    },
+    "diagrams": {
+      "type": "array",
+      "description": "One entry per <diagram> page in the file",
+      "items": { "$ref": "#/definitions/Diagram" }
+    }
+  },
+  "definitions": {
+    "Diagram": {
+      "type": "object",
+      "required": ["id", "name", "graph_model", "cells"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "graph_model": {
+          "type": "object",
+          "description": "All attributes of <mxGraphModel> (dx, dy, grid, pageWidth, …)",
+          "additionalProperties": { "type": ["number", "string"] }
+        },
+        "cells": {
+          "type": "array",
+          "description": "All <mxCell> and <object>/<mxCell> elements in flat order",
+          "items": { "$ref": "#/definitions/Cell" }
+        }
+      }
+    },
+    "Cell": {
+      "type": "object",
+      "required": ["id"],
+      "description": "A single mxCell vertex, edge, or edge-label, possibly wrapped in an <object> element.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique cell identifier within the diagram. Use make_id() from drawio_codec to generate UUIDs for programmatically created cells.",
+          "pattern": "^[\\w\\-]+$"
+        },
+        "value": {
+          "type": "string",
+          "description": "Label text (may contain HTML). For object-wrapped cells this is the <object label='...'> attribute."
+        },
+        "style": {
+          "type": "string",
+          "description": "DrawIO style string (semicolon-separated key=value pairs)"
+        },
+        "parent": {
+          "type": "string",
+          "description": "ID of the parent cell (builds the containment hierarchy)"
+        },
+        "vertex": {
+          "type": "string",
+          "enum": ["1"],
+          "description": "Present with value '1' when the cell is a vertex (shape)"
+        },
+        "edge": {
+          "type": "string",
+          "enum": ["1"],
+          "description": "Present with value '1' when the cell is an edge (connector)"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source vertex ID for edge cells"
+        },
+        "target": {
+          "type": "string",
+          "description": "Target vertex ID for edge cells"
+        },
+        "object_attrs": {
+          "type": "object",
+          "description": "Extra attributes from an enclosing <object> element (e.g. C4 metadata: c4Name, c4Type, placeholders…)",
+          "additionalProperties": { "type": "string" }
+        },
+        "geometry": { "$ref": "#/definitions/Geometry" }
+      },
+      "additionalProperties": {
+        "type": "string",
+        "description": "Any other mxCell XML attribute preserved verbatim (e.g. connectable, visible, tooltip)"
+      }
+    },
+    "Geometry": {
+      "type": "object",
+      "description": "Parsed <mxGeometry> element",
+      "additionalProperties": {
+        "type": ["number", "string"],
+        "description": "Any unknown future mxGeometry XML attribute (always a scalar — draw.io geometry attributes are never nested objects or arrays beyond the named properties above)"
+      },
+      "properties": {
+        "x": { "type": "number", "description": "Left edge position (omitted when 0)" },
+        "y": { "type": "number", "description": "Top edge position (omitted when 0). Always omitted for shape=tableRow cells — their vertical position is managed by childLayout=tableLayout." },
+        "width": { "type": "number" },
+        "height": { "type": "number" },
+        "relative": {
+          "type": "string",
+          "enum": ["1"],
+          "description": "Set on edge geometry to indicate relative positioning"
+        },
+        "source_point": { "$ref": "#/definitions/Point", "description": "Detached edge source anchor" },
+        "target_point": { "$ref": "#/definitions/Point", "description": "Detached edge target anchor" },
+        "offset": { "$ref": "#/definitions/Point", "description": "Offset for inline child shapes (e.g. edge decorators)" },
+        "waypoints": {
+          "type": "array",
+          "description": "Intermediate bend points for curved/orthogonal edges",
+          "items": { "$ref": "#/definitions/Point" }
+        },
+        "alternate_bounds": {
+          "$ref": "#/definitions/Rect",
+          "description": "Collapsed bounds stored in <mxRectangle as='alternateBounds'>. Only present when the bounds differ from the regular geometry width/height — identical alternate_bounds are stripped during parsing."
+        }
+      }
+    },
+    "Point": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "Rect": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    }
+  }
+}

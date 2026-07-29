@@ -1,0 +1,44 @@
+name: CI
+
+# Enforces the MBSE gate described in AGENTS.md: lint + tests + model-check.
+# If the architecture model, diagrams, and code drift, this fails.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install (with dev extras)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      # Generated style data is derived from the (copyright, git-ignored) draw.io
+      # source, so it is not committed — build it here. `make build-data` clones
+      # the pinned draw.io into ./drawio and extracts the palette, so the full
+      # suite runs and the coverage gate is measured against real data.
+      - name: Build generated data (clones pinned draw.io)
+        run: make build-data
+
+      - name: Gate — lint, tests, model-check
+        run: make check
+
+      # Per-Component coverage gate: fails if any code-backed Component drops
+      # below COVERAGE_MIN (60%). Dynamic, so kept out of the static `make
+      # check`; runs as its own step. Raise the threshold as coverage improves.
+      - name: Coverage gate (per-Component >= 60%)
+        run: make coverage-gate

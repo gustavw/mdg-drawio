@@ -1,0 +1,1796 @@
+# Entity Relation shape registry — agent-facing metadata for the erd draw.io DSL.
+# Conforms to the library-agnostic shape-registry schema (shape-registry.schema.json).
+# CORE fields library-invariant; METAMODEL block present only where a shape maps to a
+# metamodel element. Judgment fields are status: generated — accept/reject per entry.
+
+library: erd
+version: '1'
+provenance:
+  source_file: Entity_Relation.drawio
+  palette: draw.io Entity Relation
+  shape_count: 50
+  pages:
+  - entityRelation
+grammar:
+  spec: ../GRAMMAR.md
+  root: ERD
+  notes:
+  - Anchor rows may nest child Anchor rows (see the coverage file).
+row_types:
+- name: Row
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: Plain table row.
+- name: RowKey
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  - name: key
+    required: false
+  summary: Key row; key= sets the key tag (e.g. 'PK', 'FK1').
+- name: Item
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: List item row.
+- name: EntityText
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: Free-text block row inside an entity.
+- name: Anchor
+  args:
+  - name: node_id
+    required: true
+  - name: text
+    required: false
+  summary: Anchor row; may nest child Anchor rows.
+shapes:
+- id: erd.table.v1
+  menu_index: 1
+  kind: vertex
+  buildable: true
+  function: Table
+  variant: 1
+  menu_name: Table 1
+  render:
+    fingerprint: sha1:5bbbf4b94ad6
+  tag: metaclass
+  status: generated
+  summary: Table 1.
+  discriminator: TODO
+  use_when:
+  - using Table 1
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Row
+    - RowKey
+  related:
+    variants:
+    - erd.table.v2
+    see_also: []
+  example: |
+    erd.Table(n1, "Table"):
+        erd.RowKey(r1c1v1, "UniqueID", key="PK")
+        erd.Row(r1c1v2, "Row 1")
+        erd.Row(r1c1v3, "Row 2")
+        erd.Row(r1c1v4, "Row 3")
+  metamodel:
+    spec: erd
+    element: Table
+- id: erd.table.v2
+  menu_index: 2
+  kind: vertex
+  buildable: true
+  function: Table
+  variant: 2
+  menu_name: Table 2
+  render:
+    fingerprint: sha1:f859e914916a
+  tag: notation
+  status: generated
+  summary: Table 2.
+  discriminator: TODO
+  use_when:
+  - using Table 2
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Row
+    - RowKey
+  related:
+    variants:
+    - erd.table.v1
+    see_also: []
+  example: |
+    erd.Table(n1, "Table", variant=2):
+        erd.RowKey(r1c2v1, "Row 1", key="PK,FK1")
+        erd.RowKey(r1c2v2, "Row 2", key="PK,FK2")
+        erd.Row(r1c2v3, "Row 3")
+        erd.Row(r1c2v4, "Row 4")
+  metamodel:
+    spec: erd
+    element: Table
+- id: erd.rowkey.v1
+  menu_index: 3
+  kind: vertex
+  buildable: true
+  function: RowKey
+  variant: 1
+  menu_name: Table Row 1
+  render:
+    fingerprint: sha1:973b535162bf
+  tag: metaclass
+  status: generated
+  summary: Table Row 1.
+  discriminator: TODO
+  use_when:
+  - using Table Row 1
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - erd.rowkey.v2
+    - erd.rowkey.v3
+    see_also: []
+  example: |
+    erd.RowKey(n1, "Row")
+  metamodel:
+    spec: erd
+    element: RowKey
+- id: erd.rowkey.v2
+  menu_index: 4
+  kind: vertex
+  buildable: true
+  function: RowKey
+  variant: 2
+  menu_name: Table Row 2
+  render:
+    fingerprint: sha1:7394d09d7b8d
+  tag: notation
+  status: generated
+  summary: Table Row 2.
+  discriminator: TODO
+  use_when:
+  - using Table Row 2
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: key
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - erd.rowkey.v1
+    - erd.rowkey.v3
+    see_also: []
+  example: |
+    erd.RowKey(n1, "UniqueID", key="FK")
+  metamodel:
+    spec: erd
+    element: RowKey
+- id: erd.rowkey.v3
+  menu_index: 5
+  kind: vertex
+  buildable: true
+  function: RowKey
+  variant: 3
+  menu_name: Table Row 3
+  render:
+    fingerprint: sha1:7394d09d7b8d
+  tag: notation
+  status: generated
+  summary: Table Row 3.
+  discriminator: TODO
+  use_when:
+  - using Table Row 3
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  - name: key
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - erd.rowkey.v1
+    - erd.rowkey.v2
+    see_also: []
+  example: |
+    erd.RowKey(n1, "UniqueID", key="PK", variant=2)
+  metamodel:
+    spec: erd
+    element: RowKey
+- id: erd.list.v1
+  menu_index: 6
+  kind: vertex
+  buildable: true
+  function: List
+  variant: 1
+  menu_name: List
+  render:
+    fingerprint: sha1:5db638583f24
+  tag: metaclass
+  status: generated
+  summary: List.
+  discriminator: n/a
+  use_when:
+  - using List
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Item
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.List(n1, "List"):
+        erd.Item(r2c1v1, "Item 1")
+        erd.Item(r2c1v2, "Item 2")
+        erd.Item(r2c1v3, "Item 3")
+  metamodel:
+    spec: erd
+    element: List
+- id: erd.item.v1
+  menu_index: 7
+  kind: vertex
+  buildable: true
+  function: Item
+  variant: 1
+  menu_name: List Item 1
+  render:
+    fingerprint: sha1:cfc174d6a594
+  tag: metaclass
+  status: generated
+  summary: List Item 1.
+  discriminator: TODO
+  use_when:
+  - using List Item 1
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - erd.item.v2
+    - erd.item.v3
+    see_also: []
+  example: |
+    erd.Item(n1, "Item")
+  metamodel:
+    spec: erd
+    element: Item
+- id: erd.item.v2
+  menu_index: 8
+  kind: vertex
+  buildable: true
+  function: Item
+  variant: 2
+  menu_name: List Item 2
+  render:
+    fingerprint: sha1:f9758b6b94e1
+  tag: notation
+  status: generated
+  summary: List Item 2.
+  discriminator: TODO
+  use_when:
+  - using List Item 2
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - erd.item.v1
+    - erd.item.v3
+    see_also: []
+  example: |
+    erd.Item(n1, "Item", variant=2)
+  metamodel:
+    spec: erd
+    element: Item
+- id: erd.item.v3
+  menu_index: 9
+  kind: vertex
+  buildable: true
+  function: Item
+  variant: 3
+  menu_name: List Item 3
+  render:
+    fingerprint: sha1:bde1d970ee71
+  tag: notation
+  status: generated
+  summary: List Item 3.
+  discriminator: TODO
+  use_when:
+  - using List Item 3
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - erd.item.v1
+    - erd.item.v2
+    see_also: []
+  example: |
+    erd.Item(n1, "", variant=3)
+  metamodel:
+    spec: erd
+    element: Item
+- id: erd.entitytable.v1
+  menu_index: 10
+  kind: vertex
+  buildable: true
+  function: EntityTable
+  variant: 1
+  menu_name: Entity
+  render:
+    fingerprint: sha1:762eb3890933
+  tag: metaclass
+  status: generated
+  summary: Entity.
+  discriminator: n/a
+  use_when:
+  - using Entity
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - EntityText
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.EntityTable(n1, "Entity"):
+        erd.EntityText(r2c5v1, {BlockEntityText})
+  metamodel:
+    spec: erd
+    element: EntityTable
+- id: erd.entityrect.v1
+  menu_index: 11
+  kind: vertex
+  buildable: true
+  function: EntityRect
+  variant: 1
+  menu_name: Entity
+  render:
+    fingerprint: sha1:ca692d4d9eeb
+  tag: metaclass
+  status: generated
+  summary: Entity.
+  discriminator: n/a
+  use_when:
+  - using Entity
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.EntityRect(n1, "Entity")
+  metamodel:
+    spec: erd
+    element: EntityRect
+- id: erd.entityrounded.v1
+  menu_index: 12
+  kind: vertex
+  buildable: true
+  function: EntityRounded
+  variant: 1
+  menu_name: Entity (Rounded)
+  render:
+    fingerprint: sha1:8bac0624bb00
+  tag: metaclass
+  status: generated
+  summary: Entity (Rounded).
+  discriminator: n/a
+  use_when:
+  - using Entity (Rounded)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.EntityRounded(n1, "Entity")
+  metamodel:
+    spec: erd
+    element: EntityRounded
+- id: erd.weakentity.v1
+  menu_index: 13
+  kind: vertex
+  buildable: true
+  function: WeakEntity
+  variant: 1
+  menu_name: Weak Entity
+  render:
+    fingerprint: sha1:257af7ccf5e9
+  tag: metaclass
+  status: generated
+  summary: Weak Entity.
+  discriminator: n/a
+  use_when:
+  - using Weak Entity
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.WeakEntity(n1, "Entity")
+  metamodel:
+    spec: erd
+    element: WeakEntity
+- id: erd.attribute.v1
+  menu_index: 14
+  kind: vertex
+  buildable: true
+  function: Attribute
+  variant: 1
+  menu_name: Attribute
+  render:
+    fingerprint: sha1:356adbba9e8e
+  tag: metaclass
+  status: generated
+  summary: Attribute.
+  discriminator: n/a
+  use_when:
+  - using Attribute
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.Attribute(n1, "Attribute")
+  metamodel:
+    spec: erd
+    element: Attribute
+- id: erd.keyattribute.v1
+  menu_index: 15
+  kind: vertex
+  buildable: true
+  function: KeyAttribute
+  variant: 1
+  menu_name: Key Attribute
+  render:
+    fingerprint: sha1:9e078fccf716
+  tag: metaclass
+  status: generated
+  summary: Key Attribute.
+  discriminator: n/a
+  use_when:
+  - using Key Attribute
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.KeyAttribute(n1, "Attribute")
+  metamodel:
+    spec: erd
+    element: KeyAttribute
+- id: erd.weakkeyattribute.v1
+  menu_index: 16
+  kind: vertex
+  buildable: true
+  function: WeakKeyAttribute
+  variant: 1
+  menu_name: Weak Key Attribute
+  render:
+    fingerprint: sha1:356adbba9e8e
+  tag: metaclass
+  status: generated
+  summary: Weak Key Attribute.
+  discriminator: n/a
+  use_when:
+  - using Weak Key Attribute
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.WeakKeyAttribute(n1, "Attribute")
+  metamodel:
+    spec: erd
+    element: WeakKeyAttribute
+- id: erd.derivedattribute.v1
+  menu_index: 17
+  kind: vertex
+  buildable: true
+  function: DerivedAttribute
+  variant: 1
+  menu_name: Derived Attribute
+  render:
+    fingerprint: sha1:26d654aed7d7
+  tag: metaclass
+  status: generated
+  summary: Derived Attribute.
+  discriminator: n/a
+  use_when:
+  - using Derived Attribute
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.DerivedAttribute(n1, "Attribute")
+  metamodel:
+    spec: erd
+    element: DerivedAttribute
+- id: erd.multivalueattribute.v1
+  menu_index: 18
+  kind: vertex
+  buildable: true
+  function: MultivalueAttribute
+  variant: 1
+  menu_name: Multivalue Attribute
+  render:
+    fingerprint: sha1:5d537e9dfb97
+  tag: metaclass
+  status: generated
+  summary: Multivalue Attribute.
+  discriminator: n/a
+  use_when:
+  - using Multivalue Attribute
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.MultivalueAttribute(n1, "Attribute")
+  metamodel:
+    spec: erd
+    element: MultivalueAttribute
+- id: erd.associativeentity.v1
+  menu_index: 19
+  kind: vertex
+  buildable: true
+  function: AssociativeEntity
+  variant: 1
+  menu_name: Associative Entity
+  render:
+    fingerprint: sha1:bd592eb07cee
+  tag: metaclass
+  status: generated
+  summary: Associative Entity.
+  discriminator: n/a
+  use_when:
+  - using Associative Entity
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.AssociativeEntity(n1, "Associative\nEntity")
+  metamodel:
+    spec: erd
+    element: AssociativeEntity
+- id: erd.relationship.v1
+  menu_index: 20
+  kind: vertex
+  buildable: true
+  function: Relationship
+  variant: 1
+  menu_name: Relationship
+  render:
+    fingerprint: sha1:799504a856c4
+  tag: metaclass
+  status: generated
+  summary: Relationship.
+  discriminator: n/a
+  use_when:
+  - using Relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.Relationship(n1, "Relationship")
+  metamodel:
+    spec: erd
+    element: Relationship
+- id: erd.identifyingrelationship.v1
+  menu_index: 21
+  kind: vertex
+  buildable: true
+  function: IdentifyingRelationship
+  variant: 1
+  menu_name: Identifying Relationship
+  render:
+    fingerprint: sha1:f8e048459e68
+  tag: metaclass
+  status: generated
+  summary: Identifying Relationship.
+  discriminator: n/a
+  use_when:
+  - using Identifying Relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.IdentifyingRelationship(n1, "Relationship")
+  metamodel:
+    spec: erd
+    element: IdentifyingRelationship
+- id: erd.cloud.v1
+  menu_index: 22
+  kind: vertex
+  buildable: true
+  function: Cloud
+  variant: 1
+  menu_name: Cloud
+  render:
+    fingerprint: sha1:763eb5e5e895
+  tag: metaclass
+  status: generated
+  summary: Cloud.
+  discriminator: n/a
+  use_when:
+  - using Cloud
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.Cloud(n1, "Cloud")
+  metamodel:
+    spec: erd
+    element: Cloud
+- id: erd.hierarchy.v1
+  menu_index: 23
+  kind: vertex
+  buildable: true
+  function: Hierarchy
+  variant: 1
+  menu_name: Hierarchy
+  render:
+    fingerprint: sha1:951b3c7c68f0
+  tag: metaclass
+  status: generated
+  summary: Hierarchy.
+  discriminator: n/a
+  use_when:
+  - using Hierarchy
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed:
+    - Anchor
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.Hierarchy(n1, ""):
+        erd.Anchor(r5c3v1, "main"):
+            erd.Anchor(r5c3v2, "sub")
+  metamodel:
+    spec: erd
+    element: Hierarchy
+- id: erd.note.v1
+  menu_index: 24
+  kind: vertex
+  buildable: true
+  function: Note
+  variant: 1
+  menu_name: Note
+  render:
+    fingerprint: sha1:534deeba89e3
+  tag: metaclass
+  status: generated
+  summary: Note.
+  discriminator: n/a
+  use_when:
+  - using Note
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.Note(n1, "Note")
+  metamodel:
+    spec: erd
+    element: Note
+- id: erd.rel.v1
+  menu_index: 25
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 1
+  menu_name: Untitled Relation
+  render:
+    fingerprint: sha1:d8b02639da1f
+  tag: notation
+  status: generated
+  summary: Untitled Relation.
+  discriminator: TODO
+  use_when:
+  - using Untitled Relation
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - erd.rel.v2
+    - erd.rel.v3
+    - erd.rel.v4
+    see_also: []
+  example: |
+    erd.Rel(None, None, "")
+  metamodel:
+    spec: erd
+    element: Rel
+- id: erd.rel.v2
+  menu_index: 26
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 2
+  menu_name: Mandatory Participation (0:1)
+  render:
+    fingerprint: sha1:d8b02639da1f
+  tag: notation
+  status: generated
+  summary: Mandatory Participation (0:1).
+  discriminator: TODO
+  use_when:
+  - using Mandatory Participation (0:1)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: target_label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - erd.rel.v1
+    - erd.rel.v3
+    - erd.rel.v4
+    see_also: []
+  example: |
+    erd.Rel(None, None, "", target_label="1")
+  metamodel:
+    spec: erd
+    element: Rel
+- id: erd.rel.v3
+  menu_index: 27
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 3
+  menu_name: Mandatory Participation (0:N)
+  render:
+    fingerprint: sha1:d8b02639da1f
+  tag: notation
+  status: generated
+  summary: Mandatory Participation (0:N).
+  discriminator: TODO
+  use_when:
+  - using Mandatory Participation (0:N)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: target_label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - erd.rel.v1
+    - erd.rel.v2
+    - erd.rel.v4
+    see_also: []
+  example: |
+    erd.Rel(None, None, "", target_label="N")
+  metamodel:
+    spec: erd
+    element: Rel
+- id: erd.rel.v4
+  menu_index: 28
+  kind: edge
+  buildable: true
+  function: Rel
+  variant: 4
+  menu_name: Mandatory Participation (M:N)
+  render:
+    fingerprint: sha1:d8b02639da1f
+  tag: notation
+  status: generated
+  summary: Mandatory Participation (M:N).
+  discriminator: TODO
+  use_when:
+  - using Mandatory Participation (M:N)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: source_label
+    required: false
+  - name: target_label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - erd.rel.v1
+    - erd.rel.v2
+    - erd.rel.v3
+    see_also: []
+  example: |
+    erd.Rel(None, None, "", source_label="M", target_label="N")
+  metamodel:
+    spec: erd
+    element: Rel
+- id: erd.optionalrel.v1
+  menu_index: 29
+  kind: edge
+  buildable: true
+  function: OptionalRel
+  variant: 1
+  menu_name: Optional Participation (0:1)
+  render:
+    fingerprint: sha1:2d68559f9e35
+  tag: notation
+  status: generated
+  summary: Optional Participation (0:1).
+  discriminator: TODO
+  use_when:
+  - using Optional Participation (0:1)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: target_label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - erd.optionalrel.v2
+    - erd.optionalrel.v3
+    see_also: []
+  example: |
+    erd.OptionalRel(None, None, "", target_label="1")
+  metamodel:
+    spec: erd
+    element: OptionalRel
+- id: erd.optionalrel.v2
+  menu_index: 30
+  kind: edge
+  buildable: true
+  function: OptionalRel
+  variant: 2
+  menu_name: Optional Participation (0:N)
+  render:
+    fingerprint: sha1:2d68559f9e35
+  tag: notation
+  status: generated
+  summary: Optional Participation (0:N).
+  discriminator: TODO
+  use_when:
+  - using Optional Participation (0:N)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: target_label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - erd.optionalrel.v1
+    - erd.optionalrel.v3
+    see_also: []
+  example: |
+    erd.OptionalRel(None, None, "", target_label="N")
+  metamodel:
+    spec: erd
+    element: OptionalRel
+- id: erd.optionalrel.v3
+  menu_index: 31
+  kind: edge
+  buildable: true
+  function: OptionalRel
+  variant: 3
+  menu_name: Optional Participation (M:N)
+  render:
+    fingerprint: sha1:2d68559f9e35
+  tag: notation
+  status: generated
+  summary: Optional Participation (M:N).
+  discriminator: TODO
+  use_when:
+  - using Optional Participation (M:N)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: source_label
+    required: false
+  - name: target_label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - erd.optionalrel.v1
+    - erd.optionalrel.v2
+    see_also: []
+  example: |
+    erd.OptionalRel(None, None, "", source_label="M", target_label="N")
+  metamodel:
+    spec: erd
+    element: OptionalRel
+- id: erd.recursiverel.v1
+  menu_index: 32
+  kind: edge
+  buildable: true
+  function: RecursiveRel
+  variant: 1
+  menu_name: Recursive Relationship (0:1)
+  render:
+    fingerprint: sha1:0199965dc7e1
+  tag: notation
+  status: generated
+  summary: Recursive Relationship (0:1).
+  discriminator: TODO
+  use_when:
+  - using Recursive Relationship (0:1)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: target_label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - erd.recursiverel.v2
+    - erd.recursiverel.v3
+    see_also: []
+  example: |
+    erd.RecursiveRel(None, None, "", target_label="1")
+  metamodel:
+    spec: erd
+    element: RecursiveRel
+- id: erd.recursiverel.v2
+  menu_index: 33
+  kind: edge
+  buildable: true
+  function: RecursiveRel
+  variant: 2
+  menu_name: Recursive Relationship (0:N)
+  render:
+    fingerprint: sha1:0199965dc7e1
+  tag: notation
+  status: generated
+  summary: Recursive Relationship (0:N).
+  discriminator: TODO
+  use_when:
+  - using Recursive Relationship (0:N)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: target_label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - erd.recursiverel.v1
+    - erd.recursiverel.v3
+    see_also: []
+  example: |
+    erd.RecursiveRel(None, None, "", target_label="N")
+  metamodel:
+    spec: erd
+    element: RecursiveRel
+- id: erd.recursiverel.v3
+  menu_index: 34
+  kind: edge
+  buildable: true
+  function: RecursiveRel
+  variant: 3
+  menu_name: Recursive Relationship (M:N)
+  render:
+    fingerprint: sha1:0199965dc7e1
+  tag: notation
+  status: generated
+  summary: Recursive Relationship (M:N).
+  discriminator: TODO
+  use_when:
+  - using Recursive Relationship (M:N)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  - name: source_label
+    required: false
+  - name: target_label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - erd.recursiverel.v1
+    - erd.recursiverel.v2
+    see_also: []
+  example: |
+    erd.RecursiveRel(None, None, "", source_label="M", target_label="N")
+  metamodel:
+    spec: erd
+    element: RecursiveRel
+- id: erd.zerotomany.v1
+  menu_index: 35
+  kind: edge
+  buildable: true
+  function: ZeroToMany
+  variant: 1
+  menu_name: 0 to Many Optional
+  render:
+    fingerprint: sha1:1d59bdfc5f50
+  tag: notation
+  status: generated
+  summary: 0 to Many Optional.
+  discriminator: n/a
+  use_when:
+  - using 0 to Many Optional
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.ZeroToMany(None, None, "")
+  metamodel:
+    spec: erd
+    element: ZeroToMany
+- id: erd.onetomany.v1
+  menu_index: 36
+  kind: edge
+  buildable: true
+  function: OneToMany
+  variant: 1
+  menu_name: 1 to Many
+  render:
+    fingerprint: sha1:eeb4360d913d
+  tag: notation
+  status: generated
+  summary: 1 to Many.
+  discriminator: n/a
+  use_when:
+  - using 1 to Many
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.OneToMany(None, None, "")
+  metamodel:
+    spec: erd
+    element: OneToMany
+- id: erd.mandone.v1
+  menu_index: 37
+  kind: edge
+  buildable: true
+  function: MandOne
+  variant: 1
+  menu_name: 1 Mandatory
+  render:
+    fingerprint: sha1:4cc25aeeff27
+  tag: notation
+  status: generated
+  summary: 1 Mandatory.
+  discriminator: n/a
+  use_when:
+  - using 1 Mandatory
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.MandOne(None, None, "")
+  metamodel:
+    spec: erd
+    element: MandOne
+- id: erd.onetoone.v1
+  menu_index: 38
+  kind: edge
+  buildable: true
+  function: OneToOne
+  variant: 1
+  menu_name: 1 to 1
+  render:
+    fingerprint: sha1:610a61dc3a35
+  tag: notation
+  status: generated
+  summary: 1 to 1.
+  discriminator: n/a
+  use_when:
+  - using 1 to 1
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.OneToOne(None, None, "")
+  metamodel:
+    spec: erd
+    element: OneToOne
+- id: erd.one.v1
+  menu_index: 39
+  kind: edge
+  buildable: true
+  function: One
+  variant: 1
+  menu_name: '1'
+  render:
+    fingerprint: sha1:9177bccf1b72
+  tag: notation
+  status: generated
+  summary: '1.'
+  discriminator: n/a
+  use_when:
+  - using 1
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.One(None, None, "")
+  metamodel:
+    spec: erd
+    element: One
+- id: erd.zerotoone.v1
+  menu_index: 40
+  kind: edge
+  buildable: true
+  function: ZeroToOne
+  variant: 1
+  menu_name: 0 to 1
+  render:
+    fingerprint: sha1:83de67598494
+  tag: notation
+  status: generated
+  summary: 0 to 1.
+  discriminator: n/a
+  use_when:
+  - using 0 to 1
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.ZeroToOne(None, None, "")
+  metamodel:
+    spec: erd
+    element: ZeroToOne
+- id: erd.many.v1
+  menu_index: 41
+  kind: edge
+  buildable: true
+  function: Many
+  variant: 1
+  menu_name: Many
+  render:
+    fingerprint: sha1:23faab4a08b6
+  tag: notation
+  status: generated
+  summary: Many.
+  discriminator: n/a
+  use_when:
+  - using Many
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.Many(None, None, "")
+  metamodel:
+    spec: erd
+    element: Many
+- id: erd.manytomany.v1
+  menu_index: 42
+  kind: edge
+  buildable: true
+  function: ManyToMany
+  variant: 1
+  menu_name: Many to Many
+  render:
+    fingerprint: sha1:6ffe76983036
+  tag: notation
+  status: generated
+  summary: Many to Many.
+  discriminator: n/a
+  use_when:
+  - using Many to Many
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.ManyToMany(None, None, "")
+  metamodel:
+    spec: erd
+    element: ManyToMany
+- id: erd.zerotomanyzerotoone.v1
+  menu_index: 43
+  kind: edge
+  buildable: true
+  function: ZeroToManyZeroToOne
+  variant: 1
+  menu_name: 1 Optional to Many Optional
+  render:
+    fingerprint: sha1:1a1ca9111ddc
+  tag: notation
+  status: generated
+  summary: 1 Optional to Many Optional.
+  discriminator: n/a
+  use_when:
+  - using 1 Optional to Many Optional
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.ZeroToManyZeroToOne(None, None, "")
+  metamodel:
+    spec: erd
+    element: ZeroToManyZeroToOne
+- id: erd.zerotomanymandone.v1
+  menu_index: 44
+  kind: edge
+  buildable: true
+  function: ZeroToManyMandOne
+  variant: 1
+  menu_name: 1 Mandatory to Many Optional
+  render:
+    fingerprint: sha1:06791b7bd3c8
+  tag: notation
+  status: generated
+  summary: 1 Mandatory to Many Optional.
+  discriminator: n/a
+  use_when:
+  - using 1 Mandatory to Many Optional
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.ZeroToManyMandOne(None, None, "")
+  metamodel:
+    spec: erd
+    element: ZeroToManyMandOne
+- id: erd.zerotoonemandone.v1
+  menu_index: 45
+  kind: edge
+  buildable: true
+  function: ZeroToOneMandOne
+  variant: 1
+  menu_name: 1 Mandatory to 1 Optional
+  render:
+    fingerprint: sha1:30e7ef0b9219
+  tag: notation
+  status: generated
+  summary: 1 Mandatory to 1 Optional.
+  discriminator: n/a
+  use_when:
+  - using 1 Mandatory to 1 Optional
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.ZeroToOneMandOne(None, None, "")
+  metamodel:
+    spec: erd
+    element: ZeroToOneMandOne
+- id: erd.onetomanymandone.v1
+  menu_index: 46
+  kind: edge
+  buildable: true
+  function: OneToManyMandOne
+  variant: 1
+  menu_name: 1 Mandatory to Many Mandatory
+  render:
+    fingerprint: sha1:4a7c52913655
+  tag: notation
+  status: generated
+  summary: 1 Mandatory to Many Mandatory.
+  discriminator: n/a
+  use_when:
+  - using 1 Mandatory to Many Mandatory
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.OneToManyMandOne(None, None, "")
+  metamodel:
+    spec: erd
+    element: OneToManyMandOne
+- id: erd.onetomanyzerotoone.v1
+  menu_index: 47
+  kind: edge
+  buildable: true
+  function: OneToManyZeroToOne
+  variant: 1
+  menu_name: 1 Optional to Many Mandatory
+  render:
+    fingerprint: sha1:b38f06994912
+  tag: notation
+  status: generated
+  summary: 1 Optional to Many Mandatory.
+  discriminator: n/a
+  use_when:
+  - using 1 Optional to Many Mandatory
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.OneToManyZeroToOne(None, None, "")
+  metamodel:
+    spec: erd
+    element: OneToManyZeroToOne
+- id: erd.onetomanyonetomany.v1
+  menu_index: 48
+  kind: edge
+  buildable: true
+  function: OneToManyOneToMany
+  variant: 1
+  menu_name: Many Mandatory to Many Mandatory
+  render:
+    fingerprint: sha1:b3dd197e116a
+  tag: notation
+  status: generated
+  summary: Many Mandatory to Many Mandatory.
+  discriminator: n/a
+  use_when:
+  - using Many Mandatory to Many Mandatory
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.OneToManyOneToMany(None, None, "")
+  metamodel:
+    spec: erd
+    element: OneToManyOneToMany
+- id: erd.onetomanyzerotomany.v1
+  menu_index: 49
+  kind: edge
+  buildable: true
+  function: OneToManyZeroToMany
+  variant: 1
+  menu_name: Many Optional to Many Mandatory
+  render:
+    fingerprint: sha1:21ed650669b5
+  tag: notation
+  status: generated
+  summary: Many Optional to Many Mandatory.
+  discriminator: n/a
+  use_when:
+  - using Many Optional to Many Mandatory
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.OneToManyZeroToMany(None, None, "")
+  metamodel:
+    spec: erd
+    element: OneToManyZeroToMany
+- id: erd.zerotomanyzerotomany.v1
+  menu_index: 50
+  kind: edge
+  buildable: true
+  function: ZeroToManyZeroToMany
+  variant: 1
+  menu_name: Many Optional to Many Optional
+  render:
+    fingerprint: sha1:fcbf5099c3b5
+  tag: notation
+  status: generated
+  summary: Many Optional to Many Optional.
+  discriminator: n/a
+  use_when:
+  - using Many Optional to Many Optional
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    erd.ZeroToManyZeroToMany(None, None, "")
+  metamodel:
+    spec: erd
+    element: ZeroToManyZeroToMany

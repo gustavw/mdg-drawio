@@ -1,0 +1,309 @@
+---
+title: "BPMN 2.0 Shapes Coverage"
+mode: palette
+---
+
+use bpmn2
+
+bpmn2.BPMN("BPMN 2.0 Shapes Coverage")
+
+    # ── BPMN 2.0 General ──
+    bpmn2.DataObject(n1, "")  # 1. DataObject
+    bpmn2.DataObjectCollection(n2, "")  # 2. DataObjectCollection
+    bpmn2.DataInput(n3, "")  # 3. DataInput
+    bpmn2.DataInputCollection(n4, "")  # 4. DataInputCollection
+    bpmn2.DataOutput(n5, "")  # 5. DataOutput
+    bpmn2.DataOutputCollection(n6, "")  # 6. DataOutputCollection
+    bpmn2.DataStore(n7, "")  # 7. DataStore
+    bpmn2.DataObject(n8, "", variant=2)  # 8. DataObject
+    bpmn2.TextAnnotation(n9, "Text")  # 9. TextAnnotation
+    bpmn2.HorizontalLane(n10, "")  # 10. HorizontalLane
+    bpmn2.VerticalLane(n11, "")  # 11. VerticalLane
+    bpmn2.HorizontalLane(n12, "", variant=2)  # 12. HorizontalLane
+    bpmn2.HorizontalLane(n13, "", variant=3)  # 13. HorizontalLane
+    bpmn2.VerticalLane(n14, "", variant=2)  # 14. VerticalLane
+    bpmn2.VerticalLane(n15, "", variant=3)  # 15. VerticalLane
+    bpmn2.Conversation(n16, "")  # 16. Conversation
+    bpmn2.SubConversation(n17, "")  # 17. SubConversation
+    bpmn2.CallConversation(n18, "")  # 18. CallConversation
+    bpmn2.CallSubConversation(n19, "")  # 19. CallSubConversation
+    bpmn2.Annotation(n20, "")  # 20. Annotation
+    bpmn2.CrossFunctionalFlowchart(n21, "Cross-Functional Flowchart"):  # 21. CrossFunctionalFlowchart
+        bpmn2.TableRowBoxPart(n22, "Actor 1"):
+            bpmn2.SwimlaneBoxPart(n23, "Phase 1")
+            bpmn2.SwimlaneBoxPart(n24, "Phase 2")
+            bpmn2.SwimlaneBoxPart(n25, "Phase 3")
+        bpmn2.TableRowBoxPart(n26, "Actor 2"):
+            bpmn2.SwimlaneBoxPart(n27, "")
+            bpmn2.SwimlaneBoxPart(n28, "")
+            bpmn2.SwimlaneBoxPart(n29, "")
+        bpmn2.TableRowBoxPart(n30, "Actor 3"):
+            bpmn2.SwimlaneBoxPart(n31, "")
+            bpmn2.SwimlaneBoxPart(n32, "")
+            bpmn2.SwimlaneBoxPart(n33, "")
+    bpmn2.HorizontalPool(n34, "Pool"):  # 22. HorizontalPool
+        bpmn2.SwimlaneBoxPart(n35, "Lane 1")
+        bpmn2.SwimlaneBoxPart(n36, "Lane 2")
+        bpmn2.SwimlaneBoxPart(n37, "Lane 3")
+    bpmn2.HorizontalPool(n38, "Pool", variant=2):  # 23. HorizontalPool
+        bpmn2.SwimlaneBoxPart(n39, "Lane 1")
+        bpmn2.SwimlaneBoxPart(n40, "Lane 2")
+        bpmn2.SwimlaneBoxPart(n41, "Lane 3")
+    bpmn2.HorizontalSwimlane(n42, "Lane")  # 24. HorizontalSwimlane
+    bpmn2.VerticalPool(n43, "Pool"):  # 25. VerticalPool
+        bpmn2.SwimlaneBoxPart(n44, "Lane 1")
+        bpmn2.SwimlaneBoxPart(n45, "Lane 2")
+        bpmn2.SwimlaneBoxPart(n46, "Lane 3")
+    bpmn2.VerticalPool(n47, "Pool", variant=2):  # 26. VerticalPool
+        bpmn2.SwimlaneBoxPart(n48, "Lane 1")
+        bpmn2.SwimlaneBoxPart(n49, "Lane 2")
+        bpmn2.SwimlaneBoxPart(n50, "Lane 3")
+    bpmn2.VerticalSwimlane(n51, "Lane")  # 27. VerticalSwimlane
+    bpmn2.Group(n52, "")  # 28. Group
+    bpmn2.Association(None, None)  # 29. Association
+    bpmn2.DirectionalDirectedDataAssociation(None, None)  # 30. DirectionalDirectedDataAssociation
+    bpmn2.BiDirectionalAssociation(None, None)  # 31. BiDirectionalAssociation
+    bpmn2.DataAssociation(None, None)  # 32. DataAssociation
+    bpmn2.ConversationLink(None, None)  # 33. ConversationLink
+    bpmn2.SequenceFlow(None, None)  # 34. SequenceFlow
+    bpmn2.ConditionalSequenceFlow(None, None)  # 35. ConditionalSequenceFlow
+    bpmn2.DefaultSequenceFlow(None, None)  # 36. DefaultSequenceFlow
+    bpmn2.MessageFlow(None, None)  # 37. MessageFlow
+    bpmn2.InitiatingMessageFlowWithDecorator(None, None, "")  # 38. InitiatingMessageFlowWithDecorator
+    bpmn2.NonInitiatingMessageFlowWithDecorator(None, None, "")  # 39. NonInitiatingMessageFlowWithDecorator
+
+    # ── BPMN 2.0 Tasks ──
+    bpmn2.GenericTask(n55, "")  # 40. GenericTask
+    bpmn2.StandardLoop(n56, "")  # 41. StandardLoop
+    bpmn2.StandardLoop(n57, "", variant=2)  # 42. StandardLoop
+    bpmn2.MultiInstanceParallel(n58, "")  # 43. MultiInstanceParallel
+    bpmn2.MultiInstanceParallel(n59, "", variant=2)  # 44. MultiInstanceParallel
+    bpmn2.MultiInstanceSequential(n60, "")  # 45. MultiInstanceSequential
+    bpmn2.MultiInstanceSequential(n61, "", variant=2)  # 46. MultiInstanceSequential
+    bpmn2.Compensation(n62, "")  # 47. Compensation
+    bpmn2.Compensation(n63, "", variant=2)  # 48. Compensation
+    bpmn2.LoopAndCompensation(n64, "")  # 49. LoopAndCompensation
+    bpmn2.LoopAndCompensation(n65, "", variant=2)  # 50. LoopAndCompensation
+    bpmn2.AdHocCollapsed(n66, "")  # 51. AdHocCollapsed
+    bpmn2.AdHocExpanded(n67, "")  # 52. AdHocExpanded
+    bpmn2.Service(n68, "")  # 53. Service
+    bpmn2.Send(n69, "")  # 54. Send
+    bpmn2.Receive(n70, "")  # 55. Receive
+    bpmn2.User(n71, "")  # 56. User
+    bpmn2.Manual(n72, "")  # 57. Manual
+    bpmn2.BusinessRule(n73, "")  # 58. BusinessRule
+    bpmn2.Script(n74, "")  # 59. Script
+    bpmn2.SubProcessCollapsed(n75, "")  # 60. SubProcessCollapsed
+    bpmn2.TransactionCollapsed(n76, "")  # 61. TransactionCollapsed
+    bpmn2.TransactionExpanded(n77, "")  # 62. TransactionExpanded
+    bpmn2.MessageEventSubProcessNonInterruptingCollapsed(n78, "")  # 63. MessageEventSubProcessNonInterruptingCollapsed
+    bpmn2.MessageEventSubProcessInterruptingCollapsed(n79, "")  # 64. MessageEventSubProcessInterruptingCollapsed
+    bpmn2.TimerEventSubProcessNonInterruptingCollapsed(n80, "")  # 65. TimerEventSubProcessNonInterruptingCollapsed
+    bpmn2.TimerEventSubProcessInterruptingCollapsed(n81, "")  # 66. TimerEventSubProcessInterruptingCollapsed
+    bpmn2.ConditionalEventSubProcessNonInterruptingCollapsed(n82, "")  # 67. ConditionalEventSubProcessNonInterruptingCollapsed
+    bpmn2.ConditionalEventSubProcessInterruptingCollapsed(n83, "")  # 68. ConditionalEventSubProcessInterruptingCollapsed
+    bpmn2.SignalEventSubProcessNonInterruptingCollapsed(n84, "")  # 69. SignalEventSubProcessNonInterruptingCollapsed
+    bpmn2.SignalEventSubProcessInterruptingCollapsed(n85, "")  # 70. SignalEventSubProcessInterruptingCollapsed
+    bpmn2.MultipleEventSubProcessNonInterruptingCollapsed(n86, "")  # 71. MultipleEventSubProcessNonInterruptingCollapsed
+    bpmn2.MultipleEventSubProcessInterruptingCollapsed(n87, "")  # 72. MultipleEventSubProcessInterruptingCollapsed
+    bpmn2.ParallelMultipleEventSubProcessNonInterruptingCollapsed(n88, "")  # 73. ParallelMultipleEventSubProcessNonInterruptingCollapsed
+    bpmn2.ParallelMultipleEventSubProcessInterruptingCollapsed(n89, "")  # 74. ParallelMultipleEventSubProcessInterruptingCollapsed
+    bpmn2.EscalationEventSubProcessNonInterruptingCollapsed(n90, "")  # 75. EscalationEventSubProcessNonInterruptingCollapsed
+    bpmn2.EscalationEventSubProcessInterruptingCollapsed(n91, "")  # 76. EscalationEventSubProcessInterruptingCollapsed
+    bpmn2.ErrorEventSubProcessInterruptingCollapsed(n92, "")  # 77. ErrorEventSubProcessInterruptingCollapsed
+    bpmn2.CompensationEventSubProcessInterruptingCollapsed(n93, "")  # 78. CompensationEventSubProcessInterruptingCollapsed
+    bpmn2.EventSubProcessExpanded(n94, "")  # 79. EventSubProcessExpanded
+    bpmn2.CallActivity(n95, "")  # 80. CallActivity
+    bpmn2.UserCallActivity(n96, "")  # 81. UserCallActivity
+    bpmn2.ManualCallActivity(n97, "")  # 82. ManualCallActivity
+    bpmn2.BusinessRuleCallActivity(n98, "")  # 83. BusinessRuleCallActivity
+    bpmn2.ScriptCallActivity(n99, "")  # 84. ScriptCallActivity
+    bpmn2.CallActivityCollapsed(n100, "")  # 85. CallActivityCollapsed
+    bpmn2.CallActivityExpanded(n101, "")  # 86. CallActivityExpanded
+
+    # ── BPMN 2.0 Choreographies ──
+    bpmn2.ChoreographyTask(n102, "")  # 87. ChoreographyTask
+    bpmn2.ChoreographyTaskLoop(n103, "")  # 88. ChoreographyTaskLoop
+    bpmn2.ChoreographyTaskSequentialMultiInstance(n104, "")  # 89. ChoreographyTaskSequentialMultiInstance
+    bpmn2.ChoreographyTaskParallelMultiInstance(n105, "")  # 90. ChoreographyTaskParallelMultiInstance
+    bpmn2.SubChoreographyCollapsed(n106, "")  # 91. SubChoreographyCollapsed
+    bpmn2.SubChoreographyLoopCollapsed(n107, "")  # 92. SubChoreographyLoopCollapsed
+    bpmn2.SubChoreographySequentialMultiInstanceCollapsed(n108, "")  # 93. SubChoreographySequentialMultiInstanceCollapsed
+    bpmn2.SubChoreographyParallelMultiInstanceCollapsed(n109, "")  # 94. SubChoreographyParallelMultiInstanceCollapsed
+    bpmn2.SubChoreographyExpanded(n110, "")  # 95. SubChoreographyExpanded
+    bpmn2.Bzzzzt(n111, "")  # 96. Bzzzzt
+    bpmn2.CallChoreographyCallingGlobal(n112, "")  # 97. CallChoreographyCallingGlobal
+    bpmn2.CallChoreographyCallingGlobalLoop(n113, "")  # 98. CallChoreographyCallingGlobalLoop
+    bpmn2.CallChoreographyCallingGlobalSequentialMultiInstance(n114, "")  # 99. CallChoreographyCallingGlobalSequentialMultiInstance
+    bpmn2.CallChoreographyCallingGlobalParallelMultiInstance(n115, "")  # 100. CallChoreographyCallingGlobalParallelMultiInstance
+    bpmn2.CallChoreographyCallingAChoreography(n116, "")  # 101. CallChoreographyCallingAChoreography
+    bpmn2.CallChoreographyCallingAChoreographyLoop(n117, "")  # 102. CallChoreographyCallingAChoreographyLoop
+    bpmn2.CallChoreographyCallingAChoreographySequentialMultiInstance(n118, "")  # 103. CallChoreographyCallingAChoreographySequentialMultiInstance
+    bpmn2.CallChoreographyCallingAChoreographyParallelMultiInstance(n119, "")  # 104. CallChoreographyCallingAChoreographyParallelMultiInstance
+    bpmn2.ChoreographyTask(n120, "", variant=2)  # 105. ChoreographyTask
+    bpmn2.ChoreographyTaskLoop(n121, "", variant=2)  # 106. ChoreographyTaskLoop
+    bpmn2.ChoreographyTaskSequentialMultiInstance(n122, "", variant=2)  # 107. ChoreographyTaskSequentialMultiInstance
+    bpmn2.ChoreographyTaskParallelMultiInstance(n123, "", variant=2)  # 108. ChoreographyTaskParallelMultiInstance
+    bpmn2.SubChoreographyCollapsed(n124, "", variant=2)  # 109. SubChoreographyCollapsed
+    bpmn2.SubChoreographyLoopCollapsed(n125, "", variant=2)  # 110. SubChoreographyLoopCollapsed
+    bpmn2.SubChoreographySequentialMultiInstanceCollapsed(n126, "", variant=2)  # 111. SubChoreographySequentialMultiInstanceCollapsed
+    bpmn2.SubChoreographyParallelMultiInstanceCollapsed(n127, "", variant=2)  # 112. SubChoreographyParallelMultiInstanceCollapsed
+    bpmn2.SubChoreographyExpanded(n128, "", variant=2)  # 113. SubChoreographyExpanded
+    bpmn2.CallChoreographyCallingGlobal(n129, "", variant=2)  # 114. CallChoreographyCallingGlobal
+    bpmn2.CallChoreographyCallingGlobalLoop(n130, "", variant=2)  # 115. CallChoreographyCallingGlobalLoop
+    bpmn2.CallChoreographyCallingGlobalSequentialMultiInstance(n131, "", variant=2)  # 116. CallChoreographyCallingGlobalSequentialMultiInstance
+    bpmn2.CallChoreographyCallingGlobalParallelMultiInstance(n132, "", variant=2)  # 117. CallChoreographyCallingGlobalParallelMultiInstance
+    bpmn2.CallChoreographyCallingAChoreography(n133, "", variant=2)  # 118. CallChoreographyCallingAChoreography
+    bpmn2.CallChoreographyCallingAChoreographyLoop(n134, "", variant=2)  # 119. CallChoreographyCallingAChoreographyLoop
+    bpmn2.CallChoreographyCallingAChoreographySequentialMultiInstance(n135, "", variant=2)  # 120. CallChoreographyCallingAChoreographySequentialMultiInstance
+    bpmn2.CallChoreographyCallingAChoreographyParallelMultiInstance(n136, "", variant=2)  # 121. CallChoreographyCallingAChoreographyParallelMultiInstance
+    bpmn2.ParticipantInitiatingTop(n137, "")  # 122. ParticipantInitiatingTop
+    bpmn2.ParticipantInitiatingTopWithDecorator(n138, "")  # 123. ParticipantInitiatingTopWithDecorator
+    bpmn2.AdditionalParticipantInitiating(n139, "")  # 124. AdditionalParticipantInitiating
+    bpmn2.ParticipantInitiatingBottom(n140, "")  # 125. ParticipantInitiatingBottom
+    bpmn2.ParticipantInitiatingBottomWithDecorator(n141, "")  # 126. ParticipantInitiatingBottomWithDecorator
+    bpmn2.ParticipantInitiatingMultiInstanceTop(n142, "")  # 127. ParticipantInitiatingMultiInstanceTop
+    bpmn2.ParticipantInitiatingMultiInstanceTopWithDecorator(n143, "")  # 128. ParticipantInitiatingMultiInstanceTopWithDecorator
+    bpmn2.AdditionalParticipantInitiatingMultiInstanceBottom(n144, "")  # 129. AdditionalParticipantInitiatingMultiInstanceBottom
+    bpmn2.ParticipantInitiatingMultiInstanceBottom(n145, "")  # 130. ParticipantInitiatingMultiInstanceBottom
+    bpmn2.ParticipantInitiatingMultiInstanceBottomWithDecorator(n146, "")  # 131. ParticipantInitiatingMultiInstanceBottomWithDecorator
+    bpmn2.ParticipantNonInitiatingTop(n147, "")  # 132. ParticipantNonInitiatingTop
+    bpmn2.ParticipantNonInitiatingTopWithDecorator(n148, "")  # 133. ParticipantNonInitiatingTopWithDecorator
+    bpmn2.AdditionalParticipantNonInitiating(n149, "")  # 134. AdditionalParticipantNonInitiating
+    bpmn2.ParticipantNonInitiatingBottom(n150, "")  # 135. ParticipantNonInitiatingBottom
+    bpmn2.ParticipantNonInitiatingBottomWithDecorator(n151, "")  # 136. ParticipantNonInitiatingBottomWithDecorator
+    bpmn2.ParticipantNonInitiatingMultiInstanceTop(n152, "")  # 137. ParticipantNonInitiatingMultiInstanceTop
+    bpmn2.ParticipantNonInitiatingMultiInstanceTopWithDecorator(n153, "")  # 138. ParticipantNonInitiatingMultiInstanceTopWithDecorator
+    bpmn2.AdditionalParticipantNonInitiatingMultiInstanceBottom(n154, "")  # 139. AdditionalParticipantNonInitiatingMultiInstanceBottom
+    bpmn2.ParticipantNonInitiatingMultiInstanceBottom(n155, "")  # 140. ParticipantNonInitiatingMultiInstanceBottom
+    bpmn2.ParticipantNonInitiatingMultiInstanceBottomWithDecorator(n156, "")  # 141. ParticipantNonInitiatingMultiInstanceBottomWithDecorator
+
+    # ── BPMN 2.0 Events ──
+    bpmn2.NoneStart(n157, "")  # 142. NoneStart
+    bpmn2.NoneIntermediateThrowing(n158, "")  # 143. NoneIntermediateThrowing
+    bpmn2.End(n159, "")  # 144. End
+    bpmn2.MessageStartInterrupting(n160, "")  # 145. MessageStartInterrupting
+    bpmn2.MessageStartNonInterrupting(n161, "")  # 146. MessageStartNonInterrupting
+    bpmn2.MessageIntermediateThrowing(n162, "")  # 147. MessageIntermediateThrowing
+    bpmn2.MessageIntermediateCatching(n163, "")  # 148. MessageIntermediateCatching
+    bpmn2.MessageIntermediateBoundaryInterrupting(n164, "")  # 149. MessageIntermediateBoundaryInterrupting
+    bpmn2.MessageIntermediateBoundaryNonInterrupting(n165, "")  # 150. MessageIntermediateBoundaryNonInterrupting
+    bpmn2.MessageEnd(n166, "")  # 151. MessageEnd
+    bpmn2.TimerStartInterrupting(n167, "")  # 152. TimerStartInterrupting
+    bpmn2.TimerStartNonInterrupting(n168, "")  # 153. TimerStartNonInterrupting
+    bpmn2.TimerIntermediateCatching(n169, "")  # 154. TimerIntermediateCatching
+    bpmn2.TimerIntermediateBoundaryInterrupting(n170, "")  # 155. TimerIntermediateBoundaryInterrupting
+    bpmn2.TimerIntermediateBoundaryNonInterrupting(n171, "")  # 156. TimerIntermediateBoundaryNonInterrupting
+    bpmn2.EscalationStartInterrupting(n172, "")  # 157. EscalationStartInterrupting
+    bpmn2.EscalationStartNonInterrupting(n173, "")  # 158. EscalationStartNonInterrupting
+    bpmn2.EscalationIntermediateBoundaryThrowing(n174, "")  # 159. EscalationIntermediateBoundaryThrowing
+    bpmn2.EscalationIntermediateBoundaryInterrupting(n175, "")  # 160. EscalationIntermediateBoundaryInterrupting
+    bpmn2.EscalationIntermediateNonInterrupting(n176, "")  # 161. EscalationIntermediateNonInterrupting
+    bpmn2.EscalationEnd(n177, "")  # 162. EscalationEnd
+    bpmn2.ErrorStartInterrupting(n178, "")  # 163. ErrorStartInterrupting
+    bpmn2.ErrorIntermediateBoundaryInterrupting(n179, "")  # 164. ErrorIntermediateBoundaryInterrupting
+    bpmn2.ErrorEnd(n180, "")  # 165. ErrorEnd
+    bpmn2.CompensationStartInterrupting(n181, "")  # 166. CompensationStartInterrupting
+    bpmn2.CompensationIntermediateThrowing(n182, "")  # 167. CompensationIntermediateThrowing
+    bpmn2.CompensationIntermediateBoundaryInterrupting(n183, "")  # 168. CompensationIntermediateBoundaryInterrupting
+    bpmn2.CompensationEnd(n184, "")  # 169. CompensationEnd
+    bpmn2.ConditionalStartInterrupting(n185, "")  # 170. ConditionalStartInterrupting
+    bpmn2.ConditionalStartNonInterrupting(n186, "")  # 171. ConditionalStartNonInterrupting
+    bpmn2.ConditionalIntermediateCatching(n187, "")  # 172. ConditionalIntermediateCatching
+    bpmn2.ConditionalIntermediateBoundaryInterrupting(n188, "")  # 173. ConditionalIntermediateBoundaryInterrupting
+    bpmn2.ConditionalIntermediateBoundaryNonInterrupting(n189, "")  # 174. ConditionalIntermediateBoundaryNonInterrupting
+    bpmn2.LinkIntermediateCatching(n190, "")  # 175. LinkIntermediateCatching
+    bpmn2.LinkIntermediateThrowing(n191, "")  # 176. LinkIntermediateThrowing
+    bpmn2.SignalStartInterrupting(n192, "")  # 177. SignalStartInterrupting
+    bpmn2.SignalStartNonInterrupting(n193, "")  # 178. SignalStartNonInterrupting
+    bpmn2.SignalIntermediateCatching(n194, "")  # 179. SignalIntermediateCatching
+    bpmn2.SignalIntermediateThrowing(n195, "")  # 180. SignalIntermediateThrowing
+    bpmn2.SignalIntermediateBoundaryInterrupting(n196, "")  # 181. SignalIntermediateBoundaryInterrupting
+    bpmn2.SignalIntermediateBoundaryNonInterrupting(n197, "")  # 182. SignalIntermediateBoundaryNonInterrupting
+    bpmn2.SignalEnd(n198, "")  # 183. SignalEnd
+    bpmn2.MultipleStartInterrupting(n199, "")  # 184. MultipleStartInterrupting
+    bpmn2.MultipleStartNonInterrupting(n200, "")  # 185. MultipleStartNonInterrupting
+    bpmn2.MultipleIntermediateCatching(n201, "")  # 186. MultipleIntermediateCatching
+    bpmn2.MultipleIntermediateThrowing(n202, "")  # 187. MultipleIntermediateThrowing
+    bpmn2.MultipleIntermediateBoundaryInterrupting(n203, "")  # 188. MultipleIntermediateBoundaryInterrupting
+    bpmn2.MultipleIntermediateBoundaryNonInterrupting(n204, "")  # 189. MultipleIntermediateBoundaryNonInterrupting
+    bpmn2.MultipleEnd(n205, "")  # 190. MultipleEnd
+    bpmn2.ParallelMultipleStartInterrupting(n206, "")  # 191. ParallelMultipleStartInterrupting
+    bpmn2.ParallelMultipleStartNonInterrupting(n207, "")  # 192. ParallelMultipleStartNonInterrupting
+    bpmn2.ParallelMultipleIntermediateCatching(n208, "")  # 193. ParallelMultipleIntermediateCatching
+    bpmn2.ParallelMultipleIntermediateBoundaryInterrupting(n209, "")  # 194. ParallelMultipleIntermediateBoundaryInterrupting
+    bpmn2.ParallelMultipleIntermediateBoundaryNonInterrupting(n210, "")  # 195. ParallelMultipleIntermediateBoundaryNonInterrupting
+    bpmn2.CancelIntermediateBoundaryInterrupting(n211, "")  # 196. CancelIntermediateBoundaryInterrupting
+    bpmn2.CancelEnd(n212, "")  # 197. CancelEnd
+    bpmn2.Terminate(n213, "")  # 198. Terminate
+
+    # ── BPMN 2.0 Gateways ──
+    bpmn2.Exclusive(n214, "")  # 199. Exclusive
+    bpmn2.Exclusive(n215, "", variant=2)  # 200. Exclusive
+    bpmn2.Inclusive(n216, "")  # 201. Inclusive
+    bpmn2.Parallel(n217, "")  # 202. Parallel
+    bpmn2.Complex(n218, "")  # 203. Complex
+    bpmn2.Start(n219, "")  # 204. Start
+    bpmn2.Intermediate(n220, "")  # 205. Intermediate
+    bpmn2.End(n221, "", variant=2)  # 206. End
+    bpmn2.Message(n222, "")  # 207. Message
+    bpmn2.MessageInterrupting(n223, "")  # 208. MessageInterrupting
+    bpmn2.MessageNonInterrupting(n224, "")  # 209. MessageNonInterrupting
+    bpmn2.MessageCatching(n225, "")  # 210. MessageCatching
+    bpmn2.MessageBoundaryInterrupting(n226, "")  # 211. MessageBoundaryInterrupting
+    bpmn2.MessageBoundaryNonInterrupting(n227, "")  # 212. MessageBoundaryNonInterrupting
+    bpmn2.MessageThrowing(n228, "")  # 213. MessageThrowing
+    bpmn2.MessageEnd(n229, "", variant=2)  # 214. MessageEnd
+    bpmn2.Timer(n230, "")  # 215. Timer
+    bpmn2.TimerInterrupting(n231, "")  # 216. TimerInterrupting
+    bpmn2.TimerNonInterrupting(n232, "")  # 217. TimerNonInterrupting
+    bpmn2.TimerCatching(n233, "")  # 218. TimerCatching
+    bpmn2.TimerBoundaryInterrupting(n234, "")  # 219. TimerBoundaryInterrupting
+    bpmn2.TimerBoundaryNonInterrupting(n235, "")  # 220. TimerBoundaryNonInterrupting
+    bpmn2.EscalationInterrupting(n236, "")  # 221. EscalationInterrupting
+    bpmn2.EscalationNonInterrupting(n237, "")  # 222. EscalationNonInterrupting
+    bpmn2.EscalationBoundaryInterrupting(n238, "")  # 223. EscalationBoundaryInterrupting
+    bpmn2.EscalationBoundaryNonInterrupting(n239, "")  # 224. EscalationBoundaryNonInterrupting
+    bpmn2.EscalationThrowing(n240, "")  # 225. EscalationThrowing
+    bpmn2.EscalationEnd(n241, "", variant=2)  # 226. EscalationEnd
+    bpmn2.Conditional(n242, "")  # 227. Conditional
+    bpmn2.ConditionalInterrupting(n243, "")  # 228. ConditionalInterrupting
+    bpmn2.ConditionalNonInterrupting(n244, "")  # 229. ConditionalNonInterrupting
+    bpmn2.ConditionalCatching(n245, "")  # 230. ConditionalCatching
+    bpmn2.ConditionalBoundaryInterrupting(n246, "")  # 231. ConditionalBoundaryInterrupting
+    bpmn2.ConditionalBoundaryNonInterrupting(n247, "")  # 232. ConditionalBoundaryNonInterrupting
+    bpmn2.LinkCatching(n248, "")  # 233. LinkCatching
+    bpmn2.LinkThrowing(n249, "")  # 234. LinkThrowing
+    bpmn2.ErrorInterrupting(n250, "")  # 235. ErrorInterrupting
+    bpmn2.ErrorBoundaryInterrupting(n251, "")  # 236. ErrorBoundaryInterrupting
+    bpmn2.ErrorEnd(n252, "", variant=2)  # 237. ErrorEnd
+    bpmn2.CancelBoundaryInterrupting(n253, "")  # 238. CancelBoundaryInterrupting
+    bpmn2.CancelEnd(n254, "", variant=2)  # 239. CancelEnd
+    bpmn2.CompensationInterrupting(n255, "")  # 240. CompensationInterrupting
+    bpmn2.CompensationBoundaryInterrupting(n256, "")  # 241. CompensationBoundaryInterrupting
+    bpmn2.CompensationThrowing(n257, "")  # 242. CompensationThrowing
+    bpmn2.CompensationEnd(n258, "", variant=2)  # 243. CompensationEnd
+    bpmn2.Signal(n259, "")  # 244. Signal
+    bpmn2.SignalInterrupting(n260, "")  # 245. SignalInterrupting
+    bpmn2.SignalNonInterrupting(n261, "")  # 246. SignalNonInterrupting
+    bpmn2.SignalCatching(n262, "")  # 247. SignalCatching
+    bpmn2.SignalBoundaryInterrupting(n263, "")  # 248. SignalBoundaryInterrupting
+    bpmn2.SignalBoundaryNonInterrupting(n264, "")  # 249. SignalBoundaryNonInterrupting
+    bpmn2.SignalThrowing(n265, "")  # 250. SignalThrowing
+    bpmn2.SignalEnd(n266, "", variant=2)  # 251. SignalEnd
+    bpmn2.Multiple(n267, "")  # 252. Multiple
+    bpmn2.MultipleInterrupting(n268, "")  # 253. MultipleInterrupting
+    bpmn2.MultipleNonInterrupting(n269, "")  # 254. MultipleNonInterrupting
+    bpmn2.MultipleCatching(n270, "")  # 255. MultipleCatching
+    bpmn2.MultipleBoundaryInterrupting(n271, "")  # 256. MultipleBoundaryInterrupting
+    bpmn2.MultipleBoundaryNonInterrupting(n272, "")  # 257. MultipleBoundaryNonInterrupting
+    bpmn2.MultipleThrowing(n273, "")  # 258. MultipleThrowing
+    bpmn2.MultipleEnd(n274, "", variant=2)  # 259. MultipleEnd
+    bpmn2.MultipleStart(n275, "")  # 260. MultipleStart
+    bpmn2.ParallelMultiple(n276, "")  # 261. ParallelMultiple
+    bpmn2.ParallelMultipleInterrupting(n277, "")  # 262. ParallelMultipleInterrupting
+    bpmn2.ParallelMultipleNonInterrupting(n278, "")  # 263. ParallelMultipleNonInterrupting
+    bpmn2.ParallelMultipleCatching(n279, "")  # 264. ParallelMultipleCatching
+    bpmn2.ParallelMultipleBoundaryInterrupting(n280, "")  # 265. ParallelMultipleBoundaryInterrupting
+    bpmn2.ParallelMultipleBoundaryNonInterrupting(n281, "")  # 266. ParallelMultipleBoundaryNonInterrupting
+    bpmn2.Terminate(n282, "", variant=2)  # 267. Terminate

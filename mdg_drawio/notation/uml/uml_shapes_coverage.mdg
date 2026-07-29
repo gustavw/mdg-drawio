@@ -1,0 +1,80 @@
+---
+title: "UML Shapes Coverage"
+mode: palette
+---
+
+use uml
+
+uml.UML("UML Shapes Coverage")
+    uml.Object(t1, "Object")  # 1. Object
+    uml.Interface(t2, "Interface")  # 2. Interface
+    uml.Class(c1, "Classname"):  # 3. Class
+        uml.Item(f1, "+ field: type")
+        uml.Divider(cd1, "")
+        uml.Item(m1, "+ method(type): type")
+    uml.Class(ce1, "Classname", variant=2):  # 4. Class 2
+        uml.Item(cei1, "+ field: type")
+        uml.Item(cei2, "+ field: type")
+        uml.Item(cei3, "+ field: type")
+    uml.Item(i1, "+ item: attribute")  # 5. Item 1
+    uml.Item(i2, "item: attribute", variant=2)  # 6. Item 2
+    uml.Divider(dv1, "")  # 7. Divider
+    uml.Spacer(sp1, "")  # 8. Spacer
+    uml.Title(tl1, "Title")  # 9. Title
+    uml.Component(comp1, "Component")  # 10. Component
+    uml.ComponentWithAttributes(cf1, "Component")  # 11. Component with Attributes
+    uml.Block(b1, "Block")  # 12. Block
+    uml.Module(mo1, "Module")  # 13. Module
+    uml.Package(p1, "package")  # 14. Package
+    uml.Object(hf1, "Object", variant=2)  # 15. Object (with attributes)
+    uml.Entity(hf2, "Entity")  # 16. Entity
+    uml.Class(hf3, "Class 3", variant=3)  # 17. Class 3
+    uml.Class(hf4, "Class 4", variant=4)  # 18. Class 4
+    uml.Class(hf5, "Class 5", variant=5)  # 19. Class 5
+    uml.Interface(hf6, "Interface 2", variant=2)  # 20. Interface 2
+    uml.ProvidedRequiredInterface(pri1, "")  # 21. Provided/Required Interface
+    uml.RequiredInterface(ri1, "")  # 22. Required Interface
+    uml.RequiredInterface(ih1, "", variant=2)  # 23. Required Interface (data)
+    uml.LollipopNotation(ih2, "")  # 24. Lollipop Notation (data)
+    uml.BoundaryObject(bo1, "Boundary Object")  # 25. Boundary Object
+    uml.EntityObject(eo1, "Entity Object")  # 26. Entity Object
+    uml.ControlObject(co1, "Control Object")  # 27. Control Object
+    uml.Actor(a1, "Actor")  # 28. Actor
+    uml.UseCase(uc1, "Use Case")  # 29. Use Case
+    uml.Start(st1, "")  # 30. Start
+    uml.Activity(ac1, "Activity")  # 31. Activity
+    uml.CompositeState(cs1, "Composite State"):  # 32. Composite State
+        uml.CompositeLabel(sub1, "Subtitle")
+    uml.Condition(cn1, "Condition")  # 33. Condition
+    uml.ForkJoin(fj1, "")  # 34. Fork/Join
+    uml.End(en1, "")  # 35. End
+    uml.Lifeline(ll1, ":Object")  # 36. Lifeline
+    uml.ActorLifeline(al1, "")  # 37. Actor Lifeline
+    uml.BoundaryLifeline(bl1, "")  # 38. Boundary Lifeline
+    uml.EntityLifeline(el1, "")  # 39. Entity Lifeline
+    uml.ControlLifeline(cll1, "")  # 40. Control Lifeline
+    uml.Frame(fr1, "frame")  # 41. Frame
+    uml.Destruction(de1, "")  # 42. Destruction
+    uml.FoundMessage(act1, "")  # 43. Found Message
+    uml.SynchronousInvocation(act2, "")  # 44. Synchronous Invocation
+    uml.SelfCall(act3, "")  # 45. Self Call
+    uml.Callback(act4, "")  # 46. Callback
+    uml.ActivationBar(act5, "")  # 47. Activation Bar
+    uml.FoundMessage(None, None, "dispatch", variant=2)  # 48. Found Message 1
+    uml.FoundMessage(None, None, "dispatch", variant=3)  # 49. Found Message 2
+    uml.Message(None, None, "dispatch")  # 50. Message
+    uml.Return(None, None, "return")  # 51. Return
+    uml.Relation(None, None, "name", source_label="1")  # 52. Relation 1
+    uml.Association(None, None, "", source_label="parent", target_label="child")  # 53. Association 1
+    uml.Aggregation(None, None, "1")  # 54. Aggregation 1
+    uml.Composition(None, None, "1")  # 55. Composition 1
+    uml.Relation(None, None, "Relation", variant=2, source_label="0..n", target_label="1", label_vertical_align="top")  # 56. Relation 2
+    uml.Dependency(None, None, "Use")  # 57. Dependency
+    uml.Generalization(None, None, "Extends")  # 58. Generalization
+    uml.Association(None, None, "", variant=2)  # 59. Association 2
+    uml.InnerClass(None, None, "")  # 60. Inner Class
+    uml.Terminate(None, None, "")  # 61. Terminate
+    uml.Implementation(None, None, "")  # 62. Implementation
+    uml.Aggregation(None, None, "", variant=2)  # 63. Aggregation 2
+    uml.Composition(None, None, "", variant=2)  # 64. Composition 2
+    uml.Association(None, None, "", variant=3)  # 65. Association 3

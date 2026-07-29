@@ -1,0 +1,183 @@
+---
+title: "C4 Architecture for mdg-drawio"
+page: "Context"
+mode: layered
+direction: TB
+---
+
+
+c4.System_Boundary(drawiogen, "mdg-drawio"):
+    c4.Context_DiagramTitle("[System Context] mdg-drawio", "Converts architecture-as-code (MDG) into editable draw.io diagrams with stable node identities and manual layout preservation.")
+    c4.System(drawiogen_sys, "mdg-drawio", "Ingests MDG notation source files and shape registries, computes diagram layouts, and produces valid draw.io XML.", technology="Python")
+
+c4.Person(author, "Diagram Author / Developer", "Writes MDG source files, reviews generated diagrams, and adjusts the visual layout in draw.io when needed.", technology="")
+
+c4.System_Ext(ai, "AI Assistant / Automation", "Reads, edits, and regenerates MDG source files — works with notation, not raw draw.io XML.", technology="LLM / AI Agent")
+c4.System_Ext(drawio, "draw.io / diagrams.net", "Visual editor used to inspect, arrange, and refine the generated diagram while keeping it editable.", technology="JavaScript (Electron)")
+c4.Rel(author, drawiogen_sys, "Defines architecture via MDG", description="")
+c4.Rel(author, drawio, "Reviews and adjusts layout", description="")
+c4.Rel(ai, drawiogen_sys, "Edits and generates MDG", description="")
+c4.Rel(drawiogen_sys, drawio, "Converts MDG to draw.io; round-trip planned", description="")
+
+---
+page: "Container"
+mode: layered
+direction: TB
+---
+
+c4.System_Boundary(drawiogen_c, "mdg-drawio"):
+    c4.Container_DiagramTitle("[Containers] mdg-drawio", "Container landscape: CLI, Engine, Contracts, Layout Engine, Generator, Notation libraries, and generated palette data.")
+    c4.Container(engine, "Engine", "Orchestrates the full pipeline: loads registries and styles into memory at startup, parses MDG source files, delegates layout and XML generation, and validates the output.", technology="Python")
+    c4.Container(contracts, "Contracts", "Shared data models and constants. Zero project imports — the single source of truth for types (Node, Edge, Document) and values (DEFAULT_NODE_WIDTH, PAGE_CELL_ID) that parser, layout, and generator all depend on.", technology="Python (dataclasses)")
+    c4.Container(cli, "CLI", "Thin CLI entry point. Parses arguments and delegates to the Engine.", technology="Python (argparse)")
+    c4.Container(layout, "Layout Engine", "Computes node positions and edge routes. Supports four layout modes — layered, process, palette, and sequence — with orthogonal edge routing.", technology="Python")
+    c4.Container(generator, "Generator", "Produces valid draw.io XML from parsed Document instances. Reads geometry overlays to preserve manual layout adjustments across regenerations.", technology="Python (xml.etree)")
+    c4.Container(notation, "Notation", "Seven notation libraries, each with a YAML shape registry. C4 is fully implemented; six remain as stubs. Shared core handles registry loading, style lookup, normalization, and DSL parsing.", technology="Python / YAML")
+    c4.Container(palette_data, "Generated Data", "Pre-built JSON data extracted from draw.io shape libraries. Not committed. Supplies style dimensions and palette entries consumed at startup.", technology="JSON (generated)")
+
+c4.Person(author_c, "Diagram Author / Developer", "Writes and maintains MDG files, refines diagrams visually in draw.io.", technology="")
+
+c4.System_Ext(drawio_c, "draw.io / diagrams.net", "Visual editor used to inspect and refine generated diagrams.", technology="JavaScript (Electron)")
+c4.Rel(author_c, cli, "Runs", description="")
+
+c4.Rel(cli, engine, "Delegates to", description="")
+c4.Rel(author_c, drawio_c, "Reviews and adjusts layout", description="")
+c4.Rel(engine, notation, "Pre-loads registries and styles", description="")
+
+c4.Rel(notation, palette_data, "Reads generated JSON", description="")
+c4.Rel(engine, layout, "Delegates layout computation", description="")
+c4.Rel(engine, drawio_c, "Reads and writes .drawio files", description="")
+c4.Rel(engine, generator, "Delegates XML generation", description="")
+c4.Rel(layout, contracts, "Uses data models", description="")
+c4.Rel(notation, contracts, "Uses data models", description="")
+c4.Rel(generator, contracts, "Uses data models", description="")
+
+---
+page: "Component"
+mode: layered
+direction: TB
+---
+
+c4.System_Boundary(drawiogen_co, "mdg-drawio"):
+      c4.Component_DiagramTitle("[Components] mdg-drawio", "Engine-orchestrated pipeline: pre-load, parse, resolve layout, generate XML, validate.")
+
+  c4.Component(cli_co, "CLI main()", "Thin entry point in mdg_drawio/cli.py. Parses --input/--output/--force, delegates to engine.convert(). Returns exit code.", technology="Python (argparse)")
+
+  c4.Container_Boundary(engine_co_boundary, "Engine"):
+      c4.Component(engine_convert_co, "convert()", "Full conversion pipeline orchestration. Detects notation, pre-loads registries/styles, parses pages, resolves layout config, injects overlays, runs layout, generates multipage XML, validates, and writes output.", technology="Python")
+      c4.Component(engine_preload_co, "Pre-load", "Loads all YAML registries and JSON style data into memory once at startup. Registries feed the notation registry cache; registries and styles are returned so the composition root (convert) builds the layout SizeResolver and the generator's StyleProvider by injection — zero filesystem I/O during parsing/layout/generation.", technology="Python (YAML/JSON)")
+      c4.Component(engine_validate_co, "XML Validation", "Validates generated draw.io XML before writing: unique diagram IDs, mandatory root cells (0 and 1), and edge source/target reference integrity.", technology="Python (xml.etree)")
+
+  c4.ContainerDb(palette_data_co, "Palette Data", "Generated JSON files from draw.io shape libraries. Produced via `make build-data`; consumed by notation style lookup.", technology="JSON (generated)")
+
+  c4.Container_Boundary(contracts_co_boundary, "Contracts"):
+      c4.Component(models_contract_co, "Models", "Shared dataclasses: Diagram, Node, Edge, Document, MultiPageDocument, GeometryPoint, Anchor, BoundaryPadding, ChildCell, NodeChildCell, GeometryChild, GeometryOverlay, EdgeAnchorOverlay, Patch. Zero project imports. Lives in contracts/models.py.", technology="Python (dataclasses)")
+      c4.Component(constants_contract_co, "Constants", "Shared values: DEFAULT_NODE_WIDTH, PAGE_CELL_ID, CANVAS_DX, ROOT_CELL_ID, layout defaults, C4 scaler defaults, DSL parser constants. Zero project imports. Lives in contracts/constants.py.", technology="Python")
+
+  c4.Container_Boundary(layout_co_boundary, "Layout Engine"):
+      c4.Component(types_co, "Types & BaseLayout", "Abstract base and shared dataclasses. BaseLayout ABC, Result, SizeResolver protocol, Waypoint alias (= GeometryPoint). Node and Edge imported from contracts.", technology="Python (ABC)")
+      c4.Component(config_co, "Config", "Notation-adjustable layout parameters. Config dataclass carries margins, gaps, direction, aspect ratio. resolve_page_size() computes page dimensions from content extents.", technology="Python (dataclasses)")
+      c4.Component(size_resolver_co, "Size Resolver", "Concrete SizeResolver: create_size_resolver() maps node type strings to (width, height) via pre-loaded registry/style data with defaults fallback.", technology="Python (Protocol)")
+      c4.Component(container_co, "Container Layout", "Parent/child boundary resolution via parent_id. apply_container_layout() lays out container interiors. absolute_node_boxes() maps page-frame positions. estimate_text_width() for label sizing.", technology="Python")
+      c4.Component(layered_co, "LayeredLayout", "Sugiyama-style layered graph layout. Longest-path ranking, barycenter sweep, orthogonal 3-segment edge routing.", technology="Python (Sugiyama)")
+      c4.Component(process_co, "ProcessLayout", "Left-to-right process flow layout. Wraps LayeredLayout with direction=LR. Supports rank-excluded nodes.", technology="Python")
+      c4.Component(sequence_co, "SequenceLayout", "Sequence diagram layout. Nodes as participant column headers, edges as horizontal connections stacked top-to-bottom.", technology="Python")
+      c4.Component(palettelayout_co, "PaletteLayout", "Reads pre-baked positions from JSON palette files. Applies exact x/y/width/height. Follows the same Result contract.", technology="Python (JSON)")
+
+  c4.Container_Boundary(generator_co_boundary, "Generator"):
+      c4.Component(generate_co, "generate()", "Produces draw.io XML from Document. Renders nodes, edges, and recursive child cells into valid mxGraphModel XML. set_registries() / set_styles() pre-load data so notation is never called at runtime during generation.", technology="Python (xml.etree)")
+      c4.Component(overlay_co, "Overlay", "Reads existing draw.io XML to extract node positions and edge anchors. Enables manual layout preservation across regenerations via read_overlay() and read_overlay_xml().", technology="Python (xml.etree)")
+      c4.Component(xml_utils_co, "XML Utils", "to_string() and indent() for XML pretty-printing.", technology="Python (xml.etree)")
+
+
+  c4.Container_Boundary(notation_co_boundary, "Notation (7 libraries)"):
+      c4.Component(registries_co, "YAML Registries", "Shape registries for c4, archimate3, bpmn2, erd, general, uml, uml25. Each conforms to shape-registry.schema.json and maps DSL functions to palette shapes.", technology="YAML")
+      c4.Component(registry_co, "Registry", "Loads YAML shape registries. Exposes set_registries(), shapes_by_id(), shapes_by_function(). Maintains LIBRARIES tuple. Lives in notation/_core/.", technology="Python (PyYAML)")
+      c4.Component(styles_co, "Styles", "Locates the generated palette/style data (DATA_DIR under mdg_drawio/generated_data). Read once at startup and injected into the generator's StyleProvider — no runtime cache. Lives in notation/_core/.", technology="Python")
+      c4.Component(normalize_co, "Normalize", "Style normalization and fingerprinting. Sorts/deduplicates draw.io style tokens for stable identity. style_fingerprint() binds registry entries to palette cells. Lives in notation/_core/.", technology="Python")
+      c4.Component(palette_co, "Palette", "Palette entry grouping utilities. Groups cells by menu entry boundary. Provides flatten_entries() and anchor_cell() for palette layout. Lives in notation/_core/.", technology="Python")
+      c4.Component(dsl_engine_co, "DSL Engine (_core)", "Shared notation-agnostic primitives. Regex call matching, block definitions, YAML frontmatter parsing, page splitting (per-page and legacy), AST argument parsing, indent-based container-stack block parser, passthrough node/edge support for foreign namespaces. NodeBuilder/EdgeBuilder/IsEdge protocols. DslError exception. Lives in notation/_core/.", technology="Python (regex/ast)")
+      c4.Component(grammar_co, "GRAMMAR.md", "Canonical DSL language specification. Defines document structure, call syntax, nesting rules, and how agents should use registries.", technology="Markdown")
+      c4.Component(stubs_co, "Notation Parsers", "C4 parser is implemented. 6 plugin stubs (archimate3, bpmn2, erd, general, uml, uml25) have empty __init__.py — DSL parsers not yet written.", technology="Python (stub)")
+
+  c4.Person(author_co, "Diagram Author / Developer", "Writes MDG source, refines layout visually in draw.io.", technology="")
+
+c4.Rel(author_co, cli_co, "Runs", description="")
+c4.Rel(cli_co, engine_co_boundary, "Delegates to", description="")
+c4.Rel(engine_convert_co, engine_preload_co, "Pre-loads registries and styles", description="")
+c4.Rel(engine_convert_co, engine_validate_co, "Validates XML before write", description="")
+c4.Rel(engine_convert_co, layout_co_boundary, "Resolves layout config", description="")
+c4.Rel(engine_convert_co, contracts_co_boundary, "Uses contracts", description="")
+c4.Rel(engine_convert_co, generator_co_boundary, "Generates & overlays XML", description="")
+c4.Rel(engine_preload_co, notation_co_boundary, "Loads registries and styles", description="")
+c4.Rel(engine_validate_co, generator_co_boundary, "Validates generated XML", description="")
+c4.Rel(models_contract_co, constants_contract_co, "Uses constants", description="")
+c4.Rel(generate_co, xml_utils_co, "Serializes XML", description="")
+c4.Rel(generate_co, contracts_co_boundary, "Uses contracts", description="")
+c4.Rel(types_co, config_co, "Type references", description="")
+c4.Rel(types_co, contracts_co_boundary, "Uses contracts", description="")
+c4.Rel(container_co, types_co, "Uses layout types", description="")
+c4.Rel(size_resolver_co, types_co, "Uses layout types", description="")
+c4.Rel(size_resolver_co, config_co, "Uses layout config", description="")
+c4.Rel(size_resolver_co, container_co, "Reuses text sizing", description="")
+c4.Rel(layered_co, types_co, "Implements BaseLayout", description="")
+c4.Rel(layered_co, config_co, "Uses layout config", description="")
+c4.Rel(layered_co, container_co, "Uses container layout", description="")
+c4.Rel(process_co, layered_co, "Wraps for LR direction", description="")
+c4.Rel(process_co, types_co, "Implements BaseLayout", description="")
+c4.Rel(process_co, config_co, "Uses layout config", description="")
+c4.Rel(sequence_co, types_co, "Implements BaseLayout", description="")
+c4.Rel(sequence_co, config_co, "Uses layout config", description="")
+c4.Rel(palettelayout_co, types_co, "Implements BaseLayout", description="")
+c4.Rel(palettelayout_co, config_co, "Uses layout config", description="")
+c4.Rel(dsl_engine_co, registry_co, "Loads via registry", description="")
+c4.Rel(dsl_engine_co, contracts_co_boundary, "Uses contracts", description="")
+c4.Rel(dsl_engine_co, registries_co, "Resolves shapes via registries", description="")
+c4.Rel(registry_co, registries_co, "Loads YAML registries", description="")
+c4.Rel(styles_co, palette_data_co, "Locates generated JSON", description="")
+c4.Rel(normalize_co, styles_co, "Fingerprints bind to palette cells", description="")
+c4.Rel(palette_co, styles_co, "Groups palette entries", description="")
+c4.Rel(registries_co, grammar_co, "Conforms to spec", description="")
+c4.Rel(stubs_co, registries_co, "C4 implemented; 6 parsers planned", description="")
+
+# ---------------------------------------------------------------------------
+# Traceability meta-model (model-only; not rendered).
+# realized-by: Component -> module(s) in the Code view.
+# satisfies:   Component -> architecture decision in the Decisions view.
+# Enforced by scripts/check_traceability.py.
+# ---------------------------------------------------------------------------
+use "code_architecture.mdg" as code
+use "decisions.mdg" as decisions
+
+trace cli_co -> code.cli : realized-by
+trace config_co -> code.layout_config : realized-by
+trace constants_contract_co -> code.contracts_constants : realized-by
+trace container_co -> code.layout__container_layout : realized-by
+trace dsl_engine_co -> code.notation__core_dsl_engine : realized-by
+trace engine_convert_co -> code.engine_convert : realized-by
+trace engine_preload_co -> code.engine_preload : realized-by
+trace engine_validate_co -> code.engine_validate : realized-by
+trace generate_co -> code.generator_generator : realized-by
+trace layered_co -> code.layout_layered : realized-by
+trace models_contract_co -> code.contracts_models : realized-by
+trace normalize_co -> code.notation__core_normalize : realized-by
+trace overlay_co -> code.generator_overlay : realized-by
+trace palette_co -> code.notation__core_palette : realized-by
+trace palettelayout_co -> code.layout_palette : realized-by
+trace process_co -> code.layout_process : realized-by
+trace registry_co -> code.notation__core_registry : realized-by
+trace sequence_co -> code.layout_sequence : realized-by
+trace size_resolver_co -> code.layout_size_resolver : realized-by
+trace styles_co -> code.notation__core_styles : realized-by
+trace types_co -> code.layout__types : realized-by
+trace types_co -> code.layout_layout : realized-by
+trace xml_utils_co -> code.generator_xml_utils : realized-by
+
+trace models_contract_co -> decisions.adr_0001 : satisfies
+trace constants_contract_co -> decisions.adr_0001 : satisfies
+trace engine_preload_co -> decisions.adr_0002 : satisfies
+trace engine_validate_co -> decisions.adr_0003 : satisfies
+trace overlay_co -> decisions.adr_0004 : satisfies
+trace types_co -> decisions.adr_0005 : satisfies
+trace normalize_co -> decisions.adr_0006 : satisfies
+trace generate_co -> decisions.adr_0007 : satisfies

@@ -1,0 +1,5719 @@
+# ArchiMate 3.2 shape registry — agent-facing metadata for the archimate3 draw.io DSL.
+# Conforms to shape-registry.schema.json. METAMODEL data derived from the Open Group
+# ArchiMate 3.1 Model Exchange Format XSD (ElementTypeEnum/RelationshipTypeEnum);
+# metamodel.classification carries ArchiMate layer + aspect. status: reviewed where
+# the element maps to a concrete ArchiMate type; generic shapes are tag: none.
+
+library: archimate3
+version: '3.2'
+provenance:
+  source_file: ArchiMate_3.2.drawio
+  palette: draw.io ArchiMate 3.2
+  shape_count: 155
+  pages:
+  - Generic
+  - Relationships
+  - Motivation
+  - Strategy
+  - Business
+  - Application
+  - Technology
+  - Implementation and Migration
+  metamodel_source: ArchiMate 3.1 Model Exchange Format XSD (The Open Group)
+grammar:
+  spec: ../GRAMMAR.md
+  root: ArchiMate3
+  notes:
+  - 'Grouping and Location are containers (contains: ''*'').'
+shapes:
+- id: archimate3.genericactivestructure.v1
+  menu_index: 1
+  kind: vertex
+  buildable: true
+  function: GenericActiveStructure
+  variant: 1
+  menu_name: GenericActiveStructure
+  render:
+    fingerprint: sha1:4b0345ff3eac
+  tag: none
+  status: generated
+  summary: Abstract active-structure element.
+  discriminator: n/a
+  use_when:
+  - placing a abstract active-structure element
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.GenericActiveStructure(n1, "Internal Active Structure Element")
+- id: archimate3.genericcollaboration.v1
+  menu_index: 2
+  kind: vertex
+  buildable: true
+  function: GenericCollaboration
+  variant: 1
+  menu_name: GenericCollaboration
+  render:
+    fingerprint: sha1:01c0f5a55e82
+  tag: none
+  status: generated
+  summary: Generic collaboration shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic collaboration shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericcollaboration.v2
+    see_also: []
+  example: |
+    archimate3.GenericCollaboration(n1, "Collaboration")
+- id: archimate3.genericcollaboration.v2
+  menu_index: 3
+  kind: vertex
+  buildable: true
+  function: GenericCollaboration
+  variant: 2
+  menu_name: GenericCollaboration
+  render:
+    fingerprint: sha1:d95265eec9c2
+  tag: none
+  status: generated
+  summary: Generic collaboration shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic collaboration shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericcollaboration.v1
+    see_also: []
+  example: |
+    archimate3.GenericCollaboration(n1, "", variant=2)
+- id: archimate3.genericinterface.v1
+  menu_index: 4
+  kind: vertex
+  buildable: true
+  function: GenericInterface
+  variant: 1
+  menu_name: GenericInterface
+  render:
+    fingerprint: sha1:e63fd534eead
+  tag: none
+  status: generated
+  summary: Generic interface shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic interface shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericinterface.v2
+    see_also: []
+  example: |
+    archimate3.GenericInterface(n1, "Interface")
+- id: archimate3.genericinterface.v2
+  menu_index: 5
+  kind: vertex
+  buildable: true
+  function: GenericInterface
+  variant: 2
+  menu_name: GenericInterface
+  render:
+    fingerprint: sha1:f0b04f5798c5
+  tag: none
+  status: generated
+  summary: Generic interface shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic interface shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericinterface.v1
+    see_also: []
+  example: |
+    archimate3.GenericInterface(n1, "", variant=2)
+- id: archimate3.internalbehaviorelement.v1
+  menu_index: 6
+  kind: vertex
+  buildable: true
+  function: InternalBehaviorElement
+  variant: 1
+  menu_name: InternalBehaviorElement
+  render:
+    fingerprint: sha1:4ae254846237
+  tag: none
+  status: generated
+  summary: Abstract behavior element.
+  discriminator: n/a
+  use_when:
+  - placing a abstract behavior element
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.InternalBehaviorElement(n1, "Internal Behavior Element")
+- id: archimate3.genericprocess.v1
+  menu_index: 7
+  kind: vertex
+  buildable: true
+  function: GenericProcess
+  variant: 1
+  menu_name: GenericProcess
+  render:
+    fingerprint: sha1:ae58a5746ff1
+  tag: none
+  status: generated
+  summary: Generic process shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic process shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericprocess.v2
+    see_also: []
+  example: |
+    archimate3.GenericProcess(n1, "Process")
+- id: archimate3.genericprocess.v2
+  menu_index: 8
+  kind: vertex
+  buildable: true
+  function: GenericProcess
+  variant: 2
+  menu_name: GenericProcess
+  render:
+    fingerprint: sha1:e12fe5293d45
+  tag: none
+  status: generated
+  summary: Generic process shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic process shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericprocess.v1
+    see_also: []
+  example: |
+    archimate3.GenericProcess(n1, "", variant=2)
+- id: archimate3.genericfunction.v1
+  menu_index: 9
+  kind: vertex
+  buildable: true
+  function: GenericFunction
+  variant: 1
+  menu_name: GenericFunction
+  render:
+    fingerprint: sha1:cb377c9eed56
+  tag: none
+  status: generated
+  summary: Generic function shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic function shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericfunction.v2
+    see_also: []
+  example: |
+    archimate3.GenericFunction(n1, "Function")
+- id: archimate3.genericfunction.v2
+  menu_index: 10
+  kind: vertex
+  buildable: true
+  function: GenericFunction
+  variant: 2
+  menu_name: GenericFunction
+  render:
+    fingerprint: sha1:8fa87dad70a4
+  tag: none
+  status: generated
+  summary: Generic function shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic function shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericfunction.v1
+    see_also: []
+  example: |
+    archimate3.GenericFunction(n1, "", variant=2)
+- id: archimate3.genericinteraction.v1
+  menu_index: 11
+  kind: vertex
+  buildable: true
+  function: GenericInteraction
+  variant: 1
+  menu_name: GenericInteraction
+  render:
+    fingerprint: sha1:84f7451d50fa
+  tag: none
+  status: generated
+  summary: Generic interaction shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic interaction shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericinteraction.v2
+    see_also: []
+  example: |
+    archimate3.GenericInteraction(n1, "Interaction")
+- id: archimate3.genericinteraction.v2
+  menu_index: 12
+  kind: vertex
+  buildable: true
+  function: GenericInteraction
+  variant: 2
+  menu_name: GenericInteraction
+  render:
+    fingerprint: sha1:0011c4d04db8
+  tag: none
+  status: generated
+  summary: Generic interaction shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic interaction shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericinteraction.v1
+    see_also: []
+  example: |
+    archimate3.GenericInteraction(n1, "", variant=2)
+- id: archimate3.genericservice.v1
+  menu_index: 13
+  kind: vertex
+  buildable: true
+  function: GenericService
+  variant: 1
+  menu_name: GenericService
+  render:
+    fingerprint: sha1:83a9c6ab2b84
+  tag: none
+  status: generated
+  summary: Generic service shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic service shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericservice.v2
+    see_also: []
+  example: |
+    archimate3.GenericService(n1, "Service")
+- id: archimate3.genericservice.v2
+  menu_index: 14
+  kind: vertex
+  buildable: true
+  function: GenericService
+  variant: 2
+  menu_name: GenericService
+  render:
+    fingerprint: sha1:a8492f9a51d5
+  tag: none
+  status: generated
+  summary: Generic service shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic service shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericservice.v1
+    see_also: []
+  example: |
+    archimate3.GenericService(n1, "", variant=2)
+- id: archimate3.genericevent.v1
+  menu_index: 15
+  kind: vertex
+  buildable: true
+  function: GenericEvent
+  variant: 1
+  menu_name: GenericEvent
+  render:
+    fingerprint: sha1:a587e9db3b47
+  tag: none
+  status: generated
+  summary: Generic event shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic event shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericevent.v2
+    see_also: []
+  example: |
+    archimate3.GenericEvent(n1, "Event")
+- id: archimate3.genericevent.v2
+  menu_index: 16
+  kind: vertex
+  buildable: true
+  function: GenericEvent
+  variant: 2
+  menu_name: GenericEvent
+  render:
+    fingerprint: sha1:0f664380ed0a
+  tag: none
+  status: generated
+  summary: Generic event shape.
+  discriminator: TODO
+  use_when:
+  - placing a generic event shape
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericevent.v1
+    see_also: []
+  example: |
+    archimate3.GenericEvent(n1, "", variant=2)
+- id: archimate3.genericpassivestructure.v1
+  menu_index: 17
+  kind: vertex
+  buildable: true
+  function: GenericPassiveStructure
+  variant: 1
+  menu_name: GenericPassiveStructure
+  render:
+    fingerprint: sha1:efefab0b075d
+  tag: none
+  status: generated
+  summary: Abstract passive-structure element.
+  discriminator: TODO
+  use_when:
+  - placing a abstract passive-structure element
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericpassivestructure.v2
+    see_also: []
+  example: |
+    archimate3.GenericPassiveStructure(n1, "Passive Structure Element")
+- id: archimate3.genericpassivestructure.v2
+  menu_index: 18
+  kind: vertex
+  buildable: true
+  function: GenericPassiveStructure
+  variant: 2
+  menu_name: GenericPassiveStructure
+  render:
+    fingerprint: sha1:61e33ddc3c14
+  tag: none
+  status: generated
+  summary: Abstract passive-structure element.
+  discriminator: TODO
+  use_when:
+  - placing a abstract passive-structure element
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.genericpassivestructure.v1
+    see_also: []
+  example: |
+    archimate3.GenericPassiveStructure(n1, "", variant=2)
+- id: archimate3.motivationelement.v1
+  menu_index: 19
+  kind: vertex
+  buildable: true
+  function: MotivationElement
+  variant: 1
+  menu_name: MotivationElement
+  render:
+    fingerprint: sha1:f23164b9f116
+  tag: none
+  status: generated
+  summary: Abstract motivation element.
+  discriminator: n/a
+  use_when:
+  - placing a abstract motivation element
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.MotivationElement(n1, "Motivation Element")
+- id: archimate3.grouping.v1
+  menu_index: 20
+  kind: vertex
+  buildable: true
+  function: Grouping
+  variant: 1
+  menu_name: Grouping
+  render:
+    fingerprint: sha1:247b4bf6a936
+  tag: metaclass
+  status: drafted
+  summary: 'Composite/Connector other element: Grouping.'
+  discriminator: TODO
+  use_when:
+  - modeling a Grouping (Composite/Connector other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed: &id001
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants:
+    - archimate3.grouping.v2
+    see_also: []
+  example: |
+    archimate3.Grouping(n1, "Grouping")
+  metamodel:
+    spec: archimate-3
+    element: Grouping
+    classification:
+      layer: Composite/Connector
+      aspect: Other
+      kind: element
+- id: archimate3.grouping.v2
+  menu_index: 21
+  kind: vertex
+  buildable: true
+  function: Grouping
+  variant: 2
+  menu_name: Grouping
+  render:
+    fingerprint: sha1:b41693b44df7
+  tag: notation
+  status: drafted
+  summary: 'Composite/Connector other element: Grouping.'
+  discriminator: TODO
+  use_when:
+  - modeling a Grouping (Composite/Connector other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed: *id001
+  containment:
+    strategy: freeform
+  related:
+    variants:
+    - archimate3.grouping.v1
+    see_also: []
+  example: |
+    archimate3.Grouping(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Grouping
+    classification:
+      layer: Composite/Connector
+      aspect: Other
+      kind: element
+- id: archimate3.location.v1
+  menu_index: 22
+  kind: vertex
+  buildable: true
+  function: Location
+  variant: 1
+  menu_name: Location
+  render:
+    fingerprint: sha1:41cbf6a5c5bd
+  tag: metaclass
+  status: drafted
+  summary: 'Composite/Connector other element: Location.'
+  discriminator: TODO
+  use_when:
+  - modeling a Location (Composite/Connector other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed: &id002
+    - '*'
+  containment:
+    strategy: freeform
+  related:
+    variants:
+    - archimate3.location.v2
+    see_also: []
+  example: |
+    archimate3.Location(n1, "Location")
+  metamodel:
+    spec: archimate-3
+    element: Location
+    classification:
+      layer: Composite/Connector
+      aspect: Other
+      kind: element
+- id: archimate3.location.v2
+  menu_index: 23
+  kind: vertex
+  buildable: true
+  function: Location
+  variant: 2
+  menu_name: Location
+  render:
+    fingerprint: sha1:b43f261a8712
+  tag: notation
+  status: drafted
+  summary: 'Composite/Connector other element: Location.'
+  discriminator: TODO
+  use_when:
+  - modeling a Location (Composite/Connector other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  contains:
+    allowed: *id002
+  containment:
+    strategy: freeform
+  related:
+    variants:
+    - archimate3.location.v1
+    see_also: []
+  example: |
+    archimate3.Location(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Location
+    classification:
+      layer: Composite/Connector
+      aspect: Other
+      kind: element
+- id: archimate3.composition.v1
+  menu_index: 24
+  kind: edge
+  buildable: true
+  function: Composition
+  variant: 1
+  menu_name: Composition
+  render:
+    fingerprint: sha1:4431b8b8d0c1
+  tag: notation
+  status: reviewed
+  summary: 'ArchiMate Composition relationship: whole composed of parts.'
+  discriminator: n/a
+  use_when:
+  - showing a Composition relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.Composition(None, None)
+  metamodel:
+    spec: archimate-3
+    element: Composition
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.aggregation.v1
+  menu_index: 25
+  kind: edge
+  buildable: true
+  function: Aggregation
+  variant: 1
+  menu_name: Aggregation
+  render:
+    fingerprint: sha1:ad5d3a46c6c6
+  tag: notation
+  status: reviewed
+  summary: 'ArchiMate Aggregation relationship: whole aggregating parts.'
+  discriminator: n/a
+  use_when:
+  - showing a Aggregation relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.Aggregation(None, None)
+  metamodel:
+    spec: archimate-3
+    element: Aggregation
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.assignment.v1
+  menu_index: 26
+  kind: edge
+  buildable: true
+  function: Assignment
+  variant: 1
+  menu_name: Assignment
+  render:
+    fingerprint: sha1:4bd18f9954ea
+  tag: notation
+  status: reviewed
+  summary: 'ArchiMate Assignment relationship: active element assigned to behavior/role.'
+  discriminator: n/a
+  use_when:
+  - showing a Assignment relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.Assignment(None, None)
+  metamodel:
+    spec: archimate-3
+    element: Assignment
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.realization.v1
+  menu_index: 27
+  kind: edge
+  buildable: true
+  function: Realization
+  variant: 1
+  menu_name: Realization
+  render:
+    fingerprint: sha1:138c0f515de9
+  tag: notation
+  status: reviewed
+  summary: 'ArchiMate Realization relationship: element realizing another.'
+  discriminator: n/a
+  use_when:
+  - showing a Realization relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.Realization(None, None)
+  metamodel:
+    spec: archimate-3
+    element: Realization
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.serving.v1
+  menu_index: 28
+  kind: edge
+  buildable: true
+  function: Serving
+  variant: 1
+  menu_name: Serving
+  render:
+    fingerprint: sha1:fb85bd366d1b
+  tag: notation
+  status: reviewed
+  summary: 'ArchiMate Serving relationship: element serving/providing to another.'
+  discriminator: n/a
+  use_when:
+  - showing a Serving relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.Serving(None, None)
+  metamodel:
+    spec: archimate-3
+    element: Serving
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.access.v1
+  menu_index: 29
+  kind: edge
+  buildable: true
+  function: Access
+  variant: 1
+  menu_name: Access
+  render:
+    fingerprint: sha1:e21ea38b5f4a
+  tag: notation
+  status: drafted
+  summary: 'ArchiMate Access relationship: behavior accessing a data/object.'
+  discriminator: TODO
+  use_when:
+  - showing a Access relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - archimate3.access.v2
+    - archimate3.access.v3
+    see_also: []
+  example: |
+    archimate3.Access(None, None)
+  metamodel:
+    spec: archimate-3
+    element: Access
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.access.v3
+  menu_index: 30
+  kind: edge
+  buildable: true
+  function: Access
+  variant: 3
+  menu_name: Access
+  render:
+    fingerprint: sha1:3791a1275fca
+  tag: notation
+  status: drafted
+  summary: 'ArchiMate Access relationship: behavior accessing a data/object.'
+  discriminator: TODO
+  use_when:
+  - showing a Access relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - archimate3.access.v1
+    - archimate3.access.v2
+    see_also: []
+  example: |
+    archimate3.Access(None, None, variant=3)
+  metamodel:
+    spec: archimate-3
+    element: Access
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.access.v2
+  menu_index: 31
+  kind: edge
+  buildable: true
+  function: Access
+  variant: 2
+  menu_name: Access
+  render:
+    fingerprint: sha1:fe66de75e4a7
+  tag: notation
+  status: drafted
+  summary: 'ArchiMate Access relationship: behavior accessing a data/object.'
+  discriminator: TODO
+  use_when:
+  - showing a Access relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - archimate3.access.v1
+    - archimate3.access.v3
+    see_also: []
+  example: |
+    archimate3.Access(None, None, variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Access
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.influence.v1
+  menu_index: 32
+  kind: edge
+  buildable: true
+  function: Influence
+  variant: 1
+  menu_name: Influence
+  render:
+    fingerprint: sha1:fa5e9cea464f
+  tag: notation
+  status: reviewed
+  summary: 'ArchiMate Influence relationship: element influencing another (+/-).'
+  discriminator: n/a
+  use_when:
+  - showing a Influence relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.Influence(None, None, "+/-")
+  metamodel:
+    spec: archimate-3
+    element: Influence
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.association.v1
+  menu_index: 33
+  kind: edge
+  buildable: true
+  function: Association
+  variant: 1
+  menu_name: Association
+  render:
+    fingerprint: sha1:a9c9fb63f215
+  tag: notation
+  status: drafted
+  summary: 'ArchiMate Association relationship: unspecified relationship.'
+  discriminator: TODO
+  use_when:
+  - showing a Association relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - archimate3.association.v2
+    see_also: []
+  example: |
+    archimate3.Association(None, None)
+  metamodel:
+    spec: archimate-3
+    element: Association
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.association.v2
+  menu_index: 34
+  kind: edge
+  buildable: true
+  function: Association
+  variant: 2
+  menu_name: Association
+  render:
+    fingerprint: sha1:27748b761898
+  tag: notation
+  status: drafted
+  summary: 'ArchiMate Association relationship: unspecified relationship.'
+  discriminator: TODO
+  use_when:
+  - showing a Association relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants:
+    - archimate3.association.v1
+    see_also: []
+  example: |
+    archimate3.Association(None, None, variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Association
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.triggering.v1
+  menu_index: 35
+  kind: edge
+  buildable: true
+  function: Triggering
+  variant: 1
+  menu_name: Triggering
+  render:
+    fingerprint: sha1:a31e2ca76b23
+  tag: notation
+  status: reviewed
+  summary: 'ArchiMate Triggering relationship: temporal/causal trigger between behaviors.'
+  discriminator: n/a
+  use_when:
+  - showing a Triggering relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.Triggering(None, None)
+  metamodel:
+    spec: archimate-3
+    element: Triggering
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.flow.v1
+  menu_index: 36
+  kind: edge
+  buildable: true
+  function: Flow
+  variant: 1
+  menu_name: Flow
+  render:
+    fingerprint: sha1:cbd008b825a1
+  tag: notation
+  status: reviewed
+  summary: 'ArchiMate Flow relationship: transfer between elements.'
+  discriminator: n/a
+  use_when:
+  - showing a Flow relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.Flow(None, None)
+  metamodel:
+    spec: archimate-3
+    element: Flow
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.specialization.v1
+  menu_index: 37
+  kind: edge
+  buildable: true
+  function: Specialization
+  variant: 1
+  menu_name: Specialization
+  render:
+    fingerprint: sha1:e9e0aa10ebb1
+  tag: notation
+  status: reviewed
+  summary: 'ArchiMate Specialization relationship: element specializing a general one.'
+  discriminator: n/a
+  use_when:
+  - showing a Specialization relationship
+  avoid_when: []
+  aliases: []
+  args:
+  - name: source
+    required: true
+  - name: target
+    required: true
+  - name: label
+    required: false
+  endpoints:
+    direction: source_to_target
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.Specialization(None, None)
+  metamodel:
+    spec: archimate-3
+    element: Specialization
+    classification:
+      layer: Relationship
+      kind: relationship
+    endpoints:
+      source: Element
+      target: Element
+      source_role: source
+      target_role: target
+- id: archimate3.junction.v1
+  menu_index: 38
+  kind: vertex
+  buildable: true
+  function: Junction
+  variant: 1
+  menu_name: Junction
+  render:
+    fingerprint: sha1:b9358d7c6d95
+  tag: notation
+  status: reviewed
+  summary: Junction (and/or connector).
+  discriminator: n/a
+  use_when:
+  - placing a junction (and/or connector)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.Junction(n1, "")
+  metamodel:
+    spec: archimate-3
+    element: AndJunction
+    classification:
+      kind: notation
+- id: archimate3.orjunction.v1
+  menu_index: 39
+  kind: vertex
+  buildable: true
+  function: OrJunction
+  variant: 1
+  menu_name: OrJunction
+  render:
+    fingerprint: sha1:facf07f43ca3
+  tag: metaclass
+  status: reviewed
+  summary: 'Composite/Connector other element: OrJunction.'
+  discriminator: n/a
+  use_when:
+  - modeling a OrJunction (Composite/Connector other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants: []
+    see_also: []
+  example: |
+    archimate3.OrJunction(n1, "")
+  metamodel:
+    spec: archimate-3
+    element: OrJunction
+    classification:
+      layer: Composite/Connector
+      aspect: Other
+      kind: element
+- id: archimate3.stakeholder.v1
+  menu_index: 40
+  kind: vertex
+  buildable: true
+  function: Stakeholder
+  variant: 1
+  menu_name: Stakeholder
+  render:
+    fingerprint: sha1:a6f1f976d668
+  tag: metaclass
+  status: drafted
+  summary: 'Motivation motivation element: Stakeholder.'
+  discriminator: TODO
+  use_when:
+  - modeling a Stakeholder (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.stakeholder.v2
+    see_also: []
+  example: |
+    archimate3.Stakeholder(n1, "Stakeholder")
+  metamodel:
+    spec: archimate-3
+    element: Stakeholder
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.stakeholder.v2
+  menu_index: 41
+  kind: vertex
+  buildable: true
+  function: Stakeholder
+  variant: 2
+  menu_name: Stakeholder
+  render:
+    fingerprint: sha1:27d1d4eecb2e
+  tag: notation
+  status: drafted
+  summary: 'Motivation motivation element: Stakeholder.'
+  discriminator: TODO
+  use_when:
+  - modeling a Stakeholder (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.stakeholder.v1
+    see_also: []
+  example: |
+    archimate3.Stakeholder(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Stakeholder
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.driver.v1
+  menu_index: 42
+  kind: vertex
+  buildable: true
+  function: Driver
+  variant: 1
+  menu_name: Driver
+  render:
+    fingerprint: sha1:c3b737bf834b
+  tag: metaclass
+  status: drafted
+  summary: 'Motivation motivation element: Driver.'
+  discriminator: TODO
+  use_when:
+  - modeling a Driver (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.driver.v2
+    see_also: []
+  example: |
+    archimate3.Driver(n1, "Driver")
+  metamodel:
+    spec: archimate-3
+    element: Driver
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.driver.v2
+  menu_index: 43
+  kind: vertex
+  buildable: true
+  function: Driver
+  variant: 2
+  menu_name: Driver
+  render:
+    fingerprint: sha1:37f38c2b60dc
+  tag: notation
+  status: drafted
+  summary: 'Motivation motivation element: Driver.'
+  discriminator: TODO
+  use_when:
+  - modeling a Driver (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.driver.v1
+    see_also: []
+  example: |
+    archimate3.Driver(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Driver
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.assessment.v1
+  menu_index: 44
+  kind: vertex
+  buildable: true
+  function: Assessment
+  variant: 1
+  menu_name: Assessment
+  render:
+    fingerprint: sha1:8ca075867e61
+  tag: metaclass
+  status: drafted
+  summary: 'Motivation motivation element: Assessment.'
+  discriminator: TODO
+  use_when:
+  - modeling a Assessment (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.assessment.v2
+    see_also: []
+  example: |
+    archimate3.Assessment(n1, "Assessment")
+  metamodel:
+    spec: archimate-3
+    element: Assessment
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.assessment.v2
+  menu_index: 45
+  kind: vertex
+  buildable: true
+  function: Assessment
+  variant: 2
+  menu_name: Assessment
+  render:
+    fingerprint: sha1:9487e8921157
+  tag: notation
+  status: drafted
+  summary: 'Motivation motivation element: Assessment.'
+  discriminator: TODO
+  use_when:
+  - modeling a Assessment (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.assessment.v1
+    see_also: []
+  example: |
+    archimate3.Assessment(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Assessment
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.goal.v1
+  menu_index: 46
+  kind: vertex
+  buildable: true
+  function: Goal
+  variant: 1
+  menu_name: Goal
+  render:
+    fingerprint: sha1:1cdad06b2a6c
+  tag: metaclass
+  status: drafted
+  summary: 'Motivation motivation element: Goal.'
+  discriminator: TODO
+  use_when:
+  - modeling a Goal (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.goal.v2
+    see_also: []
+  example: |
+    archimate3.Goal(n1, "Goal")
+  metamodel:
+    spec: archimate-3
+    element: Goal
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.goal.v2
+  menu_index: 47
+  kind: vertex
+  buildable: true
+  function: Goal
+  variant: 2
+  menu_name: Goal
+  render:
+    fingerprint: sha1:a588250ee14b
+  tag: notation
+  status: drafted
+  summary: 'Motivation motivation element: Goal.'
+  discriminator: TODO
+  use_when:
+  - modeling a Goal (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.goal.v1
+    see_also: []
+  example: |
+    archimate3.Goal(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Goal
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.outcome.v1
+  menu_index: 48
+  kind: vertex
+  buildable: true
+  function: Outcome
+  variant: 1
+  menu_name: Outcome
+  render:
+    fingerprint: sha1:cdea48981009
+  tag: metaclass
+  status: drafted
+  summary: 'Motivation motivation element: Outcome.'
+  discriminator: TODO
+  use_when:
+  - modeling a Outcome (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.outcome.v2
+    see_also: []
+  example: |
+    archimate3.Outcome(n1, "Outcome")
+  metamodel:
+    spec: archimate-3
+    element: Outcome
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.outcome.v2
+  menu_index: 49
+  kind: vertex
+  buildable: true
+  function: Outcome
+  variant: 2
+  menu_name: Outcome
+  render:
+    fingerprint: sha1:6aa684d4d8fd
+  tag: notation
+  status: drafted
+  summary: 'Motivation motivation element: Outcome.'
+  discriminator: TODO
+  use_when:
+  - modeling a Outcome (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.outcome.v1
+    see_also: []
+  example: |
+    archimate3.Outcome(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Outcome
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.principle.v1
+  menu_index: 50
+  kind: vertex
+  buildable: true
+  function: Principle
+  variant: 1
+  menu_name: Principle
+  render:
+    fingerprint: sha1:cce3fde4f7a0
+  tag: metaclass
+  status: drafted
+  summary: 'Motivation motivation element: Principle.'
+  discriminator: TODO
+  use_when:
+  - modeling a Principle (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.principle.v2
+    see_also: []
+  example: |
+    archimate3.Principle(n1, "Principle")
+  metamodel:
+    spec: archimate-3
+    element: Principle
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.principle.v2
+  menu_index: 51
+  kind: vertex
+  buildable: true
+  function: Principle
+  variant: 2
+  menu_name: Principle
+  render:
+    fingerprint: sha1:6b16bc387cd2
+  tag: notation
+  status: drafted
+  summary: 'Motivation motivation element: Principle.'
+  discriminator: TODO
+  use_when:
+  - modeling a Principle (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.principle.v1
+    see_also: []
+  example: |
+    archimate3.Principle(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Principle
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.requirement.v1
+  menu_index: 52
+  kind: vertex
+  buildable: true
+  function: Requirement
+  variant: 1
+  menu_name: Requirement
+  render:
+    fingerprint: sha1:3c322d6b97f6
+  tag: metaclass
+  status: drafted
+  summary: 'Motivation motivation element: Requirement.'
+  discriminator: TODO
+  use_when:
+  - modeling a Requirement (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.requirement.v2
+    see_also: []
+  example: |
+    archimate3.Requirement(n1, "Requirement")
+  metamodel:
+    spec: archimate-3
+    element: Requirement
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.requirement.v2
+  menu_index: 53
+  kind: vertex
+  buildable: true
+  function: Requirement
+  variant: 2
+  menu_name: Requirement
+  render:
+    fingerprint: sha1:def9f49a1f10
+  tag: notation
+  status: drafted
+  summary: 'Motivation motivation element: Requirement.'
+  discriminator: TODO
+  use_when:
+  - modeling a Requirement (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.requirement.v1
+    see_also: []
+  example: |
+    archimate3.Requirement(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Requirement
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.constraint.v1
+  menu_index: 54
+  kind: vertex
+  buildable: true
+  function: Constraint
+  variant: 1
+  menu_name: Constraint
+  render:
+    fingerprint: sha1:e8447e675768
+  tag: metaclass
+  status: drafted
+  summary: 'Motivation motivation element: Constraint.'
+  discriminator: TODO
+  use_when:
+  - modeling a Constraint (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.constraint.v2
+    see_also: []
+  example: |
+    archimate3.Constraint(n1, "Constraint")
+  metamodel:
+    spec: archimate-3
+    element: Constraint
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.constraint.v2
+  menu_index: 55
+  kind: vertex
+  buildable: true
+  function: Constraint
+  variant: 2
+  menu_name: Constraint
+  render:
+    fingerprint: sha1:db9ab304ee2d
+  tag: notation
+  status: drafted
+  summary: 'Motivation motivation element: Constraint.'
+  discriminator: TODO
+  use_when:
+  - modeling a Constraint (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.constraint.v1
+    see_also: []
+  example: |
+    archimate3.Constraint(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Constraint
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.meaning.v1
+  menu_index: 56
+  kind: vertex
+  buildable: true
+  function: Meaning
+  variant: 1
+  menu_name: Meaning
+  render:
+    fingerprint: sha1:454ef829d63c
+  tag: metaclass
+  status: drafted
+  summary: 'Motivation motivation element: Meaning.'
+  discriminator: TODO
+  use_when:
+  - modeling a Meaning (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.meaning.v2
+    see_also: []
+  example: |
+    archimate3.Meaning(n1, "Meaning")
+  metamodel:
+    spec: archimate-3
+    element: Meaning
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.meaning.v2
+  menu_index: 57
+  kind: vertex
+  buildable: true
+  function: Meaning
+  variant: 2
+  menu_name: Meaning
+  render:
+    fingerprint: sha1:b640ffd25609
+  tag: notation
+  status: drafted
+  summary: 'Motivation motivation element: Meaning.'
+  discriminator: TODO
+  use_when:
+  - modeling a Meaning (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.meaning.v1
+    see_also: []
+  example: |
+    archimate3.Meaning(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Meaning
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.value.v1
+  menu_index: 58
+  kind: vertex
+  buildable: true
+  function: Value
+  variant: 1
+  menu_name: Value
+  render:
+    fingerprint: sha1:3f1c6852bf91
+  tag: metaclass
+  status: drafted
+  summary: 'Motivation motivation element: Value.'
+  discriminator: TODO
+  use_when:
+  - modeling a Value (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.value.v2
+    see_also: []
+  example: |
+    archimate3.Value(n1, "Value")
+  metamodel:
+    spec: archimate-3
+    element: Value
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.value.v2
+  menu_index: 59
+  kind: vertex
+  buildable: true
+  function: Value
+  variant: 2
+  menu_name: Value
+  render:
+    fingerprint: sha1:96184cb3c4a4
+  tag: notation
+  status: drafted
+  summary: 'Motivation motivation element: Value.'
+  discriminator: TODO
+  use_when:
+  - modeling a Value (Motivation motivation)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.value.v1
+    see_also: []
+  example: |
+    archimate3.Value(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Value
+    classification:
+      layer: Motivation
+      aspect: Motivation
+      kind: element
+- id: archimate3.resource.v1
+  menu_index: 60
+  kind: vertex
+  buildable: true
+  function: Resource
+  variant: 1
+  menu_name: Resource
+  render:
+    fingerprint: sha1:78125eb7bb11
+  tag: metaclass
+  status: drafted
+  summary: 'Strategy-layer other element: Resource.'
+  discriminator: TODO
+  use_when:
+  - modeling a Resource (Strategy-layer other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.resource.v2
+    see_also: []
+  example: |
+    archimate3.Resource(n1, "Resource")
+  metamodel:
+    spec: archimate-3
+    element: Resource
+    classification:
+      layer: Strategy
+      aspect: Other
+      kind: element
+- id: archimate3.resource.v2
+  menu_index: 61
+  kind: vertex
+  buildable: true
+  function: Resource
+  variant: 2
+  menu_name: Resource
+  render:
+    fingerprint: sha1:121fd87acb6e
+  tag: notation
+  status: drafted
+  summary: 'Strategy-layer other element: Resource.'
+  discriminator: TODO
+  use_when:
+  - modeling a Resource (Strategy-layer other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.resource.v1
+    see_also: []
+  example: |
+    archimate3.Resource(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Resource
+    classification:
+      layer: Strategy
+      aspect: Other
+      kind: element
+- id: archimate3.capability.v1
+  menu_index: 62
+  kind: vertex
+  buildable: true
+  function: Capability
+  variant: 1
+  menu_name: Capability
+  render:
+    fingerprint: sha1:7add6ceb6d97
+  tag: metaclass
+  status: drafted
+  summary: 'Strategy-layer other element: Capability.'
+  discriminator: TODO
+  use_when:
+  - modeling a Capability (Strategy-layer other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.capability.v2
+    see_also: []
+  example: |
+    archimate3.Capability(n1, "Capability")
+  metamodel:
+    spec: archimate-3
+    element: Capability
+    classification:
+      layer: Strategy
+      aspect: Other
+      kind: element
+- id: archimate3.capability.v2
+  menu_index: 63
+  kind: vertex
+  buildable: true
+  function: Capability
+  variant: 2
+  menu_name: Capability
+  render:
+    fingerprint: sha1:38034b155d99
+  tag: notation
+  status: drafted
+  summary: 'Strategy-layer other element: Capability.'
+  discriminator: TODO
+  use_when:
+  - modeling a Capability (Strategy-layer other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.capability.v1
+    see_also: []
+  example: |
+    archimate3.Capability(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Capability
+    classification:
+      layer: Strategy
+      aspect: Other
+      kind: element
+- id: archimate3.valuestream.v1
+  menu_index: 64
+  kind: vertex
+  buildable: true
+  function: ValueStream
+  variant: 1
+  menu_name: ValueStream
+  render:
+    fingerprint: sha1:7545669ccd51
+  tag: metaclass
+  status: drafted
+  summary: 'Strategy-layer other element: ValueStream.'
+  discriminator: TODO
+  use_when:
+  - modeling a ValueStream (Strategy-layer other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.valuestream.v2
+    see_also: []
+  example: |
+    archimate3.ValueStream(n1, "Value Stream")
+  metamodel:
+    spec: archimate-3
+    element: ValueStream
+    classification:
+      layer: Strategy
+      aspect: Other
+      kind: element
+- id: archimate3.valuestream.v2
+  menu_index: 65
+  kind: vertex
+  buildable: true
+  function: ValueStream
+  variant: 2
+  menu_name: ValueStream
+  render:
+    fingerprint: sha1:224dfb2c4ef7
+  tag: notation
+  status: drafted
+  summary: 'Strategy-layer other element: ValueStream.'
+  discriminator: TODO
+  use_when:
+  - modeling a ValueStream (Strategy-layer other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.valuestream.v1
+    see_also: []
+  example: |
+    archimate3.ValueStream(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: ValueStream
+    classification:
+      layer: Strategy
+      aspect: Other
+      kind: element
+- id: archimate3.courseofaction.v1
+  menu_index: 66
+  kind: vertex
+  buildable: true
+  function: CourseOfAction
+  variant: 1
+  menu_name: CourseOfAction
+  render:
+    fingerprint: sha1:191ba447eedd
+  tag: metaclass
+  status: drafted
+  summary: 'Strategy-layer other element: CourseOfAction.'
+  discriminator: TODO
+  use_when:
+  - modeling a CourseOfAction (Strategy-layer other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.courseofaction.v2
+    see_also: []
+  example: |
+    archimate3.CourseOfAction(n1, "Course of Action")
+  metamodel:
+    spec: archimate-3
+    element: CourseOfAction
+    classification:
+      layer: Strategy
+      aspect: Other
+      kind: element
+- id: archimate3.courseofaction.v2
+  menu_index: 67
+  kind: vertex
+  buildable: true
+  function: CourseOfAction
+  variant: 2
+  menu_name: CourseOfAction
+  render:
+    fingerprint: sha1:4a6930d0f3ab
+  tag: notation
+  status: drafted
+  summary: 'Strategy-layer other element: CourseOfAction.'
+  discriminator: TODO
+  use_when:
+  - modeling a CourseOfAction (Strategy-layer other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.courseofaction.v1
+    see_also: []
+  example: |
+    archimate3.CourseOfAction(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: CourseOfAction
+    classification:
+      layer: Strategy
+      aspect: Other
+      kind: element
+- id: archimate3.businessactor.v2
+  menu_index: 68
+  kind: vertex
+  buildable: true
+  function: BusinessActor
+  variant: 2
+  menu_name: BusinessActor
+  render:
+    fingerprint: sha1:efabc20df5f3
+  tag: notation
+  status: drafted
+  summary: 'Business-layer active structure element: BusinessActor.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessActor (Business-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessactor.v1
+    see_also: []
+  example: |
+    archimate3.BusinessActor(n1, "Business Actor", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: BusinessActor
+    classification:
+      layer: Business
+      aspect: Active Structure
+      kind: element
+- id: archimate3.businessactor.v1
+  menu_index: 69
+  kind: vertex
+  buildable: true
+  function: BusinessActor
+  variant: 1
+  menu_name: BusinessActor
+  render:
+    fingerprint: sha1:4d6b40ff2717
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer active structure element: BusinessActor.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessActor (Business-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessactor.v2
+    see_also: []
+  example: |
+    archimate3.BusinessActor(n1, "")
+  metamodel:
+    spec: archimate-3
+    element: BusinessActor
+    classification:
+      layer: Business
+      aspect: Active Structure
+      kind: element
+- id: archimate3.businessrole.v1
+  menu_index: 70
+  kind: vertex
+  buildable: true
+  function: BusinessRole
+  variant: 1
+  menu_name: BusinessRole
+  render:
+    fingerprint: sha1:dcab6e619d26
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer active structure element: BusinessRole.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessRole (Business-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessrole.v2
+    see_also: []
+  example: |
+    archimate3.BusinessRole(n1, "Business Role")
+  metamodel:
+    spec: archimate-3
+    element: BusinessRole
+    classification:
+      layer: Business
+      aspect: Active Structure
+      kind: element
+- id: archimate3.businessrole.v2
+  menu_index: 71
+  kind: vertex
+  buildable: true
+  function: BusinessRole
+  variant: 2
+  menu_name: BusinessRole
+  render:
+    fingerprint: sha1:055f9841a04c
+  tag: notation
+  status: drafted
+  summary: 'Business-layer active structure element: BusinessRole.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessRole (Business-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessrole.v1
+    see_also: []
+  example: |
+    archimate3.BusinessRole(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: BusinessRole
+    classification:
+      layer: Business
+      aspect: Active Structure
+      kind: element
+- id: archimate3.businesscollaboration.v1
+  menu_index: 72
+  kind: vertex
+  buildable: true
+  function: BusinessCollaboration
+  variant: 1
+  menu_name: BusinessCollaboration
+  render:
+    fingerprint: sha1:c3f511827957
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer active structure element: BusinessCollaboration.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessCollaboration (Business-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businesscollaboration.v2
+    see_also: []
+  example: |
+    archimate3.BusinessCollaboration(n1, "Business Collaboration")
+  metamodel:
+    spec: archimate-3
+    element: BusinessCollaboration
+    classification:
+      layer: Business
+      aspect: Active Structure
+      kind: element
+- id: archimate3.businesscollaboration.v2
+  menu_index: 73
+  kind: vertex
+  buildable: true
+  function: BusinessCollaboration
+  variant: 2
+  menu_name: BusinessCollaboration
+  render:
+    fingerprint: sha1:610d5d621717
+  tag: notation
+  status: drafted
+  summary: 'Business-layer active structure element: BusinessCollaboration.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessCollaboration (Business-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businesscollaboration.v1
+    see_also: []
+  example: |
+    archimate3.BusinessCollaboration(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: BusinessCollaboration
+    classification:
+      layer: Business
+      aspect: Active Structure
+      kind: element
+- id: archimate3.businessinterface.v1
+  menu_index: 74
+  kind: vertex
+  buildable: true
+  function: BusinessInterface
+  variant: 1
+  menu_name: BusinessInterface
+  render:
+    fingerprint: sha1:bd40f513455a
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer active structure element: BusinessInterface.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessInterface (Business-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessinterface.v2
+    see_also: []
+  example: |
+    archimate3.BusinessInterface(n1, "Business Interface")
+  metamodel:
+    spec: archimate-3
+    element: BusinessInterface
+    classification:
+      layer: Business
+      aspect: Active Structure
+      kind: element
+- id: archimate3.businessinterface.v2
+  menu_index: 75
+  kind: vertex
+  buildable: true
+  function: BusinessInterface
+  variant: 2
+  menu_name: BusinessInterface
+  render:
+    fingerprint: sha1:f59527d847bb
+  tag: notation
+  status: drafted
+  summary: 'Business-layer active structure element: BusinessInterface.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessInterface (Business-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessinterface.v1
+    see_also: []
+  example: |
+    archimate3.BusinessInterface(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: BusinessInterface
+    classification:
+      layer: Business
+      aspect: Active Structure
+      kind: element
+- id: archimate3.businessprocess.v1
+  menu_index: 76
+  kind: vertex
+  buildable: true
+  function: BusinessProcess
+  variant: 1
+  menu_name: BusinessProcess
+  render:
+    fingerprint: sha1:21d3f9d5b90c
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer behavior element: BusinessProcess.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessProcess (Business-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessprocess.v2
+    see_also: []
+  example: |
+    archimate3.BusinessProcess(n1, "Business Process")
+  metamodel:
+    spec: archimate-3
+    element: BusinessProcess
+    classification:
+      layer: Business
+      aspect: Behavior
+      kind: element
+- id: archimate3.businessprocess.v2
+  menu_index: 77
+  kind: vertex
+  buildable: true
+  function: BusinessProcess
+  variant: 2
+  menu_name: BusinessProcess
+  render:
+    fingerprint: sha1:042c0fcfd2dc
+  tag: notation
+  status: drafted
+  summary: 'Business-layer behavior element: BusinessProcess.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessProcess (Business-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessprocess.v1
+    see_also: []
+  example: |
+    archimate3.BusinessProcess(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: BusinessProcess
+    classification:
+      layer: Business
+      aspect: Behavior
+      kind: element
+- id: archimate3.businessfunction.v1
+  menu_index: 78
+  kind: vertex
+  buildable: true
+  function: BusinessFunction
+  variant: 1
+  menu_name: BusinessFunction
+  render:
+    fingerprint: sha1:8b7281608d02
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer behavior element: BusinessFunction.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessFunction (Business-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessfunction.v2
+    see_also: []
+  example: |
+    archimate3.BusinessFunction(n1, "Business Function")
+  metamodel:
+    spec: archimate-3
+    element: BusinessFunction
+    classification:
+      layer: Business
+      aspect: Behavior
+      kind: element
+- id: archimate3.businessfunction.v2
+  menu_index: 79
+  kind: vertex
+  buildable: true
+  function: BusinessFunction
+  variant: 2
+  menu_name: BusinessFunction
+  render:
+    fingerprint: sha1:b32aaea7ce16
+  tag: notation
+  status: drafted
+  summary: 'Business-layer behavior element: BusinessFunction.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessFunction (Business-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessfunction.v1
+    see_also: []
+  example: |
+    archimate3.BusinessFunction(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: BusinessFunction
+    classification:
+      layer: Business
+      aspect: Behavior
+      kind: element
+- id: archimate3.businessinteraction.v1
+  menu_index: 80
+  kind: vertex
+  buildable: true
+  function: BusinessInteraction
+  variant: 1
+  menu_name: BusinessInteraction
+  render:
+    fingerprint: sha1:2fbf2f76f239
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer behavior element: BusinessInteraction.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessInteraction (Business-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessinteraction.v2
+    see_also: []
+  example: |
+    archimate3.BusinessInteraction(n1, "Business Interaction")
+  metamodel:
+    spec: archimate-3
+    element: BusinessInteraction
+    classification:
+      layer: Business
+      aspect: Behavior
+      kind: element
+- id: archimate3.businessinteraction.v2
+  menu_index: 81
+  kind: vertex
+  buildable: true
+  function: BusinessInteraction
+  variant: 2
+  menu_name: BusinessInteraction
+  render:
+    fingerprint: sha1:e45550e720a7
+  tag: notation
+  status: drafted
+  summary: 'Business-layer behavior element: BusinessInteraction.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessInteraction (Business-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessinteraction.v1
+    see_also: []
+  example: |
+    archimate3.BusinessInteraction(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: BusinessInteraction
+    classification:
+      layer: Business
+      aspect: Behavior
+      kind: element
+- id: archimate3.businessevent.v1
+  menu_index: 82
+  kind: vertex
+  buildable: true
+  function: BusinessEvent
+  variant: 1
+  menu_name: BusinessEvent
+  render:
+    fingerprint: sha1:bbadf439efbb
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer behavior element: BusinessEvent.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessEvent (Business-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessevent.v2
+    see_also: []
+  example: |
+    archimate3.BusinessEvent(n1, "Business Event")
+  metamodel:
+    spec: archimate-3
+    element: BusinessEvent
+    classification:
+      layer: Business
+      aspect: Behavior
+      kind: element
+- id: archimate3.businessevent.v2
+  menu_index: 83
+  kind: vertex
+  buildable: true
+  function: BusinessEvent
+  variant: 2
+  menu_name: BusinessEvent
+  render:
+    fingerprint: sha1:423ed49226dc
+  tag: notation
+  status: drafted
+  summary: 'Business-layer behavior element: BusinessEvent.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessEvent (Business-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessevent.v1
+    see_also: []
+  example: |
+    archimate3.BusinessEvent(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: BusinessEvent
+    classification:
+      layer: Business
+      aspect: Behavior
+      kind: element
+- id: archimate3.businessservice.v1
+  menu_index: 84
+  kind: vertex
+  buildable: true
+  function: BusinessService
+  variant: 1
+  menu_name: BusinessService
+  render:
+    fingerprint: sha1:92ed206af33b
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer behavior element: BusinessService.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessService (Business-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessservice.v2
+    see_also: []
+  example: |
+    archimate3.BusinessService(n1, "Business Service")
+  metamodel:
+    spec: archimate-3
+    element: BusinessService
+    classification:
+      layer: Business
+      aspect: Behavior
+      kind: element
+- id: archimate3.businessservice.v2
+  menu_index: 85
+  kind: vertex
+  buildable: true
+  function: BusinessService
+  variant: 2
+  menu_name: BusinessService
+  render:
+    fingerprint: sha1:665bbf69375e
+  tag: notation
+  status: drafted
+  summary: 'Business-layer behavior element: BusinessService.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessService (Business-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessservice.v1
+    see_also: []
+  example: |
+    archimate3.BusinessService(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: BusinessService
+    classification:
+      layer: Business
+      aspect: Behavior
+      kind: element
+- id: archimate3.businessobject.v1
+  menu_index: 86
+  kind: vertex
+  buildable: true
+  function: BusinessObject
+  variant: 1
+  menu_name: BusinessObject
+  render:
+    fingerprint: sha1:d0bc5654491e
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer passive structure element: BusinessObject.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessObject (Business-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessobject.v2
+    see_also: []
+  example: |
+    archimate3.BusinessObject(n1, "Business Object")
+  metamodel:
+    spec: archimate-3
+    element: BusinessObject
+    classification:
+      layer: Business
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.businessobject.v2
+  menu_index: 87
+  kind: vertex
+  buildable: true
+  function: BusinessObject
+  variant: 2
+  menu_name: BusinessObject
+  render:
+    fingerprint: sha1:da07f32a434b
+  tag: notation
+  status: drafted
+  summary: 'Business-layer passive structure element: BusinessObject.'
+  discriminator: TODO
+  use_when:
+  - modeling a BusinessObject (Business-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.businessobject.v1
+    see_also: []
+  example: |
+    archimate3.BusinessObject(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: BusinessObject
+    classification:
+      layer: Business
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.contract.v1
+  menu_index: 88
+  kind: vertex
+  buildable: true
+  function: Contract
+  variant: 1
+  menu_name: Contract
+  render:
+    fingerprint: sha1:450d82a9d42d
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer passive structure element: Contract.'
+  discriminator: TODO
+  use_when:
+  - modeling a Contract (Business-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.contract.v2
+    see_also: []
+  example: |
+    archimate3.Contract(n1, "Contract")
+  metamodel:
+    spec: archimate-3
+    element: Contract
+    classification:
+      layer: Business
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.contract.v2
+  menu_index: 89
+  kind: vertex
+  buildable: true
+  function: Contract
+  variant: 2
+  menu_name: Contract
+  render:
+    fingerprint: sha1:ee9dacc27907
+  tag: notation
+  status: drafted
+  summary: 'Business-layer passive structure element: Contract.'
+  discriminator: TODO
+  use_when:
+  - modeling a Contract (Business-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.contract.v1
+    see_also: []
+  example: |
+    archimate3.Contract(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Contract
+    classification:
+      layer: Business
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.representation.v1
+  menu_index: 90
+  kind: vertex
+  buildable: true
+  function: Representation
+  variant: 1
+  menu_name: Representation
+  render:
+    fingerprint: sha1:bbf1454eeb88
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer passive structure element: Representation.'
+  discriminator: TODO
+  use_when:
+  - modeling a Representation (Business-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.representation.v2
+    see_also: []
+  example: |
+    archimate3.Representation(n1, "Representation")
+  metamodel:
+    spec: archimate-3
+    element: Representation
+    classification:
+      layer: Business
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.representation.v2
+  menu_index: 91
+  kind: vertex
+  buildable: true
+  function: Representation
+  variant: 2
+  menu_name: Representation
+  render:
+    fingerprint: sha1:53c065e8528c
+  tag: notation
+  status: drafted
+  summary: 'Business-layer passive structure element: Representation.'
+  discriminator: TODO
+  use_when:
+  - modeling a Representation (Business-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.representation.v1
+    see_also: []
+  example: |
+    archimate3.Representation(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Representation
+    classification:
+      layer: Business
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.product.v1
+  menu_index: 92
+  kind: vertex
+  buildable: true
+  function: Product
+  variant: 1
+  menu_name: Product
+  render:
+    fingerprint: sha1:4233c8bba460
+  tag: metaclass
+  status: drafted
+  summary: 'Business-layer passive structure element: Product.'
+  discriminator: TODO
+  use_when:
+  - modeling a Product (Business-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.product.v2
+    see_also: []
+  example: |
+    archimate3.Product(n1, "Product")
+  metamodel:
+    spec: archimate-3
+    element: Product
+    classification:
+      layer: Business
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.product.v2
+  menu_index: 93
+  kind: vertex
+  buildable: true
+  function: Product
+  variant: 2
+  menu_name: Product
+  render:
+    fingerprint: sha1:f6b3e51d1a0a
+  tag: notation
+  status: drafted
+  summary: 'Business-layer passive structure element: Product.'
+  discriminator: TODO
+  use_when:
+  - modeling a Product (Business-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.product.v1
+    see_also: []
+  example: |
+    archimate3.Product(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Product
+    classification:
+      layer: Business
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.applicationcomponent.v1
+  menu_index: 94
+  kind: vertex
+  buildable: true
+  function: ApplicationComponent
+  variant: 1
+  menu_name: ApplicationComponent
+  render:
+    fingerprint: sha1:870667137bff
+  tag: metaclass
+  status: drafted
+  summary: 'Application-layer active structure element: ApplicationComponent.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationComponent (Application-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationcomponent.v2
+    see_also: []
+  example: |
+    archimate3.ApplicationComponent(n1, "Application Component")
+  metamodel:
+    spec: archimate-3
+    element: ApplicationComponent
+    classification:
+      layer: Application
+      aspect: Active Structure
+      kind: element
+- id: archimate3.applicationcomponent.v2
+  menu_index: 95
+  kind: vertex
+  buildable: true
+  function: ApplicationComponent
+  variant: 2
+  menu_name: ApplicationComponent
+  render:
+    fingerprint: sha1:b437e58a5d04
+  tag: notation
+  status: drafted
+  summary: 'Application-layer active structure element: ApplicationComponent.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationComponent (Application-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationcomponent.v1
+    see_also: []
+  example: |
+    archimate3.ApplicationComponent(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: ApplicationComponent
+    classification:
+      layer: Application
+      aspect: Active Structure
+      kind: element
+- id: archimate3.applicationcollaboration.v1
+  menu_index: 96
+  kind: vertex
+  buildable: true
+  function: ApplicationCollaboration
+  variant: 1
+  menu_name: ApplicationCollaboration
+  render:
+    fingerprint: sha1:f275162dfe73
+  tag: metaclass
+  status: drafted
+  summary: 'Application-layer active structure element: ApplicationCollaboration.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationCollaboration (Application-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationcollaboration.v2
+    see_also: []
+  example: |
+    archimate3.ApplicationCollaboration(n1, "Application Collaboration")
+  metamodel:
+    spec: archimate-3
+    element: ApplicationCollaboration
+    classification:
+      layer: Application
+      aspect: Active Structure
+      kind: element
+- id: archimate3.applicationcollaboration.v2
+  menu_index: 97
+  kind: vertex
+  buildable: true
+  function: ApplicationCollaboration
+  variant: 2
+  menu_name: ApplicationCollaboration
+  render:
+    fingerprint: sha1:f32834e5ef40
+  tag: notation
+  status: drafted
+  summary: 'Application-layer active structure element: ApplicationCollaboration.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationCollaboration (Application-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationcollaboration.v1
+    see_also: []
+  example: |
+    archimate3.ApplicationCollaboration(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: ApplicationCollaboration
+    classification:
+      layer: Application
+      aspect: Active Structure
+      kind: element
+- id: archimate3.applicationinterface.v1
+  menu_index: 98
+  kind: vertex
+  buildable: true
+  function: ApplicationInterface
+  variant: 1
+  menu_name: ApplicationInterface
+  render:
+    fingerprint: sha1:84e370ca8262
+  tag: metaclass
+  status: drafted
+  summary: 'Application-layer active structure element: ApplicationInterface.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationInterface (Application-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationinterface.v2
+    see_also: []
+  example: |
+    archimate3.ApplicationInterface(n1, "Application Interface")
+  metamodel:
+    spec: archimate-3
+    element: ApplicationInterface
+    classification:
+      layer: Application
+      aspect: Active Structure
+      kind: element
+- id: archimate3.applicationinterface.v2
+  menu_index: 99
+  kind: vertex
+  buildable: true
+  function: ApplicationInterface
+  variant: 2
+  menu_name: ApplicationInterface
+  render:
+    fingerprint: sha1:2b6409d6de89
+  tag: notation
+  status: drafted
+  summary: 'Application-layer active structure element: ApplicationInterface.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationInterface (Application-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationinterface.v1
+    see_also: []
+  example: |
+    archimate3.ApplicationInterface(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: ApplicationInterface
+    classification:
+      layer: Application
+      aspect: Active Structure
+      kind: element
+- id: archimate3.applicationfunction.v1
+  menu_index: 100
+  kind: vertex
+  buildable: true
+  function: ApplicationFunction
+  variant: 1
+  menu_name: ApplicationFunction
+  render:
+    fingerprint: sha1:c84ea63e73af
+  tag: metaclass
+  status: drafted
+  summary: 'Application-layer behavior element: ApplicationFunction.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationFunction (Application-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationfunction.v2
+    see_also: []
+  example: |
+    archimate3.ApplicationFunction(n1, "Application Function")
+  metamodel:
+    spec: archimate-3
+    element: ApplicationFunction
+    classification:
+      layer: Application
+      aspect: Behavior
+      kind: element
+- id: archimate3.applicationfunction.v2
+  menu_index: 101
+  kind: vertex
+  buildable: true
+  function: ApplicationFunction
+  variant: 2
+  menu_name: ApplicationFunction
+  render:
+    fingerprint: sha1:883cc8df2f58
+  tag: notation
+  status: drafted
+  summary: 'Application-layer behavior element: ApplicationFunction.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationFunction (Application-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationfunction.v1
+    see_also: []
+  example: |
+    archimate3.ApplicationFunction(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: ApplicationFunction
+    classification:
+      layer: Application
+      aspect: Behavior
+      kind: element
+- id: archimate3.applicationinteraction.v1
+  menu_index: 102
+  kind: vertex
+  buildable: true
+  function: ApplicationInteraction
+  variant: 1
+  menu_name: ApplicationInteraction
+  render:
+    fingerprint: sha1:785ff317f81b
+  tag: metaclass
+  status: drafted
+  summary: 'Application-layer behavior element: ApplicationInteraction.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationInteraction (Application-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationinteraction.v2
+    see_also: []
+  example: |
+    archimate3.ApplicationInteraction(n1, "Application Interaction")
+  metamodel:
+    spec: archimate-3
+    element: ApplicationInteraction
+    classification:
+      layer: Application
+      aspect: Behavior
+      kind: element
+- id: archimate3.applicationinteraction.v2
+  menu_index: 103
+  kind: vertex
+  buildable: true
+  function: ApplicationInteraction
+  variant: 2
+  menu_name: ApplicationInteraction
+  render:
+    fingerprint: sha1:5be183a16945
+  tag: notation
+  status: drafted
+  summary: 'Application-layer behavior element: ApplicationInteraction.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationInteraction (Application-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationinteraction.v1
+    see_also: []
+  example: |
+    archimate3.ApplicationInteraction(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: ApplicationInteraction
+    classification:
+      layer: Application
+      aspect: Behavior
+      kind: element
+- id: archimate3.applicationprocess.v1
+  menu_index: 104
+  kind: vertex
+  buildable: true
+  function: ApplicationProcess
+  variant: 1
+  menu_name: ApplicationProcess
+  render:
+    fingerprint: sha1:cdec4e7db1d2
+  tag: metaclass
+  status: drafted
+  summary: 'Application-layer behavior element: ApplicationProcess.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationProcess (Application-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationprocess.v2
+    see_also: []
+  example: |
+    archimate3.ApplicationProcess(n1, "Application Process")
+  metamodel:
+    spec: archimate-3
+    element: ApplicationProcess
+    classification:
+      layer: Application
+      aspect: Behavior
+      kind: element
+- id: archimate3.applicationprocess.v2
+  menu_index: 105
+  kind: vertex
+  buildable: true
+  function: ApplicationProcess
+  variant: 2
+  menu_name: ApplicationProcess
+  render:
+    fingerprint: sha1:ce3de9d70fc2
+  tag: notation
+  status: drafted
+  summary: 'Application-layer behavior element: ApplicationProcess.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationProcess (Application-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationprocess.v1
+    see_also: []
+  example: |
+    archimate3.ApplicationProcess(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: ApplicationProcess
+    classification:
+      layer: Application
+      aspect: Behavior
+      kind: element
+- id: archimate3.applicationevent.v1
+  menu_index: 106
+  kind: vertex
+  buildable: true
+  function: ApplicationEvent
+  variant: 1
+  menu_name: ApplicationEvent
+  render:
+    fingerprint: sha1:4b5eb1c6a03e
+  tag: metaclass
+  status: drafted
+  summary: 'Application-layer behavior element: ApplicationEvent.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationEvent (Application-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationevent.v2
+    see_also: []
+  example: |
+    archimate3.ApplicationEvent(n1, "Application Event")
+  metamodel:
+    spec: archimate-3
+    element: ApplicationEvent
+    classification:
+      layer: Application
+      aspect: Behavior
+      kind: element
+- id: archimate3.applicationevent.v2
+  menu_index: 107
+  kind: vertex
+  buildable: true
+  function: ApplicationEvent
+  variant: 2
+  menu_name: ApplicationEvent
+  render:
+    fingerprint: sha1:2c5337c1ec56
+  tag: notation
+  status: drafted
+  summary: 'Application-layer behavior element: ApplicationEvent.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationEvent (Application-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationevent.v1
+    see_also: []
+  example: |
+    archimate3.ApplicationEvent(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: ApplicationEvent
+    classification:
+      layer: Application
+      aspect: Behavior
+      kind: element
+- id: archimate3.applicationservice.v1
+  menu_index: 108
+  kind: vertex
+  buildable: true
+  function: ApplicationService
+  variant: 1
+  menu_name: ApplicationService
+  render:
+    fingerprint: sha1:9fe5946b7b0b
+  tag: metaclass
+  status: drafted
+  summary: 'Application-layer behavior element: ApplicationService.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationService (Application-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationservice.v2
+    see_also: []
+  example: |
+    archimate3.ApplicationService(n1, "Application Service")
+  metamodel:
+    spec: archimate-3
+    element: ApplicationService
+    classification:
+      layer: Application
+      aspect: Behavior
+      kind: element
+- id: archimate3.applicationservice.v2
+  menu_index: 109
+  kind: vertex
+  buildable: true
+  function: ApplicationService
+  variant: 2
+  menu_name: ApplicationService
+  render:
+    fingerprint: sha1:e1764d284f5f
+  tag: notation
+  status: drafted
+  summary: 'Application-layer behavior element: ApplicationService.'
+  discriminator: TODO
+  use_when:
+  - modeling a ApplicationService (Application-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.applicationservice.v1
+    see_also: []
+  example: |
+    archimate3.ApplicationService(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: ApplicationService
+    classification:
+      layer: Application
+      aspect: Behavior
+      kind: element
+- id: archimate3.dataobject.v1
+  menu_index: 110
+  kind: vertex
+  buildable: true
+  function: DataObject
+  variant: 1
+  menu_name: DataObject
+  render:
+    fingerprint: sha1:c37966aff528
+  tag: metaclass
+  status: drafted
+  summary: 'Application-layer passive structure element: DataObject.'
+  discriminator: TODO
+  use_when:
+  - modeling a DataObject (Application-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.dataobject.v2
+    see_also: []
+  example: |
+    archimate3.DataObject(n1, "Data Object")
+  metamodel:
+    spec: archimate-3
+    element: DataObject
+    classification:
+      layer: Application
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.dataobject.v2
+  menu_index: 111
+  kind: vertex
+  buildable: true
+  function: DataObject
+  variant: 2
+  menu_name: DataObject
+  render:
+    fingerprint: sha1:c93147ec9af8
+  tag: notation
+  status: drafted
+  summary: 'Application-layer passive structure element: DataObject.'
+  discriminator: TODO
+  use_when:
+  - modeling a DataObject (Application-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.dataobject.v1
+    see_also: []
+  example: |
+    archimate3.DataObject(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: DataObject
+    classification:
+      layer: Application
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.node.v1
+  menu_index: 112
+  kind: vertex
+  buildable: true
+  function: Node
+  variant: 1
+  menu_name: Node
+  render:
+    fingerprint: sha1:cdaa2355ad25
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer active structure element: Node.'
+  discriminator: TODO
+  use_when:
+  - modeling a Node (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.node.v2
+    see_also: []
+  example: |
+    archimate3.Node(n1, "Node")
+  metamodel:
+    spec: archimate-3
+    element: Node
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.node.v2
+  menu_index: 113
+  kind: vertex
+  buildable: true
+  function: Node
+  variant: 2
+  menu_name: Node
+  render:
+    fingerprint: sha1:d0527e9d487a
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer active structure element: Node.'
+  discriminator: TODO
+  use_when:
+  - modeling a Node (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.node.v1
+    see_also: []
+  example: |
+    archimate3.Node(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Node
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.device.v1
+  menu_index: 114
+  kind: vertex
+  buildable: true
+  function: Device
+  variant: 1
+  menu_name: Device
+  render:
+    fingerprint: sha1:71b05b763946
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer active structure element: Device.'
+  discriminator: TODO
+  use_when:
+  - modeling a Device (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.device.v2
+    see_also: []
+  example: |
+    archimate3.Device(n1, "Device")
+  metamodel:
+    spec: archimate-3
+    element: Device
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.device.v2
+  menu_index: 115
+  kind: vertex
+  buildable: true
+  function: Device
+  variant: 2
+  menu_name: Device
+  render:
+    fingerprint: sha1:04c9028a4027
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer active structure element: Device.'
+  discriminator: TODO
+  use_when:
+  - modeling a Device (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.device.v1
+    see_also: []
+  example: |
+    archimate3.Device(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Device
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.systemsoftware.v1
+  menu_index: 116
+  kind: vertex
+  buildable: true
+  function: SystemSoftware
+  variant: 1
+  menu_name: SystemSoftware
+  render:
+    fingerprint: sha1:81d67bd6f4bf
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer active structure element: SystemSoftware.'
+  discriminator: TODO
+  use_when:
+  - modeling a SystemSoftware (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.systemsoftware.v2
+    see_also: []
+  example: |
+    archimate3.SystemSoftware(n1, "System Software")
+  metamodel:
+    spec: archimate-3
+    element: SystemSoftware
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.systemsoftware.v2
+  menu_index: 117
+  kind: vertex
+  buildable: true
+  function: SystemSoftware
+  variant: 2
+  menu_name: SystemSoftware
+  render:
+    fingerprint: sha1:06606300e67b
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer active structure element: SystemSoftware.'
+  discriminator: TODO
+  use_when:
+  - modeling a SystemSoftware (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.systemsoftware.v1
+    see_also: []
+  example: |
+    archimate3.SystemSoftware(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: SystemSoftware
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.technologycollaboration.v1
+  menu_index: 118
+  kind: vertex
+  buildable: true
+  function: TechnologyCollaboration
+  variant: 1
+  menu_name: TechnologyCollaboration
+  render:
+    fingerprint: sha1:1549a832efcb
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer active structure element: TechnologyCollaboration.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyCollaboration (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologycollaboration.v2
+    see_also: []
+  example: |
+    archimate3.TechnologyCollaboration(n1, "Technology Collaboration")
+  metamodel:
+    spec: archimate-3
+    element: TechnologyCollaboration
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.technologycollaboration.v2
+  menu_index: 119
+  kind: vertex
+  buildable: true
+  function: TechnologyCollaboration
+  variant: 2
+  menu_name: TechnologyCollaboration
+  render:
+    fingerprint: sha1:5237d9817d27
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer active structure element: TechnologyCollaboration.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyCollaboration (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologycollaboration.v1
+    see_also: []
+  example: |
+    archimate3.TechnologyCollaboration(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: TechnologyCollaboration
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.technologyinterface.v1
+  menu_index: 120
+  kind: vertex
+  buildable: true
+  function: TechnologyInterface
+  variant: 1
+  menu_name: TechnologyInterface
+  render:
+    fingerprint: sha1:8c10fc09324d
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer active structure element: TechnologyInterface.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyInterface (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologyinterface.v2
+    see_also: []
+  example: |
+    archimate3.TechnologyInterface(n1, "Technology Interface")
+  metamodel:
+    spec: archimate-3
+    element: TechnologyInterface
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.technologyinterface.v2
+  menu_index: 121
+  kind: vertex
+  buildable: true
+  function: TechnologyInterface
+  variant: 2
+  menu_name: TechnologyInterface
+  render:
+    fingerprint: sha1:850c1e1ef165
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer active structure element: TechnologyInterface.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyInterface (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologyinterface.v1
+    see_also: []
+  example: |
+    archimate3.TechnologyInterface(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: TechnologyInterface
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.path.v1
+  menu_index: 122
+  kind: vertex
+  buildable: true
+  function: Path
+  variant: 1
+  menu_name: Path
+  render:
+    fingerprint: sha1:4071c154c425
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer other element: Path.'
+  discriminator: TODO
+  use_when:
+  - modeling a Path (Technology-layer other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.path.v2
+    see_also: []
+  example: |
+    archimate3.Path(n1, "Path")
+  metamodel:
+    spec: archimate-3
+    element: Path
+    classification:
+      layer: Technology
+      aspect: Other
+      kind: element
+- id: archimate3.path.v2
+  menu_index: 123
+  kind: vertex
+  buildable: true
+  function: Path
+  variant: 2
+  menu_name: Path
+  render:
+    fingerprint: sha1:a8eba589cdb5
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer other element: Path.'
+  discriminator: TODO
+  use_when:
+  - modeling a Path (Technology-layer other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.path.v1
+    see_also: []
+  example: |
+    archimate3.Path(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Path
+    classification:
+      layer: Technology
+      aspect: Other
+      kind: element
+- id: archimate3.communicationnetwork.v1
+  menu_index: 124
+  kind: vertex
+  buildable: true
+  function: CommunicationNetwork
+  variant: 1
+  menu_name: CommunicationNetwork
+  render:
+    fingerprint: sha1:bb94be93a2b3
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer active structure element: CommunicationNetwork.'
+  discriminator: TODO
+  use_when:
+  - modeling a CommunicationNetwork (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.communicationnetwork.v2
+    see_also: []
+  example: |
+    archimate3.CommunicationNetwork(n1, "Communication Network")
+  metamodel:
+    spec: archimate-3
+    element: CommunicationNetwork
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.communicationnetwork.v2
+  menu_index: 125
+  kind: vertex
+  buildable: true
+  function: CommunicationNetwork
+  variant: 2
+  menu_name: CommunicationNetwork
+  render:
+    fingerprint: sha1:02efeec6e5f2
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer active structure element: CommunicationNetwork.'
+  discriminator: TODO
+  use_when:
+  - modeling a CommunicationNetwork (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.communicationnetwork.v1
+    see_also: []
+  example: |
+    archimate3.CommunicationNetwork(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: CommunicationNetwork
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.technologyfunction.v1
+  menu_index: 126
+  kind: vertex
+  buildable: true
+  function: TechnologyFunction
+  variant: 1
+  menu_name: TechnologyFunction
+  render:
+    fingerprint: sha1:cbee178f048f
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer behavior element: TechnologyFunction.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyFunction (Technology-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologyfunction.v2
+    see_also: []
+  example: |
+    archimate3.TechnologyFunction(n1, "Technology Function")
+  metamodel:
+    spec: archimate-3
+    element: TechnologyFunction
+    classification:
+      layer: Technology
+      aspect: Behavior
+      kind: element
+- id: archimate3.technologyfunction.v2
+  menu_index: 127
+  kind: vertex
+  buildable: true
+  function: TechnologyFunction
+  variant: 2
+  menu_name: TechnologyFunction
+  render:
+    fingerprint: sha1:9393ddb3e60f
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer behavior element: TechnologyFunction.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyFunction (Technology-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologyfunction.v1
+    see_also: []
+  example: |
+    archimate3.TechnologyFunction(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: TechnologyFunction
+    classification:
+      layer: Technology
+      aspect: Behavior
+      kind: element
+- id: archimate3.technologyprocess.v1
+  menu_index: 128
+  kind: vertex
+  buildable: true
+  function: TechnologyProcess
+  variant: 1
+  menu_name: TechnologyProcess
+  render:
+    fingerprint: sha1:07280e094dd3
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer behavior element: TechnologyProcess.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyProcess (Technology-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologyprocess.v2
+    see_also: []
+  example: |
+    archimate3.TechnologyProcess(n1, "Technology Process")
+  metamodel:
+    spec: archimate-3
+    element: TechnologyProcess
+    classification:
+      layer: Technology
+      aspect: Behavior
+      kind: element
+- id: archimate3.technologyprocess.v2
+  menu_index: 129
+  kind: vertex
+  buildable: true
+  function: TechnologyProcess
+  variant: 2
+  menu_name: TechnologyProcess
+  render:
+    fingerprint: sha1:a729e5755e12
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer behavior element: TechnologyProcess.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyProcess (Technology-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologyprocess.v1
+    see_also: []
+  example: |
+    archimate3.TechnologyProcess(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: TechnologyProcess
+    classification:
+      layer: Technology
+      aspect: Behavior
+      kind: element
+- id: archimate3.technologyinteraction.v1
+  menu_index: 130
+  kind: vertex
+  buildable: true
+  function: TechnologyInteraction
+  variant: 1
+  menu_name: TechnologyInteraction
+  render:
+    fingerprint: sha1:e9d727e9e87d
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer behavior element: TechnologyInteraction.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyInteraction (Technology-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologyinteraction.v2
+    see_also: []
+  example: |
+    archimate3.TechnologyInteraction(n1, "Technology Interaction")
+  metamodel:
+    spec: archimate-3
+    element: TechnologyInteraction
+    classification:
+      layer: Technology
+      aspect: Behavior
+      kind: element
+- id: archimate3.technologyinteraction.v2
+  menu_index: 131
+  kind: vertex
+  buildable: true
+  function: TechnologyInteraction
+  variant: 2
+  menu_name: TechnologyInteraction
+  render:
+    fingerprint: sha1:8ba0babb13b6
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer behavior element: TechnologyInteraction.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyInteraction (Technology-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologyinteraction.v1
+    see_also: []
+  example: |
+    archimate3.TechnologyInteraction(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: TechnologyInteraction
+    classification:
+      layer: Technology
+      aspect: Behavior
+      kind: element
+- id: archimate3.technologyevent.v1
+  menu_index: 132
+  kind: vertex
+  buildable: true
+  function: TechnologyEvent
+  variant: 1
+  menu_name: TechnologyEvent
+  render:
+    fingerprint: sha1:f97189597f17
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer behavior element: TechnologyEvent.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyEvent (Technology-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologyevent.v2
+    see_also: []
+  example: |
+    archimate3.TechnologyEvent(n1, "Technology Event")
+  metamodel:
+    spec: archimate-3
+    element: TechnologyEvent
+    classification:
+      layer: Technology
+      aspect: Behavior
+      kind: element
+- id: archimate3.technologyevent.v2
+  menu_index: 133
+  kind: vertex
+  buildable: true
+  function: TechnologyEvent
+  variant: 2
+  menu_name: TechnologyEvent
+  render:
+    fingerprint: sha1:c124d2887e1c
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer behavior element: TechnologyEvent.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyEvent (Technology-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologyevent.v1
+    see_also: []
+  example: |
+    archimate3.TechnologyEvent(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: TechnologyEvent
+    classification:
+      layer: Technology
+      aspect: Behavior
+      kind: element
+- id: archimate3.technologyservice.v1
+  menu_index: 134
+  kind: vertex
+  buildable: true
+  function: TechnologyService
+  variant: 1
+  menu_name: TechnologyService
+  render:
+    fingerprint: sha1:7c27c58781fe
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer behavior element: TechnologyService.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyService (Technology-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologyservice.v2
+    see_also: []
+  example: |
+    archimate3.TechnologyService(n1, "Technology Service")
+  metamodel:
+    spec: archimate-3
+    element: TechnologyService
+    classification:
+      layer: Technology
+      aspect: Behavior
+      kind: element
+- id: archimate3.technologyservice.v2
+  menu_index: 135
+  kind: vertex
+  buildable: true
+  function: TechnologyService
+  variant: 2
+  menu_name: TechnologyService
+  render:
+    fingerprint: sha1:317327453331
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer behavior element: TechnologyService.'
+  discriminator: TODO
+  use_when:
+  - modeling a TechnologyService (Technology-layer behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.technologyservice.v1
+    see_also: []
+  example: |
+    archimate3.TechnologyService(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: TechnologyService
+    classification:
+      layer: Technology
+      aspect: Behavior
+      kind: element
+- id: archimate3.artifact.v1
+  menu_index: 136
+  kind: vertex
+  buildable: true
+  function: Artifact
+  variant: 1
+  menu_name: Artifact
+  render:
+    fingerprint: sha1:2f6aa315a9b3
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer passive structure element: Artifact.'
+  discriminator: TODO
+  use_when:
+  - modeling a Artifact (Technology-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.artifact.v2
+    see_also: []
+  example: |
+    archimate3.Artifact(n1, "Artifact")
+  metamodel:
+    spec: archimate-3
+    element: Artifact
+    classification:
+      layer: Technology
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.artifact.v2
+  menu_index: 137
+  kind: vertex
+  buildable: true
+  function: Artifact
+  variant: 2
+  menu_name: Artifact
+  render:
+    fingerprint: sha1:18fafc094359
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer passive structure element: Artifact.'
+  discriminator: TODO
+  use_when:
+  - modeling a Artifact (Technology-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.artifact.v1
+    see_also: []
+  example: |
+    archimate3.Artifact(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Artifact
+    classification:
+      layer: Technology
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.equipment.v1
+  menu_index: 138
+  kind: vertex
+  buildable: true
+  function: Equipment
+  variant: 1
+  menu_name: Equipment
+  render:
+    fingerprint: sha1:6d4a5b6a0ffc
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer active structure element: Equipment.'
+  discriminator: TODO
+  use_when:
+  - modeling a Equipment (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.equipment.v2
+    see_also: []
+  example: |
+    archimate3.Equipment(n1, "Equipment")
+  metamodel:
+    spec: archimate-3
+    element: Equipment
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.equipment.v2
+  menu_index: 139
+  kind: vertex
+  buildable: true
+  function: Equipment
+  variant: 2
+  menu_name: Equipment
+  render:
+    fingerprint: sha1:bf3156a6a51d
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer active structure element: Equipment.'
+  discriminator: TODO
+  use_when:
+  - modeling a Equipment (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.equipment.v1
+    see_also: []
+  example: |
+    archimate3.Equipment(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Equipment
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.facility.v1
+  menu_index: 140
+  kind: vertex
+  buildable: true
+  function: Facility
+  variant: 1
+  menu_name: Facility
+  render:
+    fingerprint: sha1:aa56c7906a03
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer active structure element: Facility.'
+  discriminator: TODO
+  use_when:
+  - modeling a Facility (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.facility.v2
+    see_also: []
+  example: |
+    archimate3.Facility(n1, "Facility")
+  metamodel:
+    spec: archimate-3
+    element: Facility
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.facility.v2
+  menu_index: 141
+  kind: vertex
+  buildable: true
+  function: Facility
+  variant: 2
+  menu_name: Facility
+  render:
+    fingerprint: sha1:2b5cc3c9a5af
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer active structure element: Facility.'
+  discriminator: TODO
+  use_when:
+  - modeling a Facility (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.facility.v1
+    see_also: []
+  example: |
+    archimate3.Facility(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Facility
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.distributionnetwork.v1
+  menu_index: 142
+  kind: vertex
+  buildable: true
+  function: DistributionNetwork
+  variant: 1
+  menu_name: DistributionNetwork
+  render:
+    fingerprint: sha1:97d9f3eecf7d
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer active structure element: DistributionNetwork.'
+  discriminator: TODO
+  use_when:
+  - modeling a DistributionNetwork (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.distributionnetwork.v2
+    see_also: []
+  example: |
+    archimate3.DistributionNetwork(n1, "Distribution Network")
+  metamodel:
+    spec: archimate-3
+    element: DistributionNetwork
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.distributionnetwork.v2
+  menu_index: 143
+  kind: vertex
+  buildable: true
+  function: DistributionNetwork
+  variant: 2
+  menu_name: DistributionNetwork
+  render:
+    fingerprint: sha1:f162cc042093
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer active structure element: DistributionNetwork.'
+  discriminator: TODO
+  use_when:
+  - modeling a DistributionNetwork (Technology-layer active structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.distributionnetwork.v1
+    see_also: []
+  example: |
+    archimate3.DistributionNetwork(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: DistributionNetwork
+    classification:
+      layer: Technology
+      aspect: Active Structure
+      kind: element
+- id: archimate3.material.v1
+  menu_index: 144
+  kind: vertex
+  buildable: true
+  function: Material
+  variant: 1
+  menu_name: Material
+  render:
+    fingerprint: sha1:670b8ca0c9ce
+  tag: metaclass
+  status: drafted
+  summary: 'Technology-layer passive structure element: Material.'
+  discriminator: TODO
+  use_when:
+  - modeling a Material (Technology-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.material.v2
+    see_also: []
+  example: |
+    archimate3.Material(n1, "Material")
+  metamodel:
+    spec: archimate-3
+    element: Material
+    classification:
+      layer: Technology
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.material.v2
+  menu_index: 145
+  kind: vertex
+  buildable: true
+  function: Material
+  variant: 2
+  menu_name: Material
+  render:
+    fingerprint: sha1:9d528da23f33
+  tag: notation
+  status: drafted
+  summary: 'Technology-layer passive structure element: Material.'
+  discriminator: TODO
+  use_when:
+  - modeling a Material (Technology-layer passive structure)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.material.v1
+    see_also: []
+  example: |
+    archimate3.Material(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Material
+    classification:
+      layer: Technology
+      aspect: Passive Structure
+      kind: element
+- id: archimate3.workpackage.v1
+  menu_index: 146
+  kind: vertex
+  buildable: true
+  function: WorkPackage
+  variant: 1
+  menu_name: WorkPackage
+  render:
+    fingerprint: sha1:fa77c4626c74
+  tag: metaclass
+  status: drafted
+  summary: 'Implementation & Migration other element: WorkPackage.'
+  discriminator: TODO
+  use_when:
+  - modeling a WorkPackage (Implementation & Migration other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.workpackage.v2
+    see_also: []
+  example: |
+    archimate3.WorkPackage(n1, "Work Package")
+  metamodel:
+    spec: archimate-3
+    element: WorkPackage
+    classification:
+      layer: Implementation & Migration
+      aspect: Other
+      kind: element
+- id: archimate3.workpackage.v2
+  menu_index: 147
+  kind: vertex
+  buildable: true
+  function: WorkPackage
+  variant: 2
+  menu_name: WorkPackage
+  render:
+    fingerprint: sha1:4d6e539e2768
+  tag: notation
+  status: drafted
+  summary: 'Implementation & Migration other element: WorkPackage.'
+  discriminator: TODO
+  use_when:
+  - modeling a WorkPackage (Implementation & Migration other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.workpackage.v1
+    see_also: []
+  example: |
+    archimate3.WorkPackage(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: WorkPackage
+    classification:
+      layer: Implementation & Migration
+      aspect: Other
+      kind: element
+- id: archimate3.deliverable.v1
+  menu_index: 148
+  kind: vertex
+  buildable: true
+  function: Deliverable
+  variant: 1
+  menu_name: Deliverable
+  render:
+    fingerprint: sha1:b173ffc6c7b9
+  tag: metaclass
+  status: drafted
+  summary: 'Implementation & Migration other element: Deliverable.'
+  discriminator: TODO
+  use_when:
+  - modeling a Deliverable (Implementation & Migration other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.deliverable.v2
+    see_also: []
+  example: |
+    archimate3.Deliverable(n1, "Deliverable")
+  metamodel:
+    spec: archimate-3
+    element: Deliverable
+    classification:
+      layer: Implementation & Migration
+      aspect: Other
+      kind: element
+- id: archimate3.deliverable.v2
+  menu_index: 149
+  kind: vertex
+  buildable: true
+  function: Deliverable
+  variant: 2
+  menu_name: Deliverable
+  render:
+    fingerprint: sha1:35fb3a2549d6
+  tag: notation
+  status: drafted
+  summary: 'Implementation & Migration other element: Deliverable.'
+  discriminator: TODO
+  use_when:
+  - modeling a Deliverable (Implementation & Migration other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.deliverable.v1
+    see_also: []
+  example: |
+    archimate3.Deliverable(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Deliverable
+    classification:
+      layer: Implementation & Migration
+      aspect: Other
+      kind: element
+- id: archimate3.implementationevent.v1
+  menu_index: 150
+  kind: vertex
+  buildable: true
+  function: ImplementationEvent
+  variant: 1
+  menu_name: ImplementationEvent
+  render:
+    fingerprint: sha1:438a9901c890
+  tag: metaclass
+  status: drafted
+  summary: 'Implementation & Migration behavior element: ImplementationEvent.'
+  discriminator: TODO
+  use_when:
+  - modeling a ImplementationEvent (Implementation & Migration behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.implementationevent.v2
+    see_also: []
+  example: |
+    archimate3.ImplementationEvent(n1, "Implementation Event")
+  metamodel:
+    spec: archimate-3
+    element: ImplementationEvent
+    classification:
+      layer: Implementation & Migration
+      aspect: Behavior
+      kind: element
+- id: archimate3.implementationevent.v2
+  menu_index: 151
+  kind: vertex
+  buildable: true
+  function: ImplementationEvent
+  variant: 2
+  menu_name: ImplementationEvent
+  render:
+    fingerprint: sha1:72522535de97
+  tag: notation
+  status: drafted
+  summary: 'Implementation & Migration behavior element: ImplementationEvent.'
+  discriminator: TODO
+  use_when:
+  - modeling a ImplementationEvent (Implementation & Migration behavior)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.implementationevent.v1
+    see_also: []
+  example: |
+    archimate3.ImplementationEvent(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: ImplementationEvent
+    classification:
+      layer: Implementation & Migration
+      aspect: Behavior
+      kind: element
+- id: archimate3.plateau.v1
+  menu_index: 152
+  kind: vertex
+  buildable: true
+  function: Plateau
+  variant: 1
+  menu_name: Plateau
+  render:
+    fingerprint: sha1:ebecf09f9cb4
+  tag: metaclass
+  status: drafted
+  summary: 'Implementation & Migration other element: Plateau.'
+  discriminator: TODO
+  use_when:
+  - modeling a Plateau (Implementation & Migration other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.plateau.v2
+    see_also: []
+  example: |
+    archimate3.Plateau(n1, "Plateau")
+  metamodel:
+    spec: archimate-3
+    element: Plateau
+    classification:
+      layer: Implementation & Migration
+      aspect: Other
+      kind: element
+- id: archimate3.plateau.v2
+  menu_index: 153
+  kind: vertex
+  buildable: true
+  function: Plateau
+  variant: 2
+  menu_name: Plateau
+  render:
+    fingerprint: sha1:e982cd7060a4
+  tag: notation
+  status: drafted
+  summary: 'Implementation & Migration other element: Plateau.'
+  discriminator: TODO
+  use_when:
+  - modeling a Plateau (Implementation & Migration other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.plateau.v1
+    see_also: []
+  example: |
+    archimate3.Plateau(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Plateau
+    classification:
+      layer: Implementation & Migration
+      aspect: Other
+      kind: element
+- id: archimate3.gap.v1
+  menu_index: 154
+  kind: vertex
+  buildable: true
+  function: Gap
+  variant: 1
+  menu_name: Gap
+  render:
+    fingerprint: sha1:9f1ea6e40efc
+  tag: metaclass
+  status: drafted
+  summary: 'Implementation & Migration other element: Gap.'
+  discriminator: TODO
+  use_when:
+  - modeling a Gap (Implementation & Migration other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.gap.v2
+    see_also: []
+  example: |
+    archimate3.Gap(n1, "Gap")
+  metamodel:
+    spec: archimate-3
+    element: Gap
+    classification:
+      layer: Implementation & Migration
+      aspect: Other
+      kind: element
+- id: archimate3.gap.v2
+  menu_index: 155
+  kind: vertex
+  buildable: true
+  function: Gap
+  variant: 2
+  menu_name: Gap
+  render:
+    fingerprint: sha1:39fc731cbfae
+  tag: notation
+  status: drafted
+  summary: 'Implementation & Migration other element: Gap.'
+  discriminator: TODO
+  use_when:
+  - modeling a Gap (Implementation & Migration other)
+  avoid_when: []
+  aliases: []
+  args:
+  - name: node_id
+    required: true
+  - name: label
+    required: false
+  rows:
+    allowed: []
+  related:
+    variants:
+    - archimate3.gap.v1
+    see_also: []
+  example: |
+    archimate3.Gap(n1, "", variant=2)
+  metamodel:
+    spec: archimate-3
+    element: Gap
+    classification:
+      layer: Implementation & Migration
+      aspect: Other
+      kind: element
