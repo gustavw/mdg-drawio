@@ -17,6 +17,9 @@ This package scores instead of hashing, in two layers:
   ambiguous shape to the newest version (a solitary UML lifeline -> uml25),
   while any anchor from an older version still wins (lifeline + a uml-only
   shape -> uml).
+* :mod:`scripts.reverse.naming` -- assigns each resolved cell a semantic
+  ``.mdg`` node id (``person1``, ``system1``, ...) from its shape's registry
+  slug, so a derived diagram's ids read like a hand-authored one.
 
 The raw palette styles live in the git-ignored ``generated_data`` (draw.io is
 copyright), so this package -- and its tests -- require ``make build-data``.
@@ -30,6 +33,7 @@ from scripts.reverse.derive import (
     derive,
     load_cells,
 )
+from scripts.reverse.naming import SemanticId, assign_semantic_ids, semantic_base
 from scripts.reverse.scoring import DEFAULT_WEIGHTS, Weights, parse_style, similarity
 from scripts.reverse.style_index import ShapeEntry, StyleIndex
 
@@ -39,6 +43,9 @@ __all__ = [
     "DocumentResult",
     "derive",
     "load_cells",
+    "SemanticId",
+    "assign_semantic_ids",
+    "semantic_base",
     "DEFAULT_WEIGHTS",
     "Weights",
     "parse_style",

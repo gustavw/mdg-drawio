@@ -180,10 +180,18 @@ It works in two layers:
    defaults a lone ambiguous shape to the newest version: a solitary UML lifeline
    resolves to `uml25`, but add any uml-only shape and its anchor vote pulls the
    lifeline to `uml`.
+3. **Semantic naming** ([`naming.py`](scripts/reverse/naming.py)) — every
+   resolved cell gets a `.mdg`-ready `node_id` (`person1`, `system1`, ...), one
+   counter per shape function, in document order. `node_id`s are author-chosen
+   per `GRAMMAR.md`; a derived one is a starting point, not a fixed identity —
+   pure and re-derivable, so relabelling it later costs nothing. (Aside: `.mdg`
+   already accepts a quoted GUID as a `node_id` — `c4.Person("550e8400-...", ...)`
+   round-trips today — should this scale to a large EA model needing stable
+   external identities instead of mnemonic names.)
 
-Each cell reports its derived shape, similarity, a confidence, and how it was
-resolved (`unique` / `single-library` / `library-vote` / `recency-prior`). The
-palette styles are draw.io-copyright (git-ignored), so this — and its tests —
+Each cell reports its derived shape, node id, similarity, a confidence, and how
+it was resolved (`unique` / `single-library` / `library-vote` / `recency-prior`).
+The palette styles are draw.io-copyright (git-ignored), so this — and its tests —
 need `make build-data`; ground-truth `.drawio` fixtures are synthesized at test
 time from the palette, never committed.
 

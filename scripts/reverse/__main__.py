@@ -3,9 +3,11 @@
     python -m scripts.reverse path/to/diagram.drawio
     python -m scripts.reverse path/to/diagram.drawio --json
 
-Prints, per cell, the derived shape, its library, similarity, confidence, and
-how it was resolved (unique / single-library / library-vote / recency-prior),
-plus the document-level library scores. Requires ``make build-data``.
+Prints, per cell, the derived shape, its library, a generated semantic
+``.mdg`` node id (``person1``, ``system1``, ...; see
+:mod:`scripts.reverse.naming`), similarity, confidence, and how it was
+resolved (unique / single-library / library-vote / recency-prior), plus the
+document-level library scores. Requires ``make build-data``.
 """
 from __future__ import annotations
 
@@ -14,15 +16,17 @@ import json
 import sys
 
 from scripts.reverse.derive import DocumentResult, derive, load_cells
+from scripts.reverse.naming import assign_semantic_ids
 from scripts.reverse.style_index import StyleIndex
 
 
-def _as_dict(result: DocumentResult) -> dict[str, object]:
+def _as_dict(result: DocumentResult, node_ids: dict[str, str]) -> dict[str, object]:
     return {
         "library_scores": result.library_scores,
         "cells": [
             {
                 "cell_id": c.cell_id,
+                "node_id": node_ids.get(c.cell_id),
                 "shape_id": c.chosen.shape_id if c.chosen else None,
                 "library": c.chosen.library if c.chosen else None,
                 "similarity": round(c.chosen.sim, 3) if c.chosen else 0.0,
@@ -38,7 +42,7 @@ def _as_dict(result: DocumentResult) -> dict[str, object]:
     }
 
 
-def _print_table(result: DocumentResult) -> None:
+def _print_table(result: DocumentResult, node_ids: dict[str, str]) -> None:
     scores = ", ".join(
         f"{lib}={score:.2f}"
         for lib, score in sorted(
@@ -47,18 +51,28 @@ def _print_table(result: DocumentResult) -> None:
         if score
     )
     print(f"library scores: {scores}\n")
-    header = f"{'cell':<8}{'shape':<34}{'lib':<10}{'sim':>6}{'conf':>7}  how"
+    # An explicit space between every field (rather than relying solely on
+    # fixed width) guarantees a visible gap even when a long node_id or shape
+    # id overflows its nominal column.
+    header = (
+        f"{'cell':<8} {'node_id':<16} {'shape':<34} {'lib':<10} "
+        f"{'sim':>6} {'conf':>7}  how"
+    )
     print(header)
     print("-" * len(header))
     for cell in result.cells:
+        node_id = node_ids.get(cell.cell_id, "")
         if cell.chosen:
             print(
-                f"{cell.cell_id:<8}{cell.chosen.shape_id:<34}"
-                f"{cell.chosen.library:<10}{cell.chosen.sim:>6.3f}"
+                f"{cell.cell_id:<8} {node_id:<16} {cell.chosen.shape_id:<34} "
+                f"{cell.chosen.library:<10} {cell.chosen.sim:>6.3f} "
                 f"{cell.confidence:>7.3f}  {cell.resolved_by}"
             )
         else:
-            print(f"{cell.cell_id:<8}{'(no match)':<34}{'':<10}{'':>6}{'':>7}  none")
+            print(
+                f"{cell.cell_id:<8} {'':<16} {'(no match)':<34} "
+                f"{'':<10} {'':>6} {'':>7}  none"
+            )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -74,10 +88,11 @@ def main(argv: list[str] | None = None) -> int:
 
     cells = load_cells(args.drawio)
     result = derive(cells, index)
+    node_ids = {s.cell_id: s.node_id for s in assign_semantic_ids(result)}
     if args.json:
-        print(json.dumps(_as_dict(result), indent=2))
+        print(json.dumps(_as_dict(result, node_ids), indent=2))
     else:
-        _print_table(result)
+        _print_table(result, node_ids)
     return 0
 
 

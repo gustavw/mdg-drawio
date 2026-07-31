@@ -10,6 +10,7 @@ Groups, roughly in dependency order:
 * ``load_cells`` XML-parsing edge cases (no data), including a regression test
   for a real bug this suite caught: object-wrapped cells losing their id;
 * ``fixtures`` helper unit tests (no data);
+* ``naming`` semantic-id assignment tests (no data);
 * CLI (``scripts.reverse.__main__``) tests, via a monkeypatched index (no data);
 * data-gated end-to-end tests against the real palette -- the two version-
   priority scenarios from the design discussion, plus corpus-wide sanity
@@ -20,6 +21,7 @@ from __future__ import annotations
 
 import base64
 import json
+import re
 import zlib
 from pathlib import Path
 from xml.etree import ElementTree as ET
@@ -35,6 +37,7 @@ from scripts.reverse.derive import (
     derive,
     load_cells,
 )
+from scripts.reverse.naming import assign_semantic_ids, semantic_base
 from scripts.reverse.scoring import (
     BARE,
     COSMETIC_KEYS,
@@ -350,6 +353,54 @@ def test_special_characters_in_style_round_trip_through_load_cells() -> None:
     assert cells[0].style == entry.style
 
 
+# ── naming: semantic .mdg node ids (no data) ─────────────────────────────────
+def test_semantic_base_extracts_the_middle_segment() -> None:
+    assert semantic_base("c4.person_ext.v2") == "person_ext"
+    assert semantic_base("uml25.lifelinestateinvariant.v1") == "lifelinestateinvariant"
+
+
+def test_semantic_base_falls_back_to_the_whole_id_if_non_conforming() -> None:
+    assert semantic_base("solo") == "solo"
+
+
+def test_assign_semantic_ids_counts_per_base_in_document_order() -> None:
+    """Two ambiguous cells resolving to the same shape share one counter."""
+    idx = _synthetic_index()
+    result = derive([_cell(WIDGET_STYLE, "10"), _cell(WIDGET_STYLE, "11")], idx)
+    assigned = assign_semantic_ids(result)
+    assert [(a.cell_id, a.node_id) for a in assigned] == [
+        ("10", "widget1"),
+        ("11", "widget2"),
+    ]
+    assert {a.base for a in assigned} == {"widget"}
+
+
+def test_assign_semantic_ids_gives_each_distinct_base_its_own_counter() -> None:
+    idx = _synthetic_index()
+    cells = [
+        _cell(ANCHOR_STYLE, "10"),
+        _cell(WIDGET_STYLE, "11"),
+        _cell(WIDGET_STYLE, "12"),
+    ]
+    result = derive(cells, idx)
+    assigned = {a.cell_id: a.node_id for a in assign_semantic_ids(result)}
+    assert assigned["10"] == "anchor1"
+    # Both widget cells are ambiguous (no anchor for either version present
+    # here) and fall to the recency prior -> the same shape -> one counter.
+    assert assigned["11"] == "widget1"
+    assert assigned["12"] == "widget2"
+
+
+def test_assign_semantic_ids_skips_unresolved_cells() -> None:
+    idx = _synthetic_index()
+    result = derive(
+        [_cell(ANCHOR_STYLE, "10"), _cell("totallyunrelated=xyz;", "99")], idx
+    )
+    assigned = {a.cell_id: a.node_id for a in assign_semantic_ids(result)}
+    assert assigned == {"10": "anchor1"}
+    assert "99" not in assigned
+
+
 # ── CLI (no data; monkeypatched index) ────────────────────────────────────────
 def test_cli_returns_error_when_no_style_data(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
@@ -377,6 +428,7 @@ def test_cli_json_output_reports_the_chosen_shape(
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["cells"][0]["shape_id"] == "uml.anchor.v1"
+    assert payload["cells"][0]["node_id"] == "anchor1"
     assert payload["cells"][0]["library"] == "uml"
     assert payload["cells"][0]["resolved_by"] == "unique"
     assert "library_scores" in payload
@@ -403,6 +455,7 @@ def test_cli_table_output_lists_matches_and_no_match_rows(
     out = capsys.readouterr().out
     assert "library scores:" in out
     assert "uml.anchor.v1" in out
+    assert "anchor1" in out
     assert "(no match)" in out
 
 
@@ -522,3 +575,16 @@ def test_every_object_wrapped_palette_cell_is_parsed() -> None:
         if len(load_cells(doc)) != 1:
             misses.append(entry.shape_id)
     assert not misses, f"expected exactly one cell for: {misses[:10]}"
+
+
+@needs_data
+def test_every_real_shape_id_yields_an_identifier_safe_semantic_base() -> None:
+    """Every registry shape id's semantic base must be directly usable as a
+    bare .mdg node_id (lowercase letters/digits/underscore, not digit-first),
+    with no registry-specific exceptions -- verified against the full palette."""
+    bad = [
+        e.shape_id
+        for e in INDEX.entries
+        if not re.fullmatch(r"[a-z][a-z0-9_]*", semantic_base(e.shape_id))
+    ]
+    assert not bad, f"non-identifier-safe semantic base for: {bad[:10]}"
