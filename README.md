@@ -154,6 +154,44 @@ language, so treat "truly dead" as a strong hint, not a proof:
   `__all__` re-exports are treated as surface, not use, so unused public API is
   reported and annotated `(exported public API)` for human judgement.
 
+## Reverse derivation (draw.io → shape) — POC
+
+The forward pipeline turns a `.mdg` document into a `.drawio` diagram. The
+reverse — take a diagram a user drew directly in the draw.io UI and derive which
+registry shape each cell came from — lives in
+[`scripts/reverse/`](scripts/reverse/) as a proof of concept.
+
+```bash
+make derive FILE=path/to/diagram.drawio      # needs `make build-data`
+```
+
+It works in two layers:
+
+1. **Weighted style match** ([`scoring.py`](scripts/reverse/scoring.py)) — a
+   cell's style is scored against every registry shape's canonical style.
+   Shape-defining tokens (`shape=`, `perimeter=`, bare shape names) carry a high
+   weight; cosmetic tokens (colour, font, alignment, spacing) a small one. So a
+   recoloured or re-fonted cell still matches its shape, while a cosmetic
+   *agreement* still breaks ties between otherwise-identical shapes (e.g. C4
+   `Person` vs `Person_Ext`, which differ only by fill colour).
+2. **Document-level ranking** ([`derive.py`](scripts/reverse/derive.py)) — most
+   shapes (~78%) have a globally-unique style and resolve directly. For the rest,
+   unambiguous cells vote for their library and a small version-recency prior
+   defaults a lone ambiguous shape to the newest version: a solitary UML lifeline
+   resolves to `uml25`, but add any uml-only shape and its anchor vote pulls the
+   lifeline to `uml`.
+
+Each cell reports its derived shape, similarity, a confidence, and how it was
+resolved (`unique` / `single-library` / `library-vote` / `recency-prior`). The
+palette styles are draw.io-copyright (git-ignored), so this — and its tests —
+need `make build-data`; ground-truth `.drawio` fixtures are synthesized at test
+time from the palette, never committed.
+
+**Known limitation.** Ranking resolves *which library*; it does not yet
+disambiguate variants that share one style *within* a library (e.g. BPMN
+choreography markers). Those need the registry's `discriminator` field populated
+with structural rules (child cells / decorators) — a separate, later step.
+
 ## Quality dashboard
 
 `make dashboard` aggregates every Makefile quality signal into a single

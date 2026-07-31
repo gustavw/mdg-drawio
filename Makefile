@@ -6,7 +6,7 @@ help:  ## List the available targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
 		| awk 'BEGIN{FS=":.*?## "}{printf "  %-15s %s\n", $$1, $$2}'
 
-.PHONY: help test mypy ruff lint model-check verification coverage-gate check drawio build-data diagrams trace dead-code dashboard clean
+.PHONY: help test mypy ruff lint model-check verification coverage-gate check drawio build-data diagrams trace dead-code dashboard derive clean
 
 ARCH_DIR := docs/architecture
 ARCH_DIAGRAMS := c4_architecture code_architecture decisions
@@ -83,6 +83,13 @@ dead-code:  ## Advisory dead-code report (reachability vs definitions)
 # so it is a standalone target, not part of `check`.
 dashboard:  ## Build the static D3 quality dashboard (dashboard.html)
 	$(PYTHON) scripts/build_dashboard.py
+
+# Reverse derivation (POC): given a hand-drawn .drawio, derive which registry
+# shape each cell came from via weighted style matching + library ranking.
+# Needs generated data (reads the palette styles). Usage:
+#   make derive FILE=path/to/diagram.drawio
+derive:  ## Reverse-derive registry shapes from a .drawio (FILE=...)
+	$(PYTHON) -m scripts.reverse $(FILE)
 
 # Refresh the committed architecture diagrams from the model. Intentionally NOT
 # --force: the overlay round-trip preserves manually arranged node positions
