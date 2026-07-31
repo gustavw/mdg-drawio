@@ -102,14 +102,29 @@ def _model_roots(root: ET.Element) -> list[ET.Element]:
 
 
 def _cell_elements(model: ET.Element) -> list[ET.Element]:
-    """The style-bearing ``mxCell`` elements, unwrapping ``<object>`` cells."""
+    """The style-bearing ``mxCell`` elements, unwrapping ``<object>`` cells.
+
+    drawio encodes an "object" cell's id on the wrapping ``<object>`` element,
+    not on its inner ``<mxCell>`` (see ``cellsToXml`` in extract_shapes.js) --
+    copy it down so every returned element carries its real id. Without this,
+    every object-wrapped cell's inner element reads as id "", so a document
+    with more than one (e.g. two C4 Person nodes) collapses to a single cell
+    via the id-based dedup in :func:`load_cells`.
+    """
     cells: list[ET.Element] = []
+    wrapped: set[int] = set()
     for obj in model.iter("object"):
         inner = obj.find("mxCell")
-        if inner is not None:
-            cells.append(inner)
+        if inner is None:
+            continue
+        obj_id = obj.get("id")
+        if inner.get("id") is None and obj_id is not None:
+            inner.set("id", obj_id)
+        cells.append(inner)
+        wrapped.add(id(inner))
     for cell in model.iter("mxCell"):
-        cells.append(cell)
+        if id(cell) not in wrapped:
+            cells.append(cell)
     return cells
 
 
