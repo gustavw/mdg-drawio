@@ -214,6 +214,44 @@ It works in two layers:
    parent declares), out of scope here; revisit if another notation gains a
    real parser with shapes that declare rows.*
 
+5. **Merging into an existing `.mdg`** ([`merge.py`](scripts/reverse/merge.py),
+   [`merge_cli.py`](scripts/reverse/merge_cli.py)) — splices genuinely new
+   cells into an existing, hand-authored `.mdg` file's *text*, correctly
+   indented and nested, without disturbing anything already there. This is a
+   text-level merge, not a model-level one: re-serializing the whole document
+   from a freshly-built model would risk reformatting or dropping content the
+   forward generator doesn't round-trip, so new lines are inserted at the
+   right place instead.
+
+   ```bash
+   make merge MDG=path/to/existing.mdg FILE=path/to/diagram.drawio          # dry run
+   make merge MDG=path/to/existing.mdg FILE=path/to/diagram.drawio WRITE=1  # applies it
+   ```
+
+   A cell is "new" iff its raw draw.io id doesn't match a node_id already
+   declared in the `.mdg` — the same identity convention the forward
+   generator and its geometry overlay already rely on (a previously-generated
+   node's draw.io cell id equals its `.mdg` node_id). Freshly-assigned names
+   are seeded past whatever the existing file already uses (`reserved_counters`
+   in `naming.py`), so a new Person can't collide with an existing `person1`.
+   A brand-new *nested* subtree (a new container with new children inside it,
+   drawn in one sitting) is rendered as one atomic block and spliced in
+   together. A label is read from a C4 object cell's own `c4Name` attribute
+   when present (its plain `value` is only an unsubstituted `%c4Name%`
+   template — see `Cell.object_attrs` in `derive.py`), falling back to the
+   `label or node_id` convention the forward engine already applies when
+   there isn't one.
+
+   **Safety.** This module never writes a file — `merge_cli.py` is
+   dry-run-by-default (prints a unified diff) and re-parses the merged result
+   through the same parser the real pipeline uses
+   (`mdg_drawio.notation.parse`) before `--write`/`WRITE=1` is honoured; if it
+   doesn't parse cleanly, the file is left untouched and the error reported.
+
+   *Scope: vertices only. A new connector drawn between two shapes (a
+   `c4.Rel(...)`) is detected and counted, but not yet emitted — edges are a
+   separate, later extension.*
+
 Each cell reports its derived shape, node id, nesting (nearest container +
 depth), similarity, a confidence, and how it was resolved (`unique` /
 `single-library` / `library-vote` / `recency-prior`). The palette styles are
@@ -234,10 +272,7 @@ from the palette, never committed.
   document has more than one page, so a same-id collision across pages can
   never silently merge two cells into one. A single-page document's ids stay
   bare, matching the overwhelmingly common case.
-- This still only *derives structure* (shape, id, nesting) — it does not yet
-  emit or merge `.mdg` text. That "write it back into a `.mdg` file, correctly
-  indented, preserving what's already there" step is a separate, harder piece
-  of future work.
+- Merging only emits new vertex declarations, not new edges (see above).
 
 ## Quality dashboard
 

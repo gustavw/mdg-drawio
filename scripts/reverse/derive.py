@@ -43,12 +43,19 @@ _CONFIDENCE: dict[str, float] = {
 
 @dataclass(frozen=True)
 class Cell:
-    """A vertex/edge parsed out of a draw.io file."""
+    """A vertex/edge parsed out of a draw.io file.
+
+    ``object_attrs`` holds an object-wrapped cell's own attributes (its id,
+    plus custom fields like C4's ``c4Name``/``c4Type``/``c4Description``): a
+    C4 object cell's plain ``value`` is an unsubstituted ``%c4Name%``-style
+    template, so the user-typed label lives here instead.
+    """
 
     cell_id: str
     style: str
     value: str
     tokens: dict[str, object] = field(compare=False)
+    object_attrs: dict[str, str] = field(default_factory=dict, compare=False)
 
 
 @dataclass(frozen=True)
@@ -147,6 +154,19 @@ def _page_prefix(page_index: int, multi_page: bool) -> str:
     return f"{page_index}:" if multi_page else ""
 
 
+def _object_attrs_by_id(model: ET.Element, prefix: str) -> dict[str, dict[str, str]]:
+    """Every ``<object>``-wrapped cell's own attributes, keyed by the same
+    page-prefixed id used for :attr:`Cell.cell_id` -- these carry the
+    user-typed label data a C4 object cell's plain ``value`` does not (see
+    :class:`Cell`)."""
+    out: dict[str, dict[str, str]] = {}
+    for obj in model.iter("object"):
+        raw_id = obj.get("id")
+        if raw_id:
+            out[prefix + raw_id] = dict(obj.attrib)
+    return out
+
+
 def load_cells(source: str) -> list[Cell]:
     """Parse a ``.drawio`` file path or raw XML string into cells."""
     root = _parse_root(source)
@@ -156,6 +176,7 @@ def load_cells(source: str) -> list[Cell]:
     cells: list[Cell] = []
     for page_index, model in enumerate(models):
         prefix = _page_prefix(page_index, multi_page)
+        object_attrs = _object_attrs_by_id(model, prefix)
         for element in _cell_elements(model):
             style = element.get("style") or ""
             cell_id = prefix + (element.get("id") or "")
@@ -168,6 +189,7 @@ def load_cells(source: str) -> list[Cell]:
                     style=style,
                     value=element.get("value") or "",
                     tokens=parse_style(style),
+                    object_attrs=object_attrs.get(cell_id, {}),
                 )
             )
     return cells

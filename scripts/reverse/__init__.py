@@ -23,6 +23,13 @@ This package scores instead of hashing, in two layers:
 * :mod:`scripts.reverse.containment` -- resolves where each cell nests (its
   nearest legitimate container, by the registry's ``contains.allowed``) and
   how deep, climbing draw.io's own parent chain past layers/groups/anomalies.
+* :mod:`scripts.reverse.merge` -- splices new cells into an EXISTING ``.mdg``
+  file's text, correctly indented and nested, without disturbing anything
+  already there. A cell already represented in the file (its draw.io id
+  matches a declared node_id) is left alone; genuinely new cells are inserted
+  at the right place. Never writes a file itself -- see
+  ``scripts/reverse/merge_cli.py`` for the dry-run-by-default,
+  validate-before-write CLI.
 
 The raw palette styles live in the git-ignored ``generated_data`` (draw.io is
 copyright), so this package -- and its tests -- require ``make build-data``.
@@ -39,7 +46,22 @@ from scripts.reverse.derive import (
     load_cells,
     parent_map,
 )
-from scripts.reverse.naming import SemanticId, assign_semantic_ids, semantic_base
+from scripts.reverse.merge import (
+    ExistingIndex,
+    Insertion,
+    MergePlan,
+    NewNode,
+    index_existing,
+    plan_merge,
+    render_merge,
+)
+from scripts.reverse.merge import validate as validate_mdg
+from scripts.reverse.naming import (
+    SemanticId,
+    assign_semantic_ids,
+    reserved_counters,
+    semantic_base,
+)
 from scripts.reverse.scoring import DEFAULT_WEIGHTS, Weights, parse_style, similarity
 from scripts.reverse.style_index import ShapeEntry, StyleIndex
 
@@ -53,9 +75,18 @@ __all__ = [
     "parent_map",
     "SemanticId",
     "assign_semantic_ids",
+    "reserved_counters",
     "semantic_base",
     "Containment",
     "resolve_containment",
+    "ExistingIndex",
+    "Insertion",
+    "MergePlan",
+    "NewNode",
+    "index_existing",
+    "plan_merge",
+    "render_merge",
+    "validate_mdg",
     "DEFAULT_WEIGHTS",
     "Weights",
     "parse_style",
