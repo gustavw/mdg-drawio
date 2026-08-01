@@ -189,16 +189,55 @@ It works in two layers:
    round-trips today — should this scale to a large EA model needing stable
    external identities instead of mnemonic names.)
 
-Each cell reports its derived shape, node id, similarity, a confidence, and how
-it was resolved (`unique` / `single-library` / `library-vote` / `recency-prior`).
-The palette styles are draw.io-copyright (git-ignored), so this — and its tests —
-need `make build-data`; ground-truth `.drawio` fixtures are synthesized at test
-time from the palette, never committed.
+4. **Containment resolution** ([`containment.py`](scripts/reverse/containment.py))
+   — resolves where each cell nests and how deep, by climbing draw.io's own
+   `parent=` chain to the nearest ancestor whose resolved shape has a non-empty
+   registry `contains.allowed` (only `System_Boundary`/`Container_Boundary`
+   today — read from the registry, never hardcoded, so this tracks future
+   registry changes automatically). Everything else encountered while
+   climbing is transparently skipped, with a warning recorded so a human can
+   review the source file: a draw.io "layer" (styleless, organisational), a
+   Ctrl+G "group" (a UI bounding box), an ancestor that didn't resolve to any
+   shape, or one that resolved but isn't container-capable (e.g. a cell
+   accidentally nested inside a Person). A malformed/adversarial parent cycle
+   is detected and stops the climb rather than looping. Edges are excluded
+   entirely — `.mdg` declares relationships flat, so containment isn't
+   meaningful for them.
 
-**Known limitation.** Ranking resolves *which library*; it does not yet
-disambiguate variants that share one style *within* a library (e.g. BPMN
-choreography markers). Those need the registry's `discriminator` field populated
-with structural rules (child cells / decorators) — a separate, later step.
+   *Only C4 has a real forward `.mdg` parser today, and it has zero shapes
+   declaring `rows.allowed` (verified against the registry) — every nested
+   child is genuine containment, never a compartment row, so this targets
+   pure parent/child nesting only. The rows-vs-containment branch `GRAMMAR.md`
+   describes is a pre-existing gap in the forward parser itself
+   (`dsl_engine.py` never reads a shape's `rows.allowed`/`contains.allowed` —
+   every indented child becomes a contained node regardless of what the
+   parent declares), out of scope here; revisit if another notation gains a
+   real parser with shapes that declare rows.*
+
+Each cell reports its derived shape, node id, nesting (nearest container +
+depth), similarity, a confidence, and how it was resolved (`unique` /
+`single-library` / `library-vote` / `recency-prior`). The palette styles are
+draw.io-copyright (git-ignored), so this — and its tests — need
+`make build-data`; ground-truth `.drawio` fixtures are synthesized at test time
+from the palette, never committed.
+
+**Known limitations.**
+- Ranking resolves *which library*; it does not yet disambiguate variants
+  that share one style *within* a library (e.g. BPMN choreography markers, or
+  C4's `System_Boundary`/`Container_Boundary`, which turned out to have
+  byte-identical styles too). Those need the registry's `discriminator` field
+  populated with structural rules (child cells / decorators) — a separate,
+  later step.
+- draw.io ids are page-scoped (each page independently numbers its own
+  cells), so the same raw id commonly recurs across pages — `load_cells` and
+  `parent_map` prefix every id with its page index (`"0:5"`) whenever a
+  document has more than one page, so a same-id collision across pages can
+  never silently merge two cells into one. A single-page document's ids stay
+  bare, matching the overwhelmingly common case.
+- This still only *derives structure* (shape, id, nesting) — it does not yet
+  emit or merge `.mdg` text. That "write it back into a `.mdg` file, correctly
+  indented, preserving what's already there" step is a separate, harder piece
+  of future work.
 
 ## Quality dashboard
 

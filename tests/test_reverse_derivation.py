@@ -36,6 +36,7 @@ from scripts.reverse.derive import (
     Cell,
     derive,
     load_cells,
+    parent_map,
 )
 from scripts.reverse.naming import assign_semantic_ids, semantic_base
 from scripts.reverse.scoring import (
@@ -323,7 +324,115 @@ def test_multiple_diagram_pages_are_all_collected() -> None:
         "</mxfile>"
     )
     cells = load_cells(doc)
-    assert {c.cell_id for c in cells} == {"20", "21"}
+    # Multi-page documents are page-prefixed (see the collision regression
+    # below) -- ids "20"/"21" don't collide here, but still get the "N:"
+    # prefix, since whether a document is multi-page is a property of the
+    # whole document, not of any one page's particular ids.
+    assert {c.cell_id for c in cells} == {"0:20", "1:21"}
+
+
+def test_multi_page_documents_do_not_silently_merge_colliding_ids() -> None:
+    """Regression: draw.io numbers ids independently per page, so the SAME raw
+    id recurring across pages is common, not a data error. Before page-
+    prefixing, load_cells' cell_id-only dedup silently dropped every page-2+
+    cell whose id happened to repeat a page-1 id."""
+    page1 = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell id="2" style="shape=page1thing;" vertex="1" parent="1"/>'
+        "</root></mxGraphModel>"
+    )
+    page2 = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell id="2" style="shape=page2thing;" vertex="1" parent="1"/>'
+        "</root></mxGraphModel>"
+    )
+    doc = (
+        "<mxfile>"
+        f'<diagram name="Page-1">{page1}</diagram>'
+        f'<diagram name="Page-2">{page2}</diagram>'
+        "</mxfile>"
+    )
+    cells = load_cells(doc)
+    assert [(c.cell_id, c.style) for c in cells] == [
+        ("0:2", "shape=page1thing;"),
+        ("1:2", "shape=page2thing;"),
+    ]
+
+
+def test_single_page_document_ids_stay_unprefixed() -> None:
+    """The overwhelmingly common case (one page) keeps bare ids -- no needless
+    "0:" prefix when there's nothing to disambiguate against."""
+    doc = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell id="5" style="shape=solo;" vertex="1" parent="1"/>'
+        "</root></mxGraphModel>"
+    )
+    cells = load_cells(doc)
+    assert [c.cell_id for c in cells] == ["5"]
+
+
+def test_parent_map_covers_styled_and_styleless_cells_alike() -> None:
+    """Unlike load_cells, parent_map must include layers/groups too -- a
+    resolved cell's containment ancestry commonly passes through them."""
+    doc = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell id="layer1" parent="1"/>'
+        '<mxCell id="9" style="shape=a;" vertex="1" parent="layer1"/>'
+        "</root></mxGraphModel>"
+    )
+    mapping = parent_map(doc)
+    assert mapping["9"].parent_id == "layer1"
+    assert mapping["layer1"].parent_id == "1"
+    assert mapping["layer1"].style == ""  # a layer: present, but styleless
+
+
+def test_parent_map_reads_parent_off_object_wrapped_cells() -> None:
+    """An object cell's `parent` lives on the inner mxCell already (only its
+    `id` needed the object->inner copy-down fix) -- verify it comes through."""
+    doc = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<object id="5" label="A"><mxCell style="shape=a;" vertex="1" '
+        'parent="1"/></object>'
+        "</root></mxGraphModel>"
+    )
+    mapping = parent_map(doc)
+    assert mapping["5"].parent_id == "1"
+    assert mapping["5"].style == "shape=a;"
+
+
+def test_parent_map_flags_edges() -> None:
+    doc = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell id="8" style="shape=a;" vertex="1" parent="1"/>'
+        '<mxCell id="9" style="x;" edge="1" parent="1" source="8" target="8"/>'
+        "</root></mxGraphModel>"
+    )
+    mapping = parent_map(doc)
+    assert mapping["8"].is_edge is False
+    assert mapping["9"].is_edge is True
+
+
+def test_parent_map_and_load_cells_agree_on_multi_page_ids() -> None:
+    """The two functions must use identical page-prefixing so a resolved
+    cell's id can be looked up directly in the raw parent map."""
+    page1 = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell id="2" style="shape=x;" vertex="1" parent="1"/>'
+        "</root></mxGraphModel>"
+    )
+    page2 = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell id="2" style="shape=y;" vertex="1" parent="1"/>'
+        "</root></mxGraphModel>"
+    )
+    doc = (
+        "<mxfile>"
+        f'<diagram name="Page-1">{page1}</diagram>'
+        f'<diagram name="Page-2">{page2}</diagram>'
+        "</mxfile>"
+    )
+    cell_ids = {c.cell_id for c in load_cells(doc)}
+    assert cell_ids <= set(parent_map(doc))
 
 
 def test_malformed_xml_raises() -> None:
@@ -457,6 +566,40 @@ def test_cli_table_output_lists_matches_and_no_match_rows(
     assert "uml.anchor.v1" in out
     assert "anchor1" in out
     assert "(no match)" in out
+
+
+@needs_data
+def test_cli_reports_containment_for_a_nested_cell(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """End-to-end through main(): a Person nested in a System_Boundary reports
+    its container's semantic node id and depth in both output modes."""
+    monkeypatch.setattr(
+        StyleIndex, "load", classmethod(lambda cls, data_dir=None: INDEX)
+    )
+    boundary = fx.get(INDEX, "c4.system_boundary.v1")
+    person = fx.get(INDEX, "c4.person.v1")
+    path = tmp_path / "diagram.drawio"
+    path.write_text(
+        fx.document(
+            fx.entry_cell(boundary, cell_id="10", parent="1"),
+            fx.entry_cell(person, cell_id="11", parent="10"),
+        ),
+        encoding="utf-8",
+    )
+
+    rc = main([str(path), "--json"])
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    person_cell = next(c for c in payload["cells"] if c["cell_id"] == "11")
+    assert person_cell["depth"] == 1
+    assert person_cell["container_node_id"] is not None
+    assert person_cell["containment_warnings"] == []
+
+    rc = main([str(path)])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert person_cell["container_node_id"] in out
 
 
 # ── ranking scenarios (need generated data) ──────────────────────────────────

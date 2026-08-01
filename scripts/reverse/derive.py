@@ -128,19 +128,37 @@ def _cell_elements(model: ET.Element) -> list[ET.Element]:
     return cells
 
 
-def load_cells(source: str) -> list[Cell]:
-    """Parse a ``.drawio`` file path or raw XML string into cells."""
+def _parse_root(source: str) -> ET.Element:
+    """Parse a ``.drawio`` file path or raw XML string into its root element."""
     text = source
     if not source.lstrip().startswith("<"):
         with open(source, encoding="utf-8") as handle:
             text = handle.read()
-    root = ET.fromstring(text)
+    return ET.fromstring(text)
+
+
+def _page_prefix(page_index: int, multi_page: bool) -> str:
+    """draw.io ids are page-scoped (each page independently numbers its own
+    cells), so the SAME raw id commonly recurs across pages. A single-page
+    document's ids are left bare (matching the overwhelmingly common case and
+    every existing single-page caller); a multi-page document gets every id
+    (and every parent reference to it, see :func:`parent_map`) prefixed with
+    its page index so cross-page collisions can never silently merge."""
+    return f"{page_index}:" if multi_page else ""
+
+
+def load_cells(source: str) -> list[Cell]:
+    """Parse a ``.drawio`` file path or raw XML string into cells."""
+    root = _parse_root(source)
+    models = _model_roots(root)
+    multi_page = len(models) > 1
     seen: set[str] = set()
     cells: list[Cell] = []
-    for model in _model_roots(root):
+    for page_index, model in enumerate(models):
+        prefix = _page_prefix(page_index, multi_page)
         for element in _cell_elements(model):
             style = element.get("style") or ""
-            cell_id = element.get("id") or ""
+            cell_id = prefix + (element.get("id") or "")
             if not style.strip() or cell_id in seen:
                 continue
             seen.add(cell_id)
@@ -153,6 +171,48 @@ def load_cells(source: str) -> list[Cell]:
                 )
             )
     return cells
+
+
+@dataclass(frozen=True)
+class RawCell:
+    """A cell's raw containment context: its parent id and own style, from an
+    UNFILTERED pass over every cell in the document -- including the styleless
+    "layer" cells and Ctrl+G "group" cells that :func:`load_cells` excludes,
+    since a resolved cell's containment ancestry commonly passes through them.
+    """
+
+    parent_id: str | None
+    style: str
+    is_edge: bool
+
+
+def parent_map(source: str) -> dict[str, RawCell]:
+    """id -> raw containment context, for every cell in the document.
+
+    Uses the same page-prefixing convention as :func:`load_cells` (applied to
+    both a cell's own id and its parent reference), so ids line up between the
+    two when walking a resolved cell's containment ancestry.
+    """
+    root = _parse_root(source)
+    models = _model_roots(root)
+    multi_page = len(models) > 1
+    mapping: dict[str, RawCell] = {}
+    for page_index, model in enumerate(models):
+        prefix = _page_prefix(page_index, multi_page)
+        for element in _cell_elements(model):
+            raw_id = element.get("id")
+            if not raw_id:
+                continue
+            cell_id = prefix + raw_id
+            if cell_id in mapping:
+                continue
+            raw_parent = element.get("parent")
+            mapping[cell_id] = RawCell(
+                parent_id=(prefix + raw_parent) if raw_parent else None,
+                style=element.get("style") or "",
+                is_edge=element.get("edge") == "1",
+            )
+    return mapping
 
 
 # ── resolution ─────────────────────────────────────────────────────────────--

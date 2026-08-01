@@ -5,7 +5,8 @@
 
 Prints, per cell, the derived shape, its library, a generated semantic
 ``.mdg`` node id (``person1``, ``system1``, ...; see
-:mod:`scripts.reverse.naming`), similarity, confidence, and how it was
+:mod:`scripts.reverse.naming`), its nesting (nearest container + depth; see
+:mod:`scripts.reverse.containment`), similarity, confidence, and how it was
 resolved (unique / single-library / library-vote / recency-prior), plus the
 document-level library scores. Requires ``make build-data``.
 """
@@ -15,12 +16,17 @@ import argparse
 import json
 import sys
 
-from scripts.reverse.derive import DocumentResult, derive, load_cells
+from scripts.reverse.containment import Containment, resolve_containment
+from scripts.reverse.derive import DocumentResult, derive, load_cells, parent_map
 from scripts.reverse.naming import assign_semantic_ids
 from scripts.reverse.style_index import StyleIndex
 
 
-def _as_dict(result: DocumentResult, node_ids: dict[str, str]) -> dict[str, object]:
+def _as_dict(
+    result: DocumentResult,
+    node_ids: dict[str, str],
+    containments: dict[str, Containment],
+) -> dict[str, object]:
     return {
         "library_scores": result.library_scores,
         "cells": [
@@ -32,6 +38,19 @@ def _as_dict(result: DocumentResult, node_ids: dict[str, str]) -> dict[str, obje
                 "similarity": round(c.chosen.sim, 3) if c.chosen else 0.0,
                 "confidence": c.confidence,
                 "resolved_by": c.resolved_by,
+                "container_node_id": (
+                    containments[c.cell_id].container_node_id
+                    if c.cell_id in containments
+                    else None
+                ),
+                "depth": (
+                    containments[c.cell_id].depth if c.cell_id in containments else 0
+                ),
+                "containment_warnings": list(
+                    containments[c.cell_id].warnings
+                    if c.cell_id in containments
+                    else ()
+                ),
                 "alternatives": [
                     f"{cand.library}:{cand.shape_id} ({cand.sim:.3f})"
                     for cand in c.candidates
@@ -42,7 +61,11 @@ def _as_dict(result: DocumentResult, node_ids: dict[str, str]) -> dict[str, obje
     }
 
 
-def _print_table(result: DocumentResult, node_ids: dict[str, str]) -> None:
+def _print_table(
+    result: DocumentResult,
+    node_ids: dict[str, str],
+    containments: dict[str, Containment],
+) -> None:
     scores = ", ".join(
         f"{lib}={score:.2f}"
         for lib, score in sorted(
@@ -56,23 +79,34 @@ def _print_table(result: DocumentResult, node_ids: dict[str, str]) -> None:
     # id overflows its nominal column.
     header = (
         f"{'cell':<8} {'node_id':<16} {'shape':<34} {'lib':<10} "
-        f"{'sim':>6} {'conf':>7}  how"
+        f"{'sim':>6} {'conf':>7}  {'parent':<16} {'d':>3}  how"
     )
     print(header)
     print("-" * len(header))
+    warnings: list[str] = []
     for cell in result.cells:
         node_id = node_ids.get(cell.cell_id, "")
+        containment = containments.get(cell.cell_id)
+        parent = containment.container_node_id if containment else None
+        depth = containment.depth if containment else 0
+        for w in containment.warnings if containment else ():
+            warnings.append(f"{cell.cell_id}: {w}")
         if cell.chosen:
             print(
                 f"{cell.cell_id:<8} {node_id:<16} {cell.chosen.shape_id:<34} "
                 f"{cell.chosen.library:<10} {cell.chosen.sim:>6.3f} "
-                f"{cell.confidence:>7.3f}  {cell.resolved_by}"
+                f"{cell.confidence:>7.3f}  {parent or '-':<16} {depth:>3}  "
+                f"{cell.resolved_by}"
             )
         else:
             print(
                 f"{cell.cell_id:<8} {'':<16} {'(no match)':<34} "
-                f"{'':<10} {'':>6} {'':>7}  none"
+                f"{'':<10} {'':>6} {'':>7}  {'-':<16} {'':>3}  none"
             )
+    if warnings:
+        print("\ncontainment warnings:")
+        for w in warnings:
+            print(f"  {w}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -89,10 +123,14 @@ def main(argv: list[str] | None = None) -> int:
     cells = load_cells(args.drawio)
     result = derive(cells, index)
     node_ids = {s.cell_id: s.node_id for s in assign_semantic_ids(result)}
+    raw_cells = parent_map(args.drawio)
+    containments = {
+        c.cell_id: c for c in resolve_containment(result, raw_cells, node_ids)
+    }
     if args.json:
-        print(json.dumps(_as_dict(result, node_ids), indent=2))
+        print(json.dumps(_as_dict(result, node_ids, containments), indent=2))
     else:
-        _print_table(result, node_ids)
+        _print_table(result, node_ids, containments)
     return 0
 
 

@@ -20,18 +20,24 @@ This package scores instead of hashing, in two layers:
 * :mod:`scripts.reverse.naming` -- assigns each resolved cell a semantic
   ``.mdg`` node id (``person1``, ``system1``, ...) from its shape's registry
   slug, so a derived diagram's ids read like a hand-authored one.
+* :mod:`scripts.reverse.containment` -- resolves where each cell nests (its
+  nearest legitimate container, by the registry's ``contains.allowed``) and
+  how deep, climbing draw.io's own parent chain past layers/groups/anomalies.
 
 The raw palette styles live in the git-ignored ``generated_data`` (draw.io is
 copyright), so this package -- and its tests -- require ``make build-data``.
 """
 from __future__ import annotations
 
+from scripts.reverse.containment import Containment, resolve_containment
 from scripts.reverse.derive import (
     Candidate,
     CellResult,
     DocumentResult,
+    RawCell,
     derive,
     load_cells,
+    parent_map,
 )
 from scripts.reverse.naming import SemanticId, assign_semantic_ids, semantic_base
 from scripts.reverse.scoring import DEFAULT_WEIGHTS, Weights, parse_style, similarity
@@ -41,11 +47,15 @@ __all__ = [
     "Candidate",
     "CellResult",
     "DocumentResult",
+    "RawCell",
     "derive",
     "load_cells",
+    "parent_map",
     "SemanticId",
     "assign_semantic_ids",
     "semantic_base",
+    "Containment",
+    "resolve_containment",
     "DEFAULT_WEIGHTS",
     "Weights",
     "parse_style",

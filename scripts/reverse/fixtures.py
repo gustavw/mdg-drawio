@@ -35,15 +35,38 @@ def perturb(style: str, **overrides: str) -> str:
     return ";".join(kept + added) + ";"
 
 
-def cell_xml(cell_id: str, style: str, x: int, width: int, height: int) -> str:
-    """One vertex ``mxCell`` at ``(x, 40)`` with the given style."""
+def cell_xml(
+    cell_id: str, style: str, x: int, width: int, height: int, parent: str = "1"
+) -> str:
+    """One vertex ``mxCell`` at ``(x, 40)`` with the given style and parent."""
     geo = (
         f'<mxGeometry x="{x}" y="40" width="{width}" '
         f'height="{height}" as="geometry"/>'
     )
     return (
         f'<mxCell id="{cell_id}" value="" style="{escape(style, {chr(34): "&quot;"})}" '
-        f'vertex="1" parent="1">{geo}</mxCell>'
+        f'vertex="1" parent="{parent}">{geo}</mxCell>'
+    )
+
+
+def group_cell_xml(cell_id: str, parent: str = "1") -> str:
+    """A Ctrl+G "group" cell: a vertex whose style is just the bare token
+    ``group`` -- a UI bounding box, not a real shape."""
+    return cell_xml(cell_id, "group;", x=0, width=200, height=200, parent=parent)
+
+
+def layer_cell_xml(cell_id: str, parent: str = "1") -> str:
+    """A draw.io "layer" cell: no ``vertex``/``edge``, no style -- purely
+    organisational, never a real shape."""
+    return f'<mxCell id="{cell_id}" value="Layer" parent="{parent}"/>'
+
+
+def edge_cell_xml(cell_id: str, source: str, target: str, parent: str = "1") -> str:
+    """A relationship edge between two node ids."""
+    return (
+        f'<mxCell id="{cell_id}" style="edgeStyle=orthogonalEdgeStyle;html=1;" '
+        f'edge="1" parent="{parent}" source="{source}" target="{target}">'
+        f'<mxGeometry relative="1" as="geometry"/></mxCell>'
     )
 
 
@@ -53,10 +76,16 @@ def document(*cells: str) -> str:
 
 
 def entry_cell(
-    entry: ShapeEntry, cell_id: str = "10", x: int = 0, style: str | None = None
+    entry: ShapeEntry,
+    cell_id: str = "10",
+    x: int = 0,
+    style: str | None = None,
+    parent: str = "1",
 ) -> str:
     """A fixture cell for one shape entry (its canonical style by default)."""
-    return cell_xml(cell_id, style if style is not None else entry.style, x, 120, 120)
+    return cell_xml(
+        cell_id, style if style is not None else entry.style, x, 120, 120, parent
+    )
 
 
 def get(index: StyleIndex, shape_id: str) -> ShapeEntry:
