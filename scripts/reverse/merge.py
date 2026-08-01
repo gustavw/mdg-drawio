@@ -31,7 +31,7 @@ import re
 from dataclasses import dataclass, field
 
 from mdg_drawio.notation import parse as parse_mdg
-from mdg_drawio.notation._core.registry import shapes_by_id
+from mdg_drawio.notation import shapes_by_id
 from scripts.reverse.containment import Containment
 from scripts.reverse.derive import Cell, CellResult, DocumentResult, RawCell
 

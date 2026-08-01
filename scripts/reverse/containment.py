@@ -31,9 +31,8 @@ and stops the climb with a warning rather than looping.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from functools import lru_cache
 
-from mdg_drawio.notation._core.registry import shapes_by_id
+from mdg_drawio.notation import shapes_by_id
 from scripts.reverse.derive import Candidate, DocumentResult, RawCell
 from scripts.reverse.scoring import BARE, parse_style
 
@@ -44,12 +43,17 @@ from scripts.reverse.scoring import BARE, parse_style
 _MAX_CHAIN_STEPS = 200
 
 
-@lru_cache(maxsize=None)
 def _is_container_capable(shape_id: str) -> bool:
     """Whether shape_id's registry entry declares a non-empty contains.allowed.
 
     Reads the registry directly (never a hardcoded shape list) so this stays
-    correct if the registry changes or another notation gains real containment.
+    correct if the registry changes or another notation gains real
+    containment. Deliberately uncached: this project's own convention is that
+    consumers never hold a module-global cache over registry-derived data
+    (the one sanctioned exception is ``registry.py``'s own ``load_registry``,
+    which a cache here would silently shadow -- e.g. across a test session's
+    ``set_registries`` swap). ``shapes_by_id`` is already cheap: it is a
+    single dict comprehension over the (already-cached) loaded registry.
     """
     parts = shape_id.split(".")
     if len(parts) < 2:

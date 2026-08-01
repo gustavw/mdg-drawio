@@ -13,6 +13,7 @@ from ._core.registry import (
     load_registry,
     set_registries,
     shapes_by_function,
+    shapes_by_id,
 )
 from ._core.styles import DATA_DIR
 from .c4 import parse
@@ -26,4 +27,5 @@ __all__ = [
     "parse",
     "set_registries",
     "shapes_by_function",
+    "shapes_by_id",
 ]
