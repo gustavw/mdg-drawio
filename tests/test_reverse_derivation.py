@@ -234,7 +234,8 @@ def test_reported_candidates_are_capped_at_eight() -> None:
 
 
 def test_defaults_are_the_module_constants() -> None:
-    # Guards against silently drifting defaults between the module and derive().
+    # Pins these tuning constants so changing one is a deliberate, reviewable
+    # diff here, not an incidental edit buried in derive.py.
     assert DEFAULT_SIM_FLOOR == 0.4
     assert DEFAULT_BAND == 0.02
 
@@ -662,9 +663,10 @@ def test_cli_reports_containment_for_a_nested_cell(
     rc = main([str(path), "--json"])
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
+    boundary_cell = next(c for c in payload["cells"] if c["cell_id"] == "10")
     person_cell = next(c for c in payload["cells"] if c["cell_id"] == "11")
     assert person_cell["depth"] == 1
-    assert person_cell["container_node_id"] is not None
+    assert person_cell["container_node_id"] == boundary_cell["node_id"]
     assert person_cell["containment_warnings"] == []
 
     rc = main([str(path)])

@@ -26,8 +26,16 @@ from mdg_drawio.contracts import Document
 from mdg_drawio.notation import parse as parse_mdg
 from scripts.reverse import fixtures as fx
 from scripts.reverse import merge
-from scripts.reverse.containment import resolve_containment
-from scripts.reverse.derive import derive, load_cells, parent_map
+from scripts.reverse.containment import Containment, resolve_containment
+from scripts.reverse.derive import (
+    Candidate,
+    CellResult,
+    DocumentResult,
+    RawCell,
+    derive,
+    load_cells,
+    parent_map,
+)
 from scripts.reverse.merge import ExistingIndex, Insertion, MergePlan
 from scripts.reverse.merge_cli import main as merge_main
 from scripts.reverse.naming import assign_semantic_ids, reserved_counters
@@ -224,6 +232,88 @@ def test_render_merge_orders_same_line_ties_by_anchor_depth() -> None:
     assert merge.render_merge(existing, plan_reordered) == out
 
 
+# ── plan_merge decision logic (no data) ──────────────────────────────────────
+# _classify_new_cells and _build_forest are the actual "what's new, and how
+# does it nest" decisions -- unlike _render_declaration downstream, they never
+# touch the real registry (a Candidate's shape_id is just an opaque string
+# here), so -- mirroring test_reverse_containment.py's approach -- they're
+# pinned directly with hand-built dataclasses, independent of `make build-data`.
+def _result(cell_id: str, shape_id: str | None) -> CellResult:
+    chosen = Candidate(shape_id, "lib", 1.0) if shape_id else None
+    return CellResult(
+        cell_id=cell_id,
+        style="irrelevant",
+        candidates=[],
+        chosen=chosen,
+        resolved_by="unique" if chosen else "none",
+        confidence=1.0 if chosen else 0.0,
+    )
+
+
+def _doc(*results: CellResult) -> DocumentResult:
+    return DocumentResult(list(results), {}, {})
+
+
+def test_classify_new_cells_separates_existing_new_edges_and_unresolved() -> None:
+    result = _doc(
+        _result("existing1", "lib.box.v1"),  # already in the .mdg
+        _result("edge1", "lib.rel.v1"),  # a new edge -- counted, not emitted
+        _result("junk1", None),  # unresolved -- skipped and reported
+        _result("new1", "lib.leaf.v1"),  # genuinely new
+    )
+    raw_cells = {
+        "existing1": RawCell(None, "shape=box;", False),
+        "edge1": RawCell(None, "edgeStyle=x;", True),
+        "junk1": RawCell(None, "shape=unknown;", False),
+        "new1": RawCell(None, "shape=leaf;", False),
+    }
+    new_cells, skipped, new_edge_count = merge._classify_new_cells(
+        result, existing_ids={"existing1"}, raw_cells=raw_cells
+    )
+    assert [c.cell_id for c in new_cells] == ["new1"]
+    assert new_edge_count == 1
+    assert len(skipped) == 1
+    assert "junk1" in skipped[0]
+
+
+def test_build_forest_groups_new_cells_by_nearest_existing_anchor() -> None:
+    new_cells = [_result("p1", "lib.person.v1"), _result("p2", "lib.person.v1")]
+    containments = {
+        "p1": Containment("p1", "boxA", 1, ()),
+        "p2": Containment("p2", "boxB", 1, ()),
+    }
+    roots_by_anchor = merge._build_forest(
+        new_cells,
+        containments,
+        existing_ids={"boxA", "boxB"},
+        id_of_node_id={"boxA": "boxA", "boxB": "boxB"},
+    )
+    assert {a: [n.cell_id for n in roots] for a, roots in roots_by_anchor.items()} == {
+        "boxA": ["p1"],
+        "boxB": ["p2"],
+    }
+
+
+def test_build_forest_nests_a_new_cell_under_a_new_container() -> None:
+    """A new leaf whose container is ALSO new must appear as that new
+    container's CHILD in the forest, not as a second top-level root."""
+    new_cells = [_result("box1", "lib.box.v1"), _result("leaf1", "lib.leaf.v1")]
+    containments = {
+        "box1": Containment("box1", "existingRoot", 1, ()),
+        "leaf1": Containment("leaf1", "box1_node", 2, ()),  # box1's own node_id
+    }
+    roots_by_anchor = merge._build_forest(
+        new_cells,
+        containments,
+        existing_ids={"existingRoot"},
+        id_of_node_id={"existingRoot": "existingRoot", "box1_node": "box1"},
+    )
+    assert list(roots_by_anchor) == ["existingRoot"]
+    (box_node,) = roots_by_anchor["existingRoot"]
+    assert box_node.cell_id == "box1"
+    assert [child.cell_id for child in box_node.children] == ["leaf1"]
+
+
 # ── end-to-end (real registry + palette) ─────────────────────────────────────
 def _run_pipeline(
     existing_text: str, drawio_doc: str
@@ -378,9 +468,8 @@ def test_merge_reserved_counters_avoid_colliding_with_existing_names() -> None:
         fx.entry_cell(person, cell_id="new_person", parent="sys1"),
     )
     _, plan, merged = _run_pipeline(existing_text, doc)
-    assert "c4.Person(person2)" in merged.splitlines()[-1] or any(
-        "person2" in line for line in merged.splitlines()
-    )
+    assert "    c4.Person(person2)" in merged.splitlines()
+    assert merged.count("person1") == 1  # the existing one, not re-emitted
     assert merge.validate(merged) is None
 
 

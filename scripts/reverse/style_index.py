@@ -9,8 +9,11 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
-from scripts.reverse.scoring import DEFAULT_WEIGHTS, Weights, parse_style, similarity
+from mdg_drawio.notation import shapes_by_id
+
+from .scoring import DEFAULT_WEIGHTS, Weights, parse_style, similarity
 
 # Notation families that ship in more than one version. The value is the
 # version rank (higher = newer). Used only as a small tie-breaking prior, so a
@@ -26,6 +29,22 @@ def recency_prior(library: str, scale: float = 0.1) -> float:
     a tie the document evidence left open -- it can never override an anchor.
     """
     return VERSION_RANK.get(library, 0) * scale
+
+
+def registry_entry(shape_id: str) -> dict[str, Any] | None:
+    """The registry entry for ``shape_id`` (``<library>.<function>.v<N>``), or
+    ``None`` if the id doesn't conform or isn't found. Shared by every
+    consumer that needs to look a derived shape id back up in the registry
+    (``containment.py``'s ``contains.allowed`` check, ``merge.py``'s
+    function/variant lookup), so the id-parsing and not-found handling live
+    in exactly one place."""
+    parts = shape_id.split(".")
+    if len(parts) < 2:
+        return None
+    try:
+        return shapes_by_id(parts[0]).get(shape_id)
+    except KeyError:
+        return None
 
 
 @dataclass(frozen=True)

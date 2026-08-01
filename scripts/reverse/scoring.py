@@ -115,11 +115,15 @@ def similarity(
     numerator = 0.0
     denominator = 0.0
     for key in query.keys() | candidate.keys():
-        qval = query.get(key, _MISSING)
-        cval = candidate.get(key, _MISSING)
-        present = qval if qval is not _MISSING else cval
+        query_value = query.get(key, _MISSING)
+        candidate_value = candidate.get(key, _MISSING)
+        present = query_value if query_value is not _MISSING else candidate_value
         weight = token_weight(key, present, weights)
         denominator += weight
-        if qval is not _MISSING and cval is not _MISSING and qval == cval:
+        if (
+            query_value is not _MISSING
+            and candidate_value is not _MISSING
+            and query_value == candidate_value
+        ):
             numerator += weight
     return numerator / denominator if denominator else 0.0

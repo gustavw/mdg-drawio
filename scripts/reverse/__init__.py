@@ -36,8 +36,8 @@ copyright), so this package -- and its tests -- require ``make build-data``.
 """
 from __future__ import annotations
 
-from scripts.reverse.containment import Containment, resolve_containment
-from scripts.reverse.derive import (
+from .containment import Containment, resolve_containment
+from .derive import (
     Candidate,
     CellResult,
     DocumentResult,
@@ -46,7 +46,7 @@ from scripts.reverse.derive import (
     load_cells,
     parent_map,
 )
-from scripts.reverse.merge import (
+from .merge import (
     ExistingIndex,
     Insertion,
     MergePlan,
@@ -55,15 +55,15 @@ from scripts.reverse.merge import (
     plan_merge,
     render_merge,
 )
-from scripts.reverse.merge import validate as validate_mdg
-from scripts.reverse.naming import (
+from .merge import validate as validate_mdg
+from .naming import (
     SemanticId,
     assign_semantic_ids,
     reserved_counters,
     semantic_base,
 )
-from scripts.reverse.scoring import DEFAULT_WEIGHTS, Weights, parse_style, similarity
-from scripts.reverse.style_index import ShapeEntry, StyleIndex
+from .scoring import DEFAULT_WEIGHTS, Weights, parse_style, similarity
+from .style_index import Scored, ShapeEntry, StyleIndex, registry_entry
 
 __all__ = [
     "Candidate",
@@ -92,5 +92,7 @@ __all__ = [
     "parse_style",
     "similarity",
     "ShapeEntry",
+    "Scored",
     "StyleIndex",
+    "registry_entry",
 ]

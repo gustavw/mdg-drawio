@@ -18,11 +18,11 @@ import argparse
 import difflib
 import sys
 
-from scripts.reverse import merge
-from scripts.reverse.containment import resolve_containment
-from scripts.reverse.derive import derive, load_cells, parent_map
-from scripts.reverse.naming import assign_semantic_ids, reserved_counters
-from scripts.reverse.style_index import StyleIndex
+from . import merge
+from .containment import resolve_containment
+from .derive import derive, load_cells, parent_map
+from .naming import assign_semantic_ids, reserved_counters
+from .style_index import StyleIndex
 
 
 def _plan(

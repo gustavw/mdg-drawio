@@ -28,8 +28,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from scripts.reverse.derive import DocumentResult
-from scripts.reverse.style_index import VERSION_RANK
+from .derive import DocumentResult
+from .style_index import VERSION_RANK
 
 _NAME_RE = re.compile(r"^(\D+)(\d+)$")
 

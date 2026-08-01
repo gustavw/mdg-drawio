@@ -16,10 +16,10 @@ import argparse
 import json
 import sys
 
-from scripts.reverse.containment import Containment, resolve_containment
-from scripts.reverse.derive import DocumentResult, derive, load_cells, parent_map
-from scripts.reverse.naming import assign_semantic_ids
-from scripts.reverse.style_index import StyleIndex
+from .containment import Containment, resolve_containment
+from .derive import DocumentResult, derive, load_cells, parent_map
+from .naming import assign_semantic_ids
+from .style_index import StyleIndex
 
 
 def _as_dict(

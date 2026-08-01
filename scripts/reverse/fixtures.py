@@ -15,8 +15,8 @@ from __future__ import annotations
 
 from xml.sax.saxutils import escape
 
-from scripts.reverse.derive import Cell, derive
-from scripts.reverse.style_index import ShapeEntry, StyleIndex
+from .derive import Cell, derive
+from .style_index import ShapeEntry, StyleIndex
 
 _HEADER = '<mxfile><diagram name="Page-1"><mxGraphModel><root>'
 _ROOT_CELLS = '<mxCell id="0"/><mxCell id="1" parent="0"/>'

@@ -23,8 +23,8 @@ from dataclasses import dataclass, field
 from urllib.parse import unquote
 from xml.etree import ElementTree as ET
 
-from scripts.reverse.scoring import DEFAULT_WEIGHTS, Weights, parse_style
-from scripts.reverse.style_index import StyleIndex, recency_prior
+from .scoring import DEFAULT_WEIGHTS, Weights, parse_style
+from .style_index import StyleIndex, recency_prior
 
 # How close to the top similarity a candidate must be to count as a near-tie.
 DEFAULT_BAND = 0.02

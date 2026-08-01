@@ -32,9 +32,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from mdg_drawio.notation import shapes_by_id
-from scripts.reverse.derive import Candidate, DocumentResult, RawCell
-from scripts.reverse.scoring import BARE, parse_style
+from .derive import Candidate, DocumentResult, RawCell
+from .scoring import BARE, parse_style
+from .style_index import registry_entry
 
 # Hard ceiling on ancestry-chain length. The per-call `visited` set already
 # guarantees termination (a repeat MUST occur within len(raw_cells) steps), so
@@ -52,16 +52,10 @@ def _is_container_capable(shape_id: str) -> bool:
     consumers never hold a module-global cache over registry-derived data
     (the one sanctioned exception is ``registry.py``'s own ``load_registry``,
     which a cache here would silently shadow -- e.g. across a test session's
-    ``set_registries`` swap). ``shapes_by_id`` is already cheap: it is a
+    ``set_registries`` swap). ``registry_entry`` is already cheap: it is a
     single dict comprehension over the (already-cached) loaded registry.
     """
-    parts = shape_id.split(".")
-    if len(parts) < 2:
-        return False
-    try:
-        entry = shapes_by_id(parts[0]).get(shape_id)
-    except KeyError:
-        return False
+    entry = registry_entry(shape_id)
     if entry is None:
         return False
     return bool(entry.get("contains", {}).get("allowed"))

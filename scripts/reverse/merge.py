@@ -31,9 +31,10 @@ import re
 from dataclasses import dataclass, field
 
 from mdg_drawio.notation import parse as parse_mdg
-from mdg_drawio.notation import shapes_by_id
-from scripts.reverse.containment import Containment
-from scripts.reverse.derive import Cell, CellResult, DocumentResult, RawCell
+
+from .containment import Containment
+from .derive import Cell, CellResult, DocumentResult, RawCell
+from .style_index import registry_entry
 
 INDENT_STEP = "    "
 
@@ -246,16 +247,10 @@ def _shape_meta(shape_id: str) -> tuple[str, str, int] | None:
     """(library, function name, variant) from the registry, or ``None`` if
     the shape id doesn't resolve (defensive; should not happen for a shape
     that came from the loaded StyleIndex)."""
-    parts = shape_id.split(".")
-    if len(parts) < 2:
-        return None
-    library = parts[0]
-    try:
-        entry = shapes_by_id(library).get(shape_id)
-    except KeyError:
-        return None
+    entry = registry_entry(shape_id)
     if entry is None:
         return None
+    library = shape_id.split(".")[0]
     return library, str(entry["function"]), int(entry.get("variant", 1))
 
 
@@ -270,14 +265,21 @@ def _render_declaration(
     label = _label_for(cell)
     if label is not None:
         args.append(f'"{_escape_dsl_string(label)}"')
-    kwargs = f", variant={variant}" if variant != 1 else ""
+    variant_suffix = f", variant={variant}" if variant != 1 else ""
     colon = ":" if opens_block else ""
-    return f"{indent}{library}.{function}({', '.join(args)}{kwargs}){colon}"
+    return f"{indent}{library}.{function}({', '.join(args)}{variant_suffix}){colon}"
 
 
-@dataclass(frozen=True)
+@dataclass
 class NewNode:
-    """One new cell, plus its own new (not-yet-existing) children, recursively."""
+    """One new cell, plus its own new (not-yet-existing) children, recursively.
+
+    Not frozen: this is a builder, assembled incrementally by
+    :func:`_build_forest` (which appends each node's children as it discovers
+    them), the same way :class:`~scripts.reverse.derive.CellResult` or
+    ``mdg_drawio``'s own ``Node`` are mutated post-construction rather than
+    replaced wholesale.
+    """
 
     cell_id: str
     node_id: str
@@ -323,13 +325,13 @@ def _build_forest(
     containments: dict[str, Containment],
     existing_ids: set[str],
     id_of_node_id: dict[str, str],
-) -> tuple[dict[str | None, list[NewNode]], dict[str, str]]:
+) -> dict[str | None, list[NewNode]]:
     """Group new cells by their nearest EXISTING ancestor (or ``None`` for
     top-level), nesting any new cells whose container is ALSO new underneath
-    it. Returns ``{anchor: [roots...]}`` plus ``{cell_id: anchor}`` for
-    reporting. Precondition: every cell in ``new_cells`` is resolved (its
-    ``chosen`` is not ``None``) -- callers (:func:`plan_merge`) already
-    filter unresolved cells out before reaching here.
+    it. Returns ``{anchor: [roots...]}``. Precondition: every cell in
+    ``new_cells`` is resolved (its ``chosen`` is not ``None``) -- callers
+    (:func:`_build_insertions`) already filter unresolved cells out before
+    reaching here.
     """
     new_by_cell_id = {c.cell_id: c for c in new_cells}
     node_of: dict[str, NewNode] = {}
@@ -337,7 +339,6 @@ def _build_forest(
         assert c.chosen is not None  # precondition, see docstring
         node_of[c.cell_id] = NewNode(c.cell_id, c.cell_id, c.chosen.shape_id)
     roots_by_anchor: dict[str | None, list[NewNode]] = {}
-    anchor_of: dict[str, str] = {}
 
     for cell in new_cells:
         containment = containments.get(cell.cell_id)
@@ -352,9 +353,8 @@ def _build_forest(
         else:
             anchor = container_cell_id if container_cell_id in existing_ids else None
             roots_by_anchor.setdefault(anchor, []).append(node_of[cell.cell_id])
-            anchor_of[cell.cell_id] = anchor or "(top level)"
 
-    return roots_by_anchor, anchor_of
+    return roots_by_anchor
 
 
 def _render_subtree(
@@ -375,21 +375,14 @@ def _render_subtree(
     return out
 
 
-def plan_merge(
-    existing: ExistingIndex,
-    cells: list[Cell],
+def _classify_new_cells(
     result: DocumentResult,
-    node_ids: dict[str, str],
-    containments: dict[str, Containment],
+    existing_ids: set[str],
     raw_cells: dict[str, RawCell],
-) -> MergePlan:
-    """Compute what to insert, and where, to add every new cell to
-    ``existing`` -- does not touch the text itself (see :func:`render_merge`).
-    """
-    existing_ids = existing.node_ids()
-    cells_by_id = {c.cell_id: c for c in cells}
-    id_of_node_id = {v: k for k, v in node_ids.items()}
-
+) -> tuple[list[CellResult], list[str], int]:
+    """Split ``result.cells`` into (genuinely new vertex cells, human-readable
+    skip reasons for unresolved cells, count of new edges -- not yet emitted,
+    see the module docstring)."""
     new_cells: list[CellResult] = []
     skipped: list[str] = []
     new_edge_count = 0
@@ -407,8 +400,21 @@ def plan_merge(
             )
             continue
         new_cells.append(cell)
+    return new_cells, skipped, new_edge_count
 
-    roots_by_anchor, _ = _build_forest(
+
+def _build_insertions(
+    existing: ExistingIndex,
+    new_cells: list[CellResult],
+    cells_by_id: dict[str, Cell],
+    node_ids: dict[str, str],
+    containments: dict[str, Containment],
+    existing_ids: set[str],
+    id_of_node_id: dict[str, str],
+) -> list[Insertion]:
+    """One :class:`Insertion` per anchor (existing container or top-level)
+    that actually has new content to add."""
+    roots_by_anchor = _build_forest(
         new_cells, containments, existing_ids, id_of_node_id
     )
 
@@ -443,7 +449,36 @@ def plan_merge(
         insertions.append(
             Insertion(line_index, text, colon_fix, anchor_depth=anchor_depth)
         )
+    return insertions
 
+
+def plan_merge(
+    existing: ExistingIndex,
+    cells: list[Cell],
+    result: DocumentResult,
+    node_ids: dict[str, str],
+    containments: dict[str, Containment],
+    raw_cells: dict[str, RawCell],
+) -> MergePlan:
+    """Compute what to insert, and where, to add every new cell to
+    ``existing`` -- does not touch the text itself (see :func:`render_merge`).
+    """
+    existing_ids = existing.node_ids()
+    cells_by_id = {c.cell_id: c for c in cells}
+    id_of_node_id = {v: k for k, v in node_ids.items()}
+
+    new_cells, skipped, new_edge_count = _classify_new_cells(
+        result, existing_ids, raw_cells
+    )
+    insertions = _build_insertions(
+        existing,
+        new_cells,
+        cells_by_id,
+        node_ids,
+        containments,
+        existing_ids,
+        id_of_node_id,
+    )
     return MergePlan(insertions, skipped, new_edge_count, len(new_cells))
 
 
