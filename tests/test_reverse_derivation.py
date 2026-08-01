@@ -303,6 +303,35 @@ def test_empty_style_cells_are_skipped() -> None:
     assert [c.cell_id for c in cells] == ["10"]
 
 
+def test_load_cells_skips_a_styled_element_with_no_id() -> None:
+    """Regression: a styled vertex with no id attribute at all used to be
+    KEPT (as cell_id="") by load_cells but DROPPED by parent_map -- a cell
+    that can't be identified can't be tracked by anything downstream
+    (containment, naming, merge dedup), and the desync made it vanish from
+    containment resolution with no warning at all. Both functions must agree:
+    an id-less cell is skipped entirely."""
+    doc = (
+        '<mxfile><diagram name="P"><mxGraphModel><root>'
+        '<mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell style="shape=a;" vertex="1" parent="1"/>'
+        '<mxCell id="10" style="shape=b;" vertex="1" parent="1"/>'
+        "</root></mxGraphModel></diagram></mxfile>"
+    )
+    cells = load_cells(doc)
+    assert [c.cell_id for c in cells] == ["10"]
+
+
+def test_load_cells_and_parent_map_agree_when_an_id_is_missing() -> None:
+    doc = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell style="shape=a;" vertex="1" parent="1"/>'
+        '<mxCell id="10" style="shape=b;" vertex="1" parent="1"/>'
+        "</root></mxGraphModel>"
+    )
+    cell_ids = {c.cell_id for c in load_cells(doc)}
+    assert cell_ids <= set(parent_map(doc))
+
+
 def test_multiple_diagram_pages_are_all_collected() -> None:
     plain = (
         '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
@@ -498,6 +527,48 @@ def test_assign_semantic_ids_gives_each_distinct_base_its_own_counter() -> None:
     # here) and fall to the recency prior -> the same shape -> one counter.
     assert assigned["11"] == "widget1"
     assert assigned["12"] == "widget2"
+
+
+def test_assign_semantic_ids_scopes_by_library_except_version_families() -> None:
+    """Regression: an unrelated library sharing a base string with uml/uml25
+    (real registry example: C4's Container -- an application/service -- vs. a
+    generic draw.io swimlane grouping box, both slugging to "container") must
+    NOT share a counter. Only genuine version-family members
+    (style_index.VERSION_RANK: uml/uml25) intentionally still do."""
+    idx = StyleIndex(
+        [
+            _entry("uml.widget.v1", "uml", "shape=uw;"),
+            _entry("uml25.widget.v1", "uml25", "shape=u25w;"),
+            _entry("other.widget.v1", "other", "shape=ow;"),
+        ]
+    )
+    cells = [
+        _cell("shape=uw;", "10"),
+        _cell("shape=u25w;", "11"),
+        _cell("shape=ow;", "12"),
+    ]
+    result = derive(cells, idx)
+    assigned = {a.cell_id: a.node_id for a in assign_semantic_ids(result)}
+    assert assigned["10"] == "widget1"  # uml
+    assert assigned["11"] == "widget2"  # uml25 -- shares uml's counter (by design)
+    assert assigned["12"] == "widget1"  # unrelated library -- independent counter
+
+
+@needs_data
+def test_naming_c4_container_and_general_container_get_independent_counters() -> None:
+    """The exact real-registry collision the synthetic test above guards
+    against: c4.container.v1 (a C4 metaclass) and general.container.v1 (a
+    bare draw.io swimlane) both slug to "container"."""
+    c4_container = fx.get(INDEX, "c4.container.v1")
+    general_container = fx.get(INDEX, "general.container.v1")
+    doc = fx.document(
+        fx.entry_cell(c4_container, cell_id="10", x=0, parent="1"),
+        fx.entry_cell(general_container, cell_id="11", x=200, parent="1"),
+    )
+    result = derive(load_cells(doc), INDEX)
+    assigned = {a.cell_id: a.node_id for a in assign_semantic_ids(result)}
+    assert assigned["10"] == "container1"
+    assert assigned["11"] == "container1"
 
 
 def test_assign_semantic_ids_skips_unresolved_cells() -> None:

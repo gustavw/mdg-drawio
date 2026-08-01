@@ -168,7 +168,16 @@ def _object_attrs_by_id(model: ET.Element, prefix: str) -> dict[str, dict[str, s
 
 
 def load_cells(source: str) -> list[Cell]:
-    """Parse a ``.drawio`` file path or raw XML string into cells."""
+    """Parse a ``.drawio`` file path or raw XML string into cells.
+
+    A styled element with no ``id`` at all is skipped, matching
+    :func:`parent_map`'s existing behaviour -- without this, the two
+    functions disagreed (this one kept an id-less cell as ``cell_id==""``,
+    the other dropped it), so a cell with no id would silently vanish from
+    containment resolution (no entry in ``parent_map``, no warning) with no
+    signal that anything was lost. A cell that can't even be identified
+    can't be meaningfully tracked by anything downstream anyway.
+    """
     root = _parse_root(source)
     models = _model_roots(root)
     multi_page = len(models) > 1
@@ -179,8 +188,11 @@ def load_cells(source: str) -> list[Cell]:
         object_attrs = _object_attrs_by_id(model, prefix)
         for element in _cell_elements(model):
             style = element.get("style") or ""
-            cell_id = prefix + (element.get("id") or "")
-            if not style.strip() or cell_id in seen:
+            raw_id = element.get("id")
+            if not raw_id or not style.strip():
+                continue
+            cell_id = prefix + raw_id
+            if cell_id in seen:
                 continue
             seen.add(cell_id)
             cells.append(

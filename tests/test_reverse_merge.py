@@ -18,6 +18,7 @@ Three groups:
 from __future__ import annotations
 
 from pathlib import Path
+from xml.sax.saxutils import escape as xml_escape
 
 import pytest
 
@@ -142,6 +143,85 @@ def test_validate_accepts_a_minimal_valid_document() -> None:
 def test_validate_reports_an_error_for_garbage_input() -> None:
     error = merge.validate("this is not a valid mdg document {{{")
     assert error is not None
+
+
+# ── robustness fixes (no data) ────────────────────────────────────────────────
+def test_index_existing_sees_a_declaration_with_a_trailing_comment() -> None:
+    """Regression: a comment after the call must not hide the declaration --
+    this project's own .mdg fixtures use exactly this style, and a merge that
+    can't see an existing node duplicates it under a fresh id."""
+    text = (
+        'c4.System_Boundary(sys1, "X"):\n'
+        '    c4.Container(web1, "Y")  # legacy, keep as-is\n'
+    )
+    existing = merge.index_existing(text)
+    assert existing.node_line == {"sys1": 0, "web1": 1}
+
+
+def test_strip_inline_comment_respects_quoted_hashes() -> None:
+    assert merge._strip_inline_comment('c4.Person(p1, "a # not a comment")') == (
+        'c4.Person(p1, "a # not a comment")'
+    )
+    assert merge._strip_inline_comment("box(b1)  # real comment") == "box(b1)"
+
+
+def test_add_colon_preserves_a_trailing_comment() -> None:
+    assert merge._add_colon("box(b1)  # note") == "box(b1): # note"
+    assert merge._add_colon("box(b1)") == "box(b1):"
+
+
+def test_needs_colon_true_despite_indented_content_when_line_lacks_colon() -> None:
+    """Regression: indentation alone is not evidence of real children -- only
+    a trailing ':' is. A container missing its colon (a typo, or a stray
+    indented comment) must still be flagged as needing one."""
+    existing = merge.index_existing(
+        'c4.System_Boundary(sys1, "X")\n    c4.Container(web1, "Y")\n'
+    )
+    assert merge._needs_colon(existing, "sys1") is True
+
+    existing2 = merge.index_existing(
+        'c4.System_Boundary(sys1, "X")\n    # TODO: add containers here\n'
+    )
+    assert merge._needs_colon(existing2, "sys1") is True
+
+
+def test_child_insertion_ignores_orphaned_indentation_without_a_colon() -> None:
+    existing = merge.index_existing(
+        'c4.System_Boundary(sys1, "X")\n    c4.Container(web1, "Y")\n'
+    )
+    line, indent = merge._child_insertion(existing, "sys1")
+    assert line == 1  # immediately after sys1's own line, not after web1
+    assert indent == merge.INDENT_STEP
+
+
+def test_escape_dsl_string_handles_quotes_backslashes_and_newlines() -> None:
+    assert merge._escape_dsl_string('Bad", "Extra') == 'Bad\\", \\"Extra'
+    assert merge._escape_dsl_string(r"C:\Users\bob") == r"C:\\Users\\bob"
+    assert merge._escape_dsl_string("line1\nline2") == "line1\\nline2"
+
+
+def test_render_merge_orders_same_line_ties_by_anchor_depth() -> None:
+    """Regression: two anchors that happen to compute the same insertion
+    line must be spliced deepest-first, so the deeper block lands
+    immediately after its own declaration rather than after the shallower
+    anchor's appended content."""
+    existing = merge.index_existing(
+        'c4.System_Boundary(sysA, "A"):\n'
+        '    c4.System_Boundary(sysB, "B"):\n'
+    )
+    shallow = Insertion(2, "    c4.Person(person1)", anchor_depth=0)
+    deep = Insertion(2, "        c4.Component(component1)", anchor_depth=1)
+    plan = MergePlan([shallow, deep], [], 0, 2)
+    out = merge.render_merge(existing, plan)
+    assert out == (
+        'c4.System_Boundary(sysA, "A"):\n'
+        '    c4.System_Boundary(sysB, "B"):\n'
+        "        c4.Component(component1)\n"
+        "    c4.Person(person1)\n"
+    )
+    # Order of insertions in the plan must not change the result.
+    plan_reordered = MergePlan([deep, shallow], [], 0, 2)
+    assert merge.render_merge(existing, plan_reordered) == out
 
 
 # ── end-to-end (real registry + palette) ─────────────────────────────────────
@@ -331,6 +411,88 @@ def test_merge_multiple_new_cells_at_different_anchors() -> None:
     new_ids = [n for n in parents if n not in ("sysA", "sysB", "a1", "b1")]
     assert len(new_ids) == 2
     assert {parents[n] for n in new_ids} == {"sysA", "sysB"}
+
+
+@needs_data
+def test_merge_nested_new_cells_place_correctly_regardless_of_source_order() -> None:
+    """Regression for the anchor-line-tie bug: sysB is nested inside sysA and
+    both are currently childless, so their "append a new child" points used
+    to coincide -- and the resulting nesting depended on which cell the
+    incoming .drawio happened to list first. Both orders must now nest
+    identically and correctly."""
+    sys_b = fx.get(INDEX, "c4.system_boundary.v1")
+    person = fx.get(INDEX, "c4.person.v1")
+    component = fx.get(INDEX, "c4.component.v1")
+    existing_text = (
+        '---\ntitle: "T"\npage: "P"\nmode: layered\n---\n\n'
+        'c4.System_Boundary(sysA, "A"):\n'
+        '    c4.System_Boundary(sysB, "B"):\n'
+    )
+    sysA_cell = fx.entry_cell(sys_b, cell_id="sysA", x=0, parent="1")
+    sysB_cell = fx.entry_cell(sys_b, cell_id="sysB", x=0, parent="sysA")
+    cell_a = fx.entry_cell(person, cell_id="p_new", x=0, parent="sysA")
+    cell_b = fx.entry_cell(component, cell_id="c_new", x=100, parent="sysB")
+
+    results = []
+    for order in ([sysA_cell, sysB_cell, cell_b, cell_a],
+                   [sysA_cell, sysB_cell, cell_a, cell_b]):
+        doc = fx.document(*order)
+        _, plan, merged = _run_pipeline(existing_text, doc)
+        assert merge.validate(merged) is None
+        document = parse_mdg(merged)
+        assert isinstance(document, Document)
+        parents = {n.id: n.parent_id for n in document.nodes}
+        results.append(
+            {n: parents[n] for n in parents if n not in ("sysA", "sysB")}
+        )
+
+    assert results[0] == results[1]
+    (person_node,) = [n for n, p in results[0].items() if p == "sysA"]
+    (component_node,) = [n for n, p in results[0].items() if p == "sysB"]
+    assert person_node != component_node
+
+
+@needs_data
+def test_merge_does_not_duplicate_a_node_declared_with_a_trailing_comment() -> None:
+    """Regression: index_existing must see past a trailing '#' comment on a
+    declaration -- otherwise the merge tool believes an already-drawn shape
+    is new and inserts a duplicate."""
+    sys_b = fx.get(INDEX, "c4.system_boundary.v1")
+    container = fx.get(INDEX, "c4.container.v1")
+    existing_text = (
+        '---\ntitle: "T"\npage: "P"\nmode: layered\n---\n\n'
+        'c4.System_Boundary(sys1, "Mitt system"):\n'
+        '    c4.Container(web1, "Webbapp")  # legacy, keep as-is\n'
+    )
+    doc = fx.document(
+        fx.entry_cell(sys_b, cell_id="sys1", parent="1"),
+        fx.entry_cell(container, cell_id="web1", parent="sys1"),
+    )
+    _, plan, merged = _run_pipeline(existing_text, doc)
+    assert plan.new_node_count == 0
+    assert merged.count("Container(web1") == 1
+
+
+@needs_data
+def test_merge_label_with_quote_comma_quote_round_trips_correctly() -> None:
+    """Regression: XML-escaping a label meant for a Python-parsed string
+    literal let a label like ``Bad", "Extra`` silently truncate and fabricate
+    an extra positional argument. Must now round-trip exactly."""
+    person = fx.get(INDEX, "c4.person.v1")
+    tricky_label = 'Bad", "Extra'
+    labeled = (
+        f'<object id="p_new" c4Name="{xml_escape(tricky_label, {chr(34): "&quot;"})}">'
+        f'<mxCell style="{person.style}" vertex="1" parent="1">'
+        '<mxGeometry x="0" y="0" width="120" height="120" as="geometry"/>'
+        "</mxCell></object>"
+    )
+    doc = fx.document(labeled)
+    _, plan, merged = _run_pipeline(_BASE_MDG, doc)
+    assert merge.validate(merged) is None
+    document = parse_mdg(merged)
+    assert isinstance(document, Document)
+    new_node = next(n for n in document.nodes if n.id not in ("sys1", "web1"))
+    assert new_node.label == tricky_label
 
 
 # ── CLI (dry-run / --write / abort safety) ───────────────────────────────────

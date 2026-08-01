@@ -273,6 +273,26 @@ from the palette, never committed.
   never silently merge two cells into one. A single-page document's ids stay
   bare, matching the overwhelmingly common case.
 - Merging only emits new vertex declarations, not new edges (see above).
+- A first-arg id containing an *escaped* quote (`"na\"me"`) is mis-tracked by
+  `merge.py`'s quote-aware scanner and indexed under a garbled key — narrow
+  (draw.io cell ids/UUIDs essentially never contain embedded quotes), but a
+  known gap, not yet fixed.
+- `merge.py`'s `_shape_meta`/`_render_subtree` don't fully honour "nothing is
+  silently lost" for two edge cases: a registry entry missing its `function`
+  field crashes uncaught instead of reporting via `plan.skipped`, and if a
+  *parent's* shape fails to resolve, its whole subtree of otherwise-valid new
+  children is dropped with it, unreported.
+- A handful of parse-robustness gaps remain in `derive.py`: an object cell
+  whose inner `mxCell` has an explicit empty `id=""` (as opposed to no `id`
+  attribute at all) still fails the id-copy-down and can collapse with
+  another cell; duplicate ids across an `<object>`/plain-`mxCell` pair are
+  resolved by processing order, not true document order; a compressed
+  `<diagram>` page that decompresses to non-XML garbage raises an uncaught
+  `ET.ParseError` instead of being treated as an unparseable page; a page
+  that fails to decompress at all silently contributes zero cells with no
+  signal to the user; and `scoring.py`'s naive `;`-split has no
+  escaping, so a style value containing an unescaped `;` (e.g. an inlined
+  `data:` URI) corrupts that cell's token parse.
 
 ## Quality dashboard
 
