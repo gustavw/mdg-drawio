@@ -6,7 +6,7 @@ help:  ## List the available targets
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
 		| awk 'BEGIN{FS=":.*?## "}{printf "  %-15s %s\n", $$1, $$2}'
 
-.PHONY: help test mypy ruff lint model-check verification coverage-gate check drawio build-data diagrams trace dead-code dashboard clean
+.PHONY: help test mypy ruff lint model-check verification coverage-gate check drawio build-data diagrams trace dead-code dashboard derive merge clean
 
 ARCH_DIR := docs/architecture
 ARCH_DIAGRAMS := c4_architecture code_architecture decisions
@@ -83,6 +83,21 @@ dead-code:  ## Advisory dead-code report (reachability vs definitions)
 # so it is a standalone target, not part of `check`.
 dashboard:  ## Build the static D3 quality dashboard (dashboard.html)
 	$(PYTHON) scripts/build_dashboard.py
+
+# Reverse derivation (POC): given a hand-drawn .drawio, derive which registry
+# shape each cell came from via weighted style matching + library ranking.
+# Needs generated data (reads the palette styles). Usage:
+#   make derive FILE=path/to/diagram.drawio
+derive:  ## Reverse-derive registry shapes from a .drawio (FILE=...)
+	$(PYTHON) -m scripts.reverse $(FILE)
+
+# Merge newly hand-drawn cells from a .drawio into an existing .mdg, correctly
+# indented/nested. Dry run by default (prints a diff, touches nothing); pass
+# WRITE=1 to actually apply -- validated against the real .mdg parser first,
+# so an invalid merge is refused and the file left untouched. Usage:
+#   make merge MDG=path/to/existing.mdg FILE=path/to/diagram.drawio [WRITE=1]
+merge:  ## Merge new .drawio cells into an existing .mdg (MDG=... FILE=... [WRITE=1])
+	$(PYTHON) -m scripts.reverse.merge_cli $(MDG) $(FILE) $(if $(WRITE),--write,)
 
 # Refresh the committed architecture diagrams from the model. Intentionally NOT
 # --force: the overlay round-trip preserves manually arranged node positions

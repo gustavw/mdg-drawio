@@ -154,6 +154,146 @@ language, so treat "truly dead" as a strong hint, not a proof:
   `__all__` re-exports are treated as surface, not use, so unused public API is
   reported and annotated `(exported public API)` for human judgement.
 
+## Reverse derivation (draw.io → shape) — POC
+
+The forward pipeline turns a `.mdg` document into a `.drawio` diagram. The
+reverse — take a diagram a user drew directly in the draw.io UI and derive which
+registry shape each cell came from — lives in
+[`scripts/reverse/`](scripts/reverse/) as a proof of concept.
+
+```bash
+make derive FILE=path/to/diagram.drawio      # needs `make build-data`
+```
+
+It works in two layers:
+
+1. **Weighted style match** ([`scoring.py`](scripts/reverse/scoring.py)) — a
+   cell's style is scored against every registry shape's canonical style.
+   Shape-defining tokens (`shape=`, `perimeter=`, bare shape names) carry a high
+   weight; cosmetic tokens (colour, font, alignment, spacing) a small one. So a
+   recoloured or re-fonted cell still matches its shape, while a cosmetic
+   *agreement* still breaks ties between otherwise-identical shapes (e.g. C4
+   `Person` vs `Person_Ext`, which differ only by fill colour).
+2. **Document-level ranking** ([`derive.py`](scripts/reverse/derive.py)) — most
+   shapes (~78%) have a globally-unique style and resolve directly. For the rest,
+   unambiguous cells vote for their library and a small version-recency prior
+   defaults a lone ambiguous shape to the newest version: a solitary UML lifeline
+   resolves to `uml25`, but add any uml-only shape and its anchor vote pulls the
+   lifeline to `uml`.
+3. **Semantic naming** ([`naming.py`](scripts/reverse/naming.py)) — every
+   resolved cell gets a `.mdg`-ready `node_id` (`person1`, `system1`, ...), one
+   counter per shape function, in document order. `node_id`s are author-chosen
+   per `GRAMMAR.md`; a derived one is a starting point, not a fixed identity —
+   pure and re-derivable, so relabelling it later costs nothing. (Aside: `.mdg`
+   already accepts a quoted GUID as a `node_id` — `c4.Person("550e8400-...", ...)`
+   round-trips today — should this scale to a large EA model needing stable
+   external identities instead of mnemonic names.)
+
+4. **Containment resolution** ([`containment.py`](scripts/reverse/containment.py))
+   — resolves where each cell nests and how deep, by climbing draw.io's own
+   `parent=` chain to the nearest ancestor whose resolved shape has a non-empty
+   registry `contains.allowed` (only `System_Boundary`/`Container_Boundary`
+   today — read from the registry, never hardcoded, so this tracks future
+   registry changes automatically). Everything else encountered while
+   climbing is transparently skipped, with a warning recorded so a human can
+   review the source file: a draw.io "layer" (styleless, organisational), a
+   Ctrl+G "group" (a UI bounding box), an ancestor that didn't resolve to any
+   shape, or one that resolved but isn't container-capable (e.g. a cell
+   accidentally nested inside a Person). A malformed/adversarial parent cycle
+   is detected and stops the climb rather than looping. Edges are excluded
+   entirely — `.mdg` declares relationships flat, so containment isn't
+   meaningful for them.
+
+   *Only C4 has a real forward `.mdg` parser today, and it has zero shapes
+   declaring `rows.allowed` (verified against the registry) — every nested
+   child is genuine containment, never a compartment row, so this targets
+   pure parent/child nesting only. The rows-vs-containment branch `GRAMMAR.md`
+   describes is a pre-existing gap in the forward parser itself
+   (`dsl_engine.py` never reads a shape's `rows.allowed`/`contains.allowed` —
+   every indented child becomes a contained node regardless of what the
+   parent declares), out of scope here; revisit if another notation gains a
+   real parser with shapes that declare rows.*
+
+5. **Merging into an existing `.mdg`** ([`merge.py`](scripts/reverse/merge.py),
+   [`merge_cli.py`](scripts/reverse/merge_cli.py)) — splices genuinely new
+   cells into an existing, hand-authored `.mdg` file's *text*, correctly
+   indented and nested, without disturbing anything already there. This is a
+   text-level merge, not a model-level one: re-serializing the whole document
+   from a freshly-built model would risk reformatting or dropping content the
+   forward generator doesn't round-trip, so new lines are inserted at the
+   right place instead.
+
+   ```bash
+   make merge MDG=path/to/existing.mdg FILE=path/to/diagram.drawio          # dry run
+   make merge MDG=path/to/existing.mdg FILE=path/to/diagram.drawio WRITE=1  # applies it
+   ```
+
+   A cell is "new" iff its raw draw.io id doesn't match a node_id already
+   declared in the `.mdg` — the same identity convention the forward
+   generator and its geometry overlay already rely on (a previously-generated
+   node's draw.io cell id equals its `.mdg` node_id). Freshly-assigned names
+   are seeded past whatever the existing file already uses (`reserved_counters`
+   in `naming.py`), so a new Person can't collide with an existing `person1`.
+   A brand-new *nested* subtree (a new container with new children inside it,
+   drawn in one sitting) is rendered as one atomic block and spliced in
+   together. A label is read from a C4 object cell's own `c4Name` attribute
+   when present (its plain `value` is only an unsubstituted `%c4Name%`
+   template — see `Cell.object_attrs` in `derive.py`), falling back to the
+   `label or node_id` convention the forward engine already applies when
+   there isn't one.
+
+   **Safety.** This module never writes a file — `merge_cli.py` is
+   dry-run-by-default (prints a unified diff) and re-parses the merged result
+   through the same parser the real pipeline uses
+   (`mdg_drawio.notation.parse`) before `--write`/`WRITE=1` is honoured; if it
+   doesn't parse cleanly, the file is left untouched and the error reported.
+
+   *Scope: vertices only. A new connector drawn between two shapes (a
+   `c4.Rel(...)`) is detected and counted, but not yet emitted — edges are a
+   separate, later extension.*
+
+Each cell reports its derived shape, node id, nesting (nearest container +
+depth), similarity, a confidence, and how it was resolved (`unique` /
+`single-library` / `library-vote` / `recency-prior`). The palette styles are
+draw.io-copyright (git-ignored), so this — and its tests — need
+`make build-data`; ground-truth `.drawio` fixtures are synthesized at test time
+from the palette, never committed.
+
+**Known limitations.**
+- Ranking resolves *which library*; it does not yet disambiguate variants
+  that share one style *within* a library (e.g. BPMN choreography markers, or
+  C4's `System_Boundary`/`Container_Boundary`, which turned out to have
+  byte-identical styles too). Those need the registry's `discriminator` field
+  populated with structural rules (child cells / decorators) — a separate,
+  later step.
+- draw.io ids are page-scoped (each page independently numbers its own
+  cells), so the same raw id commonly recurs across pages — `load_cells` and
+  `parent_map` prefix every id with its page index (`"0:5"`) whenever a
+  document has more than one page, so a same-id collision across pages can
+  never silently merge two cells into one. A single-page document's ids stay
+  bare, matching the overwhelmingly common case.
+- Merging only emits new vertex declarations, not new edges (see above).
+- A first-arg id containing an *escaped* quote (`"na\"me"`) is mis-tracked by
+  `merge.py`'s quote-aware scanner and indexed under a garbled key — narrow
+  (draw.io cell ids/UUIDs essentially never contain embedded quotes), but a
+  known gap, not yet fixed.
+- `merge.py`'s `_shape_meta`/`_render_subtree` don't fully honour "nothing is
+  silently lost" for two edge cases: a registry entry missing its `function`
+  field crashes uncaught instead of reporting via `plan.skipped`, and if a
+  *parent's* shape fails to resolve, its whole subtree of otherwise-valid new
+  children is dropped with it, unreported.
+- A handful of parse-robustness gaps remain in `derive.py`: an object cell
+  whose inner `mxCell` has an explicit empty `id=""` (as opposed to no `id`
+  attribute at all) still fails the id-copy-down and can collapse with
+  another cell; duplicate ids across an `<object>`/plain-`mxCell` pair are
+  resolved by processing order, not true document order; a compressed
+  `<diagram>` page that decompresses to non-XML garbage raises an uncaught
+  `ET.ParseError` instead of being treated as an unparseable page; a page
+  that fails to decompress at all silently contributes zero cells with no
+  signal to the user; and `scoring.py`'s naive `;`-split has no
+  escaping, so a style value containing an unescaped `;` (e.g. an inlined
+  `data:` URI) corrupts that cell's token parse.
+
 ## Quality dashboard
 
 `make dashboard` aggregates every Makefile quality signal into a single
