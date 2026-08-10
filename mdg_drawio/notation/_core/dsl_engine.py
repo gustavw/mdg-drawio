@@ -618,7 +618,7 @@ def _process_block_call(
                 nodes,
                 container_stack,
             )
-            if call.opens_block and node is not None:
+            if call.opens_block:
                 container_stack.append(
                     _open_container_frame(
                         node, registry_entry, call.namespace, call.name,
@@ -795,11 +795,14 @@ def _build_passthrough_node(
     line_number: int,
     nodes: list[Node],
     container_stack: list[_ContainerFrame],
-) -> Node | None:
-    """Build a passthrough Node, returning it (or None if skipped)."""
+) -> Node:
+    """Build a passthrough Node."""
     pos_args = [a for a in args if not isinstance(a, ast.keyword)]
     if not pos_args:
-        return None
+        raise DslError(
+            f"{ns}.{name}(): requires at least a node id argument",
+            line_number,
+        )
     node_id = _extract_arg_string(pos_args[0])
     if not node_id:
         raise DslError(

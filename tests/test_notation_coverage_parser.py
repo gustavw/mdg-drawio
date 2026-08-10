@@ -67,6 +67,49 @@ def test_mixed_kind_family_rejects_unknown_variant(call: str) -> None:
         parse(f"use {call.split('.', 1)[0]}\n{call}")
 
 
+# uml and uml25 are the only two libraries with a function whose registry
+# variants mix vertex and edge kinds (confirmed by scanning every library's
+# shapes_by_function()). Every other library's mixed-kind coverage is
+# vacuous: there is nothing to mix.
+@pytest.mark.parametrize(
+    ("call", "vertex_variant", "edge_variant"),
+    [
+        ("uml25.Constraint", 1, 2),
+        ("uml25.Extension", 1, 2),
+        ("uml25.Activity", 2, 1),
+        ("uml25.Message", 2, 1),
+    ],
+)
+def test_uml25_mixed_kind_families_classify_by_exact_variant(
+    call: str, vertex_variant: int, edge_variant: int
+) -> None:
+    doc = parse(f'use uml25\n{call}(a, "", variant={vertex_variant})')
+    assert isinstance(doc, Document)
+    assert [n.id for n in doc.nodes] == ["a"]
+    assert doc.edges == []
+
+    doc = parse(
+        'use uml25\n'
+        'uml25.Class(a, "")\n'
+        'uml25.Class(b, "")\n'
+        f'{call}(a, b, variant={edge_variant})'
+    )
+    assert isinstance(doc, Document)
+    assert [(e.source_id, e.target_id) for e in doc.edges] == [("a", "b")]
+
+
+# ---------------------------------------------------------------------------
+# Phase 3: a passthrough call with no positional arguments at all used to be
+# silently dropped (no node, no error) instead of rejected -- the native c4
+# parser already errors on this; the passthrough path now matches it.
+# ---------------------------------------------------------------------------
+
+
+def test_passthrough_node_with_no_positional_args_is_rejected() -> None:
+    with pytest.raises(DslError, match="requires at least a node id"):
+        parse("use uml\numl.Object()")
+
+
 # ---------------------------------------------------------------------------
 # C4's own edge builder: None, None unconnected palette-edge form
 # ---------------------------------------------------------------------------

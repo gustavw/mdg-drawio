@@ -62,21 +62,11 @@ def test_every_permutation_runs_without_crashing(results: list[TraceResult]) -> 
 
 
 def test_convertible_fixtures_convert(results: list[TraceResult]) -> None:
-    """Supported fixtures convert; fixtures with known parser gaps reject."""
-    convertible = (
-        "docs/architecture/",
-        "tests/action_fixtures/",
-        "mdg_drawio/notation/archimate3/",
-        "mdg_drawio/notation/bpmn2/",
-        "mdg_drawio/notation/c4/",
-        "mdg_drawio/notation/erd/",
-        "mdg_drawio/notation/general/",
-        "mdg_drawio/notation/uml/",
-        "mdg_drawio/notation/uml25/",
-    )
-    for r in results:
-        expected = "ok" if r.fixture.startswith(convertible) else "exit=1"
-        assert r.outcome == expected, f"{r.label}: expected {expected}, got {r.outcome}"
+    """Every traced fixture (all 7 notation coverage sheets, docs/architecture,
+    tests/action_fixtures) converts. There is no longer a known-gap notation to
+    special-case here -- see todo/notation-coverage-parser.md Phase 1."""
+    failed = [f"{r.label}: {r.outcome}" for r in results if r.outcome != "ok"]
+    assert not failed, "expected every traced fixture to convert:\n" + "\n".join(failed)
 
 
 def test_touched_union_covers_the_core_pipeline(results: list[TraceResult]) -> None:
