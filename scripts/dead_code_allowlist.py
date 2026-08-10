@@ -93,8 +93,12 @@ ALLOWLIST: dict[str, str] = {
     "mdg_drawio.notation._core.palette:top_level":
         "build-data palette pipeline only",
     # --- child-cell (compartment) rendering. Reached only when a node/edge
-    #     carries child_cells; no converting notation emits them yet (they are
-    #     for compartmented shapes such as ERD tables / UML class members).
+    #     carries child_cells; no converting notation emits them (registry
+    #     `rows.allowed` shapes -- e.g. uml.Class members -- render as real
+    #     contained Nodes instead: their palette style is a genuine draw.io
+    #     swimlane with childLayout=stackLayout/tableLayout, not a static
+    #     compartment, so NodeChildCell was never the right representation
+    #     for them; see todo/notation-coverage-parser.md Phase 2).
     #     Future scaffolding, not reachable by any current input.
     "mdg_drawio.contracts.models:ChildCell":
         "child-cell rendering; no notation emits child_cells yet",

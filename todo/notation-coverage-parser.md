@@ -89,31 +89,71 @@ original scope, but blocking correct coverage-sheet output):
   `object_attributes`, and any other field not in the hand-picked list back to
   its dataclass default. Now uses `dataclasses.replace()`.
 
-## Phase 2 - Render rows and containment correctly
+## Phase 2 - Render rows and containment correctly (done, revised scope)
 
-Estimated effort: 1-3 days.
+Estimated effort: 1-3 days. Actual: done 2026-08-10, with a materially
+smaller scope than originally planned -- see "Corrected premise" below.
 
-The shared parser currently treats every indented child as a contained diagram
-node. Registry semantics require two distinct paths:
+### Corrected premise
 
-- `rows.allowed`: build compartment content as `NodeChildCell` structures.
-- `contains.allowed`: build real child nodes with `parent_id` containment.
+This phase originally assumed `rows.allowed` shapes needed a representation
+change: build `NodeChildCell` compartment structures instead of real
+`Node`s. That assumption did not survive contact with the actual palette
+data and an existing test:
 
-Tasks:
+- The generated palette style for `uml.class.v1` is
+  `swimlane;...;childLayout=stackLayout;...` -- a genuine draw.io swimlane
+  container where children are real child vertices that draw.io auto-stacks,
+  not static compartment text. ERD tables are the same
+  (`childLayout=tableLayout`).
+- `tests/test_pipeline.py::test_stacklayout_container_children_stack_tightly`
+  already depends on `uml.Class` -> `uml.Item` rows becoming real contained
+  nodes with real layout-computed geometry, and was passing on `main` before
+  this phase started.
+- The project's own self-hosted architecture doc
+  (`docs/architecture/code_architecture.mdg`) nests `uml.Package` ->
+  `uml.Package`/`uml.Class` as real containment, which also already worked.
 
-- [ ] Resolve the parent registry entry before processing its block.
-- [ ] Reject blocks for shapes that declare neither rows nor containment.
-- [ ] Validate row function names against `rows.allowed`.
-- [ ] Parse top-level `row_types` signatures and declared arguments.
-- [ ] Build recursive `NodeChildCell` data for compartment rows.
-- [ ] Validate contained node functions against `contains.allowed`.
-- [ ] Preserve registry-declared keyword arguments and fixed template fields.
-- [ ] Keep all validation errors line-numbered and actionable.
-- [ ] Add generator/XML tests for representative UML and UML 2.5 compartments.
-- [ ] Add containment tests proving rows do not become independent vertices.
+So `rows.allowed` and `contains` shapes both correctly render today as real
+`Node`s with `parent_id`, positioned by the container layout engine -- that
+part was never broken. The genuinely missing piece was **structural
+validation**: nothing checked that a nested function name was actually legal
+for its container, or that a block was only opened on a shape that declares
+one of the two.
 
-The generator already supports recursive node child cells, so this phase is
-primarily registry-driven parser and model-assembly work.
+### What shipped
+
+- [x] Resolve the parent registry entry before processing its block.
+- [x] Reject blocks for shapes that declare neither rows nor containment
+  (with a lenient fallback for unregistered functions and `kind: "diagram"`
+  reference entries, which carry no contract to validate against).
+- [x] Validate row function names against `rows.allowed`.
+- [x] Validate contained node functions against `contains.allowed`.
+- [x] Keep all validation errors line-numbered and actionable.
+- [x] Add tests proving rows/contained children still become real `Node`s
+  with `parent_id` (not `NodeChildCell`), plus rejection tests for an
+  invalid row, an invalid contained child, and a block on a shape with
+  neither.
+- [x] Fix a real registry gap this validation surfaced: `uml.package.v1` was
+  missing `contains: {allowed: ['*']}` even though the project's own
+  architecture doc already nests packages and classes inside it.
+
+### Explicitly not done (dropped, not deferred)
+
+- ~~Parse top-level `row_types` signatures and declared arguments~~ /
+  ~~Preserve registry-declared keyword arguments and fixed template
+  fields~~ -- these only made sense under the `NodeChildCell` premise. Row
+  calls parse through the same generic passthrough-node builder as any other
+  vertex now, which already handles `variant=` and the standard
+  `(node_id, label)` positional shape; no row-specific argument handling is
+  needed.
+- ~~Build recursive `NodeChildCell` data for compartment rows~~ -- superseded
+  by the corrected premise above. `NodeChildCell` remains legitimate, unused
+  future scaffolding (see `scripts/dead_code_allowlist.py`) for whatever
+  actually needs static compartment content -- not this feature.
+- ~~Add generator/XML tests for representative UML and UML 2.5
+  compartments~~ -- no generator change was made (rows already rendered
+  correctly), so there is nothing new to test at that layer.
 
 ## Phase 3 - Production hardening
 

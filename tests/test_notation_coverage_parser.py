@@ -138,3 +138,62 @@ def test_resolve_edge_style_differs_by_variant() -> None:
     assert style_v2 != style_v3
     assert "endArrow=block" in style_v2
     assert "endArrow=open" in style_v3
+
+
+# ---------------------------------------------------------------------------
+# Phase 2: registry-driven rows.allowed / contains.allowed validation.
+#
+# Both kinds nest as real Nodes with parent_id -- the palette style behind a
+# rows shape (e.g. uml.class.v1) is a genuine draw.io swimlane
+# (childLayout=stackLayout), not a static compartment, so this is the correct
+# representation for both (see tests/test_pipeline.py::
+# test_stacklayout_container_children_stack_tightly, which already depends on
+# it). What Phase 2 adds is validating the child/row function name against
+# the parent's registry entry, and rejecting a block on a shape that
+# declares neither.
+# ---------------------------------------------------------------------------
+
+
+def test_row_child_becomes_a_real_contained_node() -> None:
+    doc = parse(
+        'use uml\n'
+        'uml.Class(c1, "Classname"):\n'
+        '    uml.Item(f1, "+ field: type")'
+    )
+    assert isinstance(doc, Document)
+    item = next(n for n in doc.nodes if n.id == "f1")
+    assert item.parent_id == "c1"
+    assert item.child_cells == []
+
+
+def test_row_function_not_in_rows_allowed_is_rejected() -> None:
+    # uml.Class variant=2's rows.allowed is ['Item'] only -- Divider is legal
+    # on variant 1 but not variant 2.
+    with pytest.raises(DslError, match="not a valid row"):
+        parse(
+            'use uml\n'
+            'uml.Class(c1, "Classname", variant=2):\n'
+            '    uml.Divider(d1, "")'
+        )
+
+
+def test_contained_function_outside_contains_allowed_is_rejected() -> None:
+    # No current registry entry restricts contains.allowed to specific
+    # function names (every real one is '*'), so this exercises the
+    # validator directly rather than through a real notation.
+    from mdg_drawio.notation._core.dsl_engine import (
+        _ContainerFrame,
+        _validate_child_allowed,
+    )
+
+    frame = _ContainerFrame(
+        indent=0, node_id="p1", kind_label="child", allowed=frozenset({"Allowed"})
+    )
+    with pytest.raises(DslError, match="not a valid child"):
+        _validate_child_allowed(frame, "general", "NotAllowed", 1)
+    _validate_child_allowed(frame, "general", "Allowed", 1)  # does not raise
+
+
+def test_block_on_shape_with_neither_rows_nor_containment_is_rejected() -> None:
+    with pytest.raises(DslError, match="neither rows nor containment"):
+        parse('use uml\numl.Object(o1, "Object"):\n    uml.Item(i1, "x")')

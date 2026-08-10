@@ -21,6 +21,7 @@ grammar:
   root: UML
   notes:
   - Compartment children use Item/Divider/CompositeLabel rows.
+  - "Package contains child nodes (contains: '*')."
 row_types:
 - name: Item
   args:
@@ -565,11 +566,17 @@ shapes:
     required: false
   rows:
     allowed: []
+  contains:
+    allowed:
+    - '*'
+  containment:
+    strategy: freeform
   related:
     variants: []
     see_also: []
   example: |
-    uml.Package(n1, "package")
+    uml.Package(n1, "package"):
+        uml.Class(n2, "member class")
   metamodel:
     spec: uml-2.5
     element: Package

@@ -410,10 +410,37 @@ class _ParsedBlockCall:
     opens_block: bool
 
 
+@dataclass(frozen=True)
+class _ContainerFrame:
+    """One open block on the container stack.
+
+    Both a ``rows.allowed`` shape (UML class members, ERD table rows) and a
+    ``contains`` shape (BPMN pools, C4 boundaries) nest their children as
+    real ``Node``s with ``parent_id`` set to this frame's ``node_id`` -- the
+    palette style backing a rows-shape is a genuine draw.io swimlane
+    (``childLayout=stackLayout``/``tableLayout``), not a static compartment,
+    so real contained nodes are the correct representation for both, and the
+    container layout engine already positions them that way (see
+    ``tests/test_pipeline.py::test_stacklayout_container_children_stack_tightly``).
+    The only difference between the two is which function names are legal
+    directly beneath this frame -- that's what ``allowed`` validates.
+
+    ``allowed`` of ``None`` means unrestricted: either a genuine
+    ``contains: {allowed: ['*']}`` entry, or an unregistered function kept
+    lenient for backward compatibility. ``kind_label`` ("row"/"child") is
+    only used to phrase a rejection's error message.
+    """
+
+    indent: int
+    node_id: str
+    kind_label: str  # "row" | "child"
+    allowed: frozenset[str] | None = None
+
+
 def _process_registry_root(
     call: _ParsedBlockCall,
     line_number: int,
-    container_stack: list[tuple[int, str]],
+    container_stack: list[_ContainerFrame],
     state: dict[str, str],
 ) -> bool:
     """Consume a non-rendering registry root and apply its title as a fallback."""
@@ -467,11 +494,11 @@ def _parse_block_call_line(
 
 
 def _pop_container_stack(
-    container_stack: list[tuple[int, str]],
+    container_stack: list[_ContainerFrame],
     indent: int,
 ) -> None:
     """Pop containers no longer in scope for the current indent level."""
-    while container_stack and indent <= container_stack[-1][0]:
+    while container_stack and indent <= container_stack[-1].indent:
         container_stack.pop()
 
 
@@ -500,7 +527,7 @@ def parse_block_source(
     edges: list[Edge] = []
     # Boxed so the per-call helper can update it in place.
     state: dict[str, str] = {"diagram_name": diagram_name_default}
-    container_stack: list[tuple[int, str]] = []  # (indent, node_id)
+    container_stack: list[_ContainerFrame] = []
 
     for line_number, raw_line in enumerate(source.splitlines(), start=1):
         call = _parse_block_call_line(
@@ -546,7 +573,7 @@ def _process_block_call(
     build_edge: EdgeBuilder,
     nodes: list[Node],
     edges: list[Edge],
-    container_stack: list[tuple[int, str]],
+    container_stack: list[_ContainerFrame],
     state: dict[str, str],
 ) -> None:
     """Process one parsed block call, mutating nodes/edges/container_stack.
@@ -563,6 +590,8 @@ def _process_block_call(
         foreign_args = parse_call_arguments(call.args_source, line_number)
         _pop_container_stack(container_stack, call.indent)
         foreign_variant = _passthrough_variant(foreign_args, line_number)
+        parent_frame = container_stack[-1] if container_stack else None
+
         registry_entry = _registry_entry(
             call.namespace, call.name, foreign_variant, line_number
         )
@@ -576,7 +605,11 @@ def _process_block_call(
                 edges,
             )
         else:
-            node_id = _build_passthrough_node(
+            if parent_frame is not None:
+                _validate_child_allowed(
+                    parent_frame, call.namespace, call.name, line_number
+                )
+            node = _build_passthrough_node(
                 call.namespace,
                 call.name,
                 foreign_args,
@@ -585,8 +618,13 @@ def _process_block_call(
                 nodes,
                 container_stack,
             )
-            if call.opens_block and node_id:
-                container_stack.append((call.indent, node_id))
+            if call.opens_block and node is not None:
+                container_stack.append(
+                    _open_container_frame(
+                        node, registry_entry, call.namespace, call.name,
+                        call.indent, line_number,
+                    )
+                )
         return
 
     args = parse_call_arguments(call.args_source, line_number)
@@ -604,11 +642,13 @@ def _process_block_call(
 
     node = build_node(call.name, args, line_number)
     if container_stack:
-        node.parent_id = container_stack[-1][1]
+        node.parent_id = container_stack[-1].node_id
     nodes.append(node)
 
     if call.opens_block:
-        container_stack.append((call.indent, node.id))
+        container_stack.append(
+            _ContainerFrame(indent=call.indent, node_id=node.id, kind_label="child")
+        )
 
 def _registry_entry(
     ns: str, function: str, variant: int, line_number: int
@@ -641,6 +681,76 @@ def _registry_entry(
     raise DslError(
         f"{ns}.{function}(): unsupported variant {variant}; expected one of "
         f"{valid_variants}",
+        line_number,
+    )
+
+
+def _classify_container_kind(
+    entry: dict[str, object] | None,
+) -> tuple[str, frozenset[str] | None]:
+    """Decide what kind of block a shape's registry entry may open.
+
+    Returns ``(kind_label, allowed)``. ``kind_label`` is one of:
+
+    - ``"row"``: children are compartment rows (``rows.allowed`` is
+      non-empty). ``allowed`` is that set.
+    - ``"child"``: children are real contained nodes (a ``contains`` entry is
+      present). ``allowed`` of ``None`` means unrestricted.
+    - ``"none"``: the shape declares neither -- a block on it is invalid.
+
+    An unresolved entry (unregistered function) is treated as unrestricted
+    ``"child"``, preserving the parser's pre-Phase-2 lenient behavior for
+    notations without full registry coverage. So is a ``kind: "diagram"``
+    entry (a pre-composed, non-primitive reference fragment, e.g.
+    ``uml25.Expansion`` -- ``buildable: false``, no ``rows``/``contains`` of
+    its own): coverage sheets still demonstrate it with nested content, and
+    it carries no registry contract to validate that content against.
+    """
+    if entry is None or entry.get("kind") == "diagram":
+        return "child", None
+    rows = entry.get("rows")
+    rows_dict = rows if isinstance(rows, dict) else {}
+    rows_allowed = frozenset(rows_dict.get("allowed") or [])
+    if rows_allowed:
+        return "row", rows_allowed
+    contains = entry.get("contains")
+    if isinstance(contains, dict):
+        allowed = contains.get("allowed") or []
+        return "child", None if allowed == ["*"] else frozenset(allowed)
+    return "none", None
+
+
+def _open_container_frame(
+    node: Node,
+    entry: dict[str, object] | None,
+    ns: str,
+    name: str,
+    indent: int,
+    line_number: int,
+) -> _ContainerFrame:
+    """Build the container-stack frame opened by *node*'s trailing colon."""
+    kind_label, allowed = _classify_container_kind(entry)
+    if kind_label == "none":
+        raise DslError(
+            f"{ns}.{name}(): shape has neither rows nor containment; it "
+            f"cannot open a block",
+            line_number,
+        )
+    return _ContainerFrame(
+        indent=indent, node_id=node.id, kind_label=kind_label, allowed=allowed
+    )
+
+
+def _validate_child_allowed(
+    parent_frame: _ContainerFrame, ns: str, name: str, line_number: int
+) -> None:
+    """Reject a child function not permitted by the parent's rows/contains.allowed."""
+    if parent_frame.allowed is None or name in parent_frame.allowed:
+        return
+    allowed = ", ".join(sorted(parent_frame.allowed)) or "(none)"
+    raise DslError(
+        f"{ns}.{name}(): not a valid {parent_frame.kind_label} of "
+        f"{parent_frame.node_id!r}; expected one of {allowed}",
         line_number,
     )
 
@@ -684,9 +794,9 @@ def _build_passthrough_node(
     variant: int,
     line_number: int,
     nodes: list[Node],
-    container_stack: list[tuple[int, str]],
-) -> str | None:
-    """Build a passthrough Node, returning its id (or None if skipped)."""
+    container_stack: list[_ContainerFrame],
+) -> Node | None:
+    """Build a passthrough Node, returning it (or None if skipped)."""
     pos_args = [a for a in args if not isinstance(a, ast.keyword)]
     if not pos_args:
         return None
@@ -708,9 +818,9 @@ def _build_passthrough_node(
         element_name=name,
     )
     if container_stack:
-        node.parent_id = container_stack[-1][1]
+        node.parent_id = container_stack[-1].node_id
     nodes.append(node)
-    return node_id
+    return node
 
 
 def _build_passthrough_edge(
