@@ -11,6 +11,7 @@ any other mode.
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -75,10 +76,14 @@ class PaletteLayout(BaseLayout):
             pos = node_map.get(node.id) if node.id else None
             if pos is None:
                 pos = node_map.get(node.extra.get("elementName", ""))
+            # Only position (x/y/width/height) comes from the palette file;
+            # every other field carries over from the parsed node via
+            # replace() -- a field-by-field reconstruction here previously
+            # silently dropped variant (and would drop any future field too),
+            # so a variant=2 shape rendered with variant 1's style/label.
             placed.append(
-                Node(
-                    id=node.id,
-                    type=node.type,
+                replace(
+                    node,
                     x=float(pos.get("x", node.x)) if pos else node.x,
                     y=float(pos.get("y", node.y)) if pos else node.y,
                     width=float(pos.get("width", node.width))
@@ -87,8 +92,6 @@ class PaletteLayout(BaseLayout):
                     height=float(pos.get("height", node.height))
                     if pos
                     else node.height,
-                    label=node.label,
-                    parent_id=node.parent_id,
                     style_overrides=dict(node.style_overrides),
                     extra=dict(node.extra),
                 )
@@ -105,18 +108,13 @@ class PaletteLayout(BaseLayout):
 
         routed: list[Edge] = []
         for edge in edges:
+            # Same reasoning as the node loop above: only waypoints come from
+            # the palette file, everything else (object_attributes, variant
+            # in extra, etc.) carries over via replace().
             routed.append(
-                Edge(
-                    id=edge.id,
-                    type=edge.type,
-                    source_id=edge.source_id,
-                    target_id=edge.target_id,
+                replace(
+                    edge,
                     waypoints=edge_map.get(edge.id, edge.waypoints),
-                    source_anchor=edge.source_anchor,
-                    target_anchor=edge.target_anchor,
-                    hidden=edge.hidden,
-                    label=edge.label,
-                    description=edge.description,
                     style_overrides=dict(edge.style_overrides),
                     extra=dict(edge.extra),
                 )

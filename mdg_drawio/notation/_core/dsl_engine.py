@@ -530,6 +530,7 @@ def parse_block_source(
         except (ValueError, TypeError) as exc:
             raise DslError(str(exc), line_number) from exc
 
+    _ensure_endpoint_free_edge_ids_are_unique(nodes, edges)
     return nodes, edges, state["diagram_name"]
 
 
@@ -561,14 +562,28 @@ def _process_block_call(
         # is an edge or a node, then build appropriately.
         foreign_args = parse_call_arguments(call.args_source, line_number)
         _pop_container_stack(container_stack, call.indent)
-        if _is_registry_edge(call.namespace, call.name):
+        foreign_variant = _passthrough_variant(foreign_args, line_number)
+        registry_entry = _registry_entry(
+            call.namespace, call.name, foreign_variant, line_number
+        )
+        if registry_entry and registry_entry.get("kind") == "edge":
             _build_passthrough_edge(
-                call.namespace, call.name, foreign_args, line_number, edges,
+                call.namespace,
+                call.name,
+                foreign_args,
+                foreign_variant,
+                line_number,
+                edges,
             )
         else:
             node_id = _build_passthrough_node(
-                call.namespace, call.name, foreign_args, line_number,
-                nodes, container_stack,
+                call.namespace,
+                call.name,
+                foreign_args,
+                foreign_variant,
+                line_number,
+                nodes,
+                container_stack,
             )
             if call.opens_block and node_id:
                 container_stack.append((call.indent, node_id))
@@ -595,16 +610,39 @@ def _process_block_call(
     if call.opens_block:
         container_stack.append((call.indent, node.id))
 
-def _is_registry_edge(ns: str, function: str) -> bool:
-    """Check if *function* is registered as an edge in the *ns* notation."""
+def _registry_entry(
+    ns: str, function: str, variant: int, line_number: int
+) -> dict[str, object] | None:
+    """Resolve exactly ``(ns, function, variant)`` for passthrough dispatch.
+
+    Unknown functions retain the parser's existing generic-node behavior, as
+    do undeclared variants in a single-kind family (full variant validation is
+    Phase 3). In a mixed-kind family, however, falling back can change a vertex
+    into an edge or vice versa, so an unsupported variant is an actionable,
+    line-numbered authoring error.
+    """
     from .registry import shapes_by_function
 
     try:
         by_func = shapes_by_function(ns)
     except (KeyError, FileNotFoundError):
-        return False
+        return None
     entries = by_func.get(function, [])
-    return any(e.get("kind") == "edge" for e in entries)
+    for entry in entries:
+        if int(entry.get("variant", 1)) == variant:
+            return entry
+    if not entries:
+        return None
+    if len({entry.get("kind") for entry in entries}) == 1:
+        return entries[0]
+    valid_variants = ", ".join(
+        str(entry.get("variant", 1)) for entry in entries
+    )
+    raise DslError(
+        f"{ns}.{function}(): unsupported variant {variant}; expected one of "
+        f"{valid_variants}",
+        line_number,
+    )
 
 
 def _registry_root(ns: str) -> str:
@@ -643,6 +681,7 @@ def _build_passthrough_node(
     ns: str,
     name: str,
     args: list[ast.AST | ast.keyword],
+    variant: int,
     line_number: int,
     nodes: list[Node],
     container_stack: list[tuple[int, str]],
@@ -665,7 +704,7 @@ def _build_passthrough_node(
         id=node_id,
         type=f"{ns}.{name}",
         label=label,
-        variant=_passthrough_variant(args, line_number),
+        variant=variant,
         element_name=name,
     )
     if container_stack:
@@ -678,6 +717,7 @@ def _build_passthrough_edge(
     ns: str,
     name: str,
     args: list[ast.AST | ast.keyword],
+    variant: int,
     line_number: int,
     edges: list[Edge],
 ) -> None:
@@ -700,7 +740,6 @@ def _build_passthrough_edge(
             f"{ns}.{name}(): edge requires source and target ids",
             line_number,
         )
-    variant = _passthrough_variant(args, line_number)
     edge = Edge(
         id=f"palette-edge-{len(edges) + 1}" if unconnected else "",
         type=f"{ns}.{name}",
@@ -710,6 +749,31 @@ def _build_passthrough_edge(
         extra={"variant": variant},
     )
     edges.append(edge)
+
+
+def _ensure_endpoint_free_edge_ids_are_unique(
+    nodes: list[Node], edges: list[Edge]
+) -> None:
+    """Avoid collisions between generated palette-edge IDs and authored IDs."""
+    endpoint_free = [
+        edge for edge in edges if not edge.source_id and not edge.target_id
+    ]
+    used_ids = {node.id for node in nodes}
+    used_ids.update(
+        edge.id
+        for edge in edges
+        if (edge.source_id or edge.target_id) and edge.id
+    )
+
+    for edge in endpoint_free:
+        base_id = edge.id or "palette-edge"
+        candidate = base_id
+        suffix = 2
+        while candidate in used_ids:
+            candidate = f"{base_id}-{suffix}"
+            suffix += 1
+        edge.id = candidate
+        used_ids.add(candidate)
 
 
 def _extract_arg_string(node: ast.AST) -> str:

@@ -155,8 +155,8 @@ class StyleProvider(Protocol):
     state and never touches the filesystem itself.
     """
 
-    def resolve_style(self, node_type: str) -> str: ...
-    def resolve_edge_style(self, edge_type: str) -> str: ...
+    def resolve_style(self, node_type: str, variant: int = 1) -> str: ...
+    def resolve_edge_style(self, edge_type: str, variant: int = 1) -> str: ...
     def label_template(self, node_type: str, variant: int = 1) -> tuple[str, bool]: ...
     def style_corrections(self, node_type: str) -> dict[str, _StyleValue]: ...
     def type_padding(self, node_type: str) -> dict[str, _StyleValue]: ...
@@ -170,18 +170,23 @@ class PaletteStyleProvider:
     styles: dict[str, dict]      # {library: {shape_id: entry}}
     overrides: _TypeOverrides    # {node_type: {"style"/"padding": {...}}}
 
-    def resolve_style(self, node_type: str) -> str:
-        return self._registry_style(node_type) or DEFAULT_VERTEX_STYLE
+    def resolve_style(self, node_type: str, variant: int = 1) -> str:
+        return self._registry_style(node_type, variant) or DEFAULT_VERTEX_STYLE
 
-    def resolve_edge_style(self, edge_type: str) -> str:
-        return self._registry_style(edge_type) or DEFAULT_EDGE_STYLE
+    def resolve_edge_style(self, edge_type: str, variant: int = 1) -> str:
+        return self._registry_style(edge_type, variant) or DEFAULT_EDGE_STYLE
 
-    def _registry_style(self, type_str: str) -> str | None:
-        """Style string from the palette, gated by a known registry function."""
+    def _registry_style(self, type_str: str, variant: int = 1) -> str | None:
+        """Style string from the palette, gated by a known registry function.
+
+        A function family's variants can have genuinely different geometry
+        (e.g. bpmn2 Pool v1 vs v2 orientation) -- resolving without the
+        requested variant would silently render every variant as v1.
+        """
         library, function = _split_type(type_str)
         if not library or not self.registries.get(library, {}).get(function):
             return None
-        entry = self._palette_entry(library, function)
+        entry = self._palette_entry(library, function, variant)
         return (str(entry.get("style", "")) if entry else "") or None
 
     def _palette_entry(
@@ -343,7 +348,7 @@ def _append_node(mx_root: ET.Element, node: Node, ctx: _GenCtx) -> None:
     node_id = node.id
     parent_id = node.parent_id or PAGE_CELL_ID
 
-    base_style = ctx.styles.resolve_style(node.type)
+    base_style = ctx.styles.resolve_style(node.type, node.variant)
     if ctx.apply_overrides:
         base_style = _apply_corrections(
             base_style, ctx.styles.style_corrections(node.type)
@@ -521,7 +526,7 @@ def _build_edge_style(edge: Edge, ctx: _GenCtx) -> str:
     Starts from the palette edge style, then applies container-routing rules
     and any per-edge style overrides.
     """
-    base_style = ctx.styles.resolve_edge_style(edge.type)
+    base_style = ctx.styles.resolve_edge_style(edge.type, _coerce_variant(edge))
     # Strip orthogonal routing tokens — only allowed for container edges
     full_style = _strip_style_tokens(base_style, {"edgeStyle", "elbow"})
     if edge.source_id in ctx.container_ids or edge.target_id in ctx.container_ids:

@@ -1,6 +1,6 @@
 # TODO - Complete coverage-sheet parsing
 
-Status: open, assessed 2026-08-10.
+Status: Phase 1 done 2026-08-10. Phase 2 and Phase 3 open.
 
 ## Goal
 
@@ -9,12 +9,23 @@ then make their compartment and containment output structurally correct.
 
 Current behavior:
 
-- ArchiMate, BPMN, ERD, and General coverage sheets convert successfully.
-- C4, UML, and UML 2.5 reject cleanly on unsupported parser cases.
-- The action-trace gate records those three failures as expected until this work
-  is complete.
+- All seven coverage sheets (ArchiMate, BPMN, C4, ERD, General, UML, UML 2.5)
+  convert successfully.
+- Registry dispatch resolves node-versus-edge by the exact
+  `(namespace, function, variant)` entry, so mixed-kind function families
+  (`uml.FoundMessage`, `uml25.Dependency`) classify correctly per variant.
+- The C4 edge builder accepts the `None, None` unconnected palette-edge form
+  and still rejects one-sided `None` with a line-numbered `DslError`.
+- Style resolution (`resolve_style`/`resolve_edge_style`) and `PaletteLayout`
+  repositioning both carry the resolved variant and all non-geometry fields
+  through, so a variant-2 shape no longer renders with variant 1's style.
+- `tests/test_notation_coverage_parser.py` pins the mixed-kind classification,
+  the C4 `None, None` form, and variant-aware style resolution.
+- Phase 2 (rows/containment correctness) has not been started: the shared
+  parser still treats every indented child as a contained node, not as
+  registry-driven rows vs. containment.
 
-## Immediate failures
+## Immediate failures (resolved in Phase 1)
 
 ### C4
 
@@ -48,23 +59,35 @@ an edge when any of its registry variants is an edge.
 The same function-level classification therefore parses variant 2 using the
 edge contract.
 
-## Phase 1 - Make all three convert
+## Phase 1 - Make all three convert (done)
 
-Estimated effort: 2-4 hours.
+Estimated effort: 2-4 hours. Actual: done 2026-08-10.
 
-- [ ] Resolve the exact registry entry by `(namespace, function, variant)`.
-- [ ] Decide node versus edge from that entry's `kind`, not from all entries
+- [x] Resolve the exact registry entry by `(namespace, function, variant)`.
+- [x] Decide node versus edge from that entry's `kind`, not from all entries
   sharing the function name.
-- [ ] Use the selected entry consistently for style, argument, and variant
-  handling.
-- [ ] Support `None, None` palette edges in the C4-specific builder.
-- [ ] Give every endpoint-free edge a stable, unique generated id.
-- [ ] Keep one-sided edges invalid with a line-numbered `DslError`.
-- [ ] Add regression tests for mixed vertex/edge function families.
-- [ ] Update the action-trace expectations when each coverage sheet converts.
+- [x] Use the selected entry consistently for node/edge dispatch, style, and
+  variant handling. Full registry-driven argument validation remains Phase 3.
+- [x] Support `None, None` palette edges in the C4-specific builder.
+- [x] Give every endpoint-free edge a stable, unique generated id.
+- [x] Keep one-sided edges invalid with a line-numbered `DslError`.
+- [x] Add regression tests for mixed vertex/edge function families.
+- [x] Update the action-trace expectations when each coverage sheet converts
+  (`tests/test_dead_code.py::test_convertible_fixtures_convert` now lists all
+  seven notations).
 
 This phase makes the files convert, but it does not guarantee correct UML
-compartment rendering.
+compartment rendering (Phase 2).
+
+Also fixed while verifying Phase 1 (found via manual testing, not in the
+original scope, but blocking correct coverage-sheet output):
+
+- `resolve_style`/`resolve_edge_style` in `mdg_drawio/generator/generator.py`
+  ignored the requested variant and always resolved variant 1's style.
+- `PaletteLayout.apply()` in `mdg_drawio/layout/palette.py` reconstructed
+  `Node`/`Edge` field-by-field, silently dropping `variant`,
+  `object_attributes`, and any other field not in the hand-picked list back to
+  its dataclass default. Now uses `dataclasses.replace()`.
 
 ## Phase 2 - Render rows and containment correctly
 

@@ -244,6 +244,33 @@ def test_palette_without_file_keeps_node_geometry() -> None:
     assert (placed.x, placed.y, placed.width, placed.height) == (11.0, 12.0, 40.0, 30.0)
 
 
+def test_palette_reposition_preserves_non_geometry_fields() -> None:
+    """Regression: repositioning used to reconstruct Node/Edge field-by-field,
+    silently dropping anything not in that hand-picked list (variant,
+    object_attributes, ...) back to its dataclass default -- a variant=2
+    shape would render with variant 1's style/label. replace() carries every
+    field forward except the geometry actually being overridden."""
+    n = Node(
+        id="a",
+        type="bpmn2.HorizontalLane",
+        label="",
+        variant=2,
+        object_attributes={"c4Name": "Alice"},
+    )
+    n.x, n.y = 5.0, 6.0
+    result = PaletteLayout().apply([n], [], _size_of)
+    placed = result.nodes[0]
+    assert placed.variant == 2
+    assert placed.object_attributes == {"c4Name": "Alice"}
+
+    edge = Edge(
+        id="a->b", type="c4.Rel", source_id="a", target_id="b",
+        object_attributes={"c4Description": "calls"},
+    )
+    routed = PaletteLayout().apply([n], [edge], _size_of)
+    assert routed.edges[0].object_attributes == {"c4Description": "calls"}
+
+
 def test_palette_empty_nodes_uses_default_page() -> None:
     result = PaletteLayout().apply([], [], _size_of)
     assert result.nodes == []

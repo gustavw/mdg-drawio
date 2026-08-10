@@ -68,8 +68,11 @@ def test_convertible_fixtures_convert(results: list[TraceResult]) -> None:
         "tests/action_fixtures/",
         "mdg_drawio/notation/archimate3/",
         "mdg_drawio/notation/bpmn2/",
+        "mdg_drawio/notation/c4/",
         "mdg_drawio/notation/erd/",
         "mdg_drawio/notation/general/",
+        "mdg_drawio/notation/uml/",
+        "mdg_drawio/notation/uml25/",
     )
     for r in results:
         expected = "ok" if r.fixture.startswith(convertible) else "exit=1"
