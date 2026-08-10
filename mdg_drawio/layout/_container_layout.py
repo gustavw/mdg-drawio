@@ -54,6 +54,23 @@ class _ContainerLayoutOptions:
     default_padding: dict[str, float]
 
 
+@dataclass(frozen=True)
+class _SharedRankPlan:
+    """A rank->primary-axis-offset scale shared across sibling containers.
+
+    ``ranks`` maps a node id to its rank computed over the COMBINED children
+    of every container-sibling (e.g. every Lane's tasks under one Pool), not
+    just its own container's children. ``offsets`` maps each distinct rank
+    value to a primary-axis offset (x for LR, y for TB) sized from the
+    widest/tallest node at that rank ACROSS ALL siblings -- so two lanes
+    place same-rank content in the same column even though each one only
+    positions its own subset of it.
+    """
+
+    ranks: dict[str, int]
+    offsets: dict[int, float]
+
+
 def estimate_text_width(
     text: str, font_size: int = _DEFAULT_FONT_SIZE, bold: bool = False
 ) -> float:
@@ -314,6 +331,178 @@ def _position_ranked_children(
     )
 
 
+def _sibling_adjacency(
+    ranked: list[list[Node]],
+    edges: list[Edge],
+    parent_by_id: dict[str, str],
+) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+    """Outgoing/incoming adjacency among this rank set's siblings, collapsing
+    any edge endpoint outside the set to its nearest sibling ancestor (see
+    :func:`_sibling_owner`)."""
+    sibling_ids = {n.id for rank in ranked for n in rank}
+    out_adj: dict[str, list[str]] = defaultdict(list)
+    in_adj: dict[str, list[str]] = defaultdict(list)
+    for edge in edges:
+        source = _sibling_owner(edge.source_id, sibling_ids, parent_by_id)
+        target = _sibling_owner(edge.target_id, sibling_ids, parent_by_id)
+        if source is None or target is None or source == target:
+            continue
+        out_adj[source].append(target)
+        in_adj[target].append(source)
+    return out_adj, in_adj
+
+
+def _singleton_chain_links(
+    ranked: list[list[Node]],
+    edges: list[Edge],
+    parent_by_id: dict[str, str],
+) -> tuple[dict[str, str], dict[str, str], set[str]]:
+    """1:1 adjacency among single-occupant ranks: ``next_of``/``prev_of`` map
+    a node to its sole chain neighbor, ``singleton_ids`` is every node that is
+    alone in its own rank (a precondition for being part of a chain)."""
+    out_adj, in_adj = _sibling_adjacency(ranked, edges, parent_by_id)
+
+    singleton_ids = {rank[0].id for rank in ranked if len(rank) == 1}
+    next_of: dict[str, str] = {}
+    prev_of: dict[str, str] = {}
+    for node_id in singleton_ids:
+        outs = out_adj.get(node_id, [])
+        if len(outs) == 1 and outs[0] in singleton_ids:
+            target = outs[0]
+            if len(in_adj.get(target, [])) == 1:
+                next_of[node_id] = target
+                prev_of[target] = node_id
+    return next_of, prev_of, singleton_ids
+
+
+def _bypassed_branch_ids(
+    ranked: list[list[Node]],
+    edges: list[Edge],
+    parent_by_id: dict[str, str],
+) -> set[str]:
+    """Node ids on the LONGER of two parallel paths between the same
+    predecessor and successor -- e.g. a gateway's "no" branch that visits one
+    extra step before rejoining where its "yes" branch goes directly.
+
+    Detected structurally: a node N with exactly one predecessor P and one
+    successor S, where P ALSO has a direct edge straight to S -- a strictly
+    shorter alternate route that bypasses N entirely. These are secondary
+    detours, not the main sequence, so :func:`_drop_bypassed_branches` pushes
+    them off the primary flow line.
+    """
+    out_adj, in_adj = _sibling_adjacency(ranked, edges, parent_by_id)
+    direct_edges = {(s, t) for s, targets in out_adj.items() for t in targets}
+
+    branch_ids: set[str] = set()
+    for rank in ranked:
+        for node in rank:
+            preds = in_adj.get(node.id, [])
+            succs = out_adj.get(node.id, [])
+            if len(preds) != 1 or len(succs) != 1:
+                continue
+            if (preds[0], succs[0]) in direct_edges:
+                branch_ids.add(node.id)
+    return branch_ids
+
+
+def _drop_bypassed_branches(
+    ranked: list[list[Node]],
+    branch_ids: set[str],
+    *,
+    gap: float,
+    horizontal: bool,
+) -> None:
+    """Push each bypassed branch beyond its rank's occupied cross-axis extent.
+
+    A rank can already contain several siblings. Moving a detour by exactly one
+    child slot would put it on top of the next sibling, so each detour is placed
+    after every currently occupied slot instead.
+    """
+    for rank in ranked:
+        for node in rank:
+            if node.id not in branch_ids:
+                continue
+            if horizontal:
+                occupied_bottom = max(
+                    (
+                        sibling.y + sibling.height
+                        for sibling in rank
+                        if sibling is not node
+                    ),
+                    default=node.y,
+                )
+                node.y = max(node.y + node.height + gap, occupied_bottom + gap)
+            else:
+                occupied_right = max(
+                    (
+                        sibling.x + sibling.width
+                        for sibling in rank
+                        if sibling is not node
+                    ),
+                    default=node.x,
+                )
+                node.x = max(node.x + node.width + gap, occupied_right + gap)
+
+
+def _align_singleton_rank_chains(
+    ranked: list[list[Node]],
+    edges: list[Edge],
+    parent_by_id: dict[str, str],
+    *,
+    top: float,
+    left: float,
+    horizontal: bool,
+) -> None:
+    """Straighten a simple 1:1 chain onto a shared centerline.
+
+    ``_position_children_lr``/``_position_children_tb`` pack each rank from a
+    shared top/left edge, so single-occupant ranks of DIFFERENT sizes in the
+    same chain -- e.g. an 80px task next to a 50px gateway, or a 50px start
+    event ahead of both -- end up centered on different lines even though the
+    edges between them should read as one straight line.
+
+    Every node in a maximal chain is centered on ``top/left + (the chain's
+    own tallest/widest member) / 2`` -- computed from the WHOLE chain, not
+    pairwise from each node's immediate predecessor, so a short node at the
+    very front (e.g. a start event) doesn't clamp a taller node behind it
+    into a merely "as close as allowed" position instead of true center. This
+    also guarantees no member ever moves above/left of ``top``/``left``: the
+    tallest member sits exactly there, and no other member is taller than it.
+    Only single-occupant ranks are touched: repositioning a rank with
+    siblings risks overlapping one of them, which needs real reflow, not a
+    nudge (out of scope here).
+    """
+    next_of, prev_of, singleton_ids = _singleton_chain_links(
+        ranked, edges, parent_by_id
+    )
+    node_by_id = {n.id: n for rank in ranked for n in rank}
+
+    visited: set[str] = set()
+    for start_id in singleton_ids:
+        if start_id in visited or start_id in prev_of:
+            continue  # not a chain head (or already handled via another head)
+        chain = [start_id]
+        visited.add(start_id)
+        current = start_id
+        while current in next_of and next_of[current] not in visited:
+            current = next_of[current]
+            chain.append(current)
+            visited.add(current)
+        if len(chain) < 2:
+            continue
+        extent = max(
+            (node_by_id[nid].height if horizontal else node_by_id[nid].width)
+            for nid in chain
+        )
+        center = (top if horizontal else left) + extent / 2
+        for nid in chain:
+            node = node_by_id[nid]
+            if horizontal:
+                node.y = center - node.height / 2
+            else:
+                node.x = center - node.width / 2
+
+
 def _grow_parent_to_fit_children(
     parent: Node,
     children: list[Node],
@@ -335,13 +524,23 @@ _STACK_WIDTH_CUSHION = 1.15
 
 def _stack_children(parent: Node, children: list[Node]) -> None:
     """Lay children out as a tight vertical stack, matching draw.io's
-    ``childLayout=stackLayout`` (e.g. UML class member rows).
+    ``childLayout=stackLayout`` (e.g. UML class member rows, or a BPMN Pool
+    stacking Lanes).
 
     Children fill the parent width and stack directly below the title band
     (``start_size``) with no gaps; the parent is widened to fit the longest row
     (and the title) so nothing wraps, and sized to the exact stacked height.
     This makes our geometry identical to what draw.io computes on load, so its
     stack re-layout is a no-op instead of shrinking/reflowing the shape.
+
+    A row's own text sets the floor for a plain leaf row (a UML member), but a
+    child that is ITSELF a container (a Lane full of tasks) already had its
+    width grown to fit its own content by the recursive descent that ran
+    before this parent's turn (:func:`_layout_container_tree` lays out
+    children before their parent) -- ``child.width`` already reflects that,
+    and is almost always far wider than the child's own short label. Sizing
+    purely from label text here would silently shrink it back down, clipping
+    everything the child actually contains.
     """
     start = float(parent.extra.get("start_size", 0))
 
@@ -351,7 +550,7 @@ def _stack_children(parent: Node, children: list[Node]) -> None:
         needed_width = max(needed_width, title)
     for child in children:
         row = estimate_text_width(child.label) * _STACK_WIDTH_CUSHION
-        needed_width = max(needed_width, row + _STACK_TEXT_PADDING)
+        needed_width = max(needed_width, row + _STACK_TEXT_PADDING, child.width)
     parent.width = needed_width
 
     y = start
@@ -370,6 +569,7 @@ def _layout_container_children(
     parent_by_id: dict[str, str],
     size_of: SizeResolver,
     options: _ContainerLayoutOptions,
+    shared_rank_plan: _SharedRankPlan | None = None,
 ) -> None:
     parent.extra[_RELATIVE_CHILDREN_KEY] = True
     for child in children:
@@ -384,32 +584,68 @@ def _layout_container_children(
         options.default_padding,
     )
     child_gap = float(parent.extra.get("child_gap", options.column_gap))
-    ranked = _rank_sibling_nodes(children, edges, parent_by_id)
     top = float(parent.extra.get("start_size", 0)) + top_pad
-    # A "degenerate" ranking has no rank wider than one node — a dependency chain
-    # (or a cycle that defeats ranking), so the primary axis alone would produce a
-    # long thin strip (N columns in LR, N rows in TB). Grid-pack those to use both
-    # axes. A ranking *with* parallelism (some rank has ≥2 nodes) keeps the primary
-    # flow: siblings spread on the secondary axis, ranks advance on the primary —
-    # i.e. primary TB ⇒ secondary LR, and vice versa.
-    degenerate = max((len(rank) for rank in ranked), default=0) <= 1
-    if degenerate and len(children) >= _GRID_MIN_CHILDREN:
-        ordered = [child for rank in ranked for child in rank]
-        _position_children_grid(
-            ordered,
-            top=top,
-            left=left_pad,
-            col_gap=child_gap,
-            row_gap=options.rank_gap,
-        )
-    else:
-        _position_ranked_children(
-            ranked,
-            options,
+    horizontal = options.direction != "TB"
+
+    if shared_rank_plan is not None:
+        # This container is one of ≥2 container-siblings (e.g. a Lane among
+        # a Pool's Lanes) whose combined children were already ranked
+        # together one level up, so a flow crossing between siblings still
+        # lines up on the primary axis -- see _shared_rank_plan.
+        ranked = _position_children_by_shared_plan(
+            children,
+            shared_rank_plan,
             top=top,
             left=left_pad,
             child_gap=child_gap,
+            horizontal=horizontal,
         )
+        _align_singleton_rank_chains(
+            ranked, edges, parent_by_id, top=top, left=left_pad, horizontal=horizontal
+        )
+        branch_ids = _bypassed_branch_ids(ranked, edges, parent_by_id)
+        _drop_bypassed_branches(
+            ranked, branch_ids, gap=child_gap, horizontal=horizontal
+        )
+    else:
+        ranked = _rank_sibling_nodes(children, edges, parent_by_id)
+        # A "degenerate" ranking has no rank wider than one node — a dependency
+        # chain (or a cycle that defeats ranking), so the primary axis alone
+        # would produce a long thin strip (N columns in LR, N rows in TB).
+        # Grid-pack those to use both axes. A ranking *with* parallelism (some
+        # rank has ≥2 nodes) keeps the primary flow: siblings spread on the
+        # secondary axis, ranks advance on the primary — i.e. primary TB ⇒
+        # secondary LR, and vice versa.
+        degenerate = max((len(rank) for rank in ranked), default=0) <= 1
+        if degenerate and len(children) >= _GRID_MIN_CHILDREN:
+            ordered = [child for rank in ranked for child in rank]
+            _position_children_grid(
+                ordered,
+                top=top,
+                left=left_pad,
+                col_gap=child_gap,
+                row_gap=options.rank_gap,
+            )
+        else:
+            _position_ranked_children(
+                ranked,
+                options,
+                top=top,
+                left=left_pad,
+                child_gap=child_gap,
+            )
+            _align_singleton_rank_chains(
+                ranked,
+                edges,
+                parent_by_id,
+                top=top,
+                left=left_pad,
+                horizontal=horizontal,
+            )
+            branch_ids = _bypassed_branch_ids(ranked, edges, parent_by_id)
+            _drop_bypassed_branches(
+                ranked, branch_ids, gap=child_gap, horizontal=horizontal
+            )
     _grow_parent_to_fit_children(
         parent,
         children,
@@ -426,8 +662,27 @@ def _layout_container_tree(
     parent_by_id: dict[str, str],
     size_of: SizeResolver,
     options: _ContainerLayoutOptions,
+    shared_rank_plan: _SharedRankPlan | None = None,
 ) -> None:
     children = by_parent.get(parent_id, [])
+
+    # If ≥2 of this parent's own children are THEMSELVES containers (e.g. two
+    # Lanes under a Pool), their grandchildren need ONE shared rank/offset
+    # scale -- otherwise each child container ranks and positions its content
+    # in total isolation, and a flow crossing from one to the other lands on
+    # an arbitrary, independently-chosen column (see _shared_rank_plan).
+    container_children = [c for c in children if c.id in by_parent]
+    grandchildren_plan = None
+    if len(container_children) >= 2:
+        combined_grandchildren = [
+            grandchild
+            for container_child in container_children
+            for grandchild in by_parent.get(container_child.id, [])
+        ]
+        grandchildren_plan = _shared_rank_plan(
+            combined_grandchildren, edges, parent_by_id, options
+        )
+
     for child in children:
         if child.id in by_parent:
             _layout_container_tree(
@@ -438,6 +693,7 @@ def _layout_container_tree(
                 parent_by_id,
                 size_of,
                 options,
+                shared_rank_plan=grandchildren_plan,
             )
 
     if children:
@@ -448,6 +704,7 @@ def _layout_container_tree(
             parent_by_id,
             size_of,
             options,
+            shared_rank_plan=shared_rank_plan,
         )
 
 
@@ -536,19 +793,20 @@ def absolute_node_boxes(
     return boxes
 
 
-def _rank_sibling_nodes(
-    nodes: list[Node],
+def _topological_ranks(
+    sibling_ids: set[str],
     edges: list[Edge],
     parent_by_id: dict[str, str],
-) -> list[list[Node]]:
-    """Group sibling nodes by relationship-derived topological rank."""
-    if not nodes:
-        return []
+    order: dict[str, int],
+) -> dict[str, int] | None:
+    """Longest-path rank for each id in *sibling_ids*.
 
-    node_by_id = {n.id: n for n in nodes}
-    order = {n.id: idx for idx, n in enumerate(nodes)}
-    sibling_ids = set(node_by_id)
-
+    An edge endpoint outside the set collapses to its nearest ancestor that
+    IS in the set (:func:`_sibling_owner`), so a deeply-nested descendant's
+    edge still counts at its owning sibling's level. ``None`` if a cycle
+    among the siblings prevents every id from being ranked (caller decides
+    the fallback).
+    """
     outgoing: dict[str, list[str]] = defaultdict(list)
     indegree: dict[str, int] = defaultdict(int)
 
@@ -566,18 +824,37 @@ def _rank_sibling_nodes(
         key=order.__getitem__,
     )
     ranks: dict[str, int] = {nid: 0 for nid in sibling_ids}
-    visited: list[str] = []
+    visited: set[str] = set()
 
     while queue:
         nid = queue.pop(0)
-        visited.append(nid)
+        visited.add(nid)
         for target in sorted(outgoing[nid], key=order.__getitem__):
             ranks[target] = max(ranks[target], ranks[nid] + 1)
             indegree[target] -= 1
             if indegree[target] == 0:
                 queue.append(target)
 
-    if len(visited) != len(nodes):
+    if len(visited) != len(sibling_ids):
+        return None
+    return ranks
+
+
+def _rank_sibling_nodes(
+    nodes: list[Node],
+    edges: list[Edge],
+    parent_by_id: dict[str, str],
+) -> list[list[Node]]:
+    """Group sibling nodes by relationship-derived topological rank."""
+    if not nodes:
+        return []
+
+    node_by_id = {n.id: n for n in nodes}
+    order = {n.id: idx for idx, n in enumerate(nodes)}
+    sibling_ids = set(node_by_id)
+
+    ranks = _topological_ranks(sibling_ids, edges, parent_by_id, order)
+    if ranks is None:
         return [[node] for node in nodes]
 
     rank_numbers = sorted(set(ranks.values()))
@@ -591,6 +868,83 @@ def _rank_sibling_nodes(
         ]
         for rn in rank_numbers
     ]
+
+
+def _shared_rank_plan(
+    nodes: list[Node],
+    edges: list[Edge],
+    parent_by_id: dict[str, str],
+    options: _ContainerLayoutOptions,
+) -> _SharedRankPlan | None:
+    """A cross-container rank/offset scale for *nodes* -- the COMBINED
+    children of every container-sibling under one parent (e.g. every Lane's
+    tasks under a Pool). ``None`` if there's nothing to rank, or a cycle
+    spans the combined set (falls back to each container ranking its own
+    content in isolation, same as before this existed)."""
+    if not nodes:
+        return None
+    order = {n.id: idx for idx, n in enumerate(nodes)}
+    sibling_ids = set(order)
+    ranks = _topological_ranks(sibling_ids, edges, parent_by_id, order)
+    if ranks is None:
+        return None
+
+    horizontal = options.direction != "TB"
+    by_rank: dict[int, list[Node]] = defaultdict(list)
+    for node in nodes:
+        by_rank[ranks[node.id]].append(node)
+
+    offsets: dict[int, float] = {}
+    cursor = 0.0
+    for rank in sorted(by_rank):
+        offsets[rank] = cursor
+        widest = max(
+            (node.width if horizontal else node.height) for node in by_rank[rank]
+        )
+        cursor += widest + options.rank_gap
+    return _SharedRankPlan(ranks=ranks, offsets=offsets)
+
+
+def _position_children_by_shared_plan(
+    children: list[Node],
+    plan: _SharedRankPlan,
+    *,
+    top: float,
+    left: float,
+    child_gap: float,
+    horizontal: bool,
+) -> list[list[Node]]:
+    """Position *children* (one container-sibling's share of a combined,
+    cross-container ranking) using the plan's SHARED primary-axis offsets, so
+    same-rank content lines up across siblings. The cross axis still stacks
+    locally: only what THIS container actually has at a given rank affects
+    its own cross-axis packing.
+
+    Returns the rank groups (ascending), in the same shape
+    :func:`_rank_sibling_nodes` returns, so downstream callers (the
+    singleton-chain aligner, the degenerate/grid check) don't need to know
+    which ranking strategy produced them.
+    """
+    by_rank: dict[int, list[Node]] = defaultdict(list)
+    for child in children:
+        by_rank[plan.ranks.get(child.id, 0)].append(child)
+
+    ranked: list[list[Node]] = []
+    for rank in sorted(by_rank):
+        group = by_rank[rank]
+        primary = (left if horizontal else top) + plan.offsets.get(rank, 0.0)
+        cursor = top if horizontal else left
+        for child in group:
+            if horizontal:
+                child.x = primary
+                child.y = cursor
+                cursor += child.height + child_gap
+            else:
+                child.y = primary
+                child.x = cursor
+                cursor += child.width + child_gap
+        ranked.append(group)
+    return ranked
 
 
 def _sibling_owner(

@@ -410,6 +410,25 @@ class _ParsedBlockCall:
     opens_block: bool
 
 
+def _process_registry_root(
+    call: _ParsedBlockCall,
+    line_number: int,
+    container_stack: list[tuple[int, str]],
+    state: dict[str, str],
+) -> bool:
+    """Consume a non-rendering registry root and apply its title as a fallback."""
+    if call.name != _registry_root(call.namespace):
+        return False
+    root_args = parse_call_arguments(call.args_source, line_number)
+    _pop_container_stack(container_stack, call.indent)
+    positional = [arg for arg in root_args if not isinstance(arg, ast.keyword)]
+    if positional and not state["diagram_name"]:
+        title = _extract_arg_string(positional[0])
+        if title:
+            state["diagram_name"] = title
+    return True
+
+
 def _should_skip_block_line(line: str, stripped: str) -> bool:
     """Return True when a block parser line carries no DSL call."""
     return (
@@ -534,6 +553,9 @@ def _process_block_call(
     ``state["diagram_name"]`` is updated in place when a diagram-title call is
     seen. Kept separate so ``parse_block_source`` can wrap each call uniformly.
     """
+    if _process_registry_root(call, line_number, container_stack, state):
+        return
+
     if call.namespace != namespace:
         # Foreign namespace — look up the registry to determine if this
         # is an edge or a node, then build appropriately.
@@ -585,6 +607,38 @@ def _is_registry_edge(ns: str, function: str) -> bool:
     return any(e.get("kind") == "edge" for e in entries)
 
 
+def _registry_root(ns: str) -> str:
+    """Return a notation's non-rendering document-root function, if known."""
+    from .registry import load_registry
+
+    try:
+        registry = load_registry(ns)
+    except (KeyError, FileNotFoundError):
+        return ""
+    grammar = registry.get("grammar", {})
+    if not isinstance(grammar, dict):
+        return ""
+    root = grammar.get("root", "")
+    return str(root) if root else ""
+
+
+def _passthrough_variant(
+    args: list[ast.AST | ast.keyword], line_number: int
+) -> int:
+    """Read and validate the common ``variant=N`` passthrough keyword."""
+    values: dict[str, str | int | float] = {}
+    for arg in args:
+        if not isinstance(arg, ast.keyword) or arg.arg != "variant":
+            continue
+        value = literal_value(arg.value, "variant")
+        if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+            raise DslError(
+                f"variant= must be an integer, got {value!r}", line_number
+            )
+        values["variant"] = value
+    return parse_keyword_int(values, "variant", 1, line_number)
+
+
 def _build_passthrough_node(
     ns: str,
     name: str,
@@ -610,7 +664,8 @@ def _build_passthrough_node(
     node = Node(
         id=node_id,
         type=f"{ns}.{name}",
-        label=label or node_id,
+        label=label,
+        variant=_passthrough_variant(args, line_number),
         element_name=name,
     )
     if container_stack:
@@ -637,16 +692,22 @@ def _build_passthrough_edge(
         target_id = _extract_arg_string(pos_args[1])
     if len(pos_args) >= 3:
         label = _extract_arg_string(pos_args[2])
-    if not source_id or not target_id:
+    source_is_none = len(pos_args) >= 1 and _is_none_literal(pos_args[0])
+    target_is_none = len(pos_args) >= 2 and _is_none_literal(pos_args[1])
+    unconnected = source_is_none and target_is_none
+    if not unconnected and (not source_id or not target_id):
         raise DslError(
             f"{ns}.{name}(): edge requires source and target ids",
             line_number,
         )
+    variant = _passthrough_variant(args, line_number)
     edge = Edge(
+        id=f"palette-edge-{len(edges) + 1}" if unconnected else "",
         type=f"{ns}.{name}",
         source_id=source_id,
         target_id=target_id,
         label=label,
+        extra={"variant": variant},
     )
     edges.append(edge)
 
@@ -658,6 +719,10 @@ def _extract_arg_string(node: ast.AST) -> str:
     if isinstance(node, ast.Constant) and isinstance(node.value, str):
         return node.value
     return ""
+
+
+def _is_none_literal(node: ast.AST) -> bool:
+    return isinstance(node, ast.Constant) and node.value is None
 
 def build_pages_document(
     pages: list[tuple[str, str]],

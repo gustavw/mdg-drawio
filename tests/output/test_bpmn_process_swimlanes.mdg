@@ -1,0 +1,39 @@
+---
+title: "BPMN Process Swimlanes (calibration)"
+page: "Process"
+mode: process
+---
+
+use bpmn2
+
+bpmn2.HorizontalPool(horizontalpool1, "Order"):
+    bpmn2.HorizontalSwimlane(horizontalswimlane1, "Sales"):
+        bpmn2.DataInput(datainput1, "Order request")
+        bpmn2.User(user1, "Take order")
+        bpmn2.Exclusive(exclusive1, "Complete?")
+        bpmn2.User(user2, "Request missing info")
+        bpmn2.Exclusive(exclusive2, "Info complete?")
+        bpmn2.End(end1, "Order cancelled")
+        bpmn2.NoneStart(nonestart1)
+    bpmn2.HorizontalSwimlane(horizontalswimlane2, "Operations"):
+        bpmn2.Service(service1, "Process order")
+        bpmn2.Exclusive(exclusive3, "In stock?")
+        bpmn2.Service(service2, "Backorder item")
+        bpmn2.DataOutput(dataoutput1, "Order confirmation")
+        bpmn2.Service(service3, "Confirm order")
+        bpmn2.End(end2)
+
+bpmn2.SequenceFlow(user2, exclusive2)
+bpmn2.SequenceFlow(exclusive2, end1, "no")
+bpmn2.SequenceFlow(nonestart1, user1)
+bpmn2.SequenceFlow(user1, exclusive1)
+bpmn2.SequenceFlow(exclusive1, service1, "yes")
+bpmn2.SequenceFlow(exclusive1, user2, "no")
+bpmn2.SequenceFlow(exclusive2, service1, "yes")
+bpmn2.SequenceFlow(service1, exclusive3)
+bpmn2.SequenceFlow(exclusive3, service2, "no")
+bpmn2.SequenceFlow(exclusive3, service3, "yes")
+bpmn2.SequenceFlow(service2, service3)
+bpmn2.SequenceFlow(service3, end2)
+bpmn2.Association(datainput1, user1)
+bpmn2.Association(service3, dataoutput1)

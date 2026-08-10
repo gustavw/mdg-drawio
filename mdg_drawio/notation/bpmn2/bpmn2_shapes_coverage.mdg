@@ -42,22 +42,22 @@ bpmn2.BPMN("BPMN 2.0 Shapes Coverage")
             bpmn2.SwimlaneBoxPart(n32, "")
             bpmn2.SwimlaneBoxPart(n33, "")
     bpmn2.HorizontalPool(n34, "Pool"):  # 22. HorizontalPool
-        bpmn2.SwimlaneBoxPart(n35, "Lane 1")
-        bpmn2.SwimlaneBoxPart(n36, "Lane 2")
-        bpmn2.SwimlaneBoxPart(n37, "Lane 3")
+        bpmn2.HorizontalSwimlane(n35, "Lane 1")
+        bpmn2.HorizontalSwimlane(n36, "Lane 2")
+        bpmn2.HorizontalSwimlane(n37, "Lane 3")
     bpmn2.HorizontalPool(n38, "Pool", variant=2):  # 23. HorizontalPool
-        bpmn2.SwimlaneBoxPart(n39, "Lane 1")
-        bpmn2.SwimlaneBoxPart(n40, "Lane 2")
-        bpmn2.SwimlaneBoxPart(n41, "Lane 3")
+        bpmn2.HorizontalSwimlane(n39, "Lane 1")
+        bpmn2.HorizontalSwimlane(n40, "Lane 2")
+        bpmn2.HorizontalSwimlane(n41, "Lane 3")
     bpmn2.HorizontalSwimlane(n42, "Lane")  # 24. HorizontalSwimlane
     bpmn2.VerticalPool(n43, "Pool"):  # 25. VerticalPool
-        bpmn2.SwimlaneBoxPart(n44, "Lane 1")
-        bpmn2.SwimlaneBoxPart(n45, "Lane 2")
-        bpmn2.SwimlaneBoxPart(n46, "Lane 3")
+        bpmn2.VerticalSwimlane(n44, "Lane 1")
+        bpmn2.VerticalSwimlane(n45, "Lane 2")
+        bpmn2.VerticalSwimlane(n46, "Lane 3")
     bpmn2.VerticalPool(n47, "Pool", variant=2):  # 26. VerticalPool
-        bpmn2.SwimlaneBoxPart(n48, "Lane 1")
-        bpmn2.SwimlaneBoxPart(n49, "Lane 2")
-        bpmn2.SwimlaneBoxPart(n50, "Lane 3")
+        bpmn2.VerticalSwimlane(n48, "Lane 1")
+        bpmn2.VerticalSwimlane(n49, "Lane 2")
+        bpmn2.VerticalSwimlane(n50, "Lane 3")
     bpmn2.VerticalSwimlane(n51, "Lane")  # 27. VerticalSwimlane
     bpmn2.Group(n52, "")  # 28. Group
     bpmn2.Association(None, None)  # 29. Association

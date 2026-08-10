@@ -213,11 +213,16 @@ class RawCell:
     UNFILTERED pass over every cell in the document -- including the styleless
     "layer" cells and Ctrl+G "group" cells that :func:`load_cells` excludes,
     since a resolved cell's containment ancestry commonly passes through them.
+
+    ``source_id``/``target_id`` are only meaningful when ``is_edge`` -- the
+    endpoints an edge cell connects, page-prefixed the same as ``parent_id``.
     """
 
     parent_id: str | None
     style: str
     is_edge: bool
+    source_id: str | None = None
+    target_id: str | None = None
 
 
 def parent_map(source: str) -> dict[str, RawCell]:
@@ -241,10 +246,14 @@ def parent_map(source: str) -> dict[str, RawCell]:
             if cell_id in mapping:
                 continue
             raw_parent = element.get("parent")
+            raw_source = element.get("source")
+            raw_target = element.get("target")
             mapping[cell_id] = RawCell(
                 parent_id=(prefix + raw_parent) if raw_parent else None,
                 style=element.get("style") or "",
                 is_edge=element.get("edge") == "1",
+                source_id=(prefix + raw_source) if raw_source else None,
+                target_id=(prefix + raw_target) if raw_target else None,
             )
     return mapping
 

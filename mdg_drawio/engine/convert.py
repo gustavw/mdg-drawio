@@ -80,7 +80,9 @@ def _detect_notation(source: str) -> str:
 _FRONTMATTER_RE = re.compile(
     r"^---\s*$(.*?)^---\s*$", re.MULTILINE | re.DOTALL
 )
-_LAYOUT_MODE_RE = re.compile(r"^layout:\s*(\S+)", re.MULTILINE)
+# Every real .mdg uses "mode:" for the layout algorithm (layered/process/
+# sequence/palette) -- see GRAMMAR.md and every committed fixture.
+_LAYOUT_MODE_RE = re.compile(r"^mode:\s*(\S+)", re.MULTILINE)
 _DEFAULT_LAYOUT_MODE = "layered"
 _VALID_DIRECTIONS = ("TB", "LR")
 
@@ -144,6 +146,47 @@ def _apply_default_shape_scaling(notation: str, config: Config) -> Config:
     if factory is None:
         return config
     return replace(config, shape_scaling=factory())
+
+
+# BPMN data artifacts: annotations linked by association, not sequence flow --
+# excluded from ranking so ProcessLayout floats them above whichever task
+# they're associated with (see mdg_drawio.layout.process) instead of slotting
+# them into the ranked sequence. Matched by DSL function name (the part of
+# Node.type after the library prefix), not registry lookup: this is a fixed,
+# well-known BPMN vocabulary, not something a registry edit should silently
+# change the meaning of here.
+_BPMN2_DATA_ARTIFACT_FUNCTIONS = frozenset(
+    {
+        "DataObject",
+        "DataObjectCollection",
+        "DataInput",
+        "DataInputCollection",
+        "DataOutput",
+        "DataOutputCollection",
+        "DataStore",
+    }
+)
+
+
+def _bpmn2_rank_exclude_ids(nodes: list[Node]) -> frozenset[str]:
+    return frozenset(
+        node.id
+        for node in nodes
+        if node.type.rsplit(".", 1)[-1] in _BPMN2_DATA_ARTIFACT_FUNCTIONS
+    )
+
+
+# Notation → rank-exclusion detector, same bridging pattern as shape scaling.
+_RANK_EXCLUDE_BY_NOTATION: dict[str, Callable[[list[Node]], frozenset[str]]] = {
+    "bpmn2": _bpmn2_rank_exclude_ids,
+}
+
+
+def _resolve_rank_exclude_ids(notation: str, nodes: list[Node]) -> frozenset[str]:
+    factory = _RANK_EXCLUDE_BY_NOTATION.get(notation)
+    if factory is None:
+        return frozenset()
+    return factory(nodes)
 
 
 def _resolve_layout_config(notation: str, mode: str) -> Config:
@@ -335,6 +378,13 @@ def _apply_layout_to_document(
 
     layout: BaseLayout = layout_cls()
     result = layout.apply(page.nodes, page.edges, size_of, config=config)
+    # Nodes are mutated in place by every layout (so page.nodes already
+    # reflects final positions), but routing (_route_edges and friends)
+    # builds brand-new Edge objects rather than mutating existing ones --
+    # without this, routed waypoints/anchors are silently discarded and
+    # every edge falls back to draw.io's default floating connection.
+    page.nodes = result.nodes
+    page.edges = result.edges
 
     _inject_node_overlay(page.nodes, overlay)
 
@@ -390,6 +440,10 @@ def _generate_multipage(
         direction = _normalize_direction(page_doc.diagram.direction)
         if direction is not None:
             layout_config = replace(layout_config, direction=direction)
+        rank_exclude_ids = _resolve_rank_exclude_ids(notation, page_doc.nodes)
+        layout_config = replace(
+            layout_config, rank_exclude_ids=rank_exclude_ids
+        )
         page_doc = _apply_layout_to_document(
             page_doc, size_of, layout_mode, layout_config
         )
@@ -531,16 +585,6 @@ def convert(input_path: Path, output_path: Path, force: bool) -> int:
     # utf-8-sig transparently strips a leading BOM so the anchored frontmatter
     # regex still matches for files saved by BOM-emitting editors.
     source = input_path.read_text(encoding="utf-8-sig")
-    notation = _detect_notation(source)
-
-    if notation != "c4":
-        print(
-            f"mdg: error: unsupported notation '{notation}' — "
-            f"only 'c4' is currently implemented",
-            file=sys.stderr,
-        )
-        return 1
-
 
     try:
         doc = parse(source)

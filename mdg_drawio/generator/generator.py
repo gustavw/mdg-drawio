@@ -709,16 +709,22 @@ def _style_overrides_for_edge(edge: Edge) -> str:
 
 
 def _anchor_tokens(prefix: str, anchor: str | Anchor) -> str:
-    """Build anchor position tokens (exitX, exitY, etc.) from an anchor."""
+    """Build anchor position tokens (exitX, exitY, etc.) from an anchor.
+
+    ``x``/``y`` are always emitted together once ``anchor`` is a real
+    ``Anchor`` -- draw.io's anchor is a POINT on the perimeter, defined by
+    both fractions jointly (0 is a legitimate coordinate, e.g. the left or
+    top edge, not "unset"; only a bare ``Anchor()``/``""`` means no anchor at
+    all). ``dx``/``dy``/``perimeter`` stay individually optional: they are
+    true add-on overrides where 0 and "absent" really are equivalent.
+    """
     if not anchor:
         return ""
     if isinstance(anchor, str):
         return ""
-    tokens: list[str] = []
-    if anchor.x:
-        tokens.append(f"{prefix}X={anchor.x}")
-    if anchor.y:
-        tokens.append(f"{prefix}Y={anchor.y}")
+    if anchor == Anchor():
+        return ""
+    tokens: list[str] = [f"{prefix}X={anchor.x}", f"{prefix}Y={anchor.y}"]
     if anchor.dx:
         tokens.append(f"{prefix}Dx={anchor.dx}")
     if anchor.dy:

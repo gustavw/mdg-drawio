@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 
 import pytest
 
-from mdg_drawio.contracts import Document
+from mdg_drawio.contracts import Anchor, Document
 from mdg_drawio.engine.validate import validate_generated_xml
 from mdg_drawio.layout.config import parse_aspect_ratio
 from mdg_drawio.notation import DslError, parse
@@ -91,11 +91,18 @@ def test_bad_argument_type_raises_dslerror_with_line_number() -> None:
     assert "line 1" in str(exc.value)
 
 
-def test_node_without_label_defaults_label_to_id() -> None:
+def test_node_without_label_stays_empty() -> None:
+    """Reversal of the original 2026-07-27 finding: defaulting an omitted
+    label to the node's own id was scoped to this one shared builder every
+    notation goes through, not just c4 -- it forced a visible id string onto
+    intentionally icon-only shapes (e.g. a BPMN start/end event) once other
+    notations started rendering through the same forward pipeline. An
+    omitted label now stays truly empty; c4 authors already always supply
+    one explicitly in every real document."""
     doc = parse('c4.Person(alice)')
     assert isinstance(doc, Document)
     node = next(n for n in doc.nodes if n.id == "alice")
-    assert node.label == "alice"
+    assert node.label == ""
 
 
 def test_dangling_edge_endpoint_raises_dslerror() -> None:
@@ -103,6 +110,46 @@ def test_dangling_edge_endpoint_raises_dslerror() -> None:
     # future DslError can't satisfy the test.
     with pytest.raises(DslError, match="source"):
         parse('c4.Rel(None, bob)')
+
+
+def test_foreign_root_sets_title_without_rendering_a_node() -> None:
+    doc = parse('use bpmn2\nbpmn2.BPMN("Orders")\nbpmn2.User(task, "Take order")')
+    assert isinstance(doc, Document)
+    assert doc.diagram.name == "Orders"
+    assert [(node.id, node.type) for node in doc.nodes] == [
+        ("task", "bpmn2.User")
+    ]
+
+
+def test_foreign_node_and_edge_variants_are_preserved() -> None:
+    doc = parse(
+        'use bpmn2\n'
+        'bpmn2.DataObject(data, "", variant=2)\n'
+        'bpmn2.User(task, "Task")\n'
+        'bpmn2.Association(data, task, variant=2)'
+    )
+    assert isinstance(doc, Document)
+    assert next(node for node in doc.nodes if node.id == "data").variant == 2
+    assert doc.edges[0].extra["variant"] == 2
+
+
+def test_foreign_palette_edges_allow_none_endpoints_with_unique_ids() -> None:
+    doc = parse(
+        "use bpmn2\n"
+        "bpmn2.Association(None, None)\n"
+        "bpmn2.MessageFlow(None, None)"
+    )
+    assert isinstance(doc, Document)
+    assert [edge.id for edge in doc.edges] == ["palette-edge-1", "palette-edge-2"]
+
+
+def test_default_anchor_emits_no_attachment_tokens() -> None:
+    import mdg_drawio.generator.generator as generator
+
+    assert generator._anchor_tokens("exit", Anchor()) == ""
+    assert generator._anchor_tokens("exit", Anchor(x=0.0, y=0.5)) == (
+        "exitX=0.0;exitY=0.5"
+    )
 
 
 # ---------------------------------------------------------------------------

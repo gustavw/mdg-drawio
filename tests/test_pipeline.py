@@ -472,6 +472,13 @@ def test_overlay_preserves_geometry_edges_and_anchors(tmp_path: Path) -> None:
     edge.set("style", edge.get("style", "") + anchors)
     edge_geo = edge.find("mxGeometry")
     assert edge_geo is not None
+    # Replace any existing <Array as="points"> (the initial generation now
+    # correctly writes a real routed waypoint) rather than appending a
+    # second one -- draw.io itself would never have two, and .find() below
+    # would silently pick up the first (stale) one instead of this edit.
+    existing_array = edge_geo.find('Array[@as="points"]')
+    if existing_array is not None:
+        edge_geo.remove(existing_array)
     array = ET.SubElement(edge_geo, "Array", {"as": "points"})
     ET.SubElement(array, "mxPoint", {"x": "500", "y": "500"})
     tree.write(str(out), encoding="utf-8")

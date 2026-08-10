@@ -96,8 +96,6 @@ ALLOWLIST: dict[str, str] = {
     #     carries child_cells; no converting notation emits them yet (they are
     #     for compartmented shapes such as ERD tables / UML class members).
     #     Future scaffolding, not reachable by any current input.
-    "mdg_drawio.contracts.models:Anchor":
-        "child-cell rendering; no notation emits child_cells yet",
     "mdg_drawio.contracts.models:ChildCell":
         "child-cell rendering; no notation emits child_cells yet",
     "mdg_drawio.contracts.models:GeometryChild":
