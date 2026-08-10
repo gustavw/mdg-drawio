@@ -29,6 +29,7 @@ from scripts.reverse import merge
 from scripts.reverse.containment import Containment, resolve_containment
 from scripts.reverse.derive import (
     Candidate,
+    Cell,
     CellResult,
     DocumentResult,
     RawCell,
@@ -254,26 +255,103 @@ def _doc(*results: CellResult) -> DocumentResult:
     return DocumentResult(list(results), {}, {})
 
 
-def test_classify_new_cells_separates_existing_new_edges_and_unresolved() -> None:
+def test_classify_new_cells_separates_existing_new_edges_and_unresolved(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(merge, "_is_edge_shape", lambda _shape_id: True)
     result = _doc(
         _result("existing1", "lib.box.v1"),  # already in the .mdg
-        _result("edge1", "lib.rel.v1"),  # a new edge -- counted, not emitted
+        _result("src1", "lib.leaf.v1"),  # new vertex, edge endpoint
+        _result("tgt1", "lib.leaf.v1"),  # new vertex, edge endpoint
+        _result("edge1", "lib.rel.v1"),  # a new edge -- resolved for emission
         _result("junk1", None),  # unresolved -- skipped and reported
         _result("new1", "lib.leaf.v1"),  # genuinely new
     )
     raw_cells = {
         "existing1": RawCell(None, "shape=box;", False),
-        "edge1": RawCell(None, "edgeStyle=x;", True),
+        "src1": RawCell(None, "shape=leaf;", False),
+        "tgt1": RawCell(None, "shape=leaf;", False),
+        "edge1": RawCell(
+            None, "edgeStyle=x;", True, source_id="src1", target_id="tgt1"
+        ),
         "junk1": RawCell(None, "shape=unknown;", False),
         "new1": RawCell(None, "shape=leaf;", False),
     }
-    new_cells, skipped, new_edge_count = merge._classify_new_cells(
-        result, existing_ids={"existing1"}, raw_cells=raw_cells
+    node_ids = {"src1": "leaf1", "tgt1": "leaf2"}
+    new_cells, new_edges, skipped = merge._classify_new_cells(
+        result, existing_ids={"existing1"}, raw_cells=raw_cells, node_ids=node_ids
     )
-    assert [c.cell_id for c in new_cells] == ["new1"]
-    assert new_edge_count == 1
+    assert {c.cell_id for c in new_cells} == {"src1", "tgt1", "new1"}
+    assert new_edges == [merge.NewEdge("edge1", "lib.rel.v1", "leaf1", "leaf2")]
     assert len(skipped) == 1
     assert "junk1" in skipped[0]
+
+
+def test_classify_new_cells_skips_an_edge_with_an_unresolved_endpoint(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An edge whose source/target points at a cell nothing resolved (not a
+    new node, not already in the existing file) can't be emitted -- its
+    declaration would reference an id that doesn't exist."""
+    monkeypatch.setattr(merge, "_is_edge_shape", lambda _shape_id: True)
+    result = _doc(
+        _result("tgt1", "lib.leaf.v1"),
+        _result("edge1", "lib.rel.v1"),
+    )
+    raw_cells = {
+        "tgt1": RawCell(None, "shape=leaf;", False),
+        "edge1": RawCell(
+            None, "edgeStyle=x;", True, source_id="ghost", target_id="tgt1"
+        ),
+    }
+    new_cells, new_edges, skipped = merge._classify_new_cells(
+        result, existing_ids=set(), raw_cells=raw_cells, node_ids={"tgt1": "leaf1"}
+    )
+    assert [c.cell_id for c in new_cells] == ["tgt1"]
+    assert new_edges == []
+    assert any("edge1" in s for s in skipped)
+
+
+def test_classify_new_cells_rejects_vertex_shape_for_raw_edge(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(merge, "_is_edge_shape", lambda _shape_id: False)
+    result = _doc(_result("edge1", "uml25.parameter.v1"))
+    raw_cells = {
+        "edge1": RawCell(
+            None, "html=1;", True, source_id="src", target_id="target"
+        )
+    }
+
+    new_cells, new_edges, skipped = merge._classify_new_cells(
+        result,
+        existing_ids={"src", "target"},
+        raw_cells=raw_cells,
+        node_ids={},
+    )
+
+    assert new_cells == []
+    assert new_edges == []
+    assert skipped == [
+        "edge1: resolved edge to non-edge shape 'uml25.parameter.v1'"
+    ]
+
+
+def test_render_edge_uses_c4_description_as_label(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(merge, "_shape_meta", lambda _shape_id: ("c4", "Rel", 1))
+    cell = Cell(
+        cell_id="edge1",
+        style="edgeStyle=orthogonalEdgeStyle;",
+        value="<div>%c4Description%</div>",
+        tokens={},
+        object_attrs={"c4Description": "Calls API"},
+    )
+
+    assert merge._render_edge_declaration(cell, "c4.rel.v1", "a", "b") == (
+        'c4.Rel(a, b, "Calls API")'
+    )
 
 
 def test_build_forest_groups_new_cells_by_nearest_existing_anchor() -> None:
@@ -425,18 +503,78 @@ def test_merge_skips_and_reports_an_unresolved_cell() -> None:
 
 
 @needs_data
-def test_merge_counts_new_edges_without_emitting_them() -> None:
+def test_merge_emits_a_new_edge_between_two_new_nodes() -> None:
     sys_b = fx.get(INDEX, "c4.system_boundary.v1")
     person = fx.get(INDEX, "c4.person.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
     doc = fx.document(
         fx.entry_cell(sys_b, cell_id="sys1", parent="1"),
         fx.entry_cell(person, cell_id="p1", parent="sys1"),
         fx.entry_cell(person, cell_id="p2", parent="sys1"),
-        fx.edge_cell_xml("e1", source="p1", target="p2", parent="1"),
+        fx.edge_cell_xml("e1", source="p1", target="p2", parent="1", style=rel.style),
     )
     _, plan, merged = _run_pipeline(_BASE_MDG, doc)
     assert plan.new_edge_count == 1
-    assert "Rel" not in merged
+    assert merge.validate(merged) is None
+    document = parse_mdg(merged)
+    assert isinstance(document, Document)
+    by_parent = {n.id: n.parent_id for n in document.nodes}
+    person1, person2 = [
+        n for n, p in by_parent.items() if p == "sys1" and n != "web1"
+    ]
+    assert any(
+        line.startswith("c4.Rel(") and person1 in line and person2 in line
+        for line in merged.splitlines()
+    )
+
+
+@needs_data
+def test_merge_edge_endpoint_can_reference_an_already_existing_node() -> None:
+    """An edge doesn't need BOTH endpoints to be new -- one end can point at
+    a node already declared in the existing file (identity = cell_id ==
+    node_id, per the module docstring)."""
+    sys_b = fx.get(INDEX, "c4.system_boundary.v1")
+    person = fx.get(INDEX, "c4.person.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
+    doc = fx.document(
+        fx.entry_cell(sys_b, cell_id="sys1", parent="1"),
+        fx.entry_cell(person, cell_id="p1", parent="sys1"),
+        fx.edge_cell_xml("e1", source="p1", target="web1", parent="1", style=rel.style),
+    )
+    _, plan, merged = _run_pipeline(_BASE_MDG, doc)
+    assert plan.new_edge_count == 1
+    assert merge.validate(merged) is None
+    assert any(
+        line.startswith("c4.Rel(") and "web1" in line for line in merged.splitlines()
+    )
+
+
+@needs_data
+def test_merge_does_not_duplicate_an_edge_already_present_verbatim() -> None:
+    """Re-running a merge against an unchanged source must not duplicate an
+    edge it already emitted -- see the module docstring for the narrower
+    dedup this covers (exact rendered line only)."""
+    sys_b = fx.get(INDEX, "c4.system_boundary.v1")
+    person = fx.get(INDEX, "c4.person.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
+    existing_text = (
+        '---\ntitle: "T"\npage: "P"\nmode: layered\n---\n\n'
+        'c4.System_Boundary(sys1, "X"):\n'
+        '    c4.Person(person1)\n'
+        '    c4.Person(person2)\n\n'
+        "c4.Rel(person1, person2)\n"
+    )
+    doc = fx.document(
+        fx.entry_cell(sys_b, cell_id="sys1", parent="1"),
+        fx.entry_cell(person, cell_id="person1", parent="sys1"),
+        fx.entry_cell(person, cell_id="person2", parent="sys1"),
+        fx.edge_cell_xml(
+            "e1", source="person1", target="person2", parent="1", style=rel.style
+        ),
+    )
+    _, plan, merged = _run_pipeline(existing_text, doc)
+    assert plan.new_edge_count == 0
+    assert merged.rstrip() == existing_text.rstrip()
 
 
 @needs_data

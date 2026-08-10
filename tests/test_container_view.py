@@ -290,7 +290,7 @@ SYMBOL_ALLOWLIST: dict[str, dict[str, set[str]]] = {
         },
     },
     "layout/layered.py": {
-        "mdg_drawio.contracts": {"DEFAULT_PAGE_HEIGHT", "DEFAULT_PAGE_WIDTH"},
+        "mdg_drawio.contracts": {"Anchor", "DEFAULT_PAGE_HEIGHT", "DEFAULT_PAGE_WIDTH"},
     },
     "layout/sequence.py": {
         "mdg_drawio.contracts": {"DEFAULT_PAGE_HEIGHT", "DEFAULT_PAGE_WIDTH"},

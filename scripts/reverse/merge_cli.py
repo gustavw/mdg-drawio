@@ -9,8 +9,8 @@ never touches ``EXISTING.mdg``. ``--write`` re-parses the merged result
 through the same parser the real pipeline uses (:func:`scripts.reverse.merge.
 validate`) before writing anything -- if it doesn't parse cleanly, the file is
 left untouched and the error is reported. See :mod:`scripts.reverse.merge` for
-what "new" means and what this does and does not emit (vertices only, no
-edges yet).
+what "new" means and what this does and does not emit (vertices and edges;
+see that module's docstring for the edge dedup this does and does not catch).
 """
 from __future__ import annotations
 
@@ -65,12 +65,6 @@ def main(argv: list[str] | None = None) -> int:
         print("skipped (could not derive a shape):", file=sys.stderr)
         for reason in plan.skipped:
             print(f"  {reason}", file=sys.stderr)
-    if plan.new_edge_count:
-        print(
-            f"note: {plan.new_edge_count} new edge(s) found in the .drawio -- "
-            "not yet emitted (vertices only; see scripts/reverse/merge.py)",
-            file=sys.stderr,
-        )
 
     if not plan.insertions:
         print("nothing new to merge.")
@@ -90,14 +84,17 @@ def main(argv: list[str] | None = None) -> int:
         )
         sys.stdout.writelines(diff)
         print(
-            f"\n{plan.new_node_count} new element(s) -- "
-            "dry run, use --write to apply."
+            f"\n{plan.new_node_count} new element(s), {plan.new_edge_count} "
+            "new edge(s) -- dry run, use --write to apply."
         )
         return 0
 
     with open(args.mdg, "w", encoding="utf-8") as handle:
         handle.write(merged_text)
-    print(f"wrote {plan.new_node_count} new element(s) to {args.mdg}")
+    print(
+        f"wrote {plan.new_node_count} new element(s), "
+        f"{plan.new_edge_count} new edge(s) to {args.mdg}"
+    )
     return 0
 
 

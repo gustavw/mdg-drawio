@@ -1,0 +1,192 @@
+<mxfile host="Electron">
+  <diagram id="generated-diagram" name="Order process">
+    <mxGraphModel dx="2075" dy="1248" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2110" pageHeight="880" math="0" shadow="0">
+      <root>
+        <mxCell id="generated-diagram-0" />
+        <mxCell id="generated-diagram-1" parent="generated-diagram-0" />
+        <object UID="pool" label="Order" id="generated-diagram-3">
+          <mxCell parent="generated-diagram-1" style="shape=swimlane;html=1;startSize=20;whiteSpace=wrap;notation=bpmn2;childLayout=stackLayout;resizeParent=1;resizeParentMax=0;horizontal=1;horizontalStack=0;" vertex="1">
+            <mxGeometry height="760" width="1990" x="60" y="60" as="geometry" />
+          </mxCell>
+        </object>
+        <object UID="sales" label="Sales" id="generated-diagram-4">
+          <mxCell parent="generated-diagram-3" style="shape=swimlane;notation=bpmn2;html=1;startSize=20;horizontal=0;" vertex="1">
+            <mxGeometry height="370" width="1990" y="20" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="generated-diagram-5" parent="generated-diagram-4" style="shape=mxgraph.bpmn.event;html=1;notation=bpmn2;points=[[0.145,0.145,0],[0.5,0,0],[0.855,0.145,0],[1,0.5,0],[0.855,0.855,0],[0.5,1,0],[0.145,0.855,0],[0,0.5,0]];verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;align=center;perimeter=ellipsePerimeter;outlineConnect=0;aspect=fixed;outline=standard;symbol=general;" value="" vertex="1">
+          <mxGeometry height="50" width="50" x="60" y="165" as="geometry" />
+        </mxCell>
+        <object UID="order_request" label="Order request" id="generated-diagram-6">
+          <mxCell parent="generated-diagram-4" style="shape=mxgraph.bpmn.data2;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;size=15;html=1;notation=bpmn2;bpmnTransferType=input;" vertex="1">
+            <mxGeometry height="80" width="160" x="150" y="30" as="geometry" />
+          </mxCell>
+        </object>
+        <object UID="take_order" label="Take order" id="generated-diagram-7">
+          <mxCell parent="generated-diagram-4" style="shape=mxgraph.bpmn.task2;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];whiteSpace=wrap;rectStyle=rounded;size=10;html=1;container=1;expand=0;collapsible=0;taskMarker=user;notation=bpmn2;" vertex="1">
+            <mxGeometry height="80" width="120" x="170" y="150" as="geometry" />
+          </mxCell>
+        </object>
+        <object UID="order_complete" label="Complete?" id="generated-diagram-8">
+          <mxCell parent="generated-diagram-4" style="shape=mxgraph.bpmn.gateway2;html=1;notation=bpmn2;points=[[0.25,0.25,0],[0.5,0,0],[0.75,0.25,0],[1,0.5,0],[0.75,0.75,0],[0.5,1,0],[0.25,0.75,0],[0,0.5,0]];verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;align=center;perimeter=rhombusPerimeter;outlineConnect=0;outline=none;symbol=none;" vertex="1">
+            <mxGeometry height="50" width="50" x="410" y="165" as="geometry" />
+          </mxCell>
+        </object>
+        <object UID="request_missing_info" label="Request missing info" id="generated-diagram-9">
+          <mxCell parent="generated-diagram-4" style="shape=mxgraph.bpmn.task2;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];whiteSpace=wrap;rectStyle=rounded;size=10;html=1;container=1;expand=0;collapsible=0;taskMarker=user;notation=bpmn2;" vertex="1">
+            <mxGeometry height="80" width="120" x="580" y="150" as="geometry" />
+          </mxCell>
+        </object>
+        <object UID="info_received" label="Info complete?" id="generated-diagram-10">
+          <mxCell parent="generated-diagram-4" style="shape=mxgraph.bpmn.gateway2;html=1;notation=bpmn2;points=[[0.25,0.25,0],[0.5,0,0],[0.75,0.25,0],[1,0.5,0],[0.75,0.75,0],[0.5,1,0],[0.25,0.75,0],[0,0.5,0]];verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;align=center;perimeter=rhombusPerimeter;outlineConnect=0;outline=none;symbol=none;" vertex="1">
+            <mxGeometry height="50" width="50" x="820" y="165" as="geometry" />
+          </mxCell>
+        </object>
+        <object UID="order_cancelled" label="Order cancelled" id="generated-diagram-11">
+          <mxCell parent="generated-diagram-4" style="shape=mxgraph.bpmn.event;html=1;notation=bpmn2;points=[[0.145,0.145,0],[0.5,0,0],[0.855,0.145,0],[1,0.5,0],[0.855,0.855,0],[0.5,1,0],[0.145,0.855,0],[0,0.5,0]];verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;align=center;perimeter=ellipsePerimeter;outlineConnect=0;aspect=fixed;outline=end;symbol=terminate2;" vertex="1">
+            <mxGeometry height="50" width="50" x="990" y="165" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="generated-diagram-23" edge="1" parent="generated-diagram-4" source="generated-diagram-9" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endArrow=blockThin;endFill=1;notation=bpmn2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="generated-diagram-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="770" y="180" />
+              <mxPoint x="760" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generated-diagram-25" edge="1" parent="generated-diagram-4" source="generated-diagram-10" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endArrow=blockThin;endFill=1;notation=bpmn2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="generated-diagram-11" value="no">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="920" y="190" />
+              <mxPoint x="930" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <object UID="ops" label="Operations" id="generated-diagram-12">
+          <mxCell parent="generated-diagram-3" style="shape=swimlane;notation=bpmn2;html=1;startSize=20;horizontal=0;" vertex="1">
+            <mxGeometry height="370" width="1990" y="390" as="geometry" />
+          </mxCell>
+        </object>
+        <object UID="process_order" label="Process order" id="generated-diagram-13">
+          <mxCell parent="generated-diagram-12" style="shape=mxgraph.bpmn.task2;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];whiteSpace=wrap;rectStyle=rounded;size=10;html=1;container=1;expand=0;collapsible=0;taskMarker=service;notation=bpmn2;" vertex="1">
+            <mxGeometry height="80" width="120" x="785" y="150" as="geometry" />
+          </mxCell>
+        </object>
+        <object UID="stock_available" label="In stock?" id="generated-diagram-14">
+          <mxCell parent="generated-diagram-12" style="shape=mxgraph.bpmn.gateway2;html=1;notation=bpmn2;points=[[0.25,0.25,0],[0.5,0,0],[0.75,0.25,0],[1,0.5,0],[0.75,0.75,0],[0.5,1,0],[0.25,0.75,0],[0,0.5,0]];verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;align=center;perimeter=rhombusPerimeter;outlineConnect=0;outline=none;symbol=none;" vertex="1">
+            <mxGeometry height="50" width="50" x="1230" y="165" as="geometry" />
+          </mxCell>
+        </object>
+        <object UID="backorder_item" label="Backorder item" id="generated-diagram-15">
+          <mxCell parent="generated-diagram-12" style="shape=mxgraph.bpmn.task2;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];whiteSpace=wrap;rectStyle=rounded;size=10;html=1;container=1;expand=0;collapsible=0;taskMarker=service;notation=bpmn2;" vertex="1">
+            <mxGeometry height="80" width="120" x="1400" y="260" as="geometry" />
+          </mxCell>
+        </object>
+        <object UID="order_confirmation" label="Order confirmation" id="generated-diagram-16">
+          <mxCell parent="generated-diagram-12" style="shape=mxgraph.bpmn.data2;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;size=15;html=1;notation=bpmn2;bpmnTransferType=output;" vertex="1">
+            <mxGeometry height="80" width="160" x="1620" y="30" as="geometry" />
+          </mxCell>
+        </object>
+        <object UID="confirm_order" label="Confirm order" id="generated-diagram-17">
+          <mxCell parent="generated-diagram-12" style="shape=mxgraph.bpmn.task2;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];whiteSpace=wrap;rectStyle=rounded;size=10;html=1;container=1;expand=0;collapsible=0;taskMarker=service;notation=bpmn2;" vertex="1">
+            <mxGeometry height="80" width="120" x="1640" y="150" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="generated-diagram-18" parent="generated-diagram-12" style="shape=mxgraph.bpmn.event;html=1;notation=bpmn2;points=[[0.145,0.145,0],[0.5,0,0],[0.855,0.145,0],[1,0.5,0],[0.855,0.855,0],[0.5,1,0],[0.145,0.855,0],[0,0.5,0]];verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;verticalAlign=top;align=center;perimeter=ellipsePerimeter;outlineConnect=0;aspect=fixed;outline=end;symbol=terminate2;" value="" vertex="1">
+          <mxGeometry height="50" width="50" x="1880" y="165" as="geometry" />
+        </mxCell>
+        <mxCell id="generated-diagram-19" edge="1" parent="generated-diagram-1" source="generated-diagram-5" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endArrow=blockThin;endFill=1;notation=bpmn2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="generated-diagram-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="270" />
+              <mxPoint x="200" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generated-diagram-20" edge="1" parent="generated-diagram-1" source="generated-diagram-7" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endArrow=blockThin;endFill=1;notation=bpmn2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="generated-diagram-8">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="410" y="270" />
+              <mxPoint x="410" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generated-diagram-21" edge="1" parent="generated-diagram-1" source="generated-diagram-8" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endArrow=blockThin;endFill=1;notation=bpmn2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitPerimeter=0;entryPerimeter=0;" target="generated-diagram-13" value="yes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="495" y="470" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generated-diagram-22" edge="1" parent="generated-diagram-1" source="generated-diagram-8" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endArrow=blockThin;endFill=1;notation=bpmn2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitPerimeter=0;" target="generated-diagram-9" value="no">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="580" y="290" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generated-diagram-24" edge="1" parent="generated-diagram-1" source="generated-diagram-10" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endArrow=blockThin;endFill=1;notation=bpmn2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" target="generated-diagram-13" value="yes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generated-diagram-26" edge="1" parent="generated-diagram-1" source="generated-diagram-13" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endArrow=blockThin;endFill=1;notation=bpmn2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="generated-diagram-14">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1230" y="640" />
+              <mxPoint x="1230" y="640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generated-diagram-27" edge="1" parent="generated-diagram-1" source="generated-diagram-14" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endArrow=blockThin;endFill=1;notation=bpmn2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="generated-diagram-15" value="no">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1315" y="750" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generated-diagram-28" edge="1" parent="generated-diagram-1" source="generated-diagram-14" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endArrow=blockThin;endFill=1;notation=bpmn2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="generated-diagram-17" value="yes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1520" y="640" />
+              <mxPoint x="1520" y="640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generated-diagram-29" edge="1" parent="generated-diagram-1" source="generated-diagram-15" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endArrow=blockThin;endFill=1;notation=bpmn2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="generated-diagram-17">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1640" y="750" />
+              <mxPoint x="1640" y="640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generated-diagram-30" edge="1" parent="generated-diagram-1" source="generated-diagram-17" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endArrow=blockThin;endFill=1;notation=bpmn2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="generated-diagram-18">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1880" y="640" />
+              <mxPoint x="1880" y="640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generated-diagram-31" edge="1" parent="generated-diagram-1" source="generated-diagram-6" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endFill=0;startFill=0;endSize=6;startSize=6;dashed=1;dashPattern=1 4;endArrow=none;startArrow=none;notation=bpmn2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="generated-diagram-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="290" y="210" />
+              <mxPoint x="290" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generated-diagram-32" edge="1" parent="generated-diagram-1" source="generated-diagram-17" style="html=1;edgeStyle=elbowEdgeStyle;fontSize=12;endFill=0;startFill=0;endSize=6;startSize=6;dashed=1;dashPattern=1 4;endArrow=none;startArrow=none;notation=bpmn2;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="generated-diagram-16">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1760" y="580" />
+              <mxPoint x="1760" y="580" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

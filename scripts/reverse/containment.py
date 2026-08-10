@@ -1,15 +1,17 @@
 """Containment resolution: where a resolved cell nests, and how deep.
 
-C4 is the only notation with a real forward ``.mdg`` parser today, and none of
-its shapes declare ``rows.allowed`` (verified against the registry: zero C4
-shapes have non-empty ``rows.allowed``) -- every nested child is genuine
-containment, never a compartment row. This module targets pure parent/child
-containment only. The rows-vs-containment branch ``GRAMMAR.md`` describes is a
-pre-existing gap in the forward parser (``dsl_engine.py`` never reads a
-shape's ``rows.allowed``/``contains.allowed`` either -- every indented child
-becomes a contained node regardless of what the parent declares) -- out of
-scope here; revisit if another notation gains a real parser with shapes that
-declare rows.
+Every notation shares the same forward ``.mdg`` parser (``dsl_engine.py``),
+and none of C4's shapes declare ``rows.allowed`` (verified against the
+registry: zero C4 shapes have non-empty ``rows.allowed``) -- so for C4, every
+nested child is genuine containment, never a compartment row. This module
+targets pure parent/child containment only. The rows-vs-containment branch
+``GRAMMAR.md`` describes is a pre-existing gap in the forward parser
+(``dsl_engine.py`` never reads a shape's ``rows.allowed``/``contains.allowed``
+either -- every indented child becomes a contained node regardless of what the
+parent declares); a notation whose shapes DO declare rows (e.g. bpmn2's
+``TableRowBoxPart``/``SwimlaneBoxPart``) forward-parses those children as
+containment too, silently past what the DSL actually models -- out of scope
+here; revisit alongside a real rows-aware forward parser.
 
 A cell's *legitimate* container is the nearest ancestor, via draw.io's own
 ``parent=`` chain, whose resolved shape has a non-empty registry

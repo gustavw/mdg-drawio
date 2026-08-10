@@ -11,6 +11,8 @@ significant. For reverse matching we weight tokens by the job they do:
   cosmetic *agreement* still tips otherwise-identical candidates apart.
 * **structural** (everything else: rounded, dashed, container, ...) -- the
   medium default.
+* **ignored** (per-instance connection geometry, editor-injected metadata) --
+  excluded from comparison entirely; see :data:`IGNORED_KEYS`.
 
 Similarity is the weighted fraction of agreeing tokens over the union of tokens
 in the two styles, so a cosmetic difference costs only its small weight while a
@@ -23,6 +25,32 @@ from typing import Final
 
 # Tokens whose *key* is inherently shape-defining even though it takes a value.
 SHAPE_KEYS: Final[frozenset[str]] = frozenset({"shape", "perimeter"})
+
+# Keys dropped before comparison: never present on any palette candidate (a
+# canonical shape style has no live editor state), yet always present on a
+# real hand-drawn cell, so counting them only manufactures unmatched
+# denominator weight for every single query.
+#
+# - exit*/entry* -- per-edge connection anchor points (where on *this specific
+#   pair of shapes* the edge attaches), not part of the edge's own style.
+# - notation -- an editor-injected library tag (e.g. "notation=bpmn2"), never
+#   part of a palette style; a real signal for library detection, but that is
+#   a separate concern from shape identity and not handled here.
+IGNORED_KEYS: Final[frozenset[str]] = frozenset(
+    {
+        "exitX",
+        "exitY",
+        "exitDx",
+        "exitDy",
+        "exitPerimeter",
+        "entryX",
+        "entryY",
+        "entryDx",
+        "entryDy",
+        "entryPerimeter",
+        "notation",
+    }
+)
 
 # Cosmetic tokens: colour, font, text alignment, and other purely-visual keys.
 # These get the small weight so UI edits to them barely affect the match.
@@ -77,6 +105,14 @@ def parse_style(style: str) -> dict[str, object]:
 
     Bare tokens map to the :data:`BARE` sentinel so they compare equal to each
     other but never to a ``key=value`` token that happens to share the name.
+
+    draw.io's built-in basic shapes (``swimlane``, ``table``, ``ellipse``,
+    ``rhombus``, ...) render identically whether written bare (``swimlane;...``)
+    or prefixed (``shape=swimlane;...``) -- both forms appear across hand-drawn
+    and palette-sourced files. A dotless ``shape=`` value is therefore folded
+    into the same bare-token slot as its name, so the two spellings compare
+    equal. Namespaced stencils (``shape=mxgraph.bpmn.event``) have no bare
+    form and keep the literal ``shape`` key.
     """
     tokens: dict[str, object] = {}
     for raw in style.split(";"):
@@ -85,7 +121,13 @@ def parse_style(style: str) -> dict[str, object]:
             continue
         if "=" in tok:
             key, value = tok.split("=", 1)
-            tokens[key.strip()] = value.strip()
+            key, value = key.strip(), value.strip()
+            if key in IGNORED_KEYS:
+                continue
+            if key == "shape" and "." not in value:
+                tokens[value] = BARE
+            else:
+                tokens[key] = value
         else:
             tokens[tok] = BARE
     return tokens

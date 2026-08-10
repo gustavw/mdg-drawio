@@ -7,8 +7,8 @@ The ``mdg`` CLI exposes a single action (``convert``), but the pipeline branches
 on real input dimensions:
 
 * **fixture** — every ``*_shapes_coverage.mdg`` and every architecture ``.mdg``
-* **notation** — derived from the fixture (only ``c4`` converts; the rest hit
-  the early-reject path, which is itself worth tracing)
+* **notation** — derived from the fixture; notation coverage sheets exercise
+  the shared parser, including clean rejection of still-unsupported constructs
 * **layout mode** — ``layered`` / ``palette`` / ``process`` / ``sequence``
   (injected into frontmatter for c4 fixtures)
 * **direction** — ``TB`` / ``LR`` (injected into frontmatter)
@@ -92,10 +92,7 @@ def discover_fixtures() -> list[Path]:
 
 
 def _is_c4(fixture: Path) -> bool:
-    """Whether a fixture converts (only ``c4`` is implemented today).
-
-    Reuses the engine's own detection so this never drifts from the pipeline.
-    """
+    """Whether a fixture receives the exhaustive layout permutations."""
     source = fixture.read_text(encoding="utf-8-sig")
     return _detect_notation(source) == "c4"
 
@@ -173,8 +170,8 @@ def build_permutations(*, full: bool) -> list[Permutation]:
     """Enumerate the permutation set.
 
     Covering mode touches every dimension value at least once; full mode is the
-    cartesian product of ``mode x direction x force`` for each c4 fixture. Non-c4
-    fixtures early-exit, so they contribute one run each in both modes.
+    cartesian product of ``mode x direction x force`` for each C4 fixture.
+    Other notation fixtures contribute one representative run each.
     """
     fixtures = discover_fixtures()
     modes = sorted(layout_pkg.modes())
@@ -182,7 +179,7 @@ def build_permutations(*, full: bool) -> list[Permutation]:
 
     for fixture in fixtures:
         if not _is_c4(fixture):
-            # Early-reject path — force flag does not change what runs.
+            # One representative parse/conversion run for each other notation.
             perms.append(Permutation(fixture, force=True))
             continue
 

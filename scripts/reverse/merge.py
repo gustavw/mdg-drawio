@@ -20,10 +20,21 @@ parser the real pipeline uses) -- it never writes a file itself. The CLI
 (``scripts/reverse/merge_cli.py``) is responsible for the dry-run-by-default,
 validate-before-write contract.
 
-Scope: this only emits new VERTEX declarations. A brand-new connector drawn
-between two shapes (a ``c4.Rel(...)``) is not yet emitted -- edges are
-reported as a count so nothing is silently lost, but rendering them is a
-separate, later extension.
+Edges are emitted too, as flat top-level statements (``lib.Function(source,
+target[, label])``, per GRAMMAR.md -- edges take no block and aren't nested),
+appended after any new top-level vertex subtree. An edge's endpoints must
+themselves resolve to a known node -- either newly assigned in this run, or
+already declared in the existing file -- otherwise it is skipped and reported,
+same as an unresolved vertex.
+
+Dedup scope: a vertex's identity is its draw.io cell_id (see above), but an
+edge has no id of its own in the ``.mdg`` grammar to key on. Re-running a
+merge against an unchanged source is still safe -- an edge is skipped if its
+exact rendered line already appears verbatim in the existing file -- but a
+logically-identical edge re-labeled or re-routed through a different cell_id
+is NOT detected as a duplicate. Closing that gap needs cross-referencing
+existing edge declarations against the registry (which function names are
+edges) rather than a text-level check; out of scope here.
 """
 from __future__ import annotations
 
@@ -215,19 +226,38 @@ def _label_for(cell: Cell) -> str | None:
     trustworthy one -- callers fall back to the ``label or node_id``
     convention the forward engine already applies (GRAMMAR.md/dsl_engine.py).
 
-    Prefers a C4 object cell's own ``c4Name`` attribute over its plain
-    ``value`` (which, for an untouched palette cell, is only an
-    unsubstituted ``%c4Name%`` template -- see :class:`Cell`). Anything that
-    still looks like a template placeholder or carries raw HTML is skipped
-    rather than guessed at.
+    Three sources, in priority order:
+
+    1. A C4 object cell's own ``c4Name`` attribute -- takes priority over its
+       plain ``value``, which for an untouched palette cell is only an
+       unsubstituted ``%c4Name%`` template (see :class:`Cell`).
+    2. An object-wrapped cell's generic draw.io ``label`` attribute -- how
+       every OTHER notation's object cells carry their user-typed text (a
+       bpmn2 Pool/Lane/task is ``<object label="...">``, no C4-style
+       template substitution involved).
+    3. The cell's own ``value`` -- a bare (non-object-wrapped) vertex or edge.
+
+    Anything that still looks like a template placeholder or carries raw
+    HTML is skipped rather than guessed at.
     """
     name = cell.object_attrs.get("c4Name", "").strip()
     if name and "%" not in name:
         return name
+    label = cell.object_attrs.get("label", "").strip()
+    if label and "%" not in label and "<" not in label:
+        return label
     value = cell.value.strip()
     if value and "%" not in value and "<" not in value:
         return value
     return None
+
+
+def _edge_label_for(cell: Cell) -> str | None:
+    """Extract connector text, including C4's edge-specific object field."""
+    description = cell.object_attrs.get("c4Description", "").strip()
+    if description and "%" not in description and "<" not in description:
+        return description
+    return _label_for(cell)
 
 
 def _escape_dsl_string(text: str) -> str:
@@ -268,6 +298,26 @@ def _render_declaration(
     variant_suffix = f", variant={variant}" if variant != 1 else ""
     colon = ":" if opens_block else ""
     return f"{indent}{library}.{function}({', '.join(args)}{variant_suffix}){colon}"
+
+
+def _render_edge_declaration(
+    cell: Cell, shape_id: str, source_node_id: str, target_node_id: str
+) -> str | None:
+    """An edge declaration, flat and top-level (edges take no block, no
+    indent, per GRAMMAR.md). Only ``source``, ``target``, and ``label`` are
+    ever emitted -- an edge shape declaring further optional args (e.g.
+    C4 Rel's ``technology``) is valid DSL without them, same as
+    :func:`_render_declaration` never emits every possible vertex kwarg."""
+    meta = _shape_meta(shape_id)
+    if meta is None:
+        return None
+    library, function, variant = meta
+    args = [source_node_id, target_node_id]
+    label = _edge_label_for(cell)
+    if label is not None:
+        args.append(f'"{_escape_dsl_string(label)}"')
+    variant_suffix = f", variant={variant}" if variant != 1 else ""
+    return f"{library}.{function}({', '.join(args)}{variant_suffix})"
 
 
 @dataclass
@@ -375,24 +425,87 @@ def _render_subtree(
     return out
 
 
+@dataclass(frozen=True)
+class NewEdge:
+    """One new edge cell, resolved to a shape and both endpoints' node ids."""
+
+    cell_id: str
+    shape_id: str
+    source_node_id: str
+    target_node_id: str
+
+
+def _is_edge_shape(shape_id: str) -> bool:
+    entry = registry_entry(shape_id)
+    return entry is not None and entry.get("kind") == "edge"
+
+
+def _resolve_endpoint(
+    raw_id: str | None, node_ids: dict[str, str], existing_ids: set[str]
+) -> str | None:
+    """The semantic node_id for an edge endpoint's raw draw.io cell id, or
+    ``None`` if it names a cell this run neither resolved nor found already
+    declared -- a dangling/unresolvable endpoint, so the edge can't be
+    emitted (its declaration would reference an id that doesn't exist).
+
+    ``existing_ids`` is checked FIRST: :func:`~scripts.reverse.naming.
+    assign_semantic_ids` mints a semantic id for every resolved cell
+    regardless of whether it's already represented (see its own docstring),
+    so an already-represented endpoint would otherwise resolve to a
+    newly-minted id instead of the established one its cell_id already is
+    (the identity convention this whole module relies on, see the module
+    docstring).
+    """
+    if raw_id is None:
+        return None
+    if raw_id in existing_ids:
+        return raw_id
+    if raw_id in node_ids:
+        return node_ids[raw_id]
+    return None
+
+
 def _classify_new_cells(
     result: DocumentResult,
     existing_ids: set[str],
     raw_cells: dict[str, RawCell],
-) -> tuple[list[CellResult], list[str], int]:
-    """Split ``result.cells`` into (genuinely new vertex cells, human-readable
-    skip reasons for unresolved cells, count of new edges -- not yet emitted,
-    see the module docstring)."""
+    node_ids: dict[str, str],
+) -> tuple[list[CellResult], list[NewEdge], list[str]]:
+    """Split ``result.cells`` into (genuinely new vertex cells, genuinely new
+    resolved edges, human-readable skip reasons for anything unresolved)."""
     new_cells: list[CellResult] = []
+    new_edges: list[NewEdge] = []
     skipped: list[str] = []
-    new_edge_count = 0
     for cell in result.cells:
         if cell.cell_id in existing_ids:
             continue
         raw = raw_cells.get(cell.cell_id)
         if raw is not None and raw.is_edge:
-            if cell.chosen is not None:
-                new_edge_count += 1
+            if cell.chosen is None:
+                skipped.append(
+                    f"{cell.cell_id}: could not derive an edge shape "
+                    f"({cell.resolved_by})"
+                )
+                continue
+            if not _is_edge_shape(cell.chosen.shape_id):
+                skipped.append(
+                    f"{cell.cell_id}: resolved edge to non-edge shape "
+                    f"{cell.chosen.shape_id!r}"
+                )
+                continue
+            source_node_id = _resolve_endpoint(raw.source_id, node_ids, existing_ids)
+            target_node_id = _resolve_endpoint(raw.target_id, node_ids, existing_ids)
+            if source_node_id is None or target_node_id is None:
+                skipped.append(
+                    f"{cell.cell_id}: endpoint not resolved to a known node "
+                    f"(source={raw.source_id!r}, target={raw.target_id!r})"
+                )
+                continue
+            new_edges.append(
+                NewEdge(
+                    cell.cell_id, cell.chosen.shape_id, source_node_id, target_node_id
+                )
+            )
             continue
         if cell.chosen is None:
             skipped.append(
@@ -400,7 +513,7 @@ def _classify_new_cells(
             )
             continue
         new_cells.append(cell)
-    return new_cells, skipped, new_edge_count
+    return new_cells, new_edges, skipped
 
 
 def _build_insertions(
@@ -452,6 +565,35 @@ def _build_insertions(
     return insertions
 
 
+def _build_edge_insertion(
+    existing: ExistingIndex, new_edges: list[NewEdge], cells_by_id: dict[str, Cell]
+) -> tuple[Insertion | None, int]:
+    """One top-level :class:`Insertion` rendering every new edge (``None`` if
+    there's nothing to add), plus how many were actually emitted.
+
+    An edge whose exact rendered line already appears verbatim in the
+    existing file is skipped -- see the module docstring for what this dedup
+    does and does not catch.
+    """
+    lines: list[str] = []
+    for edge in new_edges:
+        line = _render_edge_declaration(
+            cells_by_id[edge.cell_id],
+            edge.shape_id,
+            edge.source_node_id,
+            edge.target_node_id,
+        )
+        if line is None or line in existing.clean_lines:
+            continue
+        lines.append(line)
+    if not lines:
+        return None, 0
+    insertion = Insertion(
+        len(existing.lines), "\n".join(lines), top_level=True, anchor_depth=-1
+    )
+    return insertion, len(lines)
+
+
 def plan_merge(
     existing: ExistingIndex,
     cells: list[Cell],
@@ -467,8 +609,8 @@ def plan_merge(
     cells_by_id = {c.cell_id: c for c in cells}
     id_of_node_id = {v: k for k, v in node_ids.items()}
 
-    new_cells, skipped, new_edge_count = _classify_new_cells(
-        result, existing_ids, raw_cells
+    new_cells, new_edges, skipped = _classify_new_cells(
+        result, existing_ids, raw_cells, node_ids
     )
     insertions = _build_insertions(
         existing,
@@ -479,6 +621,11 @@ def plan_merge(
         existing_ids,
         id_of_node_id,
     )
+    edge_insertion, new_edge_count = _build_edge_insertion(
+        existing, new_edges, cells_by_id
+    )
+    if edge_insertion is not None:
+        insertions.append(edge_insertion)
     return MergePlan(insertions, skipped, new_edge_count, len(new_cells))
 
 

@@ -121,28 +121,115 @@ def test_process_lays_out_all_nodes_left_to_right() -> None:
     assert by_id["a"].y == by_id["b"].y
 
 
-def test_process_rank_excluded_nodes_and_edges_pass_through() -> None:
+def test_process_rank_excluded_node_floats_above_its_connected_task() -> None:
     nodes = [_node("a"), _node("b"), _node("data")]
     edges = [
         Edge(id="a->b", type="c4.Rel", source_id="a", target_id="b"),
         Edge(id="a->data", type="c4.Rel", source_id="a", target_id="data"),
     ]
     result = ProcessLayout().apply(
-        nodes, edges, _size_of, rank_exclude_ids={"data"}
+        nodes, edges, _size_of, Config(rank_exclude_ids=frozenset({"data"}))
     )
 
     by_id = {n.id: n for n in result.nodes}
     routed = {e.id: e for e in result.edges}
     assert set(by_id) == {"a", "b", "data"}
     assert set(routed) == {"a->b", "a->data"}
-    # The excluded node is returned untouched (never ranked/placed) — it keeps
-    # its origin geometry while the ranked nodes get real positions.
-    assert (by_id["data"].x, by_id["data"].y) == (0.0, 0.0)
+    # The excluded node is never ranked/placed into the sequence -- instead it
+    # floats directly above the task it's connected to, centered horizontally.
+    data, anchor = by_id["data"], by_id["a"]
+    assert (data.width, data.height) == _size_of(data.type)
+    assert data.x == pytest.approx(anchor.x + anchor.width / 2 - data.width / 2)
+    assert data.y == pytest.approx(anchor.y - data.height - Config().column_gap)
     assert by_id["a"].x > 0.0 and by_id["b"].x > 0.0
     # The edge touching the excluded node passes through unrouted (no waypoints),
     # while the ranked edge gets routed.
     assert routed["a->data"].waypoints == []
     assert routed["a->b"].waypoints != []
+
+
+def test_process_rank_excluded_node_shared_by_two_tasks_floats_above_first() -> None:
+    """A data artifact read by more than one task (e.g. a DataObject two
+    tasks both consume) renders above the EARLIEST task in the sequence, not
+    whichever one happens to be listed first in its own edges."""
+    nodes = [_node("a"), _node("b"), _node("data")]
+    edges = [
+        Edge(id="a->b", type="c4.Rel", source_id="a", target_id="b"),
+        # Declared toward "b" (the later task) first, deliberately, to prove
+        # anchor choice depends on rank, not edge/declaration order.
+        Edge(id="b->data", type="c4.Rel", source_id="b", target_id="data"),
+        Edge(id="a->data", type="c4.Rel", source_id="a", target_id="data"),
+    ]
+    result = ProcessLayout().apply(
+        nodes, edges, _size_of, Config(rank_exclude_ids=frozenset({"data"}))
+    )
+
+    by_id = {n.id: n for n in result.nodes}
+    data, anchor = by_id["data"], by_id["a"]
+    assert anchor.x < by_id["b"].x  # sanity: "a" really is the earlier task
+    assert data.x == pytest.approx(anchor.x + anchor.width / 2 - data.width / 2)
+
+
+def test_process_rank_excluded_node_with_no_connection_keeps_origin() -> None:
+    """An excluded node with nothing to anchor to (no edge to a ranked node)
+    is left at its origin geometry -- there's nowhere meaningful to float it."""
+    nodes = [_node("a"), _node("orphan_data")]
+    edges: list[Edge] = []
+    result = ProcessLayout().apply(
+        nodes,
+        edges,
+        _size_of,
+        Config(rank_exclude_ids=frozenset({"orphan_data"})),
+    )
+    by_id = {n.id: n for n in result.nodes}
+    assert (by_id["orphan_data"].x, by_id["orphan_data"].y) == (0.0, 0.0)
+    assert (by_id["orphan_data"].width, by_id["orphan_data"].height) == _size_of(
+        by_id["orphan_data"].type
+    )
+
+
+def test_process_rank_exclusion_preserves_larger_authored_headroom() -> None:
+    lane = _node("lane", padding_extra_top=200.0)
+    task = _node("task")
+    task.parent_id = lane.id
+    data = _node("data")
+    edges = [
+        Edge(id="association", type="c4.Rel", source_id="data", target_id="task")
+    ]
+
+    ProcessLayout().apply(
+        [lane, task, data],
+        edges,
+        _size_of,
+        Config(rank_exclude_ids=frozenset({"data"})),
+    )
+
+    assert lane.extra["padding_extra_top"] == 200.0
+
+
+def test_process_bypassed_branch_does_not_overlap_same_rank_sibling() -> None:
+    container = _node("container")
+    predecessor = _node("predecessor")
+    detour = _node("detour")
+    sibling = _node("sibling")
+    successor = _node("successor")
+    for node in (predecessor, detour, sibling, successor):
+        node.parent_id = container.id
+    edges = [
+        Edge(id="p-d", type="c4.Rel", source_id="predecessor", target_id="detour"),
+        Edge(id="d-s", type="c4.Rel", source_id="detour", target_id="successor"),
+        Edge(id="p-s", type="c4.Rel", source_id="predecessor", target_id="successor"),
+        Edge(id="p-x", type="c4.Rel", source_id="predecessor", target_id="sibling"),
+    ]
+
+    result = ProcessLayout().apply(
+        [container, predecessor, detour, sibling, successor], edges, _size_of
+    )
+    by_id = {node.id: node for node in result.nodes}
+    detour_box = by_id["detour"]
+    sibling_box = by_id["sibling"]
+
+    assert detour_box.y >= sibling_box.y + sibling_box.height + Config().column_gap
 
 
 # ---------------------------------------------------------------------------

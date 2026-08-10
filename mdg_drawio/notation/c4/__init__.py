@@ -134,9 +134,13 @@ def _parse_node(
         )
 
     node_id = literal_or_name(pos_args[0], "node_id")
-    # Label is optional in the DSL; fall back to the node id so the node always
-    # has the non-empty label the model requires.
-    label = literal_string(pos_args[1], "label") if len(pos_args) >= 2 else node_id
+    # Label is optional in the DSL; an omitted label stays empty rather than
+    # defaulting to the node id (see tests/test_review_fixes.py::
+    # test_node_without_label_stays_empty for why the earlier id-fallback was
+    # reverted -- it was scoped here to c4 alone, but the equivalent default
+    # in the shared dsl_engine.py builder broke every other notation's
+    # intentionally-unlabeled shapes once they started forward-rendering too).
+    label = literal_string(pos_args[1], "label") if len(pos_args) >= 2 else ""
     variant = parse_keyword_int(kw_args, "variant", 1, line_number)
     technology = kw_args.get("technology", "")
     if not isinstance(technology, str):
@@ -286,12 +290,13 @@ def parse_page(source: str, page_name: str, _page_index: int = 0) -> Document:
         body,
         namespace=_NAMESPACE,
         diagram_title_call="",
-        diagram_name_default=page_name or _DIAGRAM_TITLE_DEFAULT,
+        diagram_name_default=page_name,
         parse_diagram_title=_parse_diagram_title,
         is_edge=_is_edge,
         build_node=_parse_node,
         build_edge=_parse_edge,
     )
+    diagram_name = diagram_name or _DIAGRAM_TITLE_DEFAULT
 
     # A DiagramTitle call renders an on-canvas title node; it also supplies the
     # page name AS A FALLBACK only. An explicit `page:` frontmatter name always

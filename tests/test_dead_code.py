@@ -35,7 +35,14 @@ from scripts.trace_actions import TraceResult, run_all, touched_union
 
 # Synthetic code objects that appear in a trace but are never `def`/`class`
 # definitions in source, so they legitimately have no universe entry.
-_SYNTHETIC = ("<genexpr>", "<listcomp>", "<dictcomp>", "<setcomp>", "<lambda>")
+_SYNTHETIC = (
+    "<module>",
+    "<genexpr>",
+    "<listcomp>",
+    "<dictcomp>",
+    "<setcomp>",
+    "<lambda>",
+)
 
 
 @pytest.fixture(scope="module")
@@ -55,12 +62,15 @@ def test_every_permutation_runs_without_crashing(results: list[TraceResult]) -> 
 
 
 def test_convertible_fixtures_convert(results: list[TraceResult]) -> None:
-    """Architecture fixtures must convert (exit 0); the rest reject cleanly.
-
-    The shape-coverage documents are not convert inputs (wrong notation, or a
-    palette round-trip fixture), so their expected outcome is ``exit=1``.
-    """
-    convertible = ("docs/architecture/", "tests/action_fixtures/")
+    """Supported fixtures convert; fixtures with known parser gaps reject."""
+    convertible = (
+        "docs/architecture/",
+        "tests/action_fixtures/",
+        "mdg_drawio/notation/archimate3/",
+        "mdg_drawio/notation/bpmn2/",
+        "mdg_drawio/notation/erd/",
+        "mdg_drawio/notation/general/",
+    )
     for r in results:
         expected = "ok" if r.fixture.startswith(convertible) else "exit=1"
         assert r.outcome == expected, f"{r.label}: expected {expected}, got {r.outcome}"

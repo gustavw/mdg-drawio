@@ -19,8 +19,8 @@ grammar:
   spec: ../GRAMMAR.md
   root: BPMN
   notes:
-  - Pools and the cross-functional table use TableRowBoxPart/SwimlaneBoxPart rows.
-  - 'Lanes, Group and *Expanded sub-processes contain child nodes (contains: ''*'').'
+  - The cross-functional table uses TableRowBoxPart/SwimlaneBoxPart rows.
+  - 'Lanes, Pools, Group and *Expanded sub-processes contain child nodes (contains: ''*'').'
 row_types:
 - name: TableRowBoxPart
   args:
@@ -790,17 +790,21 @@ shapes:
   - name: label
     required: false
   rows:
+    allowed: []
+  contains:
     allowed:
-    - SwimlaneBoxPart
+    - '*'
+  containment:
+    strategy: stack
   related:
     variants:
     - bpmn2.horizontalpool.v2
     see_also: []
   example: |
     bpmn2.HorizontalPool(n1, "Pool"):
-        bpmn2.SwimlaneBoxPart(c2, "Lane 1")
-        bpmn2.SwimlaneBoxPart(c3, "Lane 2")
-        bpmn2.SwimlaneBoxPart(c4, "Lane 3")
+        bpmn2.HorizontalSwimlane(c2, "Lane 1")
+        bpmn2.HorizontalSwimlane(c3, "Lane 2")
+        bpmn2.HorizontalSwimlane(c4, "Lane 3")
   metamodel:
     spec: bpmn-2.0
     element: HorizontalPool
@@ -827,17 +831,21 @@ shapes:
   - name: label
     required: false
   rows:
+    allowed: []
+  contains:
     allowed:
-    - SwimlaneBoxPart
+    - '*'
+  containment:
+    strategy: stack
   related:
     variants:
     - bpmn2.horizontalpool.v1
     see_also: []
   example: |
     bpmn2.HorizontalPool(n1, "Pool", variant=2):
-        bpmn2.SwimlaneBoxPart(c2, "Lane 1")
-        bpmn2.SwimlaneBoxPart(c3, "Lane 2")
-        bpmn2.SwimlaneBoxPart(c4, "Lane 3")
+        bpmn2.HorizontalSwimlane(c2, "Lane 1")
+        bpmn2.HorizontalSwimlane(c3, "Lane 2")
+        bpmn2.HorizontalSwimlane(c4, "Lane 3")
   metamodel:
     spec: bpmn-2.0
     element: HorizontalPool
@@ -901,17 +909,21 @@ shapes:
   - name: label
     required: false
   rows:
+    allowed: []
+  contains:
     allowed:
-    - SwimlaneBoxPart
+    - '*'
+  containment:
+    strategy: stack
   related:
     variants:
     - bpmn2.verticalpool.v2
     see_also: []
   example: |
     bpmn2.VerticalPool(n1, "Pool"):
-        bpmn2.SwimlaneBoxPart(c2, "Lane 1")
-        bpmn2.SwimlaneBoxPart(c3, "Lane 2")
-        bpmn2.SwimlaneBoxPart(c4, "Lane 3")
+        bpmn2.VerticalSwimlane(c2, "Lane 1")
+        bpmn2.VerticalSwimlane(c3, "Lane 2")
+        bpmn2.VerticalSwimlane(c4, "Lane 3")
   metamodel:
     spec: bpmn-2.0
     element: VerticalPool
@@ -938,17 +950,21 @@ shapes:
   - name: label
     required: false
   rows:
+    allowed: []
+  contains:
     allowed:
-    - SwimlaneBoxPart
+    - '*'
+  containment:
+    strategy: stack
   related:
     variants:
     - bpmn2.verticalpool.v1
     see_also: []
   example: |
     bpmn2.VerticalPool(n1, "Pool", variant=2):
-        bpmn2.SwimlaneBoxPart(c2, "Lane 1")
-        bpmn2.SwimlaneBoxPart(c3, "Lane 2")
-        bpmn2.SwimlaneBoxPart(c4, "Lane 3")
+        bpmn2.VerticalSwimlane(c2, "Lane 1")
+        bpmn2.VerticalSwimlane(c3, "Lane 2")
+        bpmn2.VerticalSwimlane(c4, "Lane 3")
   metamodel:
     spec: bpmn-2.0
     element: VerticalPool

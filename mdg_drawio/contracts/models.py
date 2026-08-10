@@ -126,8 +126,12 @@ class NodeChildCell:
 class Node:
     """A diagram node — shape, container, or swimlane.
 
-    ``id``, ``type``, and ``label`` are required (validated in __post_init__).
-    All other fields are optional and default to their zero/empty values.
+    ``id`` and ``type`` are required (validated in __post_init__). ``label``
+    may legitimately be empty -- an icon-only shape (a BPMN start/end event,
+    a gateway) is deliberately unlabeled in draw.io itself (``value=""``);
+    every consumer (size estimation, generator XML output) already treats a
+    falsy label as "no text" rather than assuming one. All other fields are
+    optional and default to their zero/empty values.
     """
 
     id: str = ""
@@ -179,8 +183,6 @@ class Node:
             raise ValueError("Node.id is required")
         if not self.type:
             raise ValueError("Node.type is required")
-        if not self.label:
-            raise ValueError("Node.label is required")
 
 
 @dataclass

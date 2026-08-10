@@ -61,10 +61,19 @@ def layer_cell_xml(cell_id: str, parent: str = "1") -> str:
     return f'<mxCell id="{cell_id}" value="Layer" parent="{parent}"/>'
 
 
-def edge_cell_xml(cell_id: str, source: str, target: str, parent: str = "1") -> str:
-    """A relationship edge between two node ids."""
+def edge_cell_xml(
+    cell_id: str,
+    source: str,
+    target: str,
+    parent: str = "1",
+    style: str = "edgeStyle=orthogonalEdgeStyle;html=1;",
+) -> str:
+    """A relationship edge between two node ids. Defaults to a generic style
+    that doesn't resolve to any registry shape; pass a real entry's style
+    (e.g. ``fx.get(index, "c4.rel.v1").style``) to synthesize one that does.
+    """
     return (
-        f'<mxCell id="{cell_id}" style="edgeStyle=orthogonalEdgeStyle;html=1;" '
+        f'<mxCell id="{cell_id}" style="{escape(style, {chr(34): "&quot;"})}" '
         f'edge="1" parent="{parent}" source="{source}" target="{target}">'
         f'<mxGeometry relative="1" as="geometry"/></mxCell>'
     )
