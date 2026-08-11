@@ -469,18 +469,24 @@ def _fan_out_anchor(
     branch should leave from a side that matches where its OWN target sits,
     not all pile onto the same default port -- otherwise two options read as
     one tangled line at the point they leave the shape, even though they
-    diverge further along. ``None`` means the target is roughly level with
-    the source, where the plain default port is already the right choice.
+    diverge further along. ``None`` means the target doesn't clear the
+    source's own footprint on the cross axis, where the plain default port
+    is the right choice -- forcing a cross-axis exit toward a target whose
+    box still overlaps the source's span there would have to double back
+    across the source's own body to reach it (a branch that reads as
+    "crossing through the gateway"), which is worse than the plain route.
     """
     src_x, src_y, src_w, src_h = src_box
     tgt_x, tgt_y, tgt_w, tgt_h = tgt_box
     if horizontal:
-        src_mid, tgt_mid = src_y + src_h / 2, tgt_y + tgt_h / 2
+        src_lo, src_hi = src_y, src_y + src_h
+        tgt_lo, tgt_hi = tgt_y, tgt_y + tgt_h
     else:
-        src_mid, tgt_mid = src_x + src_w / 2, tgt_x + tgt_w / 2
-    if tgt_mid > src_mid + 1:
+        src_lo, src_hi = src_x, src_x + src_w
+        tgt_lo, tgt_hi = tgt_x, tgt_x + tgt_w
+    if tgt_lo >= src_hi:
         return _ANCHOR_BOTTOM if horizontal else _ANCHOR_RIGHT
-    if tgt_mid < src_mid - 1:
+    if tgt_hi <= src_lo:
         return _ANCHOR_TOP if horizontal else _ANCHOR_LEFT
     return None
 

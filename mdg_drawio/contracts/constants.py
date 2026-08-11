@@ -54,6 +54,10 @@ DEFAULT_COLUMN_GAP = 80
 DEFAULT_TOP_PADDING = 30
 DEFAULT_BOTTOM_PADDING = 30
 
+# Clearance added around a swimlane/pool title's estimated text width when
+# sizing the container to fit its own rotated or unrotated header on one line.
+ROTATED_LABEL_PADDING = 16.0
+
 # ---------------------------------------------------------------------------
 # C4 text-driven shape scaling defaults
 # ---------------------------------------------------------------------------

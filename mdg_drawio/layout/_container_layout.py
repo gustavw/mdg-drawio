@@ -512,8 +512,24 @@ def _grow_parent_to_fit_children(
 ) -> None:
     max_right = max((child.x + child.width for child in children), default=0.0)
     max_bottom = max((child.y + child.height for child in children), default=0.0)
-    parent.width = max(parent.width, max_right + right_pad)
-    parent.height = max(parent.height, max_bottom + bottom_pad)
+    width = max(parent.width, max_right + right_pad)
+    height = max(parent.height, max_bottom + bottom_pad)
+
+    # A container whose OWN title needs a minimum span (e.g. a swimlane with a
+    # rotated header, sized in convert.py's ``_annotate_rotated_label_sizing``
+    # from the label's rendered length) must not shrink back below it just
+    # because its children happen to need less room -- otherwise draw.io wraps
+    # the title into overlapping sub-lines within the header band's thin
+    # ``startSize``. Generic ``extra`` keys keep this notation-agnostic.
+    min_width = parent.extra.get("min_width")
+    if min_width is not None:
+        width = max(width, float(min_width))
+    min_height = parent.extra.get("min_height")
+    if min_height is not None:
+        height = max(height, float(min_height))
+
+    parent.width = width
+    parent.height = height
 
 
 # Row text padding (item spacingLeft 4 + spacingRight 4) and a cushion so text

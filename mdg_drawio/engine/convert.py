@@ -27,6 +27,7 @@ from mdg_drawio.contracts import (
     C4_SCALER_VERTICAL_PADDING,
     C4_SCALER_WIDTH_CUSHION,
     PALETTE_MODE,
+    ROTATED_LABEL_PADDING,
 )
 from mdg_drawio.generator import (
     Document,
@@ -50,6 +51,7 @@ from mdg_drawio.layout import (
     create_size_resolver,
     create_style_resolver,
     dispatch_layout,
+    estimate_text_width,
     resolve_page_size,
     scale_node_sizes,
 )
@@ -535,6 +537,34 @@ def _annotate_stack_containers(
             node.extra["start_size"] = float(match.group(1)) if match else 0.0
 
 
+def _annotate_rotated_label_sizing(
+    nodes: list[Node], style_of: Callable[[str], str]
+) -> None:
+    """Ensure a swimlane/pool container is long enough to fit its OWN title
+    on one line.
+
+    draw.io's ``swimlane`` shape draws its title in a narrow ``startSize``
+    band; when the container is too short along the title's reading axis,
+    ``whiteSpace=wrap`` breaks it into sub-lines that don't fit the band's
+    thickness and render as overlapping text. Setting a ``min_width``/
+    ``min_height`` hint (consumed by ``_grow_parent_to_fit_children``) keeps
+    the container at least as long as its own label needs, independent of
+    how much room its children require. ``horizontal=0`` rotates the title
+    onto the left edge (reading along the container's height); otherwise it
+    reads normally along the width. Notation-agnostic: any library's
+    swimlane-shaped container benefits identically.
+    """
+    for node in nodes:
+        if not node.label:
+            continue
+        style = style_of(node.type)
+        if "swimlane" not in style:
+            continue
+        required = estimate_text_width(node.label) + ROTATED_LABEL_PADDING
+        axis = "min_height" if "horizontal=0" in style else "min_width"
+        node.extra.setdefault(axis, required)
+
+
 def _annotate_type_padding(nodes: list[Node], styles: StyleProvider) -> None:
     """Inject per-type extra inner padding from the override config.
 
@@ -602,6 +632,7 @@ def convert(input_path: Path, output_path: Path, force: bool) -> int:
     style_provider = create_style_provider(registries, styles)
     for page_doc, _page_src in pages:
         _annotate_stack_containers(page_doc.nodes, style_of)
+        _annotate_rotated_label_sizing(page_doc.nodes, style_of)
         # Palette/golden pages render verbatim — no type-level padding overrides.
         if page_doc.diagram.mode != PALETTE_MODE:
             _annotate_type_padding(page_doc.nodes, style_provider)
