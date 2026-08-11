@@ -595,8 +595,9 @@ def _process_block_call(
         registry_entry = _registry_entry(
             call.namespace, call.name, foreign_variant, line_number
         )
+        declared_specs = _declared_args(call.namespace, call.name, registry_entry)
         _validate_keyword_args(
-            call.namespace, call.name, foreign_args, registry_entry, line_number
+            call.namespace, call.name, foreign_args, declared_specs, line_number
         )
         _validate_nested_call(
             container_stack,
@@ -606,6 +607,10 @@ def _process_block_call(
             line_number,
         )
         if registry_entry and registry_entry.get("kind") == "edge":
+            # An unregistered function is never treated as an edge (the
+            # `else` branch below always builds it as a node instead), so a
+            # matched edge entry always has real declared_specs.
+            assert declared_specs is not None
             _build_passthrough_edge(
                 call.namespace,
                 call.name,
@@ -613,6 +618,7 @@ def _process_block_call(
                 foreign_variant,
                 line_number,
                 edges,
+                declared_specs,
             )
         else:
             node = _build_passthrough_node(
@@ -623,6 +629,7 @@ def _process_block_call(
                 line_number,
                 nodes,
                 container_stack,
+                declared_specs,
             )
             if call.opens_block:
                 container_stack.append(
@@ -640,7 +647,11 @@ def _process_block_call(
         call.namespace, call.name, variant, line_number
     )
     _validate_keyword_args(
-        call.namespace, call.name, args, registry_entry, line_number
+        call.namespace,
+        call.name,
+        args,
+        _declared_args(call.namespace, call.name, registry_entry),
+        line_number,
     )
     _validate_nested_call(
         container_stack,
@@ -813,42 +824,51 @@ def _validate_nested_call(
         )
 
 
-def _validate_keyword_args(
-    ns: str,
-    function: str,
-    args: list[ast.AST | ast.keyword],
-    entry: dict[str, object] | None,
-    line_number: int,
-) -> None:
-    """Reject undeclared keywords for registered shapes and row types."""
-    from .registry import load_registry
-
-    declared = {"variant"}
-    if entry is not None:
+def _declared_args(
+    ns: str, function: str, entry: dict[str, object] | None
+) -> list[dict[str, object]] | None:
+    """Declared arg specs for ``(ns, function)``: from the resolved shape
+    entry if one was found, else from a matching row type in the library's
+    registry (row types have no shape entry of their own). ``None`` when
+    neither exists -- an unregistered function, kept lenient (Phase 1
+    precedent: unknown functions retain generic-node behavior). A
+    ``kind: "diagram"`` entry (a pre-composed reference fragment, e.g.
+    ``uml25.Expansion`` -- ``buildable: false``, no ``args`` of its own) gets
+    the same lenient treatment as Phase 2's containment validation: it
+    carries no real argument contract to bind against.
+    """
+    if entry is not None and entry.get("kind") != "diagram":
         entry_args = entry.get("args")
         if isinstance(entry_args, list):
-            declared.update(
-                str(arg["name"])
-                for arg in entry_args
-                if isinstance(arg, dict) and "name" in arg
-            )
+            return [a for a in entry_args if isinstance(a, dict)]
+        return []
+    from .registry import load_registry
+
     try:
         registry = load_registry(ns)
     except (KeyError, FileNotFoundError):
-        return
+        return None
     for row_type in registry.get("row_types", []):
         if not isinstance(row_type, dict) or row_type.get("name") != function:
             continue
         row_args = row_type.get("args")
         if isinstance(row_args, list):
-            declared.update(
-                str(arg["name"])
-                for arg in row_args
-                if isinstance(arg, dict) and "name" in arg
-            )
+            return [a for a in row_args if isinstance(a, dict)]
+        return []
+    return None
 
-    if entry is None and declared == {"variant"}:
+
+def _validate_keyword_args(
+    ns: str,
+    function: str,
+    args: list[ast.AST | ast.keyword],
+    declared_specs: list[dict[str, object]] | None,
+    line_number: int,
+) -> None:
+    """Reject undeclared keywords for registered shapes and row types."""
+    if declared_specs is None:
         return
+    declared = {"variant"} | {str(spec["name"]) for spec in declared_specs}
     unknown = sorted(
         kw.arg or "**kwargs"
         for kw in args
@@ -860,6 +880,60 @@ def _validate_keyword_args(
             f"{', '.join(unknown)}",
             line_number,
         )
+
+
+def _bind_registry_args(
+    ns: str,
+    function: str,
+    args: list[ast.AST | ast.keyword],
+    declared_specs: list[dict[str, object]],
+    line_number: int,
+) -> dict[str, ast.AST]:
+    """Bind call arguments to declared registry arg names, Python-signature
+    style: the registry entry is the signature, the call is bound against it.
+
+    Positional call values fill ``passing: positional`` declared args
+    left-to-right; keyword call values bind by name to any declared arg.
+    Rejects excess positional arguments, an arg supplied both positionally
+    and by keyword, and a missing required argument. ``variant=`` is handled
+    separately (``Node.variant``) and is never a declared arg.
+    """
+    pos_args = [a for a in args if not isinstance(a, ast.keyword)]
+    kw_args = [
+        a for a in args if isinstance(a, ast.keyword) and a.arg not in (None, "variant")
+    ]
+
+    positional_specs = [s for s in declared_specs if s.get("passing") == "positional"]
+    if len(pos_args) > len(positional_specs):
+        raise DslError(
+            f"{ns}.{function}(): too many positional arguments (expected at "
+            f"most {len(positional_specs)})",
+            line_number,
+        )
+
+    bound: dict[str, ast.AST] = {}
+    for spec, value in zip(positional_specs, pos_args, strict=False):
+        bound[str(spec["name"])] = value
+
+    for kw in kw_args:
+        name = kw.arg
+        assert name is not None
+        if name in bound:
+            raise DslError(
+                f"{ns}.{function}(): {name}= supplied twice (already given "
+                f"positionally)",
+                line_number,
+            )
+        bound[name] = kw.value
+
+    for spec in declared_specs:
+        name = str(spec["name"])
+        if spec.get("required") and name not in bound:
+            raise DslError(
+                f"{ns}.{function}(): missing required argument {name!r}",
+                line_number,
+            )
+    return bound
 
 
 def _registry_root(ns: str) -> str:
@@ -923,31 +997,64 @@ def _build_passthrough_node(
     line_number: int,
     nodes: list[Node],
     container_stack: list[_ContainerFrame],
+    declared_specs: list[dict[str, object]] | None,
 ) -> Node:
-    """Build a passthrough Node."""
-    pos_args = [a for a in args if not isinstance(a, ast.keyword)]
-    if not pos_args:
-        raise DslError(
-            f"{ns}.{name}(): requires at least a node id argument",
-            line_number,
+    """Build a passthrough Node.
+
+    When *declared_specs* is available, arguments are bound against it (see
+    ``_bind_registry_args``) using the registry entry as the call's
+    signature: ``node_id`` and ``label``/``text`` (whichever the entry
+    declares) are structural, every other declared value lands in
+    ``Node.extra``. An unregistered function (``declared_specs`` is
+    ``None``) keeps the lenient legacy behavior -- no arg-count or
+    keyword-binding validation, just the first two positional arguments.
+    """
+    if declared_specs is not None:
+        bound = _bind_registry_args(ns, name, args, declared_specs, line_number)
+        node_id_value = bound.get("node_id")
+        node_id = (
+            _extract_arg_string(node_id_value) if node_id_value is not None else ""
         )
-    node_id = _extract_arg_string(pos_args[0])
-    if not node_id:
-        raise DslError(
-            f"{ns}.{name}(): first argument must be a node id (string or "
-            f"identifier)",
-            line_number,
-        )
-    label = ""
-    if len(pos_args) >= 2:
-        label = _extract_arg_string(pos_args[1])
+        if not node_id:
+            raise DslError(
+                f"{ns}.{name}(): first argument must be a node id (string or "
+                f"identifier)",
+                line_number,
+            )
+        label_value = bound.get("label", bound.get("text"))
+        label = _extract_arg_string(label_value) if label_value is not None else ""
+        extra = {
+            str(spec["name"]): literal_value(
+                bound[str(spec["name"])], str(spec["name"])
+            )
+            for spec in declared_specs
+            if str(spec["name"]) not in ("node_id", "label", "text")
+            and str(spec["name"]) in bound
+        }
+    else:
+        pos_args = [a for a in args if not isinstance(a, ast.keyword)]
+        if not pos_args:
+            raise DslError(
+                f"{ns}.{name}(): requires at least a node id argument",
+                line_number,
+            )
+        node_id = _extract_arg_string(pos_args[0])
+        if not node_id:
+            raise DslError(
+                f"{ns}.{name}(): first argument must be a node id (string or "
+                f"identifier)",
+                line_number,
+            )
+        label = _extract_arg_string(pos_args[1]) if len(pos_args) >= 2 else ""
+        extra = _passthrough_keyword_extra(args)
+
     node = Node(
         id=node_id,
         type=f"{ns}.{name}",
         label=label,
         variant=variant,
         element_name=name,
-        extra=_passthrough_keyword_extra(args),
+        extra=extra,
     )
     if container_stack:
         node.parent_id = container_stack[-1].node_id
@@ -962,33 +1069,44 @@ def _build_passthrough_edge(
     variant: int,
     line_number: int,
     edges: list[Edge],
+    declared_specs: list[dict[str, object]],
 ) -> None:
-    """Build a passthrough Edge for a foreign-namespace edge call."""
-    pos_args = [a for a in args if not isinstance(a, ast.keyword)]
-    source_id = ""
-    target_id = ""
-    label = ""
-    if len(pos_args) >= 1:
-        source_id = _extract_arg_string(pos_args[0])
-    if len(pos_args) >= 2:
-        target_id = _extract_arg_string(pos_args[1])
-    if len(pos_args) >= 3:
-        label = _extract_arg_string(pos_args[2])
-    source_is_none = len(pos_args) >= 1 and _is_none_literal(pos_args[0])
-    target_is_none = len(pos_args) >= 2 and _is_none_literal(pos_args[1])
+    """Build a passthrough Edge for a foreign-namespace edge call.
+
+    Always registry-driven: this is only called once a matched registry
+    entry classified the function as an edge (see ``_process_block_call``),
+    so *declared_specs* is always a real signature -- unlike
+    ``_build_passthrough_node``, there is no unregistered-function fallback
+    here, since an unregistered function is never treated as an edge.
+    """
+    bound = _bind_registry_args(ns, name, args, declared_specs, line_number)
+    source_value = bound.get("source")
+    target_value = bound.get("target")
+    label_value = bound.get("label")
+    source_id = _extract_arg_string(source_value) if source_value is not None else ""
+    target_id = _extract_arg_string(target_value) if target_value is not None else ""
+    label = _extract_arg_string(label_value) if label_value is not None else ""
+    source_is_none = source_value is not None and _is_none_literal(source_value)
+    target_is_none = target_value is not None and _is_none_literal(target_value)
     unconnected = source_is_none and target_is_none
     if not unconnected and (not source_id or not target_id):
         raise DslError(
             f"{ns}.{name}(): edge requires source and target ids",
             line_number,
         )
+    extra: dict[str, object] = {"variant": variant}
+    for spec in declared_specs:
+        spec_name = str(spec["name"])
+        if spec_name in ("source", "target", "label") or spec_name not in bound:
+            continue
+        extra[spec_name] = literal_value(bound[spec_name], spec_name)
     edge = Edge(
         id=f"palette-edge-{len(edges) + 1}" if unconnected else "",
         type=f"{ns}.{name}",
         source_id=source_id,
         target_id=target_id,
         label=label,
-        extra={"variant": variant},
+        extra=extra,
     )
     edges.append(edge)
 

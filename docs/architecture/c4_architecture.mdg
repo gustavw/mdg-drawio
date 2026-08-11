@@ -32,8 +32,8 @@ c4.System_Boundary(drawiogen_c, "mdg-drawio"):
     c4.Container(cli, "CLI", "Thin CLI entry point. Parses arguments and delegates to the Engine.", technology="Python (argparse)")
     c4.Container(layout, "Layout Engine", "Computes node positions and edge routes. Supports four layout modes — layered, process, palette, and sequence — with orthogonal edge routing.", technology="Python")
     c4.Container(generator, "Generator", "Produces valid draw.io XML from parsed Document instances. Reads geometry overlays to preserve manual layout adjustments across regenerations.", technology="Python (xml.etree)")
-    c4.Container(notation, "Notation", "Seven notation libraries, each with a YAML shape registry. C4 is fully implemented; six remain as stubs. Shared core handles registry loading, style lookup, normalization, and DSL parsing.", technology="Python / YAML")
-    c4.Container(palette_data, "Generated Data", "Pre-built JSON data extracted from draw.io shape libraries. Not committed. Supplies style dimensions and palette entries consumed at startup.", technology="JSON (generated)")
+    c4.Container(notation, "Notation", "Seven registry-driven notation libraries sharing one block DSL engine, plus C4-specific builders. Shared core handles registry loading, exact variant dispatch, nesting validation, style lookup, and normalization.", technology="Python / YAML")
+    c4.Container(palette_data, "Generated Data", "Pre-built JSON data extracted from draw.io shape libraries. Not committed. Supplies shape styles, dimensions, palette entries, and nested row-type templates consumed at startup.", technology="JSON (generated)")
 
 c4.Person(author_c, "Diagram Author / Developer", "Writes and maintains MDG files, refines diagrams visually in draw.io.", technology="")
 
@@ -65,7 +65,7 @@ c4.System_Boundary(drawiogen_co, "mdg-drawio"):
 
   c4.Container_Boundary(engine_co_boundary, "Engine"):
       c4.Component(engine_convert_co, "convert()", "Full conversion pipeline orchestration. Detects notation, pre-loads registries/styles, parses pages, resolves layout config, injects overlays, runs layout, generates multipage XML, validates, and writes output.", technology="Python")
-      c4.Component(engine_preload_co, "Pre-load", "Loads all YAML registries and JSON style data into memory once at startup. Registries feed the notation registry cache; registries and styles are returned so the composition root (convert) builds the layout SizeResolver and the generator's StyleProvider by injection — zero filesystem I/O during parsing/layout/generation.", technology="Python (YAML/JSON)")
+      c4.Component(engine_preload_co, "Pre-load", "Loads all YAML registries plus generated shape and row-type JSON into memory once at startup. Registries feed the notation registry cache; registries and styles are returned so the composition root builds the layout SizeResolver and generator StyleProvider by injection — zero filesystem I/O during parsing/layout/generation.", technology="Python (YAML/JSON)")
       c4.Component(engine_validate_co, "XML Validation", "Validates generated draw.io XML before writing: unique diagram IDs, mandatory root cells (0 and 1), and edge source/target reference integrity.", technology="Python (xml.etree)")
 
   c4.ContainerDb(palette_data_co, "Palette Data", "Generated JSON files from draw.io shape libraries. Produced via `make build-data`; consumed by notation style lookup.", technology="JSON (generated)")
@@ -85,7 +85,7 @@ c4.System_Boundary(drawiogen_co, "mdg-drawio"):
       c4.Component(palettelayout_co, "PaletteLayout", "Reads pre-baked positions from JSON palette files. Applies exact x/y/width/height. Follows the same Result contract.", technology="Python (JSON)")
 
   c4.Container_Boundary(generator_co_boundary, "Generator"):
-      c4.Component(generate_co, "generate()", "Produces draw.io XML from Document. Renders nodes, edges, and recursive child cells into valid mxGraphModel XML. set_registries() / set_styles() pre-load data so notation is never called at runtime during generation.", technology="Python (xml.etree)")
+      c4.Component(generate_co, "generate()", "Produces draw.io XML from Document. Renders nodes, edges, and recursive child cells into valid mxGraphModel XML using an injected StyleProvider; compound ERD rows are reconstructed from generated row-type templates.", technology="Python (xml.etree)")
       c4.Component(overlay_co, "Overlay", "Reads existing draw.io XML to extract node positions and edge anchors. Enables manual layout preservation across regenerations via read_overlay() and read_overlay_xml().", technology="Python (xml.etree)")
       c4.Component(xml_utils_co, "XML Utils", "to_string() and indent() for XML pretty-printing.", technology="Python (xml.etree)")
 
@@ -93,12 +93,12 @@ c4.System_Boundary(drawiogen_co, "mdg-drawio"):
   c4.Container_Boundary(notation_co_boundary, "Notation (7 libraries)"):
       c4.Component(registries_co, "YAML Registries", "Shape registries for c4, archimate3, bpmn2, erd, general, uml, uml25. Each conforms to shape-registry.schema.json and maps DSL functions to palette shapes.", technology="YAML")
       c4.Component(registry_co, "Registry", "Loads YAML shape registries. Exposes set_registries(), shapes_by_id(), shapes_by_function(). Maintains LIBRARIES tuple. Lives in notation/_core/.", technology="Python (PyYAML)")
-      c4.Component(styles_co, "Styles", "Locates the generated palette/style data (DATA_DIR under mdg_drawio/generated_data). Read once at startup and injected into the generator's StyleProvider — no runtime cache. Lives in notation/_core/.", technology="Python")
+      c4.Component(styles_co, "Styles", "Locates generated shape and row-type palette data (DATA_DIR under mdg_drawio/generated_data). Read once at startup and injected into layout and generator ports — no runtime cache. Lives in notation/_core/.", technology="Python")
       c4.Component(normalize_co, "Normalize", "Style normalization and fingerprinting. Sorts/deduplicates draw.io style tokens for stable identity. style_fingerprint() binds registry entries to palette cells. Lives in notation/_core/.", technology="Python")
       c4.Component(palette_co, "Palette", "Palette entry grouping utilities. Groups cells by menu entry boundary. Provides flatten_entries() and anchor_cell() for palette layout. Lives in notation/_core/.", technology="Python")
       c4.Component(dsl_engine_co, "DSL Engine (_core)", "Shared notation-agnostic primitives. Regex call matching, block definitions, YAML frontmatter parsing, page splitting (per-page and legacy), AST argument parsing, indent-based container-stack block parser, passthrough node/edge support for foreign namespaces. NodeBuilder/EdgeBuilder/IsEdge protocols. DslError exception. Lives in notation/_core/.", technology="Python (regex/ast)")
       c4.Component(grammar_co, "GRAMMAR.md", "Canonical DSL language specification. Defines document structure, call syntax, nesting rules, and how agents should use registries.", technology="Markdown")
-      c4.Component(stubs_co, "Notation Parsers", "C4 parser is implemented. 6 plugin stubs (archimate3, bpmn2, erd, general, uml, uml25) have empty __init__.py — DSL parsers not yet written.", technology="Python (stub)")
+      c4.Component(stubs_co, "Notation Parsers", "All seven libraries parse through the shared registry-driven DSL engine; C4 additionally supplies native node/edge builders. Library packages expose registries, coverage documents, and optional layout hooks.", technology="Python / YAML")
 
   c4.Person(author_co, "Diagram Author / Developer", "Writes MDG source, refines layout visually in draw.io.", technology="")
 
@@ -138,7 +138,7 @@ c4.Rel(styles_co, palette_data_co, "Locates generated JSON", description="")
 c4.Rel(normalize_co, styles_co, "Fingerprints bind to palette cells", description="")
 c4.Rel(palette_co, styles_co, "Groups palette entries", description="")
 c4.Rel(registries_co, grammar_co, "Conforms to spec", description="")
-c4.Rel(stubs_co, registries_co, "C4 implemented; 6 parsers planned", description="")
+c4.Rel(stubs_co, registries_co, "Dispatches calls through", description="")
 
 # ---------------------------------------------------------------------------
 # Traceability meta-model (model-only; not rendered).

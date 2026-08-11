@@ -1,6 +1,7 @@
 # mdg-drawio
 
-Python library for generating [draw.io](https://www.diagrams.net/) diagrams from compact JSON documents.
+Python library for generating [draw.io](https://www.diagrams.net/) diagrams
+from compact `.mdg` DSL documents.
 
 ## Requirements
 
@@ -71,11 +72,12 @@ before running or testing.
 tools/palette/                    -- extract shapes from draw.io source --> tools/palette/output/
 tools/styles/                     -- parse + validate .drawio files     --> tools/styles/output/
 scripts/build_data.py             -- orchestrate the full generated-data pipeline
-scripts/build_notation_styles.py  -- join registries to palette styles --> mdg_drawio/generated_data/notation/
+scripts/build_notation_styles.py  -- build shape + row-type sidecars    --> mdg_drawio/generated_data/notation/
 ```
 
-The last step verifies every registry `render.fingerprint` against the palette
-and fails loudly on drift.
+The last step verifies every registry `render.fingerprint` against the palette,
+extracts palette-faithful metadata for nested row types that have no standalone
+shape, and fails loudly on fingerprint drift or missing row-type metadata.
 
 ## Notation registries
 

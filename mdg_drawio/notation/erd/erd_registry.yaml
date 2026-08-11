@@ -21,38 +21,49 @@ row_types:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: text
     required: false
+    passing: positional
   summary: Plain table row.
 - name: RowKey
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: text
     required: false
+    passing: positional
   - name: key
     required: false
+    passing: keyword_only
   summary: Key row; key= sets the key tag (e.g. 'PK', 'FK1').
 - name: Item
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: text
     required: false
+    passing: positional
   summary: List item row.
 - name: EntityText
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: text
     required: false
+    passing: positional
   summary: Free-text block row inside an entity.
 - name: Anchor
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: text
     required: false
+    passing: positional
   summary: Anchor row; may nest child Anchor rows.
 shapes:
 - id: erd.table.v1
@@ -75,8 +86,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed:
     - Row
@@ -114,8 +127,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed:
     - Row
@@ -153,8 +168,13 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
+  - name: key
+    required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -163,7 +183,7 @@ shapes:
     - erd.rowkey.v3
     see_also: []
   example: |
-    erd.RowKey(n1, "Row")
+    erd.RowKey(n1, "Row", key="PK")
   metamodel:
     spec: erd
     element: RowKey
@@ -187,10 +207,13 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: key
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -223,10 +246,13 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: key
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -259,8 +285,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed:
     - Item
@@ -295,8 +323,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -329,8 +359,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -363,8 +395,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -397,8 +431,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed:
     - EntityText
@@ -431,8 +467,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -463,8 +501,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -495,8 +535,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -527,8 +569,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -559,8 +603,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -591,8 +637,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -623,8 +671,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -655,8 +705,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -687,8 +739,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -719,8 +773,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -751,8 +807,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -783,8 +841,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -815,8 +875,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed:
     - Anchor
@@ -850,8 +912,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
@@ -882,10 +946,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -919,12 +986,16 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: target_label
     required: false
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -958,12 +1029,16 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: target_label
     required: false
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -997,14 +1072,19 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: source_label
     required: false
+    passing: keyword_only
   - name: target_label
     required: false
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -1038,12 +1118,16 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: target_label
     required: false
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -1076,12 +1160,16 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: target_label
     required: false
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -1114,14 +1202,19 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: source_label
     required: false
+    passing: keyword_only
   - name: target_label
     required: false
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -1154,12 +1247,16 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: target_label
     required: false
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -1192,12 +1289,16 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: target_label
     required: false
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -1230,14 +1331,19 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: source_label
     required: false
+    passing: keyword_only
   - name: target_label
     required: false
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -1270,10 +1376,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1304,10 +1413,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1338,10 +1450,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1372,10 +1487,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1406,10 +1524,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1440,10 +1561,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1474,10 +1598,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1508,10 +1635,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1542,10 +1672,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1576,10 +1709,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1610,10 +1746,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1644,10 +1783,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1678,10 +1820,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1712,10 +1857,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1746,10 +1894,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:
@@ -1780,10 +1931,13 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   endpoints:
     direction: source_to_target
   related:

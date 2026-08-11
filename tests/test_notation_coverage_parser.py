@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 
 import pytest
 
-from mdg_drawio.contracts import Document
+from mdg_drawio.contracts import Document, NodeChildCell
 from mdg_drawio.notation import DATA_DIR, LIBRARIES, NOTATION_DIR, DslError, parse
 
 needs_sidecars = pytest.mark.skipif(
@@ -139,7 +139,7 @@ def test_remaining_mixed_family_variants_classify_exactly(
 
 
 def test_passthrough_node_with_no_positional_args_is_rejected() -> None:
-    with pytest.raises(DslError, match="requires at least a node id"):
+    with pytest.raises(DslError, match="missing required argument 'node_id'"):
         parse("use uml\numl.Object()")
 
 
@@ -221,8 +221,8 @@ def test_resolve_edge_style_differs_by_variant() -> None:
 #
 # Both kinds need real Nodes with parent_id for stack/table layout. That root
 # representation does not by itself provide palette-faithful row styling or
-# compound cells; those remain open in the TODO. The completed part validates
-# child/row function names and rejects blocks on shapes declaring neither.
+# compound cells; the generated row-type sidecars and generator cover those
+# below. This section focuses on structural validation.
 # ---------------------------------------------------------------------------
 
 
@@ -321,6 +321,84 @@ def test_declared_keyword_is_accepted_for_row_type() -> None:
     assert isinstance(doc, Document)
 
 
+# ---------------------------------------------------------------------------
+# Phase 3: full positional/keyword argument binding. The registry entry is
+# the call's signature -- passing: positional args fill left-to-right from
+# the call's positional arguments, passing: keyword_only args must be named,
+# and excess/duplicate/missing bindings are line-numbered DslErrors.
+#
+# erd.RowKey(node_id[, label][, key=]) is the running example: node_id/label
+# are passing: positional, key is passing: keyword_only.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        'erd.RowKey(row1)',
+        'erd.RowKey(row1, "Customer ID")',
+        'erd.RowKey(row1, "Customer ID", key="PK")',
+    ],
+)
+def test_registry_bound_call_with_valid_arguments_parses(call: str) -> None:
+    doc = parse(f"use erd\n{call}")
+    assert isinstance(doc, Document)
+    assert doc.nodes[0].id == "row1"
+
+
+def test_registry_bound_call_missing_required_argument_is_rejected() -> None:
+    with pytest.raises(DslError, match="missing required argument 'node_id'"):
+        parse("use erd\nerd.RowKey()")
+
+
+def test_registry_bound_call_rejects_excess_positional_arguments() -> None:
+    with pytest.raises(
+        DslError, match=r"too many positional arguments \(expected at most 2\)"
+    ):
+        parse('use erd\nerd.RowKey(row1, "ID", "PK", 42)')
+
+
+def test_registry_bound_call_rejects_argument_supplied_twice() -> None:
+    # erd.RowKey's own arg name for its second positional value is "label"
+    # (row_types use "text" for the same role; shapes use "label" -- see
+    # _declared_args), so this is the real-data equivalent of supplying the
+    # same argument both positionally and by keyword.
+    with pytest.raises(DslError, match="label= supplied twice"):
+        parse('use erd\nerd.RowKey(row1, "ID", label="ID2")')
+
+
+def test_registry_bound_call_still_rejects_unknown_keyword() -> None:
+    with pytest.raises(DslError, match="unknown keyword argument.*unknown"):
+        parse('use erd\nerd.RowKey(row1, unknown="x")')
+
+
+def test_registry_bound_edge_rejects_excess_positional_arguments() -> None:
+    with pytest.raises(DslError, match="too many positional arguments"):
+        parse('use erd\nerd.Rel(None, None, "label", "extra")')
+
+
+def test_general_textbox_positional_description_is_preserved() -> None:
+    """general.Textbox's 3rd positional arg (description) is declared
+    passing: positional but was previously dropped entirely -- only the
+    first two positional arguments were ever read. It's now bound and
+    preserved onto Node.extra like any other declared value."""
+    doc = parse('use general\ngeneral.Textbox(n1, "Heading", "Body text")')
+    assert isinstance(doc, Document)
+    assert doc.nodes[0].extra["description"] == "Body text"
+
+
+@needs_sidecars
+def test_uml25_divider_dashed_keyword_changes_generated_style() -> None:
+    root = _generate_xml(
+        'use uml25\n'
+        'uml25.Classifier(c1, "Class"):\n'
+        '    uml25.Divider(solid, "")\n'
+        '    uml25.Divider(dashed, "", dashed=True)'
+    )
+    assert "dashed=" not in (_cell(root, "solid").get("style") or "")
+    assert "dashed=1" in (_cell(root, "dashed").get("style") or "")
+
+
 @pytest.mark.parametrize("library", LIBRARIES)
 def test_coverage_generated_cell_counts_match_model(library: str) -> None:
     from mdg_drawio.engine.preload import preload_core
@@ -337,8 +415,11 @@ def test_coverage_generated_cell_counts_match_model(library: str) -> None:
     # A nested compound row (erd Row/RowKey) renders as one outer vertex plus
     # its [key tag, text label] sub-cells -- extra real vertices with no
     # corresponding top-level Node, by design (see _compound_row_override).
+    def descendant_count(cells: list[NodeChildCell]) -> int:
+        return sum(1 + descendant_count(cell.child_cells) for cell in cells)
+
     extra_compound_cells = sum(
-        len(override[1])
+        descendant_count(override[1])
         for node in doc.nodes
         if (override := _compound_row_override(node, style_provider)) is not None
     )
@@ -445,6 +526,13 @@ def test_erd_nested_rowkey_renders_key_and_text_subcells() -> None:
     children = _children_of(root, "r1")
     assert len(children) == 2
     assert [c.get("value") for c in children] == ["PK", "UniqueID"]
+    assert "fontStyle=1" in (children[0].get("style") or "")
+    text_geometry = children[1].find("mxGeometry")
+    assert text_geometry is not None
+    assert "alternate_bounds" not in text_geometry.attrib
+    alternate = text_geometry.find("mxRectangle")
+    assert alternate is not None
+    assert alternate.get("as") == "alternateBounds"
 
 
 @needs_sidecars
@@ -455,15 +543,21 @@ def test_erd_nested_plain_row_has_empty_key_subcell() -> None:
     children = _children_of(root, "r1")
     assert len(children) == 2
     assert [c.get("value") for c in children] == ["", "Row 1"]
+    assert "editable=1" in (children[0].get("style") or "")
+    assert "fontStyle=" not in (children[1].get("style") or "")
+    assert "bottom=0" in (_cell(root, "r1").get("style") or "")
 
 
 @needs_sidecars
-def test_erd_standalone_rowkey_keeps_authentic_standalone_style() -> None:
-    """A top-level (unnested) RowKey is the real standalone "Table Row"
-    palette shape -- its own mini shape=table wrapper -- not the compound
-    override, which only applies once actually nested inside a Table."""
+def test_erd_standalone_rowkey_keeps_table_hierarchy_and_values() -> None:
+    """A top-level RowKey is a table wrapper containing row/key/text cells."""
     root = _generate_xml('use erd\nerd.RowKey(r1, "UniqueID", key="PK")')
     row = _cell(root, "r1")
-    assert row.get("value") == "UniqueID"
+    assert row.get("value") == ""
     assert "shape=table;" in (row.get("style") or "")
-    assert _children_of(root, "r1") == []
+    (table_row,) = _children_of(root, "r1")
+    assert "shape=tableRow" in (table_row.get("style") or "")
+    assert [c.get("value") for c in _children_of(root, table_row.get("id", ""))] == [
+        "PK",
+        "UniqueID",
+    ]

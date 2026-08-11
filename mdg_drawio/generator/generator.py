@@ -26,6 +26,7 @@ from mdg_drawio.contracts import (
     ChildCell,
     Document,
     Edge,
+    GeometryChild,
     Node,
     NodeChildCell,
     index_shapes_by_function,
@@ -333,6 +334,10 @@ def _build_node_cell_attrs(
     overrides = _style_overrides(node)
     if overrides:
         full_style = full_style.rstrip(";") + ";" + overrides
+    if isinstance(node.extra.get("dashed"), bool):
+        full_style = _apply_corrections(
+            full_style, {"dashed": 1 if node.extra["dashed"] else None}
+        )
 
     attrs: dict[str, str] = {
         "id": node_id,
@@ -375,15 +380,6 @@ def _build_node_geometry(
         ET.SubElement(geometry, tag, child_attrs)
 
 
-# Row types that are real compound cells in the palette -- a wrapper row
-# plus nested sub-cells (e.g. erd's table row: a key tag + a text label) --
-# keyed by library. Only erd has this pattern today (see
-# scripts/build_notation_styles.py's row-type extraction).
-_COMPOUND_ROW_FUNCTIONS: dict[str, frozenset[str]] = {
-    "erd": frozenset({"Row", "RowKey"}),
-}
-
-
 def _style_string_to_overrides(style: str) -> dict[str, str | int | float | None]:
     """Parse a raw draw.io style string into a style_overrides-shaped dict."""
     overrides: dict[str, str | int | float | None] = {}
@@ -394,6 +390,28 @@ def _style_string_to_overrides(style: str) -> dict[str, str | int | float | None
         key, sep, value = token.partition("=")
         overrides[key] = value if sep else None
     return overrides
+
+
+def _child_geometry(
+    raw: object,
+) -> tuple[dict[str, Any], list[GeometryChild]]:
+    """Split palette geometry attrs from nested geometry elements.
+
+    Palette extraction represents ``<mxRectangle as="alternateBounds">`` as
+    an ``alternate_bounds`` mapping. It must be reconstructed as a child XML
+    element, not stringified into an invalid mxGeometry attribute.
+    """
+    geometry = dict(raw) if isinstance(raw, dict) else {}
+    alternate = geometry.pop("alternate_bounds", None)
+    children: list[GeometryChild] = []
+    if isinstance(alternate, dict):
+        children.append(
+            GeometryChild(
+                tag="mxRectangle",
+                attributes={**alternate, "as": "alternateBounds"},
+            )
+        )
+    return geometry, children
 
 
 def _compound_row_override(
@@ -409,32 +427,54 @@ def _compound_row_override(
     entry at all. Both resolve correctly here from the row-type sidecar,
     which was extracted directly from the nested (nothing-else-wrapped) form.
 
-    Only applies when nested: a standalone ``erd.RowKey(...)`` (no parent)
-    keeps rendering as the authentic standalone "Table Row" shape.
+    A standalone ``erd.RowKey`` keeps its registered outer ``shape=table``
+    style, then receives the keyed tableRow template as a recursive child.
+    Nested Row/RowKey nodes already *are* tableRows, so their two leaf cells
+    attach directly to the authored node.
     """
-    if not node.parent_id:
-        return None
-    library, _, function = node.type.partition(".")
-    if function not in _COMPOUND_ROW_FUNCTIONS.get(library, frozenset()):
-        return None
     entry = styles.row_type_entry(node.type)
     cells = (entry or {}).get("cells") if entry else None
     if not cells or len(cells) < 2:
         return None
     key_cell, text_cell = cells[0], cells[1]
-    child_cells = [
+    key_geometry, key_geometry_children = _child_geometry(key_cell.get("geometry"))
+    text_geometry, text_geometry_children = _child_geometry(
+        text_cell.get("geometry")
+    )
+    leaf_cells = [
         NodeChildCell(
             label=str(node.extra.get("key", "")),
-            geometry_attributes=dict(key_cell.get("geometry") or {}),
+            geometry_attributes=key_geometry,
+            geometry_children=key_geometry_children,
             style_overrides=_style_string_to_overrides(key_cell.get("style", "")),
         ),
         NodeChildCell(
             label=node.label,
-            geometry_attributes=dict(text_cell.get("geometry") or {}),
+            geometry_attributes=text_geometry,
+            geometry_children=text_geometry_children,
             style_overrides=_style_string_to_overrides(text_cell.get("style", "")),
         ),
     ]
-    return str((entry or {}).get("style", "")), child_cells
+    row_style = str((entry or {}).get("style", ""))
+    standalone_style = styles.resolve_style(node.type, node.variant)
+    if node.parent_id or standalone_style == row_style:
+        return row_style, leaf_cells
+
+    # A row type may have a separately registered standalone wrapper (RowKey
+    # is shape=table at top level, but shape=tableRow when nested). Preserve
+    # that outer style while rebuilding the inner hierarchy with authored
+    # values instead of the palette's example labels.
+    row_geometry = {
+        key: value
+        for key in ("width", "height")
+        if (value := (entry or {}).get(key)) is not None
+    }
+    row_cell = NodeChildCell(
+        style_overrides=_style_string_to_overrides(row_style),
+        geometry_attributes=row_geometry,
+        child_cells=leaf_cells,
+    )
+    return standalone_style, [row_cell]
 
 
 def _append_node(mx_root: ET.Element, node: Node, ctx: _GenCtx) -> None:

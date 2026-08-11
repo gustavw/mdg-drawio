@@ -7,7 +7,6 @@ against everything the CLI action permutations touch (see
 :mod:`scripts.trace_actions`). Some definitions are legitimately never reached
 by that sweep:
 
-* code behind notations the pipeline does not yet convert (only ``c4`` runs);
 * the standalone ``parse()`` public API and its module-global fallback, which
   the injected-port pipeline never exercises;
 * layout helpers only reached by notation-native documents that the sweep's
@@ -46,6 +45,8 @@ ALLOWLIST: dict[str, str] = {
     "mdg_drawio.generator.generator:StyleProvider.style_corrections":
         "typing.Protocol method; concrete impl runs",
     "mdg_drawio.generator.generator:StyleProvider.type_padding":
+        "typing.Protocol method; concrete impl runs",
+    "mdg_drawio.generator.generator:StyleProvider.row_type_entry":
         "typing.Protocol method; concrete impl runs",
     "mdg_drawio.layout._types:SizeResolver":
         "typing.Protocol; concrete resolver is injected",

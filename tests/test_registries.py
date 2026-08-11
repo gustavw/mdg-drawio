@@ -223,3 +223,32 @@ def test_styles_sidecar_is_fresh(library: str) -> None:
         "sidecar out of date with registry — rerun scripts/build_notation_styles.py"
     for shape in doc["shapes"]:
         assert sidecar[shape["id"]]["fingerprint"] == shape["render"]["fingerprint"]
+
+
+@needs_sidecars
+def test_row_type_sidecar_covers_every_non_shape_row_type(library: str) -> None:
+    """Every row type without its own shape needs generated render metadata."""
+    doc = load_registry(library)
+    shape_functions = {shape["function"] for shape in doc["shapes"]}
+    expected = {
+        row_type["name"]
+        for row_type in doc.get("row_types", [])
+        if row_type["name"] not in shape_functions
+    }
+    if library == "erd":
+        # RowKey also has a standalone shape, but its nested tableRow template
+        # is structurally different and must be generated separately.
+        expected.add("RowKey")
+    sidecar_path = DATA_DIR / "notation" / f"{library}_row_types.json"
+    if not expected and not sidecar_path.exists():
+        return
+    if not sidecar_path.exists():
+        pytest.fail(
+            f"missing row-type sidecar for {library}; run `make build-data`"
+        )
+    sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+    assert expected == set(sidecar), (
+        "row-type sidecar is stale — rerun `make build-data`: "
+        f"missing={sorted(expected - set(sidecar))}, "
+        f"unexpected={sorted(set(sidecar) - expected)}"
+    )

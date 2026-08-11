@@ -22,13 +22,14 @@ automated multi-agent pass (one reader per container) + manual verification of P
 
 `mdg-drawio` turns **architecture-as-code** (a compact `.mdg` DSL) into editable
 **draw.io diagrams**, preserving stable node identities and manual layout across
-regenerations. The one implemented notation is **C4**; six more are stubs.
+regenerations. All seven notation libraries parse through the shared
+registry-driven DSL engine; C4 also supplies native builders.
 
 The whole system is a single-shot pipeline:
 
 ```
 .mdg source ─▶ preload ─▶ parse ─▶ layout ─▶ generate ─▶ validate ─▶ .drawio
-             (registries   (C4 DSL   (4 modes)  (mxGraph    (unique ids,
+             (registries   (.mdg DSL  (4 modes)  (mxGraph    (unique ids,
               + styles)      → AST)              XML)         refs, roots)
 ```
 

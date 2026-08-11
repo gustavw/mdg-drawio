@@ -1,17 +1,16 @@
 # TODO - Complete coverage-sheet parsing
 
-Status: Phase 1, registry-driven block validation, and palette-faithful row
-rendering are done 2026-08-11. Only positional argument validation remains
-open; see Phase 3 below.
+Status: all three phases done 2026-08-11 -- conversion, registry-driven block
+validation, palette-faithful row rendering, and full positional/keyword
+argument binding.
 
 ## Goal
 
 Make the C4, UML, and UML 2.5 shape-coverage documents convert successfully,
 validate their nested content against the registry, render rows with
 palette-faithful style/geometry, and harden argument handling -- in that
-order, each phase re-scoped against real data rather than assumption.
-Conversion, structural validation, and row rendering are done. Positional
-argument binding is still open.
+order, each phase re-scoped against real data rather than assumption. All
+four are done.
 
 Current behavior:
 
@@ -43,13 +42,15 @@ Current behavior:
   `create_size_resolver` fall back to it. erd's Row/RowKey are additionally
   compound (a wrapper row plus [key tag, text label] sub-cells); these render
   via `NodeChildCell`, with `key=` preserved from parse through to the XML.
-- A passthrough call with no positional arguments is rejected instead of
-  silently producing nothing.
+- Every DSL call is bound against its resolved registry entry like a Python
+  function call: the `passing` field (`positional`/`keyword_only`) on each
+  declared arg decides whether it can be filled positionally, and binding
+  rejects a missing required argument, excess positional arguments, and an
+  argument supplied both positionally and by keyword -- all with
+  line-numbered errors. Structural values map onto the model
+  (`node_id`->id, `label`/`text`->label, `source`/`target`->edge endpoints);
+  every other declared value lands on `Node.extra`/`Edge.extra`.
 - `tests/test_notation_coverage_parser.py` pins all of the above.
-- Unknown keywords are rejected for registered shapes and row types, and
-  declared keyword values (`key=`, `dashed=`, ...) are preserved onto the
-  node. Full positional/required argument binding remains deferred (see
-  Phase 3).
 
 ## Immediate failures (resolved in Phase 1)
 
@@ -182,10 +183,11 @@ structural-validation gap and this rendering gap have now shipped -- see
   (kept separate from `<lib>_styles.json` because several consumers --
   `test_styles_sidecar_is_fresh`, `scripts/reverse/style_index.py` -- assume
   every key there is a real registry shape id). `preload_core()` merges it
-  into `styles[lib]["_row_types"]` in memory. Covers all 8 orphaned row
-  types: uml25's Item/Header/Divider/Note/Lane, erd's Row/EntityText/Anchor,
-  plus uml's CompositeLabel and bpmn2's SwimlaneBoxPart/TableRowBoxPart
-  (11 total row-type names, 2 of them aliased as described below).
+  into `styles[lib]["_row_types"]` in memory. Covers all 11 orphaned row-type
+  names: uml25's Item/Header/Divider/Note/Lane, erd's Row/EntityText/Anchor,
+  plus uml's CompositeLabel and bpmn2's SwimlaneBoxPart/TableRowBoxPart;
+  erd.RowKey has a standalone shape but also needs its distinct nested keyed
+  row template.
 - [x] `PaletteStyleProvider.resolve_style`/`resolve_edge_style`
   (`mdg_drawio/generator/generator.py`) and `create_size_resolver`/
   `create_style_resolver` (`mdg_drawio/layout/size_resolver.py`) fall back to
@@ -201,15 +203,17 @@ structural-validation gap and this rendering gap have now shipped -- see
   compound-cell template plus the node's own label/`key=` value. Only applies
   when nested (`node.parent_id` is set): `erd.RowKey` also has its own
   independent top-level palette entry (a standalone "Table Row" shape, itself
-  wrapped in a mini `shape=table` container) which is the *correct* style
-  for standalone use and the *wrong* one once nested inside a real Table (a
-  table-within-a-row) -- a standalone `erd.RowKey(...)` keeps rendering
-  as that authentic standalone shape.
+  wrapped in a mini `shape=table` container) which supplies the correct outer
+  wrapper for standalone use and is the wrong outer style once nested inside
+  a real Table (a table-within-a-row). A standalone `erd.RowKey(...)` keeps
+  that wrapper and reconstructs its nested row/key/text hierarchy from the
+  row-type template.
 - [x] Add generator/XML tests for UML 2.5 row-type geometry (`Header`/
   `Item`/`Divider`/`Note`/`Lane`), BPMN row types (`SwimlaneBoxPart`/
   `TableRowBoxPart`), UML's `CompositeLabel`, and ERD's compound rows
   (nested `RowKey` renders `[key, text]` sub-cells; nested plain `Row` gets
-  an empty key sub-cell; standalone `RowKey` is unaffected) --
+  an empty key sub-cell with the plain-row style; standalone `RowKey` keeps
+  its table wrapper and renders its row/key/text hierarchy) --
   `tests/test_notation_coverage_parser.py`, gated on `needs_sidecars` like
   other build-data-dependent tests.
 - [x] `test_coverage_generated_cell_counts_match_model`'s vertex-count
@@ -220,11 +224,11 @@ structural-validation gap and this rendering gap have now shipped -- see
   (removed from the allowlist); the edge-side equivalent (`ChildCell`,
   `_append_edge_child`) still has no notation emitting it and remains listed.
 
-## Phase 3 - Production hardening
+## Phase 3 - Production hardening (done)
 
 Estimated total effort through this phase: 3-5 days. A safe, bounded subset
-shipped 2026-08-10; the rest is deferred with a concrete reason, not silently
-dropped.
+shipped 2026-08-10; full positional/keyword argument binding -- the piece
+that subset deferred -- shipped 2026-08-11.
 
 ### What shipped
 
@@ -266,33 +270,58 @@ dropped.
   earlier single-kind fallback silently paired an invalid variant number with
   variant 1's style.
 
-### Deferred -- needs its own scoping, not mechanical validation
+### Positional/keyword argument binding: what shipped (2026-08-11)
 
-- [ ] Validate required and optional positional arguments from registry
-  metadata.
+The blocker was exactly as described: the registry's `args:` list conflated
+true positional parameters with ones real documents only ever pass by
+keyword, with no field distinguishing them. Fixed by extending the schema
+rather than working around it:
 
-Full positional binding needs more registry precision before it can be strict:
-
-- The registry's `args:` list conflates true positional parameters
-  (`node_id`, `label`, `source`, `target`) with parameters real documents
-  only ever pass by keyword (e.g. `general.Rel`'s `type`, `erd.Rel`'s
-  `target_label`/`source_label`, `erd.RowKey`'s `key`, `uml25.Divider`'s
-  `dashed`, plus a couple dozen more one-off keywords across `uml25`
-  specifically) -- there is no schema field distinguishing "positional" from
-  "keyword-only," so a generic positional-arg validator cannot be written
-  without first extending the schema.
-- Separately, the passthrough builders (`_build_passthrough_node`,
-  `_build_passthrough_edge`) only ever read the `variant=` keyword today.
-  Every other keyword in that list above -- `target_label`, `source_label`,
-  `type`, `key`, `dashed`, and more -- is silently accepted and discarded;
-  it never reaches the `Node`/`Edge` model, and the generator has no
-  rendering support for many of them either. Unknown names can and now do
-  reject independently; preserving and rendering the known values belongs to
-  Phase 2's remaining row/template work.
+- [x] `shape-registry.schema.json`'s `$defs/arg` gained a required `passing`
+  field (`positional` | `keyword_only`). `scripts/migrate_registry_v3.py`
+  (one-shot, mirrors `migrate_registry_v2.py`'s pattern) added it to all 771
+  arg lists across all seven registries' `shapes` and `row_types`, using a
+  name-based rule verified empirically against every coverage sheet and
+  `docs/architecture/*.mdg`: `node_id`/`label`/`text`/`source`/`target`/
+  `description` are positional (the only names ever used positionally
+  anywhere in the codebase); every other declared name (`key`, `dashed`,
+  `type`, `target_label`, `source_label`, and ~20 uml25 one-offs) is
+  `keyword_only`, matching how real documents already call them -- the
+  migration reclassifies existing data, it does not change behavior for any
+  currently-valid document.
+- [x] `_declared_args(ns, function, entry)` (`dsl_engine.py`) resolves the
+  arg-spec list to bind against: the shape entry's own `args` if one was
+  found, else a matching row type's `args`, else `None` for an unregistered
+  function (kept lenient) or a `kind: "diagram"` reference entry (no real
+  contract, same reasoning as Phase 2's containment leniency).
+- [x] `_bind_registry_args` binds a call's positional and keyword arguments
+  against the resolved signature, Python-call-style: positional values fill
+  `passing: positional` args left-to-right; keyword values bind by name;
+  excess positional arguments, an argument supplied both ways, and a missing
+  required argument are all line-numbered `DslError`s.
+- [x] `_build_passthrough_node`/`_build_passthrough_edge` consume the bound
+  values: `node_id` -> `Node.id`, `label`/`text` -> `Node.label`,
+  `source`/`target` -> edge endpoints, `label` -> `Edge.label`, every other
+  declared value -> `Node.extra`/`Edge.extra` (rendering semantics for any
+  given extra value remain whatever they already were -- this phase is
+  argument validation and structural mapping, not new rendering).
+- [x] Fixed a real registry gap this validation surfaced:
+  `erd.rowkey.v1` (variant 1) was missing its own `key` arg (variants 2/3
+  already had it) -- previously masked because keyword validation used to
+  unconditionally merge in a same-named row type's args even when a shape
+  entry already matched, silently papering over the gap instead of catching
+  it.
+- [x] Regression tests cover the full example from this phase's design
+  discussion (`erd.RowKey(node_id[, label][, key=])`): valid calls with 1-3
+  arguments, missing required `node_id`, excess positional arguments, an
+  argument supplied both positionally and by keyword, the pre-existing
+  unknown-keyword rejection, and an edge case (`erd.Rel`); plus
+  `general.Textbox`'s positional `description` (previously silently
+  dropped, now preserved onto `Node.extra` like any other declared value).
 
 ## Delivery (as it actually happened)
 
-Four changes, each gated on verifying the previous phase's assumptions
+Five changes, each gated on verifying the previous phase's assumptions
 against real data before building the next:
 
 1. Variant-aware registry dispatch and endpoint-free edge support, making all
@@ -305,8 +334,11 @@ against real data before building the next:
    rendering for erd's Row/RowKey and `key=`/`dashed=` preservation
    (Phase 2, rendering).
 4. Safe argument hardening: zero-arg, unknown-keyword, and invalid-variant
-   rejection. Full positional binding remains deferred pending clearer
-   positional-vs-keyword registry metadata (Phase 3).
+   rejection (Phase 3, first pass).
+5. Full positional/keyword argument binding: a `passing` schema field plus a
+   one-shot registry migration turned the registry's `args:` list into a real
+   callable signature, checked exactly like a Python function call
+   (Phase 3, completed).
 
 ## Definition of done
 
@@ -319,5 +351,8 @@ against real data before building the next:
 - [x] Endpoint-free palette edges have stable unique ids.
 - [x] Invalid blocks, variants, endpoints, and unknown keywords raise
   line-numbered errors.
-- [ ] Full required/optional positional argument binding remains open.
+- [x] Full required/optional positional argument binding: every declared
+  registry arg is bound like a Python call against the resolved
+  `(namespace, function, variant)` signature, with `passing` distinguishing
+  positional from keyword-only.
 - [x] `make check` and the required architecture pipeline smoke test pass.

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Build the notation styles sidecars in generated_data/notation/<lib>_styles.json.
+"""Build notation shape and row-type sidecars in generated_data/notation/.
 
 Joins each registry entry to its palette entry (provenance.pages order +
 menu_index) and FAILS if any committed render.fingerprint no longer matches
 the palette — palette drift must be a loud error, not silent misrendering.
 
-The sidecar is generated data (derived from the draw.io shape library) and is
-gitignored along with the rest of mdg_drawio/generated_data/. Runs as the final
-step of `make build-data`.
+The generated ``<lib>_styles.json`` and ``<lib>_row_types.json`` files are
+derived from the draw.io shape library and gitignored with the rest of
+``mdg_drawio/generated_data/``. Runs as the final step of ``make build-data``.
 """
 from __future__ import annotations
 
@@ -91,6 +91,14 @@ def _cells_by_parent(cells: list[dict[str, Any]]) -> dict[str, list[dict[str, An
 # heuristics that correctly classify genuine rows.
 _RECURSIVE_ROW_TYPES = frozenset({"TableRowBoxPart", "Lane"})
 
+# Some row types also have a standalone palette shape but use a different
+# nested template. ERD RowKey is a mini table when placed at the top level and
+# a tableRow with two child cells when nested inside Table, so both forms must
+# be retained independently.
+_REQUIRED_NESTED_TEMPLATES: dict[str, frozenset[str]] = {
+    "erd": frozenset({"RowKey"}),
+}
+
 
 def _collect_row_type_cells(
     cells: list[dict[str, Any]], anchor_id: str, rows_allowed: list[str]
@@ -112,6 +120,14 @@ def _collect_row_type_cells(
             row_type = _classify_row_cell(cell.get("style") or "", rows_allowed)
             if row_type is None:
                 continue
+            # ERD tables declare both Row and RowKey. Their wrapper styles are
+            # nearly identical, but keyed rows have a non-empty first child;
+            # plain rows have an empty editable key cell. Classify from that
+            # structural distinction instead of aliasing both to the first row.
+            if row_type == "Row" and "RowKey" in rows_allowed:
+                children = by_parent.get(str(cell.get("id")), [])
+                if children and children[0].get("value") not in (None, ""):
+                    row_type = "RowKey"
             consumed_ids.add(str(cell.get("id")))
             found.setdefault(row_type, cell)
             if row_type in _RECURSIVE_ROW_TYPES:
@@ -160,6 +176,9 @@ def _build_row_types(
     if not row_type_names:
         return {}
     by_function = {s["function"] for s in registry["shapes"]}
+    required_nested = _REQUIRED_NESTED_TEMPLATES.get(
+        str(registry["library"]), frozenset()
+    )
 
     row_types: dict[str, Any] = {}
     for shape in registry["shapes"]:
@@ -176,7 +195,10 @@ def _build_row_types(
         )
         by_parent = _cells_by_parent(cells)
         for row_type, cell in classified.items():
-            if row_type in row_types or row_type in by_function:
+            if row_type in row_types or (
+                row_type in by_function
+                and row_type not in required_nested
+            ):
                 continue
             children = [
                 c
@@ -185,21 +207,14 @@ def _build_row_types(
             ]
             row_types[row_type] = _row_type_entry(cell, children)
 
-    # erd's Row and RowKey are structurally identical when nested (a
-    # shape=tableRow wrapper with [key tag, text label] sub-cells) -- the
-    # DSL distinguishes them only by whether key= is supplied, not by any
-    # palette difference, so one's extracted template covers both.
-    if "Row" in row_types and "RowKey" not in row_types and "RowKey" in row_type_names:
-        row_types["RowKey"] = row_types["Row"]
-    elif "RowKey" in row_types and "Row" not in row_types and "Row" in row_type_names:
-        row_types["Row"] = row_types["RowKey"]
-
-    missing = row_type_names - row_types.keys() - by_function
+    required = (row_type_names - by_function) | (
+        row_type_names & required_nested
+    )
+    missing = required - row_types.keys()
     if missing:
-        print(
-            f"  warning: no palette-derived style found for row types: "
-            f"{sorted(missing)}",
-            file=sys.stderr,
+        raise ValueError(
+            "no palette-derived style found for row types: "
+            f"{sorted(missing)}"
         )
     return row_types
 
