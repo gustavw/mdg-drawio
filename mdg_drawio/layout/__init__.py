@@ -13,6 +13,7 @@ from __future__ import annotations
 from . import layered, palette, process, sequence
 from ._container_layout import (
     absolute_node_boxes,
+    estimate_text_width,
 )
 from ._types import (
     BaseLayout,
@@ -63,6 +64,7 @@ __all__ = [
     "create_size_resolver",
     "create_style_resolver",
     "dispatch_layout",
+    "estimate_text_width",
     "modes",
     "register_layout",
     "resolve_page_size",

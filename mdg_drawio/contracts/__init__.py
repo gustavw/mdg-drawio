@@ -49,6 +49,7 @@ from .constants import (
     QUOTE_OFFSET,
     RELATIVE_CHAR_WIDTH,
     ROOT_CELL_ID,
+    ROTATED_LABEL_PADDING,
     WIDE_CHAR_WIDTH,
 )
 from .models import (
@@ -125,5 +126,6 @@ __all__ = [
     "QUOTE_OFFSET",
     "RELATIVE_CHAR_WIDTH",
     "ROOT_CELL_ID",
+    "ROTATED_LABEL_PADDING",
     "WIDE_CHAR_WIDTH",
 ]
