@@ -171,8 +171,8 @@ C4_EXAMPLES: dict[tuple[str, int], str] = {
 SHAPE_KEY_ORDER = ["id", "menu_index", "kind", "buildable", "function",
                    "variant", "menu_name", "render", "tag", "status",
                    "summary", "discriminator", "use_when", "avoid_when",
-                   "aliases", "args", "rows", "contains", "endpoints",
-                   "related", "example", "metamodel"]
+                   "aliases", "args", "rows", "contains", "containment",
+                   "endpoints", "related", "example", "metamodel"]
 ROOT_KEY_ORDER = ["library", "version", "provenance", "grammar", "row_types",
                   "shapes"]
 

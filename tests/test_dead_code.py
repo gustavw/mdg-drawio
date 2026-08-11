@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import pytest
 
+from mdg_drawio.notation import DATA_DIR
 from scripts.analyze_dead_code import (
     build_reference_graph,
     build_report,
@@ -62,18 +63,11 @@ def test_every_permutation_runs_without_crashing(results: list[TraceResult]) -> 
 
 
 def test_convertible_fixtures_convert(results: list[TraceResult]) -> None:
-    """Supported fixtures convert; fixtures with known parser gaps reject."""
-    convertible = (
-        "docs/architecture/",
-        "tests/action_fixtures/",
-        "mdg_drawio/notation/archimate3/",
-        "mdg_drawio/notation/bpmn2/",
-        "mdg_drawio/notation/erd/",
-        "mdg_drawio/notation/general/",
-    )
-    for r in results:
-        expected = "ok" if r.fixture.startswith(convertible) else "exit=1"
-        assert r.outcome == expected, f"{r.label}: expected {expected}, got {r.outcome}"
+    """Every traced fixture (all 7 notation coverage sheets, docs/architecture,
+    tests/action_fixtures) converts. There is no longer a known-gap notation to
+    special-case here -- see todo/notation-coverage-parser.md Phase 1."""
+    failed = [f"{r.label}: {r.outcome}" for r in results if r.outcome != "ok"]
+    assert not failed, "expected every traced fixture to convert:\n" + "\n".join(failed)
 
 
 def test_touched_union_covers_the_core_pipeline(results: list[TraceResult]) -> None:
@@ -86,6 +80,25 @@ def test_touched_union_covers_the_core_pipeline(results: list[TraceResult]) -> N
         "mdg_drawio.generator.generator:generate",
     ):
         assert expected in touched, f"expected live symbol not traced: {expected}"
+
+
+def test_compound_row_rendering_is_traced_when_available(
+    results: list[TraceResult],
+) -> None:
+    """Pin the Phase 2 path that made node child cells leave the allowlist."""
+    if not (DATA_DIR / "notation" / "erd_row_types.json").exists():
+        pytest.skip("generated row-type sidecars missing — run `make build-data`")
+    touched = touched_union(results)
+    for expected in (
+        "mdg_drawio.contracts.models:NodeChildCell",
+        "mdg_drawio.generator.generator:_compound_row_override",
+        "mdg_drawio.generator.generator:_append_node_child",
+        "mdg_drawio.generator.generator:_append_node_child_geometry",
+        "mdg_drawio.generator.generator:_append_node_child_cells",
+    ):
+        assert expected in touched, (
+            f"expected compound-row symbol not traced: {expected}"
+        )
 
 
 def test_static_qualnames_mirror_traced_qualnames(results: list[TraceResult]) -> None:

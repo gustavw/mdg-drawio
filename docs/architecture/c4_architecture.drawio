@@ -34,38 +34,34 @@
             <mxGeometry x="1000.0" y="91.0" width="368.0" height="120.0" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Defines architecture via MDG" id="author-&gt;drawiogen_sys" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;entryX=0;entryY=0.25;" edge="1" parent="1" source="author" target="drawiogen_sys">
-            <mxGeometry relative="1" as="geometry">
-              <Array as="points">
-                <mxPoint x="224.0" y="460.0" />
-              </Array>
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Reviews and adjusts layout" id="author-&gt;drawio" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="author" target="drawio">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Edits and generates MDG" id="ai-&gt;drawiogen_sys" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;entryX=0;entryY=0.75;" edge="1" parent="1" source="ai" target="drawiogen_sys">
-            <mxGeometry relative="1" as="geometry">
-              <Array as="points">
-                <mxPoint x="224.0" y="518.0" />
-              </Array>
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Converts MDG to draw.io; round-trip planned" id="drawiogen_sys-&gt;drawio" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="drawiogen_sys" target="drawio">
-            <mxGeometry relative="1" as="geometry">
-              <Array as="points">
-                <mxPoint x="1180.0" y="488.0" />
-              </Array>
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
+        <mxCell id="author-&gt;drawiogen_sys" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="author" target="drawiogen_sys" value="Defines architecture via MDG">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="224.0" y="460.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="author-&gt;drawio" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="author" target="drawio" value="Reviews and adjusts layout">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="224.0" y="151.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ai-&gt;drawiogen_sys" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;entryX=0;entryY=0.75;" edge="1" parent="1" source="ai" target="drawiogen_sys" value="Edits and generates MDG">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="224.0" y="518.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="drawiogen_sys-&gt;drawio" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="drawiogen_sys" target="drawio" value="Converts MDG to draw.io; round-trip planned">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1180.0" y="488.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
@@ -109,13 +105,13 @@
             <mxGeometry x="1350.0" y="610.0" width="368.0" height="156.0" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject c4Name="Notation" c4Type="Container" c4Description="Seven notation libraries, each with a YAML shape registry. C4 is fully implemented; six remain as stubs. Shared core handles registry loading, style lookup, normalization, and DSL parsing." c4Technology="Python / YAML" id="notation" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#E6E6E6&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
-          <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;labelBackgroundColor=none;fillColor=#23A2D9;fontColor=#ffffff;align=center;arcSize=10;strokeColor=#0E7DAD;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="drawiogen_c" c4Name="Notation" c4Type="Container" c4Description="Seven notation libraries, each with a YAML shape registry. C4 is fully implemented; six remain as stubs. Shared core handles registry loading, style lookup, normalization, and DSL parsing." c4Technology="Python / YAML">
+        <UserObject c4Name="Notation" c4Type="Container" c4Description="Seven registry-driven notation libraries sharing one block DSL engine, plus C4-specific builders. Shared core handles registry loading, exact variant dispatch, nesting validation, style lookup, and normalization." c4Technology="Python / YAML" id="notation" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#E6E6E6&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;labelBackgroundColor=none;fillColor=#23A2D9;fontColor=#ffffff;align=center;arcSize=10;strokeColor=#0E7DAD;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="drawiogen_c" c4Name="Notation" c4Type="Container" c4Description="Seven registry-driven notation libraries sharing one block DSL engine, plus C4-specific builders. Shared core handles registry loading, exact variant dispatch, nesting validation, style lookup, and normalization." c4Technology="Python / YAML">
             <mxGeometry x="390.0" y="610.0" width="368.0" height="156.0" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject c4Name="Generated Data" c4Type="Container" c4Description="Pre-built JSON data extracted from draw.io shape libraries. Not committed. Supplies style dimensions and palette entries consumed at startup." c4Technology="JSON (generated)" id="palette_data" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#E6E6E6&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
-          <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;labelBackgroundColor=none;fillColor=#23A2D9;fontColor=#ffffff;align=center;arcSize=10;strokeColor=#0E7DAD;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="drawiogen_c" c4Name="Generated Data" c4Type="Container" c4Description="Pre-built JSON data extracted from draw.io shape libraries. Not committed. Supplies style dimensions and palette entries consumed at startup." c4Technology="JSON (generated)">
+        <UserObject c4Name="Generated Data" c4Type="Container" c4Description="Pre-built JSON data extracted from draw.io shape libraries. Not committed. Supplies shape styles, dimensions, palette entries, and nested row-type templates consumed at startup." c4Technology="JSON (generated)" id="palette_data" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;&lt;font color=&quot;#E6E6E6&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;labelBackgroundColor=none;fillColor=#23A2D9;fontColor=#ffffff;align=center;arcSize=10;strokeColor=#0E7DAD;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="drawiogen_c" c4Name="Generated Data" c4Type="Container" c4Description="Pre-built JSON data extracted from draw.io shape libraries. Not committed. Supplies shape styles, dimensions, palette entries, and nested row-type templates consumed at startup." c4Technology="JSON (generated)">
             <mxGeometry x="390.0" y="990.0" width="368.0" height="156.0" as="geometry" />
           </mxCell>
         </UserObject>
@@ -129,74 +125,91 @@
             <mxGeometry x="2380.0" y="83.5" width="368.0" height="120.0" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Runs" id="author_c-&gt;cli" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="author_c" target="cli">
-            <mxGeometry relative="1" as="geometry">
-              <Array as="points">
-                <mxPoint x="150.0" y="764.0" />
-              </Array>
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Delegates to" id="cli-&gt;engine" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="cli" target="engine">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Reviews and adjusts layout" id="author_c-&gt;drawio_c" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="author_c" target="drawio_c">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Pre-loads registries and styles" id="engine-&gt;notation" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="engine" target="notation">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Reads generated JSON" id="notation-&gt;palette_data" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="notation" target="palette_data">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Delegates layout computation" id="engine-&gt;layout" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="engine" target="layout">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Reads and writes .drawio files" id="engine-&gt;drawio_c" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="engine" target="drawio_c">
-            <mxGeometry relative="1" as="geometry">
-              <Array as="points">
-                <mxPoint x="2564.0" y="764.0" />
-              </Array>
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Delegates XML generation" id="engine-&gt;generator" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="engine" target="generator">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses data models" id="layout-&gt;contracts" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="layout" target="contracts">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses data models" id="notation-&gt;contracts" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="notation" target="contracts">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses data models" id="generator-&gt;contracts" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="generator" target="contracts">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
+        <mxCell id="author_c-&gt;cli" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="author_c" target="cli" value="Runs">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="150.0" y="764.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cli-&gt;engine" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="cli" target="engine" value="Delegates to">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="554.0" y="553.0" />
+              <mxPoint x="254.0" y="553.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="author_c-&gt;drawio_c" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="author_c" target="drawio_c" value="Reviews and adjusts layout">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="224.0" y="143.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="engine-&gt;notation" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="engine" target="notation" value="Pre-loads registries and styles">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1070.0" y="671.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="notation-&gt;palette_data" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=0.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="notation" target="palette_data" value="Reads generated JSON">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="662.0" y="907.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="engine-&gt;layout" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="engine" target="layout" value="Delegates layout computation">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="254.0" y="789.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="engine-&gt;drawio_c" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="engine" target="drawio_c" value="Reads and writes .drawio files">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2564.0" y="764.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="engine-&gt;generator" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="engine" target="generator" value="Delegates XML generation">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="662.0" y="671.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="layout-&gt;contracts" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="layout" target="contracts" value="Uses data models">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="254.0" y="1025.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="notation-&gt;contracts" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="notation" target="contracts" value="Uses data models">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="662.0" y="907.0" />
+              <mxPoint x="662.0" y="1143.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generator-&gt;contracts" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="generator" target="contracts" value="Uses data models">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="662.0" y="1025.0" />
+              <mxPoint x="254.0" y="1025.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="diagram-2" name="Component">
-    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="5013" pageHeight="3760" math="0" shadow="0">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="5248" pageHeight="3936" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -225,8 +238,8 @@
             <mxGeometry x="40.0" y="274.0" width="368.0" height="204.0" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject c4Name="Pre-load" c4Type="Component" c4Description="Loads all YAML registries and JSON style data into memory once at startup. Registries feed the notation registry cache; registries and styles are returned so the composition root (convert) builds the layout SizeResolver and the generator's StyleProvider by injection — zero filesystem I/O during parsing/layout/generation." c4Technology="Python (YAML/JSON)" id="engine_preload_co" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
-          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#ffffff;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="engine_co_boundary" c4Name="Pre-load" c4Type="Component" c4Description="Loads all YAML registries and JSON style data into memory once at startup. Registries feed the notation registry cache; registries and styles are returned so the composition root (convert) builds the layout SizeResolver and the generator's StyleProvider by injection — zero filesystem I/O during parsing/layout/generation." c4Technology="Python (YAML/JSON)">
+        <UserObject c4Name="Pre-load" c4Type="Component" c4Description="Loads all YAML registries plus generated shape and row-type JSON into memory once at startup. Registries feed the notation registry cache; registries and styles are returned so the composition root builds the layout SizeResolver and generator StyleProvider by injection — zero filesystem I/O during parsing/layout/generation." c4Technology="Python (YAML/JSON)" id="engine_preload_co" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#ffffff;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="engine_co_boundary" c4Name="Pre-load" c4Type="Component" c4Description="Loads all YAML registries plus generated shape and row-type JSON into memory once at startup. Registries feed the notation registry cache; registries and styles are returned so the composition root builds the layout SizeResolver and generator StyleProvider by injection — zero filesystem I/O during parsing/layout/generation." c4Technology="Python (YAML/JSON)">
             <mxGeometry x="40.0" y="30.0" width="368.0" height="204.0" as="geometry" />
           </mxCell>
         </UserObject>
@@ -305,8 +318,8 @@
             <mxGeometry x="3640.0" y="1170.0" width="888.0" height="690.0" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject c4Name="generate()" c4Type="Component" c4Description="Produces draw.io XML from Document. Renders nodes, edges, and recursive child cells into valid mxGraphModel XML. set_registries() / set_styles() pre-load data so notation is never called at runtime during generation." c4Technology="Python (xml.etree)" id="generate_co" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
-          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#ffffff;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="generator_co_boundary" c4Name="generate()" c4Type="Component" c4Description="Produces draw.io XML from Document. Renders nodes, edges, and recursive child cells into valid mxGraphModel XML. set_registries() / set_styles() pre-load data so notation is never called at runtime during generation." c4Technology="Python (xml.etree)">
+        <UserObject c4Name="generate()" c4Type="Component" c4Description="Produces draw.io XML from Document. Renders nodes, edges, and recursive child cells into valid mxGraphModel XML using an injected StyleProvider; compound ERD rows are reconstructed from generated row-type templates." c4Technology="Python (xml.etree)" id="generate_co" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#ffffff;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="generator_co_boundary" c4Name="generate()" c4Type="Component" c4Description="Produces draw.io XML from Document. Renders nodes, edges, and recursive child cells into valid mxGraphModel XML using an injected StyleProvider; compound ERD rows are reconstructed from generated row-type templates." c4Technology="Python (xml.etree)">
             <mxGeometry x="30.0" y="40.0" width="368.0" height="204.0" as="geometry" />
           </mxCell>
         </UserObject>
@@ -335,8 +348,8 @@
             <mxGeometry x="478.0" y="350.0" width="368.0" height="204.0" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject c4Name="Styles" c4Type="Component" c4Description="Locates the generated palette/style data (DATA_DIR under mdg_drawio/generated_data). Read once at startup and injected into the generator's StyleProvider — no runtime cache. Lives in notation/_core/." c4Technology="Python" id="styles_co" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
-          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#ffffff;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="notation_co_boundary" c4Name="Styles" c4Type="Component" c4Description="Locates the generated palette/style data (DATA_DIR under mdg_drawio/generated_data). Read once at startup and injected into the generator's StyleProvider — no runtime cache. Lives in notation/_core/." c4Technology="Python">
+        <UserObject c4Name="Styles" c4Type="Component" c4Description="Locates generated shape and row-type palette data (DATA_DIR under mdg_drawio/generated_data). Read once at startup and injected into layout and generator ports — no runtime cache. Lives in notation/_core/." c4Technology="Python" id="styles_co" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#ffffff;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="notation_co_boundary" c4Name="Styles" c4Type="Component" c4Description="Locates generated shape and row-type palette data (DATA_DIR under mdg_drawio/generated_data). Read once at startup and injected into layout and generator ports — no runtime cache. Lives in notation/_core/." c4Technology="Python">
             <mxGeometry x="30.0" y="660.0" width="368.0" height="204.0" as="geometry" />
           </mxCell>
         </UserObject>
@@ -350,8 +363,8 @@
             <mxGeometry x="470.0" y="660.0" width="368.0" height="204.0" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject c4Name="DSL Engine (_core)" c4Type="Component" c4Description="Shared notation-agnostic primitives. Regex call matching, block definitions, YAML frontmatter parsing, page splitting (per-page and legacy), AST argument parsing, indent-based container-stack block parser, passthrough node/edge support for foreign namespaces. NodeBuilder/EdgeBuilder/IsEdge protocols. DslError exception. Lives in notation/_core/." c4Technology="Python (regex/ast)" id="dsl_engine_co" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
-          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#ffffff;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="notation_co_boundary" c4Name="DSL Engine (_core)" c4Type="Component" c4Description="Shared notation-agnostic primitives. Regex call matching, block definitions, YAML frontmatter parsing, page splitting (per-page and legacy), AST argument parsing, indent-based container-stack block parser, passthrough node/edge support for foreign namespaces. NodeBuilder/EdgeBuilder/IsEdge protocols. DslError exception. Lives in notation/_core/." c4Technology="Python (regex/ast)">
+        <UserObject c4Name="DSL Engine (_core)" c4Type="Component" c4Description="Shared notation-agnostic primitives. Regex call matching, YAML frontmatter and page parsing, AST argument parsing, registry-signature binding, exact variant dispatch, nesting validation, and indent-based container stacks. Supports native builders and registry-driven passthrough nodes/edges with line-numbered DslError failures. Lives in notation/_core/." c4Technology="Python (regex/ast)" id="dsl_engine_co" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#ffffff;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="notation_co_boundary" c4Name="DSL Engine (_core)" c4Type="Component" c4Description="Shared notation-agnostic primitives. Regex call matching, YAML frontmatter and page parsing, AST argument parsing, registry-signature binding, exact variant dispatch, nesting validation, and indent-based container stacks. Supports native builders and registry-driven passthrough nodes/edges with line-numbered DslError failures. Lives in notation/_core/." c4Technology="Python (regex/ast)">
             <mxGeometry x="910.0" y="660.0" width="368.0" height="204.0" as="geometry" />
           </mxCell>
         </UserObject>
@@ -360,8 +373,8 @@
             <mxGeometry x="910.0" y="50.0" width="368.0" height="204.0" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject c4Name="Notation Parsers" c4Type="Component" c4Description="C4 parser is implemented. 6 plugin stubs (archimate3, bpmn2, erd, general, uml, uml25) have empty __init__.py — DSL parsers not yet written." c4Technology="Python (stub)" id="stubs_co" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
-          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#ffffff;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="notation_co_boundary" c4Name="Notation Parsers" c4Type="Component" c4Description="C4 parser is implemented. 6 plugin stubs (archimate3, bpmn2, erd, general, uml, uml25) have empty __init__.py — DSL parsers not yet written." c4Technology="Python (stub)">
+        <UserObject c4Name="Notation Parsers" c4Type="Component" c4Description="All seven libraries parse through the shared registry-driven DSL engine; C4 additionally supplies native node/edge builders. Library packages expose registries, coverage documents, and optional layout hooks." c4Technology="Python / YAML" id="stubs_co" placeholders="1" label="&lt;font style=&quot;font-size: 16px&quot;&gt;&lt;b&gt;%c4Name%&lt;/b&gt;&lt;/font&gt;&lt;div&gt;[%c4Type%: %c4Technology%]&lt;/div&gt;&lt;br&gt;&lt;div&gt;&lt;font style=&quot;font-size: 11px&quot;&gt;%c4Description%&lt;/font&gt;&lt;/div&gt;">
+          <mxCell style="rounded=1;whiteSpace=wrap;html=1;labelBackgroundColor=none;fillColor=#63BEF2;fontColor=#ffffff;align=center;arcSize=6;strokeColor=#2086C9;metaEdit=1;resizable=0;points=[[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0.25,0],[1,0.5,0],[1,0.75,0],[0.75,1,0],[0.5,1,0],[0.25,1,0],[0,0.75,0],[0,0.5,0],[0,0.25,0]];" vertex="1" parent="notation_co_boundary" c4Name="Notation Parsers" c4Type="Component" c4Description="All seven libraries parse through the shared registry-driven DSL engine; C4 additionally supplies native node/edge builders. Library packages expose registries, coverage documents, and optional layout hooks." c4Technology="Python / YAML">
             <mxGeometry x="478.0" y="50.0" width="368.0" height="204.0" as="geometry" />
           </mxCell>
         </UserObject>
@@ -370,210 +383,287 @@
             <mxGeometry x="40.0" y="375.64" width="218.58" height="196.72" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Runs" id="author_co-&gt;cli_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="author_co" target="cli_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Delegates to" id="cli_co-&gt;engine_co_boundary" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="cli_co" target="engine_co_boundary">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Pre-loads registries and styles" id="engine_convert_co-&gt;engine_preload_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="engine_convert_co" target="engine_preload_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Validates XML before write" id="engine_convert_co-&gt;engine_validate_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="engine_convert_co" target="engine_validate_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Resolves layout config" id="engine_convert_co-&gt;layout_co_boundary" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="engine_convert_co" target="layout_co_boundary">
-            <mxGeometry relative="1" as="geometry">
-              <Array as="points">
-                <mxPoint x="2364.0" y="1250.0" />
-                <mxPoint x="2364.0" y="1250.0" />
-              </Array>
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses contracts" id="engine_convert_co-&gt;contracts_co_boundary" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="engine_convert_co" target="contracts_co_boundary">
-            <mxGeometry relative="1" as="geometry">
-              <Array as="points">
-                <mxPoint x="1670.0" y="606.0" />
-                <mxPoint x="1670.0" y="3180.0" />
-              </Array>
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Generates &amp; overlays XML" id="engine_convert_co-&gt;generator_co_boundary" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="engine_convert_co" target="generator_co_boundary">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Loads registries and styles" id="engine_preload_co-&gt;notation_co_boundary" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="engine_preload_co" target="notation_co_boundary">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Validates generated XML" id="engine_validate_co-&gt;generator_co_boundary" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="engine_validate_co" target="generator_co_boundary">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses constants" id="models_contract_co-&gt;constants_contract_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="models_contract_co" target="constants_contract_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Serializes XML" id="generate_co-&gt;xml_utils_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="generate_co" target="xml_utils_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses contracts" id="generate_co-&gt;contracts_co_boundary" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="generate_co" target="contracts_co_boundary">
-            <mxGeometry relative="1" as="geometry">
-              <Array as="points">
-                <mxPoint x="3500.0" y="1310.0" />
-                <mxPoint x="3500.0" y="3314.0" />
-              </Array>
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Type references" id="types_co-&gt;config_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="types_co" target="config_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses contracts" id="types_co-&gt;contracts_co_boundary" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="types_co" target="contracts_co_boundary">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses layout types" id="container_co-&gt;types_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="container_co" target="types_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses layout types" id="size_resolver_co-&gt;types_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="size_resolver_co" target="types_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses layout config" id="size_resolver_co-&gt;config_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="size_resolver_co" target="config_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Reuses text sizing" id="size_resolver_co-&gt;container_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="size_resolver_co" target="container_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Implements BaseLayout" id="layered_co-&gt;types_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="layered_co" target="types_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses layout config" id="layered_co-&gt;config_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="layered_co" target="config_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses container layout" id="layered_co-&gt;container_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="layered_co" target="container_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Wraps for LR direction" id="process_co-&gt;layered_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="process_co" target="layered_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Implements BaseLayout" id="process_co-&gt;types_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="process_co" target="types_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses layout config" id="process_co-&gt;config_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="process_co" target="config_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Implements BaseLayout" id="sequence_co-&gt;types_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="sequence_co" target="types_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses layout config" id="sequence_co-&gt;config_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="sequence_co" target="config_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Implements BaseLayout" id="palettelayout_co-&gt;types_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="palettelayout_co" target="types_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses layout config" id="palettelayout_co-&gt;config_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="palettelayout_co" target="config_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Loads via registry" id="dsl_engine_co-&gt;registry_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="dsl_engine_co" target="registry_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Uses contracts" id="dsl_engine_co-&gt;contracts_co_boundary" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="dsl_engine_co" target="contracts_co_boundary">
-            <mxGeometry relative="1" as="geometry">
-              <Array as="points">
-                <mxPoint x="1254.0" y="3314.0" />
-              </Array>
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Resolves shapes via registries" id="dsl_engine_co-&gt;registries_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="dsl_engine_co" target="registries_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Loads YAML registries" id="registry_co-&gt;registries_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="registry_co" target="registries_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Locates generated JSON" id="styles_co-&gt;palette_data_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="styles_co" target="palette_data_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Fingerprints bind to palette cells" id="normalize_co-&gt;styles_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="normalize_co" target="styles_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Groups palette entries" id="palette_co-&gt;styles_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="palette_co" target="styles_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="Conforms to spec" id="registries_co-&gt;grammar_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="registries_co" target="grammar_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject c4Type="Relationship" c4Description="C4 implemented; 6 parsers planned" id="stubs_co-&gt;registries_co" placeholders="1" label="&lt;div style=&quot;text-align: left&quot;&gt;&lt;div style=&quot;text-align: center&quot;&gt;&lt;b&gt;%c4Description%&lt;/b&gt;&lt;/div&gt;">
-          <mxCell style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="stubs_co" target="registries_co">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
+        <mxCell id="author_co-&gt;cli_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="author_co" target="cli_co" value="Runs">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="479.29" y="306.72" />
+              <mxPoint x="508.0" y="306.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cli_co-&gt;engine_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="cli_co" target="engine_co_boundary" value="Delegates to">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="508.0" y="590.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="engine_convert_co-&gt;engine_preload_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="engine_convert_co" target="engine_preload_co" value="Pre-loads registries and styles">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="284.0" y="904.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="engine_convert_co-&gt;engine_validate_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="engine_convert_co" target="engine_validate_co" value="Validates XML before write">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="692.0" y="762.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="engine_convert_co-&gt;layout_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="engine_convert_co" target="layout_co_boundary" value="Resolves layout config">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2364.0" y="1250.0" />
+              <mxPoint x="2364.0" y="1250.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="engine_convert_co-&gt;contracts_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="engine_convert_co" target="contracts_co_boundary" value="Uses contracts">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1670.0" y="606.0" />
+              <mxPoint x="1670.0" y="3180.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="engine_convert_co-&gt;generator_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="engine_convert_co" target="generator_co_boundary" value="Generates &amp; overlays XML">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2206.0" y="762.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="engine_preload_co-&gt;notation_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="engine_preload_co" target="notation_co_boundary" value="Loads registries and styles">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="284.0" y="1213.72" />
+              <mxPoint x="3516.0" y="1213.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="engine_validate_co-&gt;generator_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="engine_validate_co" target="generator_co_boundary" value="Validates generated XML">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="692.0" y="1213.72" />
+              <mxPoint x="2206.0" y="1213.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="models_contract_co-&gt;constants_contract_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="models_contract_co" target="constants_contract_co" value="Uses constants">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="692.0" y="3032.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generate_co-&gt;xml_utils_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="generate_co" target="xml_utils_co" value="Serializes XML">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1976.0" y="1552.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="generate_co-&gt;contracts_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="generate_co" target="contracts_co_boundary" value="Uses contracts">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3500.0" y="1310.0" />
+              <mxPoint x="3500.0" y="3314.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="types_co-&gt;config_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="types_co" target="config_co" value="Type references">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4596.0" y="2404.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="types_co-&gt;contracts_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="types_co" target="contracts_co_boundary" value="Uses contracts">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2659.0" y="2262.7200000000003" />
+              <mxPoint x="2659.0" y="3042.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="container_co-&gt;types_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="container_co" target="types_co" value="Uses layout types">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4596.0" y="2120.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="size_resolver_co-&gt;types_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=0.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=0.0;entryY=0.5;" edge="1" parent="1" source="size_resolver_co" target="types_co" value="Uses layout types">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4392.0" y="1410.72" />
+              <mxPoint x="4392.0" y="2262.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="size_resolver_co-&gt;config_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=0.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=0.0;entryY=0.5;" edge="1" parent="1" source="size_resolver_co" target="config_co" value="Uses layout config">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4392.0" y="1410.72" />
+              <mxPoint x="4392.0" y="2546.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="size_resolver_co-&gt;container_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=0.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=0.0;entryY=0.5;" edge="1" parent="1" source="size_resolver_co" target="container_co" value="Reuses text sizing">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4392.0" y="1410.72" />
+              <mxPoint x="4392.0" y="1978.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="layered_co-&gt;types_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=0.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=0.0;entryY=0.5;" edge="1" parent="1" source="layered_co" target="types_co" value="Implements BaseLayout">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4392.0" y="1694.72" />
+              <mxPoint x="4392.0" y="2262.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="layered_co-&gt;config_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=0.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=0.0;entryY=0.5;" edge="1" parent="1" source="layered_co" target="config_co" value="Uses layout config">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4392.0" y="1694.72" />
+              <mxPoint x="4392.0" y="2546.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="layered_co-&gt;container_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="layered_co" target="container_co" value="Uses container layout">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4596.0" y="1836.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="process_co-&gt;layered_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=0.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="process_co" target="layered_co" value="Wraps for LR direction">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4596.0" y="1410.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="process_co-&gt;types_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="process_co" target="types_co" value="Implements BaseLayout">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4800.0" y="1410.72" />
+              <mxPoint x="4800.0" y="2262.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="process_co-&gt;config_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="process_co" target="config_co" value="Uses layout config">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4800.0" y="1410.72" />
+              <mxPoint x="4800.0" y="2546.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sequence_co-&gt;types_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="sequence_co" target="types_co" value="Implements BaseLayout">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="5004.0" y="1410.72" />
+              <mxPoint x="5004.0" y="2262.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sequence_co-&gt;config_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="sequence_co" target="config_co" value="Uses layout config">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="5004.0" y="1410.72" />
+              <mxPoint x="5004.0" y="2546.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="palettelayout_co-&gt;types_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="palettelayout_co" target="types_co" value="Implements BaseLayout">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="5208.0" y="1410.72" />
+              <mxPoint x="5208.0" y="2262.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="palettelayout_co-&gt;config_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="palettelayout_co" target="config_co" value="Uses layout config">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="5208.0" y="1410.72" />
+              <mxPoint x="5208.0" y="2546.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="dsl_engine_co-&gt;registry_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="dsl_engine_co" target="registry_co" value="Loads via registry">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3720.0" y="1552.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="dsl_engine_co-&gt;contracts_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="dsl_engine_co" target="contracts_co_boundary" value="Uses contracts">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1254.0" y="3314.0" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="dsl_engine_co-&gt;registries_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=0.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="dsl_engine_co" target="registries_co" value="Resolves shapes via registries">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2904.0" y="1410.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="registry_co-&gt;registries_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="registry_co" target="registries_co" value="Loads YAML registries">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3720.0" y="1836.72" />
+              <mxPoint x="2904.0" y="1836.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="styles_co-&gt;palette_data_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="styles_co" target="palette_data_co" value="Locates generated JSON">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3312.0" y="2277.7200000000003" />
+              <mxPoint x="254.0" y="2277.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="normalize_co-&gt;styles_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="normalize_co" target="styles_co" value="Fingerprints bind to palette cells">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2904.0" y="1552.72" />
+              <mxPoint x="3312.0" y="1552.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="palette_co-&gt;styles_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="palette_co" target="styles_co" value="Groups palette entries">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3312.0" y="1552.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="registries_co-&gt;grammar_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="registries_co" target="grammar_co" value="Conforms to spec">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2904.0" y="2120.7200000000003" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="stubs_co-&gt;registries_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="stubs_co" target="registries_co" value="Dispatches calls through">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="4128.0" y="1694.72" />
+              <mxPoint x="2904.0" y="1694.72" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>

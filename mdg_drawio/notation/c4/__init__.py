@@ -209,6 +209,10 @@ def _select_rel_variant(
     return 3
 
 
+def _is_none_literal(node: ast.AST) -> bool:
+    return isinstance(node, ast.Constant) and node.value is None
+
+
 def _parse_edge(
     function: str, args: list[ast.AST | ast.keyword], line_number: int
 ) -> Edge:
@@ -226,11 +230,23 @@ def _parse_edge(
             line_number,
         )
 
-    # Both endpoints are required and must be real ids — a dangling ``None``
-    # endpoint is rejected here (with a line number) rather than deferred to a
-    # confusing model-level error.
-    source_id = literal_or_name(pos_args[0], "source")
-    target_id = literal_or_name(pos_args[1], "target")
+    # Both endpoints are required and must be real ids, UNLESS both are the
+    # literal ``None`` -- the grammar's unconnected palette-edge form, used by
+    # coverage sheets to render a shape's edge style with nothing attached. A
+    # dangling single ``None`` (only one endpoint missing) is still rejected
+    # here, with a line number, rather than deferred to a confusing
+    # model-level error.
+    source_is_none = _is_none_literal(pos_args[0])
+    target_is_none = _is_none_literal(pos_args[1])
+    if source_is_none != target_is_none:
+        raise DslError(
+            f"{function}(): source and target must both be ids, or both be "
+            f"None (the unconnected palette form)",
+            line_number,
+        )
+    unconnected = source_is_none and target_is_none
+    source_id = "" if unconnected else literal_or_name(pos_args[0], "source")
+    target_id = "" if unconnected else literal_or_name(pos_args[1], "target")
     label = literal_string(pos_args[2], "label") if len(pos_args) >= 3 else ""
     technology = kw_args.get("technology", "")
     if not isinstance(technology, str):
@@ -254,7 +270,14 @@ def _parse_edge(
     if technology:
         obj_attrs["c4Technology"] = technology
 
-    edge_id = f"{source_id}->{target_id}"
+    # An unconnected palette edge has no endpoints to derive an id from --
+    # the line number is stable and unique (one call per source line), same
+    # role as the shared passthrough builder's "palette-edge-N" counter.
+    edge_id = (
+        f"palette-edge-line{line_number}"
+        if unconnected
+        else f"{source_id}->{target_id}"
+    )
     return Edge(
         id=edge_id,
         type=f"{_NAMESPACE}.{function}",

@@ -48,7 +48,10 @@ def _resolve_shape_entry(
     Both size and style resolution go through here so a node's dimensions and
     its style string always come from the *same* palette shape. The registry's
     canonical shape id (variant-sorted first) is preferred; a prefix scan of the
-    styles keys is the fallback when no registry is available.
+    styles keys is the fallback when no registry is available. A row type
+    (e.g. uml25's Item/Header/Divider) has no shape id of its own -- it only
+    exists nested inside a composite shape -- so it falls back to the
+    row-type sidecar last.
     """
     parts = node_type.split(".", 1)
     if len(parts) != 2 or styles is None:
@@ -68,6 +71,10 @@ def _resolve_shape_entry(
     for shape_id, entry in styles_for_lib.items():
         if shape_id.startswith(f"{library}.{function.lower()}."):
             return entry
+
+    row_types = styles_for_lib.get("_row_types")
+    if isinstance(row_types, dict):
+        return row_types.get(function)
     return None
 
 

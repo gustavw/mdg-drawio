@@ -38,12 +38,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -76,12 +80,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -114,12 +122,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -152,12 +164,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -190,12 +206,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -228,12 +248,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -266,12 +290,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -304,12 +332,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -342,12 +374,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -380,12 +416,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -416,12 +456,19 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
+  - name: description
+    required: false
+    passing: keyword_only
   - name: technology
     required: false
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -457,10 +504,16 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
+  - name: description
+    required: false
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -496,10 +549,16 @@ shapes:
   args:
   - name: source
     required: true
+    passing: positional
   - name: target
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
+  - name: description
+    required: false
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -535,8 +594,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   contains:
@@ -573,8 +634,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   contains:
@@ -611,12 +674,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -644,12 +711,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -677,12 +748,16 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   - name: description
     required: false
+    passing: positional
   - name: technology
     required: false
+    passing: keyword_only
   rows:
     allowed: []
   related:
@@ -710,8 +785,10 @@ shapes:
   args:
   - name: node_id
     required: true
+    passing: positional
   - name: label
     required: false
+    passing: positional
   rows:
     allowed: []
   related:
