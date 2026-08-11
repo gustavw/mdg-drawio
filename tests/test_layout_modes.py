@@ -232,6 +232,43 @@ def test_process_bypassed_branch_does_not_overlap_same_rank_sibling() -> None:
     assert detour_box.y >= sibling_box.y + sibling_box.height + Config().column_gap
 
 
+def test_bypassed_branch_edge_to_successor_uses_a_single_bend() -> None:
+    """Regression: a bypassed node's edge back to its successor used to
+    always fall through to the plain default route -- forward-exit,
+    backward-entry, split down the cross-axis middle -- because that route's
+    single-bend alternative (_minimal_bend_route) was gated on the SOURCE
+    branching (out_degree >= 2), which a detour node with one successor
+    never does. The detour is, by construction, offset on the cross axis
+    from its successor (that's the whole point of parking it on a secondary
+    row), so the plain default route always cost an avoidable second bend.
+    Forcing only the entry side (mirroring _minimal_bend_route, but for the
+    target instead of the source) gets the same one-corner elbow without
+    forcing an exit side nothing here needs differentiated."""
+    container = _node("container")
+    predecessor = _node("predecessor")
+    detour = _node("detour")
+    sibling = _node("sibling")
+    successor = _node("successor")
+    for node in (predecessor, detour, sibling, successor):
+        node.parent_id = container.id
+    edges = [
+        Edge(id="p-d", type="c4.Rel", source_id="predecessor", target_id="detour"),
+        Edge(id="d-s", type="c4.Rel", source_id="detour", target_id="successor"),
+        Edge(id="p-s", type="c4.Rel", source_id="predecessor", target_id="successor"),
+        Edge(id="p-x", type="c4.Rel", source_id="predecessor", target_id="sibling"),
+    ]
+
+    result = ProcessLayout().apply(
+        [container, predecessor, detour, sibling, successor], edges, _size_of
+    )
+    detour_to_successor = next(e for e in result.edges if e.id == "d-s")
+
+    assert len(detour_to_successor.waypoints) == 1
+    assert detour_to_successor.source_anchor != ""
+    assert detour_to_successor.target_anchor != ""
+    assert detour_to_successor.source_anchor != detour_to_successor.target_anchor
+
+
 # ---------------------------------------------------------------------------
 # Palette layout
 # ---------------------------------------------------------------------------

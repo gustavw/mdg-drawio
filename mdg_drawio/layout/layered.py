@@ -615,6 +615,38 @@ def _minimal_bend_route(
     return [Waypoint(x=tx, y=sy)], exit_anchor, _ANCHOR_TOP
 
 
+def _minimal_bend_entry_route(
+    src_box: tuple[float, float, float, float],
+    tgt_box: tuple[float, float, float, float],
+    entry_anchor: Anchor,
+    *,
+    horizontal: bool,
+) -> tuple[list[Waypoint], Anchor, Anchor]:
+    """Mirror of :func:`_minimal_bend_route`: the SOURCE keeps its ordinary
+    forward exit -- there is no sibling branch here needing it forced off the
+    default port -- and the TARGET's entry side is forced instead, with a
+    single-corner elbow.
+
+    For a single-successor source whose target sits off its cross axis (e.g.
+    a node relocated to a secondary row by the bypass-branch layout), the
+    plain default route (:func:`_default_route`) pays an avoidable second
+    bend splitting the cross-axis gap down the middle. Forcing only the
+    entry side gets the same one-corner elbow :func:`_minimal_bend_route`
+    gives fan-out branches, without forcing an exit side that would serve no
+    purpose here (nothing else leaves this source that needs to visually
+    diverge from it).
+    """
+    src_x, src_y, src_w, src_h = src_box
+    tgt_x, tgt_y, tgt_w, tgt_h = tgt_box
+    if horizontal:
+        sy = src_y + src_h / 2
+        tx = tgt_x + tgt_w / 2
+        return [Waypoint(x=tx, y=sy)], _ANCHOR_RIGHT, entry_anchor
+    sx = src_x + src_w / 2
+    ty = tgt_y + tgt_h / 2
+    return [Waypoint(x=sx, y=ty)], _ANCHOR_BOTTOM, entry_anchor
+
+
 def _default_route(
     src_box: tuple[float, float, float, float],
     tgt_box: tuple[float, float, float, float],
@@ -723,12 +755,24 @@ def _route_one_edge(
             horizontal=horizontal,
         )
 
+    is_branching_source = out_degree.get(edge.source_id or "", 0) >= 2
     fan_anchor = (
         _fan_out_anchor(src_box, tgt_box, horizontal=horizontal)
-        if not has_explicit_anchor and out_degree.get(edge.source_id or "", 0) >= 2
+        if not has_explicit_anchor and is_branching_source
         else None
     )
     if fan_anchor is None:
+        if not has_explicit_anchor and not is_branching_source:
+            # A single-successor source has no sibling branch that needs its
+            # exit forced off the default port -- but its target can still
+            # sit off the cross axis (e.g. relocated to a secondary row by
+            # the bypass-branch layout), where the plain default route below
+            # would pay an avoidable second bend. Force only the entry side.
+            entry_anchor = _fan_out_anchor(tgt_box, src_box, horizontal=horizontal)
+            if entry_anchor is not None:
+                return _minimal_bend_entry_route(
+                    src_box, tgt_box, entry_anchor, horizontal=horizontal
+                )
         return _default_route(src_box, tgt_box, horizontal=horizontal), \
             source_anchor, target_anchor
 
