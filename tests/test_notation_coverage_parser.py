@@ -1,4 +1,4 @@
-"""Regression tests for todo/notation-coverage-parser.md Phase 1.
+"""Regression tests for todo/notation-coverage-parser.md.
 
 Each test pins one of the three coverage-sheet failures documented there
 (C4's None,None palette-edge form; UML FoundMessage and UML 2.5 Dependency
@@ -9,10 +9,17 @@ PaletteLayout's node/edge reconstruction dropping non-geometry fields.
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
+
 import pytest
 
 from mdg_drawio.contracts import Document
-from mdg_drawio.notation import DslError, parse
+from mdg_drawio.notation import DATA_DIR, LIBRARIES, NOTATION_DIR, DslError, parse
+
+needs_sidecars = pytest.mark.skipif(
+    not DATA_DIR.exists(),
+    reason="generated notation sidecars missing — run `make build-data`",
+)
 
 # ---------------------------------------------------------------------------
 # Variant-aware node/edge classification (UML FoundMessage, UML 2.5 Dependency)
@@ -67,6 +74,11 @@ def test_mixed_kind_family_rejects_unknown_variant(call: str) -> None:
         parse(f"use {call.split('.', 1)[0]}\n{call}")
 
 
+def test_single_kind_family_rejects_unknown_variant() -> None:
+    with pytest.raises(DslError, match=r"line 2: .*unsupported variant 99"):
+        parse('use uml\numl.Object(a, "Object", variant=99)')
+
+
 # uml and uml25 are the only two libraries with a function whose registry
 # variants mix vertex and edge kinds (confirmed by scanning every library's
 # shapes_by_function()). Every other library's mixed-kind coverage is
@@ -96,6 +108,27 @@ def test_uml25_mixed_kind_families_classify_by_exact_variant(
     )
     assert isinstance(doc, Document)
     assert [(e.source_id, e.target_id) for e in doc.edges] == [("a", "b")]
+
+
+@pytest.mark.parametrize(
+    ("call", "variant", "expected_kind"),
+    [
+        ("uml.FoundMessage", 3, "edge"),
+        ("uml25.Activity", 3, "vertex"),
+        ("uml25.Activity", 4, "edge"),
+        ("uml25.Activity", 5, "edge"),
+        ("uml25.Message", 3, "vertex"),
+    ],
+)
+def test_remaining_mixed_family_variants_classify_exactly(
+    call: str, variant: int, expected_kind: str
+) -> None:
+    namespace = call.split(".", 1)[0]
+    args = 'a, ""' if expected_kind == "vertex" else "a, b"
+    doc = parse(f"use {namespace}\n{call}({args}, variant={variant})")
+    assert isinstance(doc, Document)
+    assert len(doc.nodes) == (expected_kind == "vertex")
+    assert len(doc.edges) == (expected_kind == "edge")
 
 
 # ---------------------------------------------------------------------------
@@ -186,14 +219,10 @@ def test_resolve_edge_style_differs_by_variant() -> None:
 # ---------------------------------------------------------------------------
 # Phase 2: registry-driven rows.allowed / contains.allowed validation.
 #
-# Both kinds nest as real Nodes with parent_id -- the palette style behind a
-# rows shape (e.g. uml.class.v1) is a genuine draw.io swimlane
-# (childLayout=stackLayout), not a static compartment, so this is the correct
-# representation for both (see tests/test_pipeline.py::
-# test_stacklayout_container_children_stack_tightly, which already depends on
-# it). What Phase 2 adds is validating the child/row function name against
-# the parent's registry entry, and rejecting a block on a shape that
-# declares neither.
+# Both kinds need real Nodes with parent_id for stack/table layout. That root
+# representation does not by itself provide palette-faithful row styling or
+# compound cells; those remain open in the TODO. The completed part validates
+# child/row function names and rejects blocks on shapes declaring neither.
 # ---------------------------------------------------------------------------
 
 
@@ -230,13 +259,211 @@ def test_contained_function_outside_contains_allowed_is_rejected() -> None:
     )
 
     frame = _ContainerFrame(
-        indent=0, node_id="p1", kind_label="child", allowed=frozenset({"Allowed"})
+        indent=0,
+        node_id="p1",
+        namespace="general",
+        kind_label="child",
+        allowed=frozenset({"Allowed"}),
     )
     with pytest.raises(DslError, match="not a valid child"):
-        _validate_child_allowed(frame, "general", "NotAllowed", 1)
-    _validate_child_allowed(frame, "general", "Allowed", 1)  # does not raise
+        _validate_child_allowed(frame, "general", "NotAllowed", None, 1)
+    _validate_child_allowed(frame, "general", "Allowed", None, 1)
 
 
 def test_block_on_shape_with_neither_rows_nor_containment_is_rejected() -> None:
     with pytest.raises(DslError, match="neither rows nor containment"):
         parse('use uml\numl.Object(o1, "Object"):\n    uml.Item(i1, "x")')
+
+
+def test_native_c4_block_is_validated_against_registry() -> None:
+    with pytest.raises(DslError, match="neither rows nor containment"):
+        parse('c4.Person(p1, "Person"):\n    c4.System(s1, "System")')
+
+
+def test_row_child_must_use_its_parent_namespace() -> None:
+    with pytest.raises(DslError, match=r"expected uml\.\{Item\}"):
+        parse(
+            'use uml\n'
+            'uml.Class(c1, "Classname", variant=2):\n'
+            '    uml25.Item(i1, "field")'
+        )
+
+
+def test_wildcard_containment_stays_within_parent_namespace() -> None:
+    with pytest.raises(DslError, match=r"expected uml\.\*"):
+        parse(
+            'use uml\n'
+            'uml.Package(p1, "Package"):\n'
+            '    c4.Person(person1, "Person")'
+        )
+
+
+def test_edge_cannot_be_nested_as_a_row() -> None:
+    with pytest.raises(DslError, match="edges cannot be nested"):
+        parse(
+            'use uml\n'
+            'uml.Class(c1, "Classname"):\n'
+            '    uml.Message(None, None, "dispatch")'
+        )
+
+
+def test_unknown_keyword_is_rejected_for_registered_call() -> None:
+    with pytest.raises(DslError, match="unknown keyword argument.*surprise"):
+        parse('use uml\numl.Object(o1, "Object", surprise="ignored")')
+
+
+def test_declared_keyword_is_accepted_for_row_type() -> None:
+    doc = parse(
+        'use uml25\n'
+        'uml25.Classifier(c1, "Class"):\n'
+        '    uml25.Divider(d1, "", dashed=True)'
+    )
+    assert isinstance(doc, Document)
+
+
+@pytest.mark.parametrize("library", LIBRARIES)
+def test_coverage_generated_cell_counts_match_model(library: str) -> None:
+    from mdg_drawio.engine.preload import preload_core
+    from mdg_drawio.generator import create_style_provider, generate
+    from mdg_drawio.generator.generator import _compound_row_override
+
+    source = (NOTATION_DIR / library / f"{library}_shapes_coverage.mdg").read_text()
+    doc = parse(source)
+    assert isinstance(doc, Document)
+    registries, styles = preload_core()
+    style_provider = create_style_provider(registries, styles)
+    root = ET.fromstring(generate(doc, style_provider))
+
+    # A nested compound row (erd Row/RowKey) renders as one outer vertex plus
+    # its [key tag, text label] sub-cells -- extra real vertices with no
+    # corresponding top-level Node, by design (see _compound_row_override).
+    extra_compound_cells = sum(
+        len(override[1])
+        for node in doc.nodes
+        if (override := _compound_row_override(node, style_provider)) is not None
+    )
+    assert sum(
+        cell.get("vertex") == "1" for cell in root.iter("mxCell")
+    ) == len(doc.nodes) + extra_compound_cells
+    assert sum(cell.get("edge") == "1" for cell in root.iter("mxCell")) == len(
+        doc.edges
+    )
+
+
+# ---------------------------------------------------------------------------
+# Phase 2 (continued): palette-faithful row rendering.
+#
+# Row types with no independent top-level shape (uml25's Item/Header/Divider/
+# Note/Lane, erd's Row/EntityText/Anchor, uml's CompositeLabel, bpmn2's
+# SwimlaneBoxPart/TableRowBoxPart) used to fall back to DEFAULT_VERTEX_STYLE
+# and the default 120x60 size. scripts/build_notation_styles.py now extracts
+# a canonical style/geometry for each from its parent shape's own palette
+# cells, and PaletteStyleProvider/size_resolver fall back to it. erd's Row
+# and RowKey are additionally compound (a wrapper row + [key tag, text label]
+# sub-cells), rendered via NodeChildCell -- see _compound_row_override.
+# ---------------------------------------------------------------------------
+
+
+def _style_and_size(node_type: str) -> tuple[str, tuple[float, float]]:
+    from mdg_drawio.engine.preload import preload_core
+    from mdg_drawio.generator import create_style_provider
+    from mdg_drawio.layout.size_resolver import create_size_resolver
+
+    registries, styles = preload_core()
+    provider = create_style_provider(registries, styles)
+    size_of = create_size_resolver(registries=registries, styles=styles)
+    return provider.resolve_style(node_type), size_of(node_type)
+
+
+@needs_sidecars
+@pytest.mark.parametrize(
+    ("node_type", "expected_height"),
+    [
+        ("uml25.Header", 20),
+        ("uml25.Item", 20),
+        ("uml25.Divider", 8),
+        ("uml25.Note", 140),
+        ("uml25.Lane", 20),
+    ],
+)
+def test_uml25_orphaned_row_types_resolve_palette_geometry(
+    node_type: str, expected_height: float
+) -> None:
+    style, (width, height) = _style_and_size(node_type)
+    assert style and style != "whiteSpace=wrap;html=1;"
+    assert width > 0
+    assert height == expected_height
+
+
+@needs_sidecars
+@pytest.mark.parametrize(
+    "node_type", ["bpmn2.SwimlaneBoxPart", "bpmn2.TableRowBoxPart"]
+)
+def test_bpmn2_row_types_resolve_palette_style(node_type: str) -> None:
+    style, (width, height) = _style_and_size(node_type)
+    assert style and style != "whiteSpace=wrap;html=1;"
+    assert width > 0 and height > 0
+
+
+@needs_sidecars
+def test_uml_composite_label_resolves_palette_style() -> None:
+    style, (width, height) = _style_and_size("uml.CompositeLabel")
+    assert style and style != "whiteSpace=wrap;html=1;"
+    assert (width, height) != (0, 0)
+
+
+def _generate_xml(source: str) -> ET.Element:
+    from mdg_drawio.engine.preload import preload_core
+    from mdg_drawio.generator import create_style_provider, generate
+
+    doc = parse(source)
+    assert isinstance(doc, Document)
+    registries, styles = preload_core()
+    return ET.fromstring(generate(doc, create_style_provider(registries, styles)))
+
+
+def _cell(root: ET.Element, cell_id: str) -> ET.Element:
+    return next(c for c in root.iter("mxCell") if c.get("id") == cell_id)
+
+
+def _children_of(root: ET.Element, parent_id: str) -> list[ET.Element]:
+    return [c for c in root.iter("mxCell") if c.get("parent") == parent_id]
+
+
+@needs_sidecars
+def test_erd_nested_rowkey_renders_key_and_text_subcells() -> None:
+    root = _generate_xml(
+        'use erd\n'
+        'erd.Table(t1, "T"):\n'
+        '    erd.RowKey(r1, "UniqueID", key="PK")'
+    )
+    row = _cell(root, "r1")
+    assert row.get("value") == ""
+    assert "shape=tableRow" in (row.get("style") or "")
+    assert "shape=table;" not in (row.get("style") or "")
+
+    children = _children_of(root, "r1")
+    assert len(children) == 2
+    assert [c.get("value") for c in children] == ["PK", "UniqueID"]
+
+
+@needs_sidecars
+def test_erd_nested_plain_row_has_empty_key_subcell() -> None:
+    root = _generate_xml(
+        'use erd\nerd.Table(t1, "T"):\n    erd.Row(r1, "Row 1")'
+    )
+    children = _children_of(root, "r1")
+    assert len(children) == 2
+    assert [c.get("value") for c in children] == ["", "Row 1"]
+
+
+@needs_sidecars
+def test_erd_standalone_rowkey_keeps_authentic_standalone_style() -> None:
+    """A top-level (unnested) RowKey is the real standalone "Table Row"
+    palette shape -- its own mini shape=table wrapper -- not the compound
+    override, which only applies once actually nested inside a Table."""
+    root = _generate_xml('use erd\nerd.RowKey(r1, "UniqueID", key="PK")')
+    row = _cell(root, "r1")
+    assert row.get("value") == "UniqueID"
+    assert "shape=table;" in (row.get("style") or "")
+    assert _children_of(root, "r1") == []

@@ -92,36 +92,16 @@ ALLOWLIST: dict[str, str] = {
         "build-data palette pipeline only",
     "mdg_drawio.notation._core.palette:top_level":
         "build-data palette pipeline only",
-    # --- child-cell (compartment) rendering. Reached only when a node/edge
-    #     carries child_cells; no converting notation emits them (registry
-    #     `rows.allowed` shapes -- e.g. uml.Class members -- render as real
-    #     contained Nodes instead: their palette style is a genuine draw.io
-    #     swimlane with childLayout=stackLayout/tableLayout, not a static
-    #     compartment, so NodeChildCell was never the right representation
-    #     for them; see todo/notation-coverage-parser.md Phase 2).
-    #     Future scaffolding, not reachable by any current input.
+    # --- edge child-cell rendering only. Node child cells (NodeChildCell) are
+    #     reachable since Phase 2's compound-row rendering (erd Row/RowKey's
+    #     [key tag, text label] sub-cells; see
+    #     mdg_drawio.generator.generator:_compound_row_override and
+    #     todo/notation-coverage-parser.md Phase 2). The edge-side equivalent
+    #     (Edge.child_cells: list[ChildCell]) has no notation emitting it yet.
     "mdg_drawio.contracts.models:ChildCell":
-        "child-cell rendering; no notation emits child_cells yet",
-    "mdg_drawio.contracts.models:GeometryChild":
-        "child-cell rendering; no notation emits child_cells yet",
-    "mdg_drawio.contracts.models:NodeChildCell":
-        "child-cell rendering; no notation emits child_cells yet",
-    "mdg_drawio.generator.generator:_GenCtx.next_child_id":
-        "child-cell rendering; no notation emits child_cells yet",
-    "mdg_drawio.generator.generator:_append_node_child":
-        "child-cell rendering; no notation emits child_cells yet",
-    "mdg_drawio.generator.generator:_append_node_child_cells":
-        "child-cell rendering; no notation emits child_cells yet",
-    "mdg_drawio.generator.generator:_append_node_child_geometry":
-        "child-cell rendering; no notation emits child_cells yet",
-    "mdg_drawio.generator.generator:_build_node_child_cell_attrs":
-        "child-cell rendering; no notation emits child_cells yet",
-    "mdg_drawio.generator.generator:_wrap_child_object":
-        "child-cell rendering; no notation emits child_cells yet",
+        "edge child-cell rendering; no notation emits edge child_cells yet",
     "mdg_drawio.generator.generator:_append_edge_child":
         "edge child-cell rendering; no notation emits edge child_cells yet",
-    "mdg_drawio.generator.generator:_overrides_to_style":
-        "only reached via the child/edge-child rendering path (see above)",
     # --- inert callback: c4 passes ``diagram_title_call=""`` to
     #     parse_block_source, so this handler can never fire (no DSL call has an
     #     empty name). Scaffolding for a DiagramTitle statement not yet wired.

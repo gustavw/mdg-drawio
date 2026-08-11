@@ -420,6 +420,8 @@ shapes:
     required: true
   - name: label
     required: false
+  - name: description
+    required: false
   - name: technology
     required: false
   endpoints:
@@ -461,6 +463,8 @@ shapes:
     required: true
   - name: label
     required: false
+  - name: description
+    required: false
   endpoints:
     direction: source_to_target
   related:
@@ -499,6 +503,8 @@ shapes:
   - name: target
     required: true
   - name: label
+    required: false
+  - name: description
     required: false
   endpoints:
     direction: source_to_target

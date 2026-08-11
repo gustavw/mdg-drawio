@@ -126,7 +126,7 @@ def test_foreign_node_and_edge_variants_are_preserved() -> None:
         'use bpmn2\n'
         'bpmn2.DataObject(data, "", variant=2)\n'
         'bpmn2.User(task, "Task")\n'
-        'bpmn2.Association(data, task, variant=2)'
+        'general.Rel(data, task, variant=2)'
     )
     assert isinstance(doc, Document)
     assert next(node for node in doc.nodes if node.id == "data").variant == 2

@@ -44,4 +44,14 @@ def preload_core() -> tuple[dict[str, dict], dict[str, dict]]:
             with open(path, encoding="utf-8") as f:
                 styles[lib] = json.load(f)
 
+        # Row types (e.g. uml25's Item/Header/Divider) have no independent
+        # shape id, so they are generated into a sibling sidecar rather than
+        # as extra keys in <lib>_styles.json -- merged here, in memory only,
+        # under "_row_types" so PaletteStyleProvider/size_resolver can fall
+        # back to it without the on-disk sidecar gaining non-shape-id keys.
+        row_types_path = DATA_DIR / "notation" / f"{lib}_row_types.json"
+        if row_types_path.exists():
+            with open(row_types_path, encoding="utf-8") as f:
+                styles.setdefault(lib, {})["_row_types"] = json.load(f)
+
     return registries, styles

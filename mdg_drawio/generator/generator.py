@@ -160,6 +160,7 @@ class StyleProvider(Protocol):
     def label_template(self, node_type: str, variant: int = 1) -> tuple[str, bool]: ...
     def style_corrections(self, node_type: str) -> dict[str, _StyleValue]: ...
     def type_padding(self, node_type: str) -> dict[str, _StyleValue]: ...
+    def row_type_entry(self, type_str: str) -> dict | None: ...
 
 
 @dataclass(frozen=True)
@@ -182,12 +183,34 @@ class PaletteStyleProvider:
         A function family's variants can have genuinely different geometry
         (e.g. bpmn2 Pool v1 vs v2 orientation) -- resolving without the
         requested variant would silently render every variant as v1.
+
+        Row types (e.g. uml25's Item/Header/Divider) have no independent
+        registry function of their own -- they only exist nested inside a
+        composite shape -- so they fall back to the row-type sidecar instead.
         """
         library, function = _split_type(type_str)
-        if not library or not self.registries.get(library, {}).get(function):
+        if not library:
             return None
-        entry = self._palette_entry(library, function, variant)
-        return (str(entry.get("style", "")) if entry else "") or None
+        if self.registries.get(library, {}).get(function):
+            entry = self._palette_entry(library, function, variant)
+            return (str(entry.get("style", "")) if entry else "") or None
+        row_entry = self.row_type_entry(type_str)
+        return (str(row_entry.get("style", "")) if row_entry else "") or None
+
+    def row_type_entry(self, type_str: str) -> dict | None:
+        """Palette-derived style/geometry for a row type (e.g. uml25.Item).
+
+        Distinct from ``_palette_entry``: row types have no shape id and no
+        variant, only a single canonical entry per (library, function).
+        """
+        library, function = _split_type(type_str)
+        if not library:
+            return None
+        row_types = self.styles.get(library, {}).get("_row_types")
+        if not isinstance(row_types, dict):
+            return None
+        entry = row_types.get(function)
+        return entry if isinstance(entry, dict) else None
 
     def _palette_entry(
         self, library: str, function: str, variant: int = 1
@@ -294,9 +317,18 @@ def _style_overrides(node: Node) -> str:
 
 
 def _build_node_cell_attrs(
-    node: Node, node_id: str, parent_id: str, base_style: str
+    node: Node,
+    node_id: str,
+    parent_id: str,
+    base_style: str,
+    *,
+    label: str | None = None,
 ) -> dict[str, str]:
-    """Build mxCell attributes for a node."""
+    """Build mxCell attributes for a node.
+
+    ``label`` overrides ``node.label`` when given -- used by compound rows
+    (e.g. erd RowKey), whose text lives in a child cell, not the row itself.
+    """
     full_style = base_style
     overrides = _style_overrides(node)
     if overrides:
@@ -304,7 +336,7 @@ def _build_node_cell_attrs(
 
     attrs: dict[str, str] = {
         "id": node_id,
-        "value": node.label,
+        "value": node.label if label is None else label,
         "style": full_style,
         # "vertex" is a boolean mxCell flag ("1" = this cell is a vertex); it is
         # unrelated to PAGE_CELL_ID, which only happens to share the value "1".
@@ -343,17 +375,88 @@ def _build_node_geometry(
         ET.SubElement(geometry, tag, child_attrs)
 
 
+# Row types that are real compound cells in the palette -- a wrapper row
+# plus nested sub-cells (e.g. erd's table row: a key tag + a text label) --
+# keyed by library. Only erd has this pattern today (see
+# scripts/build_notation_styles.py's row-type extraction).
+_COMPOUND_ROW_FUNCTIONS: dict[str, frozenset[str]] = {
+    "erd": frozenset({"Row", "RowKey"}),
+}
+
+
+def _style_string_to_overrides(style: str) -> dict[str, str | int | float | None]:
+    """Parse a raw draw.io style string into a style_overrides-shaped dict."""
+    overrides: dict[str, str | int | float | None] = {}
+    for token in style.split(";"):
+        token = token.strip()
+        if not token:
+            continue
+        key, sep, value = token.partition("=")
+        overrides[key] = value if sep else None
+    return overrides
+
+
+def _compound_row_override(
+    node: Node, styles: StyleProvider
+) -> tuple[str, list[NodeChildCell]] | None:
+    """Style + compound sub-cells for a nested compound row (e.g. erd RowKey).
+
+    erd's Row and RowKey are real draw.io table rows made of two sub-cells (a
+    key tag, a text label). RowKey also has its own independent top-level
+    palette entry -- a standalone "Table Row" shape wrapped in its own mini
+    ``shape=table`` container -- which is the *wrong* style once nested
+    inside a real Table (a table-within-a-row). Row has no such top-level
+    entry at all. Both resolve correctly here from the row-type sidecar,
+    which was extracted directly from the nested (nothing-else-wrapped) form.
+
+    Only applies when nested: a standalone ``erd.RowKey(...)`` (no parent)
+    keeps rendering as the authentic standalone "Table Row" shape.
+    """
+    if not node.parent_id:
+        return None
+    library, _, function = node.type.partition(".")
+    if function not in _COMPOUND_ROW_FUNCTIONS.get(library, frozenset()):
+        return None
+    entry = styles.row_type_entry(node.type)
+    cells = (entry or {}).get("cells") if entry else None
+    if not cells or len(cells) < 2:
+        return None
+    key_cell, text_cell = cells[0], cells[1]
+    child_cells = [
+        NodeChildCell(
+            label=str(node.extra.get("key", "")),
+            geometry_attributes=dict(key_cell.get("geometry") or {}),
+            style_overrides=_style_string_to_overrides(key_cell.get("style", "")),
+        ),
+        NodeChildCell(
+            label=node.label,
+            geometry_attributes=dict(text_cell.get("geometry") or {}),
+            style_overrides=_style_string_to_overrides(text_cell.get("style", "")),
+        ),
+    ]
+    return str((entry or {}).get("style", "")), child_cells
+
+
 def _append_node(mx_root: ET.Element, node: Node, ctx: _GenCtx) -> None:
     """Append a single node to the mxGraphModel root."""
     node_id = node.id
     parent_id = node.parent_id or PAGE_CELL_ID
 
-    base_style = ctx.styles.resolve_style(node.type, node.variant)
+    compound = _compound_row_override(node, ctx.styles)
+    if compound is not None:
+        base_style, child_cells = compound
+        outer_label: str | None = ""
+    else:
+        base_style = ctx.styles.resolve_style(node.type, node.variant)
+        child_cells = node.child_cells
+        outer_label = None
     if ctx.apply_overrides:
         base_style = _apply_corrections(
             base_style, ctx.styles.style_corrections(node.type)
         )
-    cell_attrs = _build_node_cell_attrs(node, node_id, parent_id, base_style)
+    cell_attrs = _build_node_cell_attrs(
+        node, node_id, parent_id, base_style, label=outer_label
+    )
 
     wrapper = _maybe_wrap_object(mx_root, node, cell_attrs, ctx.styles)
     cell_parent: ET.Element = wrapper if wrapper is not None else mx_root
@@ -368,7 +471,7 @@ def _append_node(mx_root: ET.Element, node: Node, ctx: _GenCtx) -> None:
     x, y, w, h = _node_geometry(node)
     _build_node_geometry(cell, x, y, w, h, node)
 
-    for child_cell in node.child_cells:
+    for child_cell in child_cells:
         _append_node_child(mx_root, node_id, child_cell, ctx)
 
 

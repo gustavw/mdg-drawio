@@ -433,6 +433,7 @@ class _ContainerFrame:
 
     indent: int
     node_id: str
+    namespace: str
     kind_label: str  # "row" | "child"
     allowed: frozenset[str] | None = None
 
@@ -590,10 +591,19 @@ def _process_block_call(
         foreign_args = parse_call_arguments(call.args_source, line_number)
         _pop_container_stack(container_stack, call.indent)
         foreign_variant = _passthrough_variant(foreign_args, line_number)
-        parent_frame = container_stack[-1] if container_stack else None
 
         registry_entry = _registry_entry(
             call.namespace, call.name, foreign_variant, line_number
+        )
+        _validate_keyword_args(
+            call.namespace, call.name, foreign_args, registry_entry, line_number
+        )
+        _validate_nested_call(
+            container_stack,
+            call.namespace,
+            call.name,
+            registry_entry,
+            line_number,
         )
         if registry_entry and registry_entry.get("kind") == "edge":
             _build_passthrough_edge(
@@ -605,10 +615,6 @@ def _process_block_call(
                 edges,
             )
         else:
-            if parent_frame is not None:
-                _validate_child_allowed(
-                    parent_frame, call.namespace, call.name, line_number
-                )
             node = _build_passthrough_node(
                 call.namespace,
                 call.name,
@@ -629,6 +635,20 @@ def _process_block_call(
 
     args = parse_call_arguments(call.args_source, line_number)
     _pop_container_stack(container_stack, call.indent)
+    variant = _passthrough_variant(args, line_number)
+    registry_entry = _registry_entry(
+        call.namespace, call.name, variant, line_number
+    )
+    _validate_keyword_args(
+        call.namespace, call.name, args, registry_entry, line_number
+    )
+    _validate_nested_call(
+        container_stack,
+        call.namespace,
+        call.name,
+        registry_entry,
+        line_number,
+    )
 
     if call.name == diagram_title_call:
         state["diagram_name"] = parse_diagram_title(
@@ -647,7 +667,14 @@ def _process_block_call(
 
     if call.opens_block:
         container_stack.append(
-            _ContainerFrame(indent=call.indent, node_id=node.id, kind_label="child")
+            _open_container_frame(
+                node,
+                registry_entry,
+                call.namespace,
+                call.name,
+                call.indent,
+                line_number,
+            )
         )
 
 def _registry_entry(
@@ -655,11 +682,10 @@ def _registry_entry(
 ) -> dict[str, object] | None:
     """Resolve exactly ``(ns, function, variant)`` for passthrough dispatch.
 
-    Unknown functions retain the parser's existing generic-node behavior, as
-    do undeclared variants in a single-kind family (full variant validation is
-    Phase 3). In a mixed-kind family, however, falling back can change a vertex
-    into an edge or vice versa, so an unsupported variant is an actionable,
-    line-numbered authoring error.
+    Unknown functions retain the parser's existing generic-node behavior.
+    For a registered family, an undeclared variant is always an actionable,
+    line-numbered error: otherwise generation silently falls back to another
+    variant's style, even when node/edge classification happens to agree.
     """
     from .registry import shapes_by_function
 
@@ -673,8 +699,6 @@ def _registry_entry(
             return entry
     if not entries:
         return None
-    if len({entry.get("kind") for entry in entries}) == 1:
-        return entries[0]
     valid_variants = ", ".join(
         str(entry.get("variant", 1)) for entry in entries
     )
@@ -737,22 +761,105 @@ def _open_container_frame(
             line_number,
         )
     return _ContainerFrame(
-        indent=indent, node_id=node.id, kind_label=kind_label, allowed=allowed
+        indent=indent,
+        node_id=node.id,
+        namespace=ns,
+        kind_label=kind_label,
+        allowed=allowed,
     )
 
 
 def _validate_child_allowed(
-    parent_frame: _ContainerFrame, ns: str, name: str, line_number: int
+    parent_frame: _ContainerFrame,
+    ns: str,
+    name: str,
+    entry: dict[str, object] | None,
+    line_number: int,
 ) -> None:
     """Reject a child function not permitted by the parent's rows/contains.allowed."""
-    if parent_frame.allowed is None or name in parent_frame.allowed:
-        return
-    allowed = ", ".join(sorted(parent_frame.allowed)) or "(none)"
+    if entry is not None and entry.get("kind") == "edge":
+        raise DslError(
+            f"{ns}.{name}(): edges cannot be nested inside "
+            f"{parent_frame.node_id!r}",
+            line_number,
+        )
+    same_namespace = ns == parent_frame.namespace
+    if same_namespace:
+        if parent_frame.allowed is None or name in parent_frame.allowed:
+            return
+    if parent_frame.allowed is None:
+        expected = f"{parent_frame.namespace}.*"
+    else:
+        allowed = ", ".join(sorted(parent_frame.allowed)) or "(none)"
+        expected = f"{parent_frame.namespace}.{{{allowed}}}"
     raise DslError(
         f"{ns}.{name}(): not a valid {parent_frame.kind_label} of "
-        f"{parent_frame.node_id!r}; expected one of {allowed}",
+        f"{parent_frame.node_id!r}; expected {expected}",
         line_number,
     )
+
+
+def _validate_nested_call(
+    container_stack: list[_ContainerFrame],
+    ns: str,
+    name: str,
+    entry: dict[str, object] | None,
+    line_number: int,
+) -> None:
+    """Validate a call against its active parent, if it has one."""
+    if container_stack:
+        _validate_child_allowed(
+            container_stack[-1], ns, name, entry, line_number
+        )
+
+
+def _validate_keyword_args(
+    ns: str,
+    function: str,
+    args: list[ast.AST | ast.keyword],
+    entry: dict[str, object] | None,
+    line_number: int,
+) -> None:
+    """Reject undeclared keywords for registered shapes and row types."""
+    from .registry import load_registry
+
+    declared = {"variant"}
+    if entry is not None:
+        entry_args = entry.get("args")
+        if isinstance(entry_args, list):
+            declared.update(
+                str(arg["name"])
+                for arg in entry_args
+                if isinstance(arg, dict) and "name" in arg
+            )
+    try:
+        registry = load_registry(ns)
+    except (KeyError, FileNotFoundError):
+        return
+    for row_type in registry.get("row_types", []):
+        if not isinstance(row_type, dict) or row_type.get("name") != function:
+            continue
+        row_args = row_type.get("args")
+        if isinstance(row_args, list):
+            declared.update(
+                str(arg["name"])
+                for arg in row_args
+                if isinstance(arg, dict) and "name" in arg
+            )
+
+    if entry is None and declared == {"variant"}:
+        return
+    unknown = sorted(
+        kw.arg or "**kwargs"
+        for kw in args
+        if isinstance(kw, ast.keyword) and kw.arg not in declared
+    )
+    if unknown:
+        raise DslError(
+            f"{ns}.{function}(): unknown keyword argument(s): "
+            f"{', '.join(unknown)}",
+            line_number,
+        )
 
 
 def _registry_root(ns: str) -> str:
@@ -787,6 +894,27 @@ def _passthrough_variant(
     return parse_keyword_int(values, "variant", 1, line_number)
 
 
+def _passthrough_keyword_extra(
+    args: list[ast.AST | ast.keyword],
+) -> dict[str, object]:
+    """Preserve declared row/shape keywords (``key=``, ``dashed=``, ...) onto
+    the node for later consumption (e.g. compound row rendering).
+
+    Keyword names are already validated by ``_validate_keyword_args`` before
+    a node is built, so every keyword seen here is known-legal; ``variant``
+    is handled separately (``Node.variant``), not duplicated here.
+    """
+    extra: dict[str, object] = {}
+    for arg in args:
+        if not isinstance(arg, ast.keyword) or arg.arg is None:
+            continue
+        arg_name = arg.arg
+        if arg_name == "variant":
+            continue
+        extra[arg_name] = literal_value(arg.value, arg_name)
+    return extra
+
+
 def _build_passthrough_node(
     ns: str,
     name: str,
@@ -819,6 +947,7 @@ def _build_passthrough_node(
         label=label,
         variant=variant,
         element_name=name,
+        extra=_passthrough_keyword_extra(args),
     )
     if container_stack:
         node.parent_id = container_stack[-1].node_id
