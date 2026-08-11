@@ -42,7 +42,8 @@ Current behavior:
   `create_size_resolver` fall back to it. erd's Row/RowKey are additionally
   compound (a wrapper row plus [key tag, text label] sub-cells); these render
   via `NodeChildCell`, with `key=` preserved from parse through to the XML.
-- Every DSL call is bound against its resolved registry entry like a Python
+- Every registered buildable DSL call is bound against its resolved registry
+  entry like a Python
   function call: the `passing` field (`positional`/`keyword_only`) on each
   declared arg decides whether it can be filled positionally, and binding
   rejects a missing required argument, excess positional arguments, and an
@@ -279,12 +280,15 @@ rather than working around it:
 
 - [x] `shape-registry.schema.json`'s `$defs/arg` gained a required `passing`
   field (`positional` | `keyword_only`). `scripts/migrate_registry_v3.py`
-  (one-shot, mirrors `migrate_registry_v2.py`'s pattern) added it to all 771
-  arg lists across all seven registries' `shapes` and `row_types`, using a
-  name-based rule verified empirically against every coverage sheet and
+  (one-shot, mirrors `migrate_registry_v2.py`'s pattern) added it to all 1,734
+  declared arguments across 769 signature lists in all seven registries'
+  `shapes` and `row_types`, using a
+  mostly name-based rule verified empirically against every coverage sheet and
   `docs/architecture/*.mdg`: `node_id`/`label`/`text`/`source`/`target`/
   `description` are positional (the only names ever used positionally
-  anywhere in the codebase); every other declared name (`key`, `dashed`,
+  anywhere in the codebase), except C4 relationship `description`, whose
+  native contract and examples make it keyword-only; every other declared
+  name (`key`, `dashed`,
   `type`, `target_label`, `source_label`, and ~20 uml25 one-offs) is
   `keyword_only`, matching how real documents already call them -- the
   migration reclassifies existing data, it does not change behavior for any
@@ -299,6 +303,11 @@ rather than working around it:
   `passing: positional` args left-to-right; keyword values bind by name;
   excess positional arguments, an argument supplied both ways, and a missing
   required argument are all line-numbered `DslError`s.
+- [x] Apply the same binding contract to notation-native calls before their
+  specialized builder runs. Bound positional-or-keyword values are normalized
+  into the builder's legacy positional slots, while keyword-only values and
+  `variant=` remain keywords. This keeps C4's palette-specific construction
+  without giving it weaker argument semantics than registry-driven calls.
 - [x] `_build_passthrough_node`/`_build_passthrough_edge` consume the bound
   values: `node_id` -> `Node.id`, `label`/`text` -> `Node.label`,
   `source`/`target` -> edge endpoints, `label` -> `Edge.label`, every other

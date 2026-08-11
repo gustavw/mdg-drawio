@@ -6,8 +6,10 @@ to every declared arg across every library's ``shapes[].args`` and
 ``row_types[].args``: ``positional`` for the handful of structural names
 every DSL call binds by position (``node_id``, ``label``, ``text``,
 ``source``, ``target``, ``description``), ``keyword_only`` for everything
-else. That split was verified empirically: every non-structural arg name is
-used exclusively via ``name=value`` syntax across every coverage sheet and
+else. C4 relationship ``description`` is the one name-specific exception: its
+native builder and every example treat it as keyword-only. The split was
+verified empirically: every non-structural arg name is used exclusively via
+``name=value`` syntax across every coverage sheet and
 ``docs/architecture/*.mdg`` (see the migration's own commit message for the
 survey), never positionally -- ``passing`` codifies what real documents
 already do, it does not change any of them.
@@ -75,13 +77,17 @@ POSITIONAL_NAMES = frozenset(
 )
 
 
-def _passing(name: str) -> str:
+def _passing(library: str, function: str, name: str) -> str:
+    if library == "c4" and function == "Rel" and name == "description":
+        return "keyword_only"
     return "positional" if name in POSITIONAL_NAMES else "keyword_only"
 
 
-def _add_passing(args: list[dict[str, Any]] | None) -> None:
+def _add_passing(
+    args: list[dict[str, Any]] | None, library: str, function: str
+) -> None:
     for arg in args or []:
-        arg["passing"] = _passing(arg["name"])
+        arg["passing"] = _passing(library, function, arg["name"])
 
 
 def migrate_library(lib: str) -> int:
@@ -99,12 +105,12 @@ def migrate_library(lib: str) -> int:
     changed = 0
     for shape in doc["shapes"]:
         before = [dict(a) for a in shape.get("args") or []]
-        _add_passing(shape.get("args"))
+        _add_passing(shape.get("args"), lib, shape["function"])
         if shape.get("args") != before:
             changed += 1
     for row_type in doc.get("row_types") or []:
         before = [dict(a) for a in row_type.get("args") or []]
-        _add_passing(row_type.get("args"))
+        _add_passing(row_type.get("args"), lib, row_type["name"])
         if row_type.get("args") != before:
             changed += 1
 

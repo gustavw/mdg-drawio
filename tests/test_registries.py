@@ -161,6 +161,43 @@ def test_contains_excludes_rows(library: str) -> None:
                 f"{shape['id']}: contains.allowed must not be empty"
 
 
+def test_arg_lists_are_bindable_signatures(library: str) -> None:
+    """Registry argument order must form an unambiguous Python-like call."""
+    doc = load_registry(library)
+    owners = [*doc.get("row_types", []), *doc["shapes"]]
+    for owner in owners:
+        owner_name = owner.get("id", owner.get("name", "<unknown>"))
+        args = owner.get("args", [])
+        names = [arg["name"] for arg in args]
+        assert len(names) == len(set(names)), (
+            f"{owner_name}: duplicate argument names: {names}"
+        )
+
+        saw_keyword_only = False
+        saw_optional_positional = False
+        for arg in args:
+            if arg["passing"] == "keyword_only":
+                saw_keyword_only = True
+                continue
+            assert not saw_keyword_only, (
+                f"{owner_name}: positional argument follows keyword-only argument"
+            )
+            assert not (saw_optional_positional and arg["required"]), (
+                f"{owner_name}: required positional argument follows an optional one"
+            )
+            saw_optional_positional = not arg["required"]
+
+        kind = owner.get("kind")
+        if kind == "edge":
+            assert names[:2] == ["source", "target"], (
+                f"{owner_name}: edge signature must start with source, target"
+            )
+        elif args and (kind == "vertex" or "name" in owner):
+            assert names[0] == "node_id", (
+                f"{owner_name}: node/row signature must start with node_id"
+            )
+
+
 def test_provenance_shape_count(library: str) -> None:
     doc = load_registry(library)
     assert doc["provenance"]["shape_count"] == len(doc["shapes"])

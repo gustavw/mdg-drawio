@@ -367,6 +367,19 @@ def test_registry_bound_call_rejects_argument_supplied_twice() -> None:
         parse('use erd\nerd.RowKey(row1, "ID", label="ID2")')
 
 
+def test_registry_bound_call_rejects_duplicate_keyword() -> None:
+    with pytest.raises(DslError, match="keyword argument supplied twice: key"):
+        parse('use erd\nerd.RowKey(row1, key="PK", key="FK")')
+
+
+@pytest.mark.parametrize(
+    "variants", ["variant=1, variant=1", "variant=1, variant=99"]
+)
+def test_registry_bound_call_rejects_duplicate_variant(variants: str) -> None:
+    with pytest.raises(DslError, match="keyword argument supplied twice: variant"):
+        parse(f"use erd\nerd.RowKey(row1, {variants})")
+
+
 def test_registry_bound_call_still_rejects_unknown_keyword() -> None:
     with pytest.raises(DslError, match="unknown keyword argument.*unknown"):
         parse('use erd\nerd.RowKey(row1, unknown="x")')
@@ -375,6 +388,25 @@ def test_registry_bound_call_still_rejects_unknown_keyword() -> None:
 def test_registry_bound_edge_rejects_excess_positional_arguments() -> None:
     with pytest.raises(DslError, match="too many positional arguments"):
         parse('use erd\nerd.Rel(None, None, "label", "extra")')
+
+
+def test_native_c4_node_uses_registry_keyword_binding() -> None:
+    doc = parse('c4.Person(node_id=person, label="Person", description="Bio")')
+    assert isinstance(doc, Document)
+    (node,) = doc.nodes
+    assert (node.id, node.label, node.text_parts) == ("person", "Person", ["Bio"])
+
+
+def test_native_c4_edge_uses_registry_keyword_binding() -> None:
+    doc = parse('c4.Rel(source=a, target=b, label="calls")')
+    assert isinstance(doc, Document)
+    (edge,) = doc.edges
+    assert (edge.source_id, edge.target_id, edge.label) == ("a", "b", "calls")
+
+
+def test_native_c4_call_rejects_excess_positional_arguments() -> None:
+    with pytest.raises(DslError, match="too many positional arguments"):
+        parse('c4.Person(person, "Person", "Bio", "extra")')
 
 
 def test_general_textbox_positional_description_is_preserved() -> None:

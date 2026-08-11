@@ -22,7 +22,7 @@ import ast
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Protocol, cast
 
 from mdg_drawio.contracts import (
     PAGE_PREFIX_LENGTH,
@@ -646,13 +646,20 @@ def _process_block_call(
     registry_entry = _registry_entry(
         call.namespace, call.name, variant, line_number
     )
+    declared_specs = _declared_args(
+        call.namespace, call.name, registry_entry
+    )
     _validate_keyword_args(
         call.namespace,
         call.name,
         args,
-        _declared_args(call.namespace, call.name, registry_entry),
+        declared_specs,
         line_number,
     )
+    if declared_specs is not None:
+        args = _normalize_registry_args(
+            call.namespace, call.name, args, declared_specs, line_number
+        )
     _validate_nested_call(
         container_stack,
         call.namespace,
@@ -869,15 +876,26 @@ def _validate_keyword_args(
     if declared_specs is None:
         return
     declared = {"variant"} | {str(spec["name"]) for spec in declared_specs}
-    unknown = sorted(
-        kw.arg or "**kwargs"
-        for kw in args
-        if isinstance(kw, ast.keyword) and kw.arg not in declared
-    )
+    keywords = [kw for kw in args if isinstance(kw, ast.keyword)]
+    unknown = sorted(kw.arg or "**kwargs" for kw in keywords if kw.arg not in declared)
     if unknown:
         raise DslError(
             f"{ns}.{function}(): unknown keyword argument(s): "
             f"{', '.join(unknown)}",
+            line_number,
+        )
+    seen: set[str] = set()
+    duplicates: list[str] = []
+    for kw in keywords:
+        if kw.arg is None:
+            continue
+        if kw.arg in seen:
+            duplicates.append(kw.arg)
+        seen.add(kw.arg)
+    if duplicates:
+        raise DslError(
+            f"{ns}.{function}(): keyword argument supplied twice: "
+            f"{', '.join(sorted(set(duplicates)))}",
             line_number,
         )
 
@@ -912,19 +930,27 @@ def _bind_registry_args(
         )
 
     bound: dict[str, ast.AST] = {}
+    positionally_bound: set[str] = set()
     for spec, value in zip(positional_specs, pos_args, strict=False):
-        bound[str(spec["name"])] = value
+        name = str(spec["name"])
+        bound[name] = value
+        positionally_bound.add(name)
 
     for kw in kw_args:
-        name = kw.arg
-        assert name is not None
-        if name in bound:
+        keyword_name = kw.arg
+        assert keyword_name is not None
+        if keyword_name in bound:
+            source = (
+                "positionally"
+                if keyword_name in positionally_bound
+                else "by keyword"
+            )
             raise DslError(
-                f"{ns}.{function}(): {name}= supplied twice (already given "
-                f"positionally)",
+                f"{ns}.{function}(): {keyword_name}= supplied twice "
+                f"(already given {source})",
                 line_number,
             )
-        bound[name] = kw.value
+        bound[keyword_name] = kw.value
 
     for spec in declared_specs:
         name = str(spec["name"])
@@ -934,6 +960,55 @@ def _bind_registry_args(
                 line_number,
             )
     return bound
+
+
+def _normalize_registry_args(
+    ns: str,
+    function: str,
+    args: list[ast.AST | ast.keyword],
+    declared_specs: list[dict[str, object]],
+    line_number: int,
+) -> list[ast.AST | ast.keyword]:
+    """Normalize a registry-bound call for a notation-native builder.
+
+    Native builders predate registry signatures and consume structural values
+    positionally. Bind first, then emit those values in declared order; an
+    omitted optional slot before a later supplied value becomes an empty-string
+    placeholder. Keyword-only values and the special ``variant=`` control stay
+    as keywords. This gives native and passthrough calls the same public calling
+    convention without coupling notation-specific builders to registry data.
+    """
+    bound = _bind_registry_args(ns, function, args, declared_specs, line_number)
+    positional_specs = [
+        spec for spec in declared_specs if spec.get("passing") == "positional"
+    ]
+    last_bound = max(
+        (
+            index
+            for index, spec in enumerate(positional_specs)
+            if str(spec["name"]) in bound
+        ),
+        default=-1,
+    )
+    normalized: list[ast.AST | ast.keyword] = [
+        bound.get(str(spec["name"]), ast.Constant(value=""))
+        for spec in positional_specs[: last_bound + 1]
+    ]
+    normalized.extend(
+        ast.keyword(
+            arg=str(spec["name"]),
+            value=cast(ast.expr, bound[str(spec["name"])]),
+        )
+        for spec in declared_specs
+        if spec.get("passing") == "keyword_only"
+        and str(spec["name"]) in bound
+    )
+    normalized.extend(
+        kw
+        for kw in args
+        if isinstance(kw, ast.keyword) and kw.arg == "variant"
+    )
+    return normalized
 
 
 def _registry_root(ns: str) -> str:
@@ -956,9 +1031,15 @@ def _passthrough_variant(
 ) -> int:
     """Read and validate the common ``variant=N`` passthrough keyword."""
     values: dict[str, str | int | float] = {}
+    seen = False
     for arg in args:
         if not isinstance(arg, ast.keyword) or arg.arg != "variant":
             continue
+        if seen:
+            raise DslError(
+                "keyword argument supplied twice: variant", line_number
+            )
+        seen = True
         value = literal_value(arg.value, "variant")
         if isinstance(value, bool) or not isinstance(value, (str, int, float)):
             raise DslError(

@@ -39,14 +39,20 @@ c4.C4("Payment system — container view")
 
 - **Function names** are UpperCamelCase, exactly as in the registry's
   `function` field.
-- **Positional args** are declared per shape in the registry (`args`), in
-  order. The first arg of a vertex is always its `node_id`.
+- **Arguments** are declared per shape or row type in registry `args`, which
+  is the call's enforced signature. `passing: positional` means Python-style
+  positional-or-keyword and binds positional values left-to-right in declaration
+  order; `passing: keyword_only` requires `name=value`. `required: true` must
+  be bound. Missing required, excess positional, duplicate, and unknown
+  arguments are line-numbered errors. The first arg of a vertex is always its
+  `node_id`.
 - **`variant=N`** selects which palette shape of a function family to render
   (default 1). Variants are listed in `related.variants`; how they differ is
   in each entry's `discriminator`.
-- **Keyword args** carry fixed template parts (e.g. `keyword=`, `name=`,
-  `entry=`, `technology=`). Repeating/scaling content goes in child rows
-  instead (see below).
+- **Keyword args** commonly carry fixed template parts (e.g. `keyword=`,
+  `name=`, `entry=`, `technology=`). Consult `passing` rather than assuming a
+  parameter is keyword-only from its name. Repeating/scaling content goes in
+  child rows instead (see below).
 
 ## Ids
 

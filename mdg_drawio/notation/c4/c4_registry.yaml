@@ -465,7 +465,7 @@ shapes:
     passing: positional
   - name: description
     required: false
-    passing: positional
+    passing: keyword_only
   - name: technology
     required: false
     passing: keyword_only
@@ -513,7 +513,7 @@ shapes:
     passing: positional
   - name: description
     required: false
-    passing: positional
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:
@@ -558,7 +558,7 @@ shapes:
     passing: positional
   - name: description
     required: false
-    passing: positional
+    passing: keyword_only
   endpoints:
     direction: source_to_target
   related:

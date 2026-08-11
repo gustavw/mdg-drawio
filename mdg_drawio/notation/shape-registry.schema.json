@@ -79,7 +79,7 @@
         "passing": {
           "type": "string",
           "enum": ["positional", "keyword_only"],
-          "description": "Calling convention: 'positional' args bind left-to-right from the call's positional arguments (in declaration order); 'keyword_only' args may only be supplied as name=value and are never counted against the positional list. Drives DSL-call argument validation (mdg_drawio.notation._core.dsl_engine)."
+          "description": "Calling convention: 'positional' means Python-style positional-or-keyword and binds call positional values left-to-right in declaration order; 'keyword_only' args may only be supplied as name=value and are never counted against the positional list. Drives DSL-call argument validation (mdg_drawio.notation._core.dsl_engine)."
         }
       }
     },
