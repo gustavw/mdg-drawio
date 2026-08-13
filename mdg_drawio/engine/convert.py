@@ -517,10 +517,25 @@ def _split_page_sources(source: str) -> list[str]:
 _START_SIZE_RE = re.compile(r"startSize=(\d+)")
 
 
+_STACKING_CHILD_LAYOUTS = ("childLayout=stackLayout", "childLayout=tableLayout")
+
+
 def _annotate_stack_containers(
     nodes: list[Node], style_of: Callable[[str], str]
 ) -> None:
-    """Flag nodes whose palette shape is a ``childLayout=stackLayout`` container.
+    """Flag nodes whose palette shape stacks its children tightly.
+
+    draw.io has two child-layout primitives that both mean "children are
+    fixed-size rows/bands stacked with no gap, starting right after the
+    title band": ``childLayout=stackLayout`` (BPMN pools, UML classifier
+    members) and ``childLayout=tableLayout`` (ERD tables and their RowKey/Row
+    entries, the BPMN cross-functional flowchart, the C4 legend, the UML
+    activity partition). Without this, such a container's rows fall through
+    to the generic ranked-graph layout, which inserts a full
+    ``column_gap``/``row_gap`` between "siblings" that have no edges between
+    them -- rows that should be flush end up floating apart with dead space,
+    and their own border-line decorations (drawn flush against the row's own
+    edges) visibly stop short of the next row instead of meeting it.
 
     Records ``extra['child_layout']='stack'`` and the title-band ``start_size``
     so the container layout stacks their children tightly (matching draw.io)
@@ -529,7 +544,7 @@ def _annotate_stack_containers(
     """
     for node in nodes:
         style = style_of(node.type)
-        if "childLayout=stackLayout" not in style:
+        if not any(marker in style for marker in _STACKING_CHILD_LAYOUTS):
             continue
         node.extra.setdefault("child_layout", "stack")
         if "start_size" not in node.extra:
