@@ -69,14 +69,29 @@ from .validate import validate_generated_xml
 # ---------------------------------------------------------------------------
 
 _USE_RE = re.compile(r"^\s*use\s+(\w+)", re.MULTILINE)
+_DEFAULT_NOTATION = "c4"
 
 
 def _detect_notation(source: str) -> str:
-    """Detect the primary notation from a ``use <name>`` statement."""
+    """Detect the primary notation from a ``use <name>`` statement.
+
+    A page with no ``use`` line falls back to the default notation. A ``use``
+    naming a library that does not exist is a loud error, not a silent
+    fallback: it decides the page's layout config, shape scaling and rank
+    exclusions, so quietly treating ``use bpnm2`` (a typo) as C4 renders the
+    whole page with the wrong policy and no diagnostic. Same principle as
+    :func:`_normalize_direction`.
+    """
     m = _USE_RE.search(source)
-    if m and m.group(1) in LIBRARIES:
-        return m.group(1)
-    return "c4"
+    if m is None:
+        return _DEFAULT_NOTATION
+    notation = m.group(1)
+    if notation not in LIBRARIES:
+        raise ValueError(
+            f"unknown notation `use {notation}`; "
+            f"expected one of {sorted(LIBRARIES)}"
+        )
+    return notation
 
 
 # ---------------------------------------------------------------------------

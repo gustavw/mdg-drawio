@@ -336,7 +336,10 @@ def trace_permutation(perm: Permutation, *, quiet: bool = True) -> TraceResult:
             try:
                 code = cli_main(argv)
                 outcome = "ok" if code == 0 else f"exit={code}"
-            except BaseException as exc:  # noqa: BLE001 - report, don't abort the sweep
+            # Deliberately catches BaseException: one permutation blowing up
+            # (including on SystemExit) is a result to record, not a reason to
+            # abort the whole sweep.
+            except BaseException as exc:
                 outcome = f"error:{type(exc).__name__}: {exc}"
             finally:
                 sys.settrace(previous)

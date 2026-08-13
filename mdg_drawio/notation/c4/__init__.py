@@ -32,6 +32,7 @@ from mdg_drawio.contracts import (
 from .._core import (
     DslError,
     build_pages_document,
+    is_none_literal,
     literal_or_name,
     literal_string,
     literal_value,
@@ -209,10 +210,6 @@ def _select_rel_variant(
     return 3
 
 
-def _is_none_literal(node: ast.AST) -> bool:
-    return isinstance(node, ast.Constant) and node.value is None
-
-
 def _parse_edge(
     function: str, args: list[ast.AST | ast.keyword], line_number: int
 ) -> Edge:
@@ -236,8 +233,8 @@ def _parse_edge(
     # dangling single ``None`` (only one endpoint missing) is still rejected
     # here, with a line number, rather than deferred to a confusing
     # model-level error.
-    source_is_none = _is_none_literal(pos_args[0])
-    target_is_none = _is_none_literal(pos_args[1])
+    source_is_none = is_none_literal(pos_args[0])
+    target_is_none = is_none_literal(pos_args[1])
     if source_is_none != target_is_none:
         raise DslError(
             f"{function}(): source and target must both be ids, or both be "

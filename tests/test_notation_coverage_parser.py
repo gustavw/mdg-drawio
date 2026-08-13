@@ -143,6 +143,33 @@ def test_passthrough_node_with_no_positional_args_is_rejected() -> None:
         parse("use uml\numl.Object()")
 
 
+def test_passthrough_accepts_unquoted_hyphenated_ids() -> None:
+    """An unquoted hyphenated id parses as a chain of subtractions.
+
+    The native c4 parser has always recovered those (``literal_or_name``),
+    but the passthrough builders used a narrower extractor, so the identical
+    construct was legal in one notation and a confusing "first argument must
+    be a node id" error in every other. draw.io's own cell ids -- what the
+    reverse derivation seeds node ids from -- routinely contain hyphens.
+    """
+    doc = parse("use erd\nerd.EntityRect(my-node-1, \"Label\")")
+    assert isinstance(doc, Document)
+    (node,) = doc.nodes
+    assert node.id == "my-node-1"
+
+
+def test_passthrough_edge_accepts_unquoted_hyphenated_endpoints() -> None:
+    doc = parse(
+        "use erd\n"
+        'erd.EntityRect(a-1, "A")\n'
+        'erd.EntityRect(b-2, "B")\n'
+        "erd.Rel(a-1, b-2)"
+    )
+    assert isinstance(doc, Document)
+    (edge,) = doc.edges
+    assert (edge.source_id, edge.target_id) == ("a-1", "b-2")
+
+
 # ---------------------------------------------------------------------------
 # C4's own edge builder: None, None unconnected palette-edge form
 # ---------------------------------------------------------------------------

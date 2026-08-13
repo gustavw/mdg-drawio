@@ -11,8 +11,9 @@ The algorithm produces a directed acyclic graph layout:
 
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import defaultdict, deque
 from collections.abc import Iterator
+from dataclasses import replace
 
 from mdg_drawio.contracts import DEFAULT_PAGE_HEIGHT, DEFAULT_PAGE_WIDTH, Anchor
 
@@ -59,7 +60,6 @@ class LayeredLayout(BaseLayout):
 
         node_by_id = {n.id: n for n in nodes}
         layout_nodes = container_state.top_level_nodes
-        layout_node_by_id = {n.id: n for n in layout_nodes}
 
         edges, reversed_ids = _remove_cycles(edges, node_by_id)
         layout_edges = _collapse_edges_to_layout_units(
@@ -67,10 +67,9 @@ class LayeredLayout(BaseLayout):
             container_state.top_level_by_id,
         )
         layers = _assign_layers(layout_nodes, layout_edges)
-        ordered_layers = _order_layers(layers, layout_edges, layout_node_by_id)
+        ordered_layers = _order_layers(layers, layout_edges)
         _assign_positions(
             ordered_layers,
-            layout_node_by_id,
             direction=cfg.direction,
             margin_x=cfg.margin_x,
             margin_y=cfg.margin_y,
@@ -229,25 +228,24 @@ def _remove_cycles(
 def _layer_graph(
     nodes: list[Node],
     edges: list[Edge],
-) -> tuple[dict[str, Node], dict[str, int], dict[str, list[str]]]:
-    """Build graph state used by longest-path layer assignment."""
-    node_by_id = {n.id: n for n in nodes}
+) -> tuple[dict[str, int], dict[str, list[str]]]:
+    """Build the in-degree/adjacency state longest-path ranking works from.
+
+    Edges with an endpoint outside *nodes* are dropped: ranking only sees the
+    layout units it was handed.
+    """
+    node_ids = {n.id for n in nodes}
     in_degree: dict[str, int] = defaultdict(int)
     out_adj: dict[str, list[str]] = defaultdict(list)
 
     for edge in edges:
         source_id = edge.source_id
         target_id = edge.target_id
-        if (
-            source_id
-            and target_id
-            and source_id in node_by_id
-            and target_id in node_by_id
-        ):
+        if source_id in node_ids and target_id in node_ids:
             in_degree[target_id] += 1
             out_adj[source_id].append(target_id)
 
-    return node_by_id, in_degree, out_adj
+    return in_degree, out_adj
 
 
 def _initial_rank_queue(
@@ -272,15 +270,18 @@ def _longest_path_ranks(
     for node_id in queue:
         ranks[node_id] = 0
 
-    while queue:
-        node_id = queue.pop(0)
+    # deque: this is a BFS frontier, and list.pop(0) is O(n) per step, making
+    # ranking quadratic in the node count for no reason.
+    pending = deque(queue)
+    while pending:
+        node_id = pending.popleft()
         for target_id in out_adj.get(node_id, []):
             new_rank = ranks[node_id] + 1
             if target_id not in ranks or new_rank > ranks[target_id]:
                 ranks[target_id] = new_rank
             in_degree[target_id] -= 1
             if in_degree[target_id] == 0:
-                queue.append(target_id)
+                pending.append(target_id)
 
     for node in nodes:
         if node.id not in ranks:
@@ -291,7 +292,6 @@ def _longest_path_ranks(
 
 def _layers_from_ranks(
     nodes: list[Node],
-    node_by_id: dict[str, Node],
     ranks: dict[str, int],
 ) -> list[list[Node]]:
     """Group nodes into layer lists by rank."""
@@ -299,7 +299,7 @@ def _layers_from_ranks(
     layers: list[list[Node]] = [[] for _ in range(max_rank + 1)]
 
     for node in nodes:
-        layers[ranks[node.id]].append(node_by_id[node.id])
+        layers[ranks[node.id]].append(node)
 
     return layers
 
@@ -311,10 +311,10 @@ def _assign_layers(
     if not nodes:
         return []
 
-    node_by_id, in_degree, out_adj = _layer_graph(nodes, edges)
+    in_degree, out_adj = _layer_graph(nodes, edges)
     queue = _initial_rank_queue(nodes, in_degree)
     ranks = _longest_path_ranks(nodes, in_degree, out_adj, queue)
-    return _layers_from_ranks(nodes, node_by_id, ranks)
+    return _layers_from_ranks(nodes, ranks)
 
 
 def _collapse_edges_to_layout_units(
@@ -346,8 +346,8 @@ def _collapse_edges_to_layout_units(
 def _order_layers(
     layers: list[list[Node]],
     edges: list[Edge],
-    node_by_id: dict[str, Node],
 ) -> list[list[Node]]:
+    """Reduce edge crossings by barycenter sorting within each layer."""
     in_adj: dict[str, list[str]] = defaultdict(list)
     out_adj: dict[str, list[str]] = defaultdict(list)
     for e in edges:
@@ -390,7 +390,6 @@ def _order_layers(
 
 def _assign_positions(
     layers: list[list[Node]],
-    node_by_id: dict[str, Node],
     *,
     direction: str,
     margin_x: float,
@@ -834,18 +833,20 @@ def _route_edges(
                 out_degree, in_degree, primary_incoming, horizontal=horizontal,
             )
 
+        # Only routing (waypoints + anchors) is computed here; every other
+        # field carries over via replace(). A field-by-field reconstruction
+        # silently drops anything not in the hand-picked list -- notably
+        # ``object_attributes``, which is what makes the generator emit a C4
+        # Rel inside its <UserObject> wrapper with the palette's label
+        # template. Same lesson palette.py already learned; see
+        # tests/test_layout_modes.py::test_layered_routing_preserves_
+        # non_geometry_fields.
         routed.append(
-            Edge(
-                id=edge.id,
-                type=edge.type,
-                source_id=edge.source_id,
-                target_id=edge.target_id,
+            replace(
+                edge,
                 waypoints=waypoints,
                 source_anchor=source_anchor,
                 target_anchor=target_anchor,
-                hidden=edge.hidden,
-                label=edge.label,
-                description=edge.description,
                 style_overrides=dict(edge.style_overrides),
                 extra=dict(edge.extra),
             )

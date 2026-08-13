@@ -12,10 +12,6 @@ Improvements over the DrawIoGen reference:
 """
 
 
-
-
-
-
 from __future__ import annotations
 
 import ast
@@ -46,7 +42,6 @@ CALL_RE: re.Pattern[str] = re.compile(
     r"(?P<name>[A-Za-z_][A-Za-z0-9_]*)\((?P<args>.*)\)\s*(?P<colon>:?)\s*$"
 )
 
-# Lines the block parser skips silently.
 # Lines the block parser skips silently. ``use ``/``trace `` are model-only
 # statements consumed by the traceability meta-model (scripts/check_traceability.py),
 # never rendered as draw.io nodes or edges.
@@ -151,10 +146,7 @@ def _page_name_from_statement(stripped: str) -> str:
 
 def _has_per_page_frontmatter(body_lines: list[str]) -> bool:
     """True if the body uses ``---`` + ``page:`` per-page frontmatter."""
-    for line in body_lines:
-        if line.strip() == "---":
-            return True
-    return False
+    return any(line.strip() == "---" for line in body_lines)
 
 
 def _collect_page_sections(
@@ -1094,7 +1086,7 @@ def _build_passthrough_node(
         bound = _bind_registry_args(ns, name, args, declared_specs, line_number)
         node_id_value = bound.get("node_id")
         node_id = (
-            _extract_arg_string(node_id_value) if node_id_value is not None else ""
+            _extract_arg_id(node_id_value) if node_id_value is not None else ""
         )
         if not node_id:
             raise DslError(
@@ -1119,7 +1111,7 @@ def _build_passthrough_node(
                 f"{ns}.{name}(): requires at least a node id argument",
                 line_number,
             )
-        node_id = _extract_arg_string(pos_args[0])
+        node_id = _extract_arg_id(pos_args[0])
         if not node_id:
             raise DslError(
                 f"{ns}.{name}(): first argument must be a node id (string or "
@@ -1164,11 +1156,11 @@ def _build_passthrough_edge(
     source_value = bound.get("source")
     target_value = bound.get("target")
     label_value = bound.get("label")
-    source_id = _extract_arg_string(source_value) if source_value is not None else ""
-    target_id = _extract_arg_string(target_value) if target_value is not None else ""
+    source_id = _extract_arg_id(source_value) if source_value is not None else ""
+    target_id = _extract_arg_id(target_value) if target_value is not None else ""
     label = _extract_arg_string(label_value) if label_value is not None else ""
-    source_is_none = source_value is not None and _is_none_literal(source_value)
-    target_is_none = target_value is not None and _is_none_literal(target_value)
+    source_is_none = source_value is not None and is_none_literal(source_value)
+    target_is_none = target_value is not None and is_none_literal(target_value)
     unconnected = source_is_none and target_is_none
     if not unconnected and (not source_id or not target_id):
         raise DslError(
@@ -1226,7 +1218,22 @@ def _extract_arg_string(node: ast.AST) -> str:
     return ""
 
 
-def _is_none_literal(node: ast.AST) -> bool:
+def _extract_arg_id(node: ast.AST) -> str:
+    """Extract an *identity* argument (node_id, edge source/target).
+
+    Wider than :func:`_extract_arg_string`: an unquoted hyphenated id like
+    ``some-id-1`` parses as a chain of subtraction nodes, which
+    :func:`_identifier_like_value` recovers. The C4 parser accepted those all
+    along (via :func:`literal_or_name`), so without this the same document
+    was legal in one notation and a confusing "first argument must be a node
+    id" error in every other — and draw.io's own cell ids (what the reverse
+    derivation seeds node ids from) routinely contain hyphens.
+    """
+    return _identifier_like_value(node) or ""
+
+
+def is_none_literal(node: ast.AST) -> bool:
+    """True for the literal ``None`` — the grammar's unconnected-endpoint form."""
     return isinstance(node, ast.Constant) and node.value is None
 
 def build_pages_document(
