@@ -26,12 +26,12 @@ from mdg_drawio.contracts import (
     C4_SCALER_TITLE_LINE_HEIGHT,
     C4_SCALER_VERTICAL_PADDING,
     C4_SCALER_WIDTH_CUSHION,
-    ERD_SCALER_HORIZONTAL_PADDING,
-    ERD_SCALER_TITLE_FONT_SIZE,
-    ERD_SCALER_TITLE_LINE_HEIGHT,
-    ERD_SCALER_VERTICAL_PADDING,
     PALETTE_MODE,
     ROTATED_LABEL_PADDING,
+    SMALL_BOX_SCALER_HORIZONTAL_PADDING,
+    SMALL_BOX_SCALER_TITLE_FONT_SIZE,
+    SMALL_BOX_SCALER_TITLE_LINE_HEIGHT,
+    SMALL_BOX_SCALER_VERTICAL_PADDING,
 )
 from mdg_drawio.generator import (
     Document,
@@ -172,10 +172,117 @@ def _erd_shape_scaling() -> ShapeScalingConfig:
     return ShapeScalingConfig(
         enabled=True,
         node_types=set(_ERD_LEAF_SHAPE_TYPES),
-        horizontal_padding=ERD_SCALER_HORIZONTAL_PADDING,
-        vertical_padding=ERD_SCALER_VERTICAL_PADDING,
-        title_font_size=ERD_SCALER_TITLE_FONT_SIZE,
-        title_line_height=ERD_SCALER_TITLE_LINE_HEIGHT,
+        horizontal_padding=SMALL_BOX_SCALER_HORIZONTAL_PADDING,
+        vertical_padding=SMALL_BOX_SCALER_VERTICAL_PADDING,
+        title_font_size=SMALL_BOX_SCALER_TITLE_FONT_SIZE,
+        title_line_height=SMALL_BOX_SCALER_TITLE_LINE_HEIGHT,
+    )
+
+
+# Plain (non-bold, ~12px label) small-box leaf shapes in the general-purpose
+# shape library. List/ListItem are deliberately excluded: List already has
+# childLayout=stackLayout, so ListItem already sizes correctly via the same
+# _stack_children path Table/RowKey use in ERD.
+_GENERAL_LEAF_SHAPE_TYPES = frozenset(
+    {
+        "general.Rectangle",
+        "general.RoundedRectangle",
+        "general.Process",
+        "general.Parallelogram",
+        "general.Trapezoid",
+        "general.Text",
+    }
+)
+
+
+def _general_shape_scaling() -> ShapeScalingConfig:
+    """Text-driven sizing for the general-purpose shape library's leaf boxes.
+
+    These carry arbitrary user text more often than any other notation --
+    Rectangle/RoundedRectangle/etc. are the generic building blocks reached
+    for when no specialized notation fits -- yet had the smallest, most
+    generic palette defaults (120x60) and no growth mechanism at all.
+    """
+    return ShapeScalingConfig(
+        enabled=True,
+        node_types=set(_GENERAL_LEAF_SHAPE_TYPES),
+        horizontal_padding=SMALL_BOX_SCALER_HORIZONTAL_PADDING,
+        vertical_padding=SMALL_BOX_SCALER_VERTICAL_PADDING,
+        title_font_size=SMALL_BOX_SCALER_TITLE_FONT_SIZE,
+        title_line_height=SMALL_BOX_SCALER_TITLE_LINE_HEIGHT,
+    )
+
+
+# UML 2.5's leaf shapes most likely to carry a real (not structural-marker)
+# label. Ports, pseudostate nodes (InitialPseudoState, FinalState,
+# ShallowHistory, Junction, ...) are deliberately excluded: those are small
+# by design in the UML spec itself (unlabeled or a single glyph), not an
+# oversight -- growing them to fit a hypothetical long label would misrender
+# standard notation.
+_UML25_LEAF_SHAPE_TYPES = frozenset(
+    {
+        "uml25.Comment",
+        "uml25.Instance",
+        "uml25.Property",
+    }
+)
+
+
+def _uml25_shape_scaling() -> ShapeScalingConfig:
+    """Text-driven sizing for UML 2.5's free-text-bearing leaf shapes."""
+    return ShapeScalingConfig(
+        enabled=True,
+        node_types=set(_UML25_LEAF_SHAPE_TYPES),
+        horizontal_padding=SMALL_BOX_SCALER_HORIZONTAL_PADDING,
+        vertical_padding=SMALL_BOX_SCALER_VERTICAL_PADDING,
+        title_font_size=SMALL_BOX_SCALER_TITLE_FONT_SIZE,
+        title_line_height=SMALL_BOX_SCALER_TITLE_LINE_HEIGHT,
+    )
+
+
+# The legacy "uml" library's leaf shapes with rows.allowed == [] and a real
+# label. Item/Title/Divider/Spacer/SelfCall/LollipopNotation are row-like or
+# structural helpers for other composite shapes, not directly-placed leaf
+# vertices, so they're excluded here.
+_UML_LEAF_SHAPE_TYPES = frozenset(
+    {
+        "uml.Object",
+        "uml.Interface",
+        "uml.Module",
+        "uml.Package",
+    }
+)
+
+
+def _uml_shape_scaling() -> ShapeScalingConfig:
+    """Text-driven sizing for the legacy UML library's leaf shapes."""
+    return ShapeScalingConfig(
+        enabled=True,
+        node_types=set(_UML_LEAF_SHAPE_TYPES),
+        horizontal_padding=SMALL_BOX_SCALER_HORIZONTAL_PADDING,
+        vertical_padding=SMALL_BOX_SCALER_VERTICAL_PADDING,
+        title_font_size=SMALL_BOX_SCALER_TITLE_FONT_SIZE,
+        title_line_height=SMALL_BOX_SCALER_TITLE_LINE_HEIGHT,
+    )
+
+
+# BPMN2's free-text annotation. Every other small-boxed bpmn2 shape is either
+# a choreography-specific band meant to nest inside a composite activity
+# (Participant*, part=1) or a niche Conversation-family hexagon -- both
+# conventionally carry short labels and have no confirmed overflow bug, so
+# they're left alone rather than speculatively widened.
+_BPMN2_LEAF_SHAPE_TYPES = frozenset({"bpmn2.TextAnnotation"})
+
+
+def _bpmn2_shape_scaling() -> ShapeScalingConfig:
+    """Text-driven sizing for BPMN2's free-text annotation shape."""
+    return ShapeScalingConfig(
+        enabled=True,
+        node_types=set(_BPMN2_LEAF_SHAPE_TYPES),
+        horizontal_padding=SMALL_BOX_SCALER_HORIZONTAL_PADDING,
+        vertical_padding=SMALL_BOX_SCALER_VERTICAL_PADDING,
+        title_font_size=SMALL_BOX_SCALER_TITLE_FONT_SIZE,
+        title_line_height=SMALL_BOX_SCALER_TITLE_LINE_HEIGHT,
     )
 
 
@@ -184,9 +291,19 @@ def _erd_shape_scaling() -> ShapeScalingConfig:
 # the architecture tests), so notation-specific layout policy is wired here.
 # Adding scaling support for a new notation is a single declarative entry —
 # no new control flow.
+#
+# archimate3 is deliberately absent: every element's default (.v1) variant
+# already has a comfortable 150x75 palette size. Only the opt-in compact
+# icon variant (variant=2, ~60x35) is small, and that's the point of
+# choosing it -- growing it back up would defeat the denser look the author
+# asked for.
 _SHAPE_SCALING_BY_NOTATION: dict[str, Callable[[], ShapeScalingConfig]] = {
     "c4": _c4_shape_scaling,
     "erd": _erd_shape_scaling,
+    "general": _general_shape_scaling,
+    "uml25": _uml25_shape_scaling,
+    "uml": _uml_shape_scaling,
+    "bpmn2": _bpmn2_shape_scaling,
 }
 
 
