@@ -41,7 +41,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="author-&gt;drawio" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="author" target="drawio" value="Reviews and adjusts layout">
+        <mxCell id="author-&gt;drawio" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="author" target="drawio" value="Reviews and adjusts layout">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="224.0" y="151.0" />
@@ -140,7 +140,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="author_c-&gt;drawio_c" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="author_c" target="drawio_c" value="Reviews and adjusts layout">
+        <mxCell id="author_c-&gt;drawio_c" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=1.0;exitY=0.5;entryX=0.5;entryY=0.0;" edge="1" parent="1" source="author_c" target="drawio_c" value="Reviews and adjusts layout">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="224.0" y="143.5" />
@@ -168,7 +168,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="engine-&gt;drawio_c" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="engine" target="drawio_c" value="Reads and writes .drawio files">
+        <mxCell id="engine-&gt;drawio_c" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.0;exitY=0.5;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="engine" target="drawio_c" value="Reads and writes .drawio files">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="2564.0" y="764.0" />
@@ -197,7 +197,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="generator-&gt;contracts" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="generator" target="contracts" value="Uses data models">
+        <mxCell id="generator-&gt;contracts" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.5;exitY=1.0;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="generator" target="contracts" value="Uses data models">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="662.0" y="1025.0" />
@@ -435,7 +435,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="engine_preload_co-&gt;notation_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="engine_preload_co" target="notation_co_boundary" value="Loads registries and styles">
+        <mxCell id="engine_preload_co-&gt;notation_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1.0;entryX=0.0;entryY=0.5;" edge="1" parent="1" source="engine_preload_co" target="notation_co_boundary" value="Loads registries and styles">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="284.0" y="1213.72" />
@@ -443,7 +443,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="engine_validate_co-&gt;generator_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="engine_validate_co" target="generator_co_boundary" value="Validates generated XML">
+        <mxCell id="engine_validate_co-&gt;generator_co_boundary" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1.0;entryX=0.0;entryY=0.5;" edge="1" parent="1" source="engine_validate_co" target="generator_co_boundary" value="Validates generated XML">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="692.0" y="1213.72" />
@@ -618,7 +618,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="registry_co-&gt;registries_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="registry_co" target="registries_co" value="Loads YAML registries">
+        <mxCell id="registry_co-&gt;registries_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.5;exitY=1.0;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="registry_co" target="registries_co" value="Loads YAML registries">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="3720.0" y="1836.72" />
@@ -626,7 +626,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="styles_co-&gt;palette_data_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="styles_co" target="palette_data_co" value="Locates generated JSON">
+        <mxCell id="styles_co-&gt;palette_data_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.5;exitY=1.0;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="styles_co" target="palette_data_co" value="Locates generated JSON">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="3312.0" y="2277.7200000000003" />
@@ -634,7 +634,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="normalize_co-&gt;styles_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="normalize_co" target="styles_co" value="Fingerprints bind to palette cells">
+        <mxCell id="normalize_co-&gt;styles_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.5;exitY=1.0;entryX=0.0;entryY=0.5;" edge="1" parent="1" source="normalize_co" target="styles_co" value="Fingerprints bind to palette cells">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="2904.0" y="1552.72" />
@@ -656,7 +656,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="stubs_co-&gt;registries_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;" edge="1" parent="1" source="stubs_co" target="registries_co" value="Dispatches calls through">
+        <mxCell id="stubs_co-&gt;registries_co" style="endArrow=blockThin;html=1;fontSize=10;fontColor=#404040;strokeWidth=1;endFill=1;strokeColor=#828282;metaEdit=1;endSize=14;startSize=14;jumpStyle=arc;jumpSize=16;rounded=0;exitX=0.5;exitY=1.0;entryX=1.0;entryY=0.5;" edge="1" parent="1" source="stubs_co" target="registries_co" value="Dispatches calls through">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="4128.0" y="1694.72" />
