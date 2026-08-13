@@ -79,6 +79,16 @@ C4_SCALER_PERSON_ASPECT_RATIO = 200 / 180
 C4_SCALER_SUBTITLE_KEY = "c4Subtitle"
 
 # ---------------------------------------------------------------------------
+# ERD text-driven shape scaling defaults (row-less entities only; Table/
+# RowKey/Row/EntityTable size from their own row content instead — see
+# _erd_shape_scaling in engine/convert.py)
+# ---------------------------------------------------------------------------
+ERD_SCALER_HORIZONTAL_PADDING = 24
+ERD_SCALER_VERTICAL_PADDING = 20
+ERD_SCALER_TITLE_FONT_SIZE = 12
+ERD_SCALER_TITLE_LINE_HEIGHT = 16
+
+# ---------------------------------------------------------------------------
 # Container layout minimums
 # ---------------------------------------------------------------------------
 MIN_CONTAINER_WIDTH = 240.0
