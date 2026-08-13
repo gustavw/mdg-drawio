@@ -26,6 +26,10 @@ from mdg_drawio.contracts import (
     C4_SCALER_TITLE_LINE_HEIGHT,
     C4_SCALER_VERTICAL_PADDING,
     C4_SCALER_WIDTH_CUSHION,
+    ERD_SCALER_HORIZONTAL_PADDING,
+    ERD_SCALER_TITLE_FONT_SIZE,
+    ERD_SCALER_TITLE_LINE_HEIGHT,
+    ERD_SCALER_VERTICAL_PADDING,
     PALETTE_MODE,
     ROTATED_LABEL_PADDING,
 )
@@ -130,6 +134,51 @@ def _c4_shape_scaling() -> ShapeScalingConfig:
     )
 
 
+# ERD vertex functions with no rows of their own (rows.allowed == []) --
+# Table/RowKey/Row/EntityTable are deliberately excluded: those already size
+# correctly from their row content via the childLayout=tableLayout/
+# stackLayout container path (_stack_children), so scaling them again here
+# would be redundant rather than wrong, but adds nothing.
+_ERD_LEAF_SHAPE_TYPES = frozenset(
+    {
+        "erd.EntityRect",
+        "erd.EntityRounded",
+        "erd.WeakEntity",
+        "erd.Attribute",
+        "erd.KeyAttribute",
+        "erd.WeakKeyAttribute",
+        "erd.DerivedAttribute",
+        "erd.MultivalueAttribute",
+        "erd.AssociativeEntity",
+        "erd.Relationship",
+        "erd.IdentifyingRelationship",
+        "erd.Cloud",
+        "erd.Note",
+    }
+)
+
+
+def _erd_shape_scaling() -> ShapeScalingConfig:
+    """Text-driven sizing for ERD's row-less shapes.
+
+    Every one of these has a small, fixed palette default (e.g. 100x40 for
+    EntityRect/EntityRounded) sized for a short single word, and no
+    mechanism grows it for a longer or multi-line label (e.g. "Employee\\n
+    (source system: SuccessFactors)") -- it silently overflows the box.
+    Padding/line-height are tuned down from C4's defaults: ERD entities are
+    small, tight boxes with plain (non-bold, ~12px) labels, not C4's bold
+    title-card style.
+    """
+    return ShapeScalingConfig(
+        enabled=True,
+        node_types=set(_ERD_LEAF_SHAPE_TYPES),
+        horizontal_padding=ERD_SCALER_HORIZONTAL_PADDING,
+        vertical_padding=ERD_SCALER_VERTICAL_PADDING,
+        title_font_size=ERD_SCALER_TITLE_FONT_SIZE,
+        title_line_height=ERD_SCALER_TITLE_LINE_HEIGHT,
+    )
+
+
 # Notation → default shape-scaling factory. The engine is the only layer
 # allowed to bridge notation and layout (see the cross-package import rule in
 # the architecture tests), so notation-specific layout policy is wired here.
@@ -137,6 +186,7 @@ def _c4_shape_scaling() -> ShapeScalingConfig:
 # no new control flow.
 _SHAPE_SCALING_BY_NOTATION: dict[str, Callable[[], ShapeScalingConfig]] = {
     "c4": _c4_shape_scaling,
+    "erd": _erd_shape_scaling,
 }
 
 
