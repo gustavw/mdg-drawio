@@ -6,7 +6,7 @@ consumers import from here, never from submodules.
 
 from __future__ import annotations
 
-from ._core.dsl_engine import DslError
+from ._core.dsl_engine import DslError, split_pages
 from ._core.registry import (
     LIBRARIES,
     NOTATION_DIR,
@@ -28,4 +28,5 @@ __all__ = [
     "set_registries",
     "shapes_by_function",
     "shapes_by_id",
+    "split_pages",
 ]

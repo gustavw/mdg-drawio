@@ -59,7 +59,7 @@ from mdg_drawio.layout import (
     resolve_page_size,
     scale_node_sizes,
 )
-from mdg_drawio.notation import LIBRARIES, DslError, parse
+from mdg_drawio.notation import LIBRARIES, DslError, parse, split_pages
 
 from .preload import preload_core
 from .validate import validate_generated_xml
@@ -603,7 +603,10 @@ def _generate_multipage(
     for _i, (page_doc, page_source) in enumerate(pages):
         if _i < len(ovs):
             page_doc.geometry_overlay = ovs[_i]
-        layout_mode = _detect_layout_mode(page_source)
+        # Prefer the mode the parser already recorded on the page itself --
+        # only fall back to re-deriving it from raw text when a notation's
+        # parse_page() left it unset.
+        layout_mode = page_doc.diagram.mode or _detect_layout_mode(page_source)
         notation = _detect_notation(page_source)
         layout_config = _resolve_layout_config(notation, layout_mode)
         direction = _normalize_direction(page_doc.diagram.direction)
@@ -639,42 +642,29 @@ def _normalize_pages(
     doc: Document | MultiPageDocument,
     source: str,
 ) -> list[tuple[Document, str]]:
-    """Flatten parsed document into ``(Document, page_source)`` pairs."""
+    """Flatten parsed document into ``(Document, page_source)`` pairs.
+
+    Delegates page splitting to ``notation.split_pages`` -- the same
+    function ``doc.pages`` was actually built from -- rather than
+    re-deriving page boundaries with a separate implementation. A prior,
+    parallel regex-based splitter here only recognized the legacy
+    ``page "Name"`` (no colon) statement, not the ``---``/``page:`` YAML
+    frontmatter block every real ``.mdg`` file uses, so for a genuine
+    multi-page file it silently fell back to handing every page the
+    *entire* file as its own source. Harmless when every page uses the
+    same library (notation/layout-mode detection landed on the right
+    answer by coincidence), but a page after the first using a different
+    library got whichever notation/mode the first page's frontmatter
+    declared.
+    """
     if isinstance(doc, Document):
         return [(doc, source)]
-    page_sources = _split_page_sources(source)
+    page_sources = [page_source for _name, page_source in split_pages(source)]
     result: list[tuple[Document, str]] = []
     for i, page_doc in enumerate(doc.pages):
         page_src = page_sources[i] if i < len(page_sources) else source
         result.append((page_doc, page_src))
     return result
-
-
-def _split_page_sources(source: str) -> list[str]:
-    """Split raw source on ``page "Name"`` boundaries."""
-    raw_lines = source.lstrip("\n").split("\n")
-    global_header_lines: list[str] = []
-    page_chunks: list[list[str]] = []
-    current_chunk: list[str] | None = None
-
-    for line in raw_lines:
-        stripped = line.strip()
-        if stripped.startswith('page "') or stripped.startswith("page '"):
-            current_chunk = [line]
-            page_chunks.append(current_chunk)
-        elif current_chunk is not None:
-            current_chunk.append(line)
-        else:
-            global_header_lines.append(line)
-
-    global_header = "\n".join(global_header_lines)
-    if global_header:
-        global_header += "\n"
-
-    if not page_chunks:
-        return [source]
-
-    return [global_header + "\n".join(chunk) for chunk in page_chunks]
 
 
 # Public API
