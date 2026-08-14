@@ -18,6 +18,7 @@ from mdg_drawio.contracts import (
     DEFAULT_PAGE_WIDTH,
     PALETTE_DEFAULT_PAGE_HEIGHT,
     PALETTE_DEFAULT_PAGE_WIDTH,
+    Anchor,
     Edge,
     GeometryPoint,
     Node,
@@ -332,6 +333,24 @@ def test_layered_lays_out_children_declared_by_contains(form: str) -> None:
     assert by_id["p"].height >= by_id["c"].height
 
 
+def _rel(
+    *,
+    object_attributes: dict[str, str | int | float | None] | None = None,
+    extra: dict[str, object] | None = None,
+    source_anchor: str | Anchor = "",
+) -> Edge:
+    """A minimal a→b relationship."""
+    return Edge(
+        id="a->b",
+        type="c4.Rel",
+        source_id="a",
+        target_id="b",
+        object_attributes=object_attributes or {},
+        extra=extra or {},
+        source_anchor=source_anchor,
+    )
+
+
 def test_layered_routing_preserves_non_geometry_fields() -> None:
     """Regression: ``_route_edges`` rebuilt every Edge field-by-field, so
     ``object_attributes`` (and geometry_points/child_cells/palette_decoration)
@@ -340,15 +359,11 @@ def test_layered_routing_preserves_non_geometry_fields() -> None:
     so every Rel silently degraded to a bare ``value=`` label instead. Only
     the routing result is computed here; the rest must carry over."""
     nodes = [_node("a"), _node("b")]
-    edge = Edge(
-        id="a->b",
-        type="c4.Rel",
-        source_id="a",
-        target_id="b",
+    edge = _rel(
         object_attributes={"c4Type": "Relationship", "c4Description": "calls"},
         extra={"variant": 2},
     )
-    result = LayeredLayout().apply(nodes, [edge], _size_of)
+    result = LayeredLayout(route_edges=True).apply(nodes, [edge], _size_of)
 
     routed = result.edges[0]
     assert routed.waypoints, "routing still runs"
@@ -357,6 +372,68 @@ def test_layered_routing_preserves_non_geometry_fields() -> None:
         "c4Description": "calls",
     }
     assert routed.extra == {"variant": 2}
+
+
+def test_layered_emits_no_edge_geometry_by_default() -> None:
+    """An ordinary ranked diagram leaves routing to draw.io.
+
+    Pre-baked elbows also freeze the picture: draw.io honours an explicit
+    ``<Array as="points">`` and will not re-route around a shape the author
+    later moves. Only process mode opts into computed geometry.
+    """
+    nodes = [_node("a"), _node("b")]
+    result = LayeredLayout().apply(nodes, [_rel()], _size_of)
+
+    (edge,) = result.edges
+    assert edge.waypoints == []
+    # Anchors go with the waypoints they were chosen for, so they are not
+    # emitted either -- an edge pinned to a port picked for a path that is no
+    # longer drawn is worse than no anchor at all.
+    assert edge.source_anchor == ""
+    assert edge.target_anchor == ""
+
+
+def test_layered_keeps_an_explicitly_authored_anchor() -> None:
+    """Turning routing off must not discard anchors layout never computed.
+
+    These arrive from an author override or from an existing ``.drawio`` via
+    the geometry overlay, and are the author's manual adjustment to preserve.
+    """
+    nodes = [_node("a"), _node("b")]
+    edge = _rel(source_anchor=Anchor(x=1.0, y=0.5))
+    result = LayeredLayout().apply(nodes, [edge], _size_of)
+
+    assert result.edges[0].source_anchor == Anchor(x=1.0, y=0.5)
+
+
+def test_process_still_routes_edges() -> None:
+    """Process mode is the one layout that keeps its computed elbows."""
+    nodes = [_node("a"), _node("b")]
+    result = ProcessLayout().apply(nodes, [_rel()], _size_of)
+
+    assert result.edges[0].waypoints, "process mode must still route"
+
+
+def test_layered_restores_back_edge_orientation_on_the_emitted_edge() -> None:
+    """A reversed back edge must be emitted with its declared orientation.
+
+    Cycle removal swaps a back edge's endpoints so ranking sees a DAG. The
+    restore used to run *after* routing, which copies each edge — so it only
+    ever fixed the originals, which are then discarded, and the emitted copy
+    kept the swapped endpoints. It stayed invisible because a reversed edge is
+    also marked hidden, so draw.io never drew the wrong orientation; the id
+    (``b->a``) still disagreed with the emitted source/target.
+    """
+    nodes = [_node("a"), _node("b")]
+    edges = [
+        Edge(id="a->b", type="c4.Rel", source_id="a", target_id="b"),
+        Edge(id="b->a", type="c4.Rel", source_id="b", target_id="a"),
+    ]
+    result = LayeredLayout(route_edges=True).apply(nodes, edges, _size_of)
+
+    back_edge = next(e for e in result.edges if e.id == "b->a")
+    assert (back_edge.source_id, back_edge.target_id) == ("b", "a")
+    assert back_edge.hidden
 
 
 # ---------------------------------------------------------------------------

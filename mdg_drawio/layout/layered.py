@@ -30,7 +30,31 @@ from .config import Config, resolve_page_size
 
 
 class LayeredLayout(BaseLayout):
-    """Sugiyama-style layered graph layout."""
+    """Sugiyama-style layered graph layout.
+
+    ``route_edges`` decides whether this layout computes edge geometry at all.
+    It is **off** by default: for an ordinary ranked diagram, draw.io's own
+    routing reads better than pre-baked elbows, and emitting waypoints also
+    freezes the picture -- draw.io honours an explicit ``<Array as="points">``
+    and will not re-route around a shape the author later moves or resizes.
+
+    Process mode turns it on (see :class:`~mdg_drawio.layout.process.
+    ProcessLayout`), where a left-to-right flow with swimlanes and detour
+    branches genuinely needs the computed elbows and the exit/entry sides that
+    go with them.
+
+    The switch covers waypoints *and* anchors deliberately: :func:`_route_one_edge`
+    picks the two together (an arc around an obstruction only makes sense with
+    the anchors that aim into it, and a fan-out branch's forced exit side is
+    chosen to pair with its elbow). Keeping half the result would leave edges
+    pinned to ports chosen for a path that is no longer drawn. Anchors an
+    author set explicitly, or that came back from an existing ``.drawio`` via
+    the geometry overlay, are untouched either way -- they are applied after
+    layout, in ``engine/convert.py``.
+    """
+
+    def __init__(self, *, route_edges: bool = False) -> None:
+        self.route_edges = route_edges
 
     def apply(
         self,
@@ -77,16 +101,21 @@ class LayeredLayout(BaseLayout):
             column_gap=cfg.column_gap,
         )
         node_boxes = absolute_node_boxes(nodes)
-        routed_edges = _route_edges(
-            edges,
-            node_by_id,
-            direction=cfg.direction,
-            node_boxes=node_boxes,
-        )
         # Ranking reversed back edges in place; restore their declared
-        # orientation now that layout is done (these objects are what the
-        # generator emits).
+        # orientation before anything downstream reads or copies them.
         _restore_reversed_edges(edges, reversed_ids)
+
+        if self.route_edges:
+            result_edges = _route_edges(
+                edges,
+                node_by_id,
+                direction=cfg.direction,
+                node_boxes=node_boxes,
+            )
+        else:
+            # No routing: hand the edges straight through, carrying whatever
+            # anchors they already had. draw.io draws its own path.
+            result_edges = list(edges)
 
         content_w, content_h = _content_extents(nodes, node_boxes)
         page_w, page_h = resolve_page_size(
@@ -99,7 +128,7 @@ class LayeredLayout(BaseLayout):
 
         return Result(
             nodes=list(nodes),
-            edges=routed_edges,
+            edges=result_edges,
             page_width=page_w,
             page_height=page_h,
         )
@@ -858,11 +887,16 @@ def _route_edges(
 def _restore_reversed_edges(edges: list[Edge], reversed_ids: set[int]) -> None:
     """Un-swap the endpoints of back edges after ranking, in place.
 
-    Cycle removal reverses back edges so ranking sees a DAG. These same edge
-    objects are what the generator emits, so their original orientation must be
-    restored — otherwise a back edge is emitted with swapped source/target (and,
-    for passthrough edges whose id is derived from the endpoints, a duplicate id
+    Cycle removal reverses back edges so ranking sees a DAG. Their original
+    orientation must be restored before anything downstream reads them —
+    otherwise a back edge is emitted with swapped source/target (and, for
+    passthrough edges whose id is derived from the endpoints, a duplicate id
     that collides with its counterpart). ``hidden`` is left untouched.
+
+    This runs *before* routing, not after: routing copies each edge, so a
+    restore that happened afterwards only ever fixed the originals, which are
+    then discarded. It went unnoticed because a reversed edge is also marked
+    hidden, so draw.io never drew the wrongly-oriented copy.
     """
     for edge in edges:
         if id(edge) in reversed_ids:
