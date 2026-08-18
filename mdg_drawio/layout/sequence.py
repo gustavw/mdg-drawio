@@ -7,6 +7,7 @@ connections between columns, stacked top-to-bottom in declaration order.
 from __future__ import annotations
 
 import sys
+from dataclasses import replace
 
 from mdg_drawio.contracts import DEFAULT_PAGE_HEIGHT, DEFAULT_PAGE_WIDTH
 
@@ -50,15 +51,17 @@ class SequenceLayout(BaseLayout):
             width = node.width if node.width else w
             height = node.height if node.height else h
 
-            placed_node = Node(
-                id=node.id,
-                type=node.type,
+            # Only geometry is decided here; every other field carries over
+            # via replace(). A field-by-field reconstruction silently drops
+            # anything not in the hand-picked list (``variant``,
+            # ``object_attributes``, ``child_cells``, ...) back to its
+            # dataclass default -- see the same fix in palette.py.
+            placed_node = replace(
+                node,
                 x=x,
                 y=cfg.margin_y,
                 width=float(width),
                 height=float(height),
-                label=node.label,
-                parent_id=node.parent_id,
                 style_overrides=dict(node.style_overrides),
                 extra=dict(node.extra),
             )
@@ -88,18 +91,12 @@ class SequenceLayout(BaseLayout):
                 continue
 
             routed.append(
-                Edge(
-                    id=edge.id,
-                    type=edge.type,
-                    source_id=edge.source_id,
-                    target_id=edge.target_id,
+                replace(
+                    edge,
                     waypoints=[
                         Waypoint(x=src_x, y=y),
                         Waypoint(x=tgt_x, y=y),
                     ],
-                    label=edge.label,
-                    description=edge.description,
-                    hidden=edge.hidden,
                     style_overrides=dict(edge.style_overrides),
                     extra=dict(edge.extra),
                 )

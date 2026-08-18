@@ -14,6 +14,8 @@ from typing import Any
 
 import yaml
 
+from mdg_drawio.contracts import index_shapes_by_function
+
 NOTATION_DIR = Path(__file__).parent.parent
 
 LIBRARIES = ("archimate3", "bpmn2", "c4", "erd", "general", "uml", "uml25")
@@ -61,10 +63,14 @@ def shapes_by_id(library: str) -> dict[str, dict[str, Any]]:
 
 
 def shapes_by_function(library: str) -> dict[str, list[dict[str, Any]]]:
-    """Function name -> shape entries sorted by variant."""
-    out: dict[str, list[dict[str, Any]]] = {}
-    for s in load_registry(library)["shapes"]:
-        out.setdefault(s["function"], []).append(s)
+    """Function name -> shape entries sorted by variant.
+
+    Grouping goes through ``contracts.index_shapes_by_function``, the declared
+    single source for the ``{function: [entries]}`` transformation; only the
+    variant ordering (which callers here rely on to pick the canonical entry)
+    is added on top.
+    """
+    out = index_shapes_by_function(load_registry(library)["shapes"])
     for entries in out.values():
         entries.sort(key=lambda s: int(s["variant"]))
     return out

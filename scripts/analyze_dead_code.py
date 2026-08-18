@@ -69,8 +69,8 @@ PKG_DIR = ROOT / "mdg_drawio"
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.dead_code_allowlist import ALLOWLIST  # noqa: E402
-from scripts.trace_actions import (  # noqa: E402
+from scripts.dead_code_allowlist import ALLOWLIST
+from scripts.trace_actions import (
     run_all,
     touched_union,
     trace_regression_suite,

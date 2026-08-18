@@ -666,6 +666,8 @@ def validate(text: str) -> str | None:
     """``None`` if ``text`` parses cleanly; the error message otherwise."""
     try:
         parse_mdg(text)
-    except Exception as exc:  # noqa: BLE001 -- report any parse failure, don't crash
+    # Deliberately broad: the point is to REPORT any parse failure so the
+    # caller can leave the file untouched, never to crash the merge.
+    except Exception as exc:
         return str(exc)
     return None

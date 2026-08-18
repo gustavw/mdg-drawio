@@ -29,6 +29,15 @@ def normalize_style(style: str) -> str:
 
 
 def style_fingerprint(style: str) -> str:
-    """Fingerprint of a raw style string, e.g. 'sha1:3fa4b2c19e07'."""
-    digest = hashlib.sha1(normalize_style(style).encode("utf-8")).hexdigest()
+    """Fingerprint of a raw style string, e.g. 'sha1:3fa4b2c19e07'.
+
+    ``usedforsecurity=False`` states the obvious — this is a content hash for
+    change detection, not a security primitive — and is what keeps it working
+    on a FIPS-restricted build, where an unflagged SHA-1 raises instead of
+    hashing. The committed registry fingerprints are unaffected: the flag
+    changes nothing about the digest.
+    """
+    digest = hashlib.sha1(
+        normalize_style(style).encode("utf-8"), usedforsecurity=False
+    ).hexdigest()
     return FINGERPRINT_PREFIX + digest[:FINGERPRINT_HEX_LEN]

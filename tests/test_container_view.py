@@ -301,13 +301,6 @@ SYMBOL_ALLOWLIST: dict[str, dict[str, set[str]]] = {
                                  "PALETTE_DEFAULT_PAGE_WIDTH",
                                  "PALETTE_MODE"},
     },
-    "layout/_container_layout.py": {
-        "mdg_drawio.contracts": {
-            "DEFAULT_BOTTOM_PADDING", "DEFAULT_PAGE_MARGIN",
-            "DEFAULT_TOP_PADDING", "MIN_CONTAINER_HEIGHT",
-            "MIN_CONTAINER_WIDTH",
-        },
-    },
     "layout/size_resolver.py": {
         "mdg_drawio.contracts": {
             "DEFAULT_NODE_HEIGHT", "DEFAULT_NODE_WIDTH",
@@ -321,6 +314,9 @@ SYMBOL_ALLOWLIST: dict[str, dict[str, set[str]]] = {
             "PAGE_PREFIX_LENGTH", "QUOTE_OFFSET",
             "Diagram", "Document", "Edge", "MultiPageDocument", "Node",
         },
+    },
+    "notation/_core/registry.py": {
+        "mdg_drawio.contracts": {"index_shapes_by_function"},
     },
     "notation/c4/__init__.py": {
         "mdg_drawio.contracts": {
@@ -362,6 +358,36 @@ def test_cross_service_imports_are_valid_symbols() -> None:
         + "\n".join(f"  {v}" for v in violations)
     )
 
+
+def test_symbol_allowlist_has_no_stale_entries() -> None:
+    """Every allowlisted symbol must correspond to a real import.
+
+    The allowlist only *permits*, so an entry for a symbol a module stopped
+    importing (or never imported) sits there passing forever — which is how
+    ``layout/_container_layout.py`` came to declare ``MIN_CONTAINER_WIDTH``,
+    ``MIN_CONTAINER_HEIGHT`` and ``DEFAULT_PAGE_MARGIN`` it never used, and
+    how those three constants stayed alive in ``contracts`` with no consumer
+    at all. Checking the reverse direction keeps the allowlist an accurate
+    description of the import graph instead of a wish list.
+    """
+    stale: list[str] = []
+    for path, allowed_by_module in SYMBOL_ALLOWLIST.items():
+        actual_imports = _cross_imports(path)
+        if not actual_imports:
+            stale.append(f"{path}: allowlisted but has no cross-package imports")
+            continue
+        for module, allowed_names in allowed_by_module.items():
+            unused = allowed_names - actual_imports.get(module, set())
+            if unused:
+                stale.append(
+                    f"{path}: allows symbols from {module} it does not "
+                    f"import: {sorted(unused)}"
+                )
+    assert not stale, (
+        f"{len(stale)} stale allowlist entr(ies) — delete them (and any "
+        f"constant left with no consumer):\n"
+        + "\n".join(f"  {s}" for s in stale)
+    )
 
 
 # ---------------------------------------------------------------------------

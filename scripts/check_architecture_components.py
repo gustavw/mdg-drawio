@@ -114,6 +114,10 @@ EXPECTED_RELATION_COUNTS: dict[str, int] = {
     "Context": 4,
     "Container": 11,
     "Component": 37,
+    # Net unchanged: notation/_core/registry.py gained an edge to contracts
+    # (reusing index_shapes_by_function instead of re-implementing it), while
+    # layout/_container_layout.py lost its only one (the padding constants it
+    # imported fed a default dict no caller ever reached).
     "Code": 37,
 }
 

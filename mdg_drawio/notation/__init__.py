@@ -20,9 +20,9 @@ from .c4 import parse
 
 __all__ = [
     "DATA_DIR",
-    "DslError",
     "LIBRARIES",
     "NOTATION_DIR",
+    "DslError",
     "load_registry",
     "parse",
     "set_registries",

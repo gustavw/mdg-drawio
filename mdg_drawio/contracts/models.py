@@ -8,14 +8,19 @@ Improvements over the DrawIoGen reference (TypedDicts):
 - Explicit Optional defaults; no total=False masking
 - __post_init__ validates required fields at construction time
 - frozen=True on immutable leaf types
-- to_dict() / from_dict() for JSON round-trip
+
+Note for anyone rebuilding one of these: use ``dataclasses.replace`` rather
+than reconstructing field-by-field. A hand-picked field list silently resets
+everything it omits to the dataclass default, which has caused real rendering
+bugs in the layout modes more than once (see ``layout/palette.py`` and
+``layout/layered.py``).
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any, TypeAlias
+from typing import Any
 
 from .constants import (
     A4_LANDSCAPE_HEIGHT,
@@ -24,7 +29,7 @@ from .constants import (
 )
 
 # draw.io style tokens are semicolon-delimited key=value pairs.
-StyleDict: TypeAlias = dict[str, str | int | float | None]
+type StyleDict = dict[str, str | int | float | None]
 
 
 def index_shapes_by_function(
@@ -150,7 +155,10 @@ class Node:
     abs_x: float | None = None
     abs_y: float | None = None
 
-    # Hierarchy
+    # Hierarchy. ``parent_id`` (child points at parent) is what every notation
+    # parser populates today; ``contains`` (parent lists its children) is the
+    # inverse form, read by both the container layout and the generator's
+    # container detection. Set one or the other, not a conflicting mix.
     parent_id: str | None = None
     contains: list[str] = field(default_factory=list)
 

@@ -127,6 +127,9 @@ class ProcessLayout(BaseLayout):
     Excluded nodes are positioned above the earliest-ranked node they connect
     to (see :func:`_position_excluded_nodes`) rather than joining the ranked
     flow; edges touching them pass through unrouted.
+
+    This is the only mode that asks the layered layout to route edges
+    (``route_edges=True``); everywhere else draw.io does its own routing.
     """
 
     def apply(
@@ -162,7 +165,12 @@ class ProcessLayout(BaseLayout):
             ranked_nodes, excluded_nodes, passthrough_edges, gap=cfg.column_gap
         )
 
-        layered = LayeredLayout()
+        # Process mode is the one layout that wants computed edge geometry:
+        # a left-to-right flow with swimlanes, gateway fan-outs and detour
+        # branches reads far better with the elbows (and matching exit/entry
+        # sides) worked out here than with draw.io's own routing. Every other
+        # mode leaves routing to draw.io -- see LayeredLayout.route_edges.
+        layered = LayeredLayout(route_edges=True)
         result = layered.apply(ranked_nodes, rank_edges, size_of, config=cfg)
 
         _position_excluded_nodes(

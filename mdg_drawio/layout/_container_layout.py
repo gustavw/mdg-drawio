@@ -6,31 +6,25 @@ Pure geometry helpers; does not depend on any notation.
 
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import defaultdict, deque
 from collections.abc import Iterable
 from dataclasses import dataclass
 from math import ceil
 
-from mdg_drawio.contracts import (
-    DEFAULT_BOTTOM_PADDING,
-    DEFAULT_TOP_PADDING,
-)
-
 from ._types import Edge, Node, SizeResolver
 
+# Per-character width table for estimate_text_width, from Helvetica metrics at
+# _DEFAULT_FONT_SIZE. Kept together here (the only consumer) rather than in
+# contracts: they are a property of this estimator, not a cross-package
+# contract, and a second copy elsewhere is free to drift out of step with it.
 _NARROW = frozenset("iIl1!|.,;:tf ")
 _WIDE = frozenset("mwMWOQD@%")
+_NARROW_CHAR_WIDTH = 4.0
 _AVG_CHAR_WIDTH = 6.5
 _WIDE_CHAR_WIDTH = 9.5
 _BOLD_WIDTH_MULTIPLIER = 1.1
 _DEFAULT_FONT_SIZE = 11
 _RELATIVE_CHILDREN_KEY = "_layout_children_relative"
-_DEFAULT_BOUNDARY_PADDING: dict[str, float] = {
-    "top": DEFAULT_TOP_PADDING,
-    "right": DEFAULT_TOP_PADDING,
-    "bottom": DEFAULT_BOTTOM_PADDING,
-    "left": DEFAULT_TOP_PADDING,
-}
 
 Box = tuple[float, float, float, float]
 
@@ -82,7 +76,7 @@ def estimate_text_width(
     width = 0.0
     for ch in text:
         if ch in _NARROW:
-            width += 4.0
+            width += _NARROW_CHAR_WIDTH
         elif ch in _WIDE:
             width += _WIDE_CHAR_WIDTH
         else:
@@ -100,12 +94,22 @@ def _node_size(node: Node, size_of: SizeResolver) -> tuple[float, float]:
 
 
 def _contains_ids(node: Node) -> list[str]:
+    """Ids this node declares it contains, from either representation.
+
+    ``Node.contains`` is the first-class contract field; ``extra["contains"]``
+    is the loose passthrough form. Both are read here because the generator
+    keys its container detection off ``Node.contains`` — reading only the
+    ``extra`` form meant a node populating the declared field was treated as a
+    container when routing its edges but never had its children laid out
+    inside it.
+    """
+    declared = [str(value) for value in node.contains if value]
     raw = node.extra.get("contains", [])
     if isinstance(raw, str):
-        return [raw]
+        return [*declared, raw]
     if not isinstance(raw, Iterable):
-        return []
-    return [str(value) for value in raw if value]
+        return declared
+    return [*declared, *(str(value) for value in raw if value)]
 
 
 def _would_create_parent_cycle(
@@ -736,7 +740,8 @@ def apply_container_layout(
 ) -> ContainerState:
     """Lay out generic parent/child containers and return hierarchy state.
 
-    Any node with children from ``parent_id`` or ``extra["contains"]`` behaves
+    Any node with children from ``parent_id``, ``Node.contains``, or
+    ``extra["contains"]`` behaves
     as a container. Children are positioned relative to their parent so draw.io
     containment works naturally, while the parent expands to enclose its direct
     children plus padding. Non-container nodes are left unchanged.
@@ -835,15 +840,18 @@ def _topological_ranks(
             outgoing[source].append(target)
             indegree[target] += 1
 
-    queue = sorted(
-        (nid for nid in sibling_ids if indegree[nid] == 0),
-        key=order.__getitem__,
+    # deque: a BFS frontier, where list.pop(0) is O(n) per step.
+    queue = deque(
+        sorted(
+            (nid for nid in sibling_ids if indegree[nid] == 0),
+            key=order.__getitem__,
+        )
     )
     ranks: dict[str, int] = {nid: 0 for nid in sibling_ids}
     visited: set[str] = set()
 
     while queue:
-        nid = queue.pop(0)
+        nid = queue.popleft()
         visited.add(nid)
         for target in sorted(outgoing[nid], key=order.__getitem__):
             ranks[target] = max(ranks[target], ranks[nid] + 1)

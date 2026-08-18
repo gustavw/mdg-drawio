@@ -20,6 +20,7 @@ from mdg_drawio.contracts import (
     C4_SCALER_MAX_WIDTH,
     C4_SCALER_PERSON_ASPECT_RATIO,
 )
+from mdg_drawio.engine.validate import _iter_edge_cells
 from mdg_drawio.notation import DATA_DIR
 
 # Tests that render palette-driven styling need the generated style sidecars
@@ -169,9 +170,16 @@ def test_edge_endpoints_resolve_to_vertices() -> None:
                         iid = inner.get("id")
                         if iid:
                             cell_ids.add(iid)
-            for cell in cells_root.findall("mxCell"):
-                if cell.get("edge") != "1":
-                    continue
+            # Edges must be collected through the same wrapper-aware helper
+            # the real validation uses: C4 Rel edges live inside a
+            # <UserObject>, so a plain findall("mxCell") (direct children
+            # only) would silently check nothing at all here.
+            edge_cells = _iter_edge_cells(cells_root)
+            assert edge_cells, (
+                f"diagram {d.get('id')!r}: no edge cells found — the scan "
+                f"stopped matching the generator's output"
+            )
+            for cell in edge_cells:
                 for attr in ("source", "target"):
                     ref = cell.get(attr, "")
                     if ref:
@@ -181,6 +189,38 @@ def test_edge_endpoints_resolve_to_vertices() -> None:
                             f"references unknown cell"
                         )
 
+    finally:
+        output_path.unlink(missing_ok=True)
+
+
+def test_c4_relationships_render_with_the_palette_label_template() -> None:
+    """Regression: every C4 Rel must be emitted inside a <UserObject> that
+    carries its c4* attributes and the palette's ``placeholders=1`` label
+    template — that is what makes a relationship render like its shape-library
+    entry instead of a bare label.
+
+    Layout used to rebuild each Edge field-by-field on its way out of
+    ``_route_edges``, dropping ``object_attributes`` and with it the wrapper,
+    so every relationship silently degraded to a plain ``value=`` string.
+    """
+    with tempfile.NamedTemporaryFile(suffix=".drawio", delete=False) as f:
+        output_path = Path(f.name)
+
+    try:
+        assert _run_convert(_ARCH_MDG, output_path) == 0
+        root = ET.parse(str(output_path)).getroot()
+
+        wrapped_rels = [
+            wrapper
+            for wrapper in root.iter("UserObject")
+            if wrapper.get("c4Type") == "Relationship"
+        ]
+        assert wrapped_rels, "no C4 relationship was wrapped in a <UserObject>"
+        for wrapper in wrapped_rels:
+            assert wrapper.get("placeholders") == "1"
+            assert "%c4Description%" in (wrapper.get("label") or "")
+            inner = wrapper.find("mxCell")
+            assert inner is not None and inner.get("edge") == "1"
     finally:
         output_path.unlink(missing_ok=True)
 
@@ -350,6 +390,37 @@ def test_invalid_frontmatter_direction_is_rejected(
 
     assert _run_convert(src, tmp_path / "bad.drawio") == 1
     assert "direction: sideways" in capsys.readouterr().err
+
+
+def test_unknown_use_statement_is_rejected(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A `use` naming a library that does not exist fails loudly.
+
+    It used to fall back to c4 in silence, so a typo (`use bpnm2`) laid the
+    whole page out with the wrong notation's config, scaling and rank
+    exclusions with no diagnostic at all.
+    """
+    src = tmp_path / "bad_use.mdg"
+    src.write_text(
+        '---\npage: "P"\nmode: layered\n---\n\nuse bpnm2\n'
+        'c4.System(s, "S")\n',
+        encoding="utf-8",
+    )
+
+    assert _run_convert(src, tmp_path / "bad_use.drawio") == 1
+    assert "use bpnm2" in capsys.readouterr().err
+
+
+def test_page_without_use_statement_defaults_to_c4(tmp_path: Path) -> None:
+    """No `use` line at all is still legal — c4 stays the default notation."""
+    src = tmp_path / "no_use.mdg"
+    src.write_text(
+        '---\npage: "P"\nmode: layered\n---\n\nc4.System(s, "S")\n',
+        encoding="utf-8",
+    )
+
+    assert _run_convert(src, tmp_path / "no_use.drawio") == 0
 
 
 def _inner_cell(root: ET.Element, cell_id: str) -> ET.Element:

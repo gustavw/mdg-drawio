@@ -38,16 +38,12 @@ PAGE_CELL_ID = "1"
 # Layout defaults
 # ---------------------------------------------------------------------------
 DEFAULT_BOUNDARY_PADDING = 20.0
-DEFAULT_PAGE_MARGIN = 40.0
 
 # ---------------------------------------------------------------------------
 # Layout config defaults (dataclass field defaults in LayoutConfig)
 # ---------------------------------------------------------------------------
 DEFAULT_MARGIN_X = 40
 DEFAULT_MARGIN_Y = 40
-DEFAULT_LANE_MARGIN_X = 40
-DEFAULT_LANE_MARGIN_Y = 50
-DEFAULT_COLUMN_GAP = 80
 
 # Default container padding overrides. Bottom matches top so a container hugs
 # its children symmetrically (the title band already adds room above).
@@ -91,18 +87,12 @@ SMALL_BOX_SCALER_VERTICAL_PADDING = 20
 SMALL_BOX_SCALER_TITLE_FONT_SIZE = 12
 SMALL_BOX_SCALER_TITLE_LINE_HEIGHT = 16
 
-# ---------------------------------------------------------------------------
-# Container layout minimums
-# ---------------------------------------------------------------------------
-MIN_CONTAINER_WIDTH = 240.0
-MIN_CONTAINER_HEIGHT = 160.0
-
-# ---------------------------------------------------------------------------
-# Character width estimates (container_layout)
-# ---------------------------------------------------------------------------
-NARROW_CHAR_WIDTH = 6.5
-WIDE_CHAR_WIDTH = 9.5
-RELATIVE_CHAR_WIDTH = 1.1
+# Character-width estimates deliberately do NOT live here: they are read by
+# ``layout/_container_layout.estimate_text_width`` and nothing else, so they
+# stay named next to that algorithm. Duplicating them here once produced two
+# sets of values that disagreed (the copies here were also misnamed -- 6.5 is
+# the AVERAGE character width, not the narrow one) with nothing importing
+# either. This module is for values genuinely shared across packages.
 
 # ---------------------------------------------------------------------------
 # Palette layout defaults

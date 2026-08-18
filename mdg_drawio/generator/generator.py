@@ -304,16 +304,22 @@ def _node_geometry(node: Node) -> tuple[float, float, float, float]:
     h = node.height or DEFAULT_NODE_HEIGHT
     return node.x or 0.0, node.y or 0.0, w, h
 
-def _style_overrides(node: Node) -> str:
-    """Build a semicolon-delimited style string from overrides."""
-    if not node.style_overrides:
-        return ""
-    tokens: list[str] = []
-    for key, value in node.style_overrides.items():
-        if value is None:
-            tokens.append(key)
-        else:
-            tokens.append(f"{key}={value}")
+def _style_tokens(overrides: dict[str, _StyleValue]) -> list[str]:
+    """Render a style-override mapping as draw.io style tokens.
+
+    A ``None`` value means a bare flag token (``rounded``) rather than a
+    ``key=value`` pair. The single source for this rendering — node styles,
+    edge styles and child-cell styles all went through their own copy of this
+    loop before, which is how they drifted apart on the empty-input case.
+    """
+    return [
+        key if value is None else f"{key}={value}"
+        for key, value in overrides.items()
+    ]
+
+
+def _tokens_to_style(tokens: list[str]) -> str:
+    """Join style tokens into a trailing-semicolon style string ("" if empty)."""
     return ";".join(tokens) + ";" if tokens else ""
 
 
@@ -331,7 +337,7 @@ def _build_node_cell_attrs(
     (e.g. erd RowKey), whose text lives in a child cell, not the row itself.
     """
     full_style = base_style
-    overrides = _style_overrides(node)
+    overrides = _tokens_to_style(_style_tokens(node.style_overrides))
     if overrides:
         full_style = full_style.rstrip(";") + ";" + overrides
     if isinstance(node.extra.get("dashed"), bool):
@@ -663,13 +669,14 @@ def _append_node_child(
     _append_node_child_cells(child.child_cells, mx_root, child_id, ctx)
 
 
-def _build_edge_style(edge: Edge, ctx: _GenCtx) -> str:
+def _build_edge_style(edge: Edge, ctx: _GenCtx, variant: int) -> str:
     """Assemble the full draw.io style string for an edge.
 
     Starts from the palette edge style, then applies container-routing rules
-    and any per-edge style overrides.
+    and any per-edge style overrides. *variant* is resolved once by the caller
+    so the style and the label template it pairs with cannot disagree.
     """
-    base_style = ctx.styles.resolve_edge_style(edge.type, _coerce_variant(edge))
+    base_style = ctx.styles.resolve_edge_style(edge.type, variant)
     # Strip orthogonal routing tokens — only allowed for container edges
     full_style = _strip_style_tokens(base_style, {"edgeStyle", "elbow"})
     if edge.source_id in ctx.container_ids or edge.target_id in ctx.container_ids:
@@ -700,7 +707,8 @@ def _append_edge(mx_root: ET.Element, edge: Edge, ctx: _GenCtx) -> None:
     source_id = edge.source_id
     target_id = edge.target_id
 
-    full_style = _build_edge_style(edge, ctx)
+    variant = _coerce_variant(edge)
+    full_style = _build_edge_style(edge, ctx, variant)
 
     edge_attrs: dict[str, str] = {
         "id": edge_id,
@@ -717,7 +725,6 @@ def _append_edge(mx_root: ET.Element, edge: Edge, ctx: _GenCtx) -> None:
     # Wrap in a <UserObject> and inherit the palette edge label template 1:1
     # (same mechanism as nodes), so a C4 Rel renders like its shape-library
     # entry instead of a bare label.
-    variant = _coerce_variant(edge)
     wrapper = _wrap_object(
         mx_root, edge.type, edge.object_attributes, edge_id, edge.label,
         ctx.styles, variant,
@@ -838,13 +845,7 @@ def _append_edge_child(
 
 def _style_overrides_for_edge(edge: Edge) -> str:
     """Build style override tokens for an edge."""
-    tokens: list[str] = []
-    overrides = edge.style_overrides
-    for key, value in overrides.items():
-        if value is None:
-            tokens.append(key)
-        else:
-            tokens.append(f"{key}={value}")
+    tokens = _style_tokens(edge.style_overrides)
     if edge.hidden:
         tokens.append("hidden=1")
     anchor_tokens = _anchor_tokens("exit", edge.source_anchor)
@@ -853,7 +854,7 @@ def _style_overrides_for_edge(edge: Edge) -> str:
     anchor_tokens = _anchor_tokens("entry", edge.target_anchor)
     if anchor_tokens:
         tokens.append(anchor_tokens)
-    return ";".join(tokens) + ";" if tokens else ""
+    return _tokens_to_style(tokens)
 
 
 def _anchor_tokens(prefix: str, anchor: str | Anchor) -> str:
@@ -882,17 +883,9 @@ def _anchor_tokens(prefix: str, anchor: str | Anchor) -> str:
     return ";".join(tokens)
 
 
-def _overrides_to_style(overrides: dict[str, str | int | float | None]) -> str:
+def _overrides_to_style(overrides: dict[str, _StyleValue]) -> str:
     """Convert a style-override dict to a semicolon-delimited style string."""
-    if not overrides:
-        return ""
-    tokens: list[str] = []
-    for key, value in overrides.items():
-        if value is None:
-            tokens.append(key)
-        else:
-            tokens.append(f"{key}={value}")
-    return ";".join(tokens) + ";"
+    return _tokens_to_style(_style_tokens(overrides))
 
 
 def generate(
@@ -941,10 +934,12 @@ def generate(
 
     ctx = _GenCtx(styles=styles, apply_overrides=document.diagram.mode != PALETTE_MODE)
 
-    # Identify container nodes — needed for conditional orthogonal edge routing
+    # Identify container nodes — needed for conditional orthogonal edge routing.
+    # Collect the referenced parent ids in one pass first; the nested `any(...)`
+    # this replaced rescanned every node for every node.
+    parent_ids = {n.parent_id for n in document.nodes if n.parent_id}
     ctx.container_ids = {
-        n.id for n in document.nodes
-        if n.contains or any(c.parent_id == n.id for c in document.nodes)
+        n.id for n in document.nodes if n.contains or n.id in parent_ids
     }
 
     for node in document.nodes:
