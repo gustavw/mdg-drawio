@@ -16,6 +16,7 @@ Verification traceability is coverage-derived via `make verification`.
 | Engine | convert() | `engine/convert.py` |
 | Engine | derive() | `engine/derive.py` |
 | Engine | merge() | `engine/merge.py` |
+| Engine | notation() | `engine/notation_info.py` |
 | Generator | Overlay | `generator/overlay.py` |
 | Generator | XML Utils | `generator/xml_utils.py` |
 | Generator | generate() | `generator/generator.py` |

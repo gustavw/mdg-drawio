@@ -94,6 +94,14 @@ shape, and fails loudly on fingerprint drift or missing row-type metadata.
 
 Registry consistency is enforced by `tests/test_registries.py`.
 
+Explore a registry from the CLI instead of reading the YAML directly:
+
+```bash
+mdg notation                # list all libraries with their shape counts
+mdg notation c4              # every function/variant + a ready-to-adapt example call
+mdg notation c4 --json       # machine-readable
+```
+
 ## Dead-code analysis
 
 The CLI exposes one action (`convert`), but the pipeline branches on real input

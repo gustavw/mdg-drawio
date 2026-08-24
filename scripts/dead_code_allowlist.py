@@ -48,6 +48,8 @@ ALLOWLIST: dict[str, str] = {
         "typing.Protocol method; concrete impl runs",
     "mdg_drawio.generator.generator:StyleProvider.row_type_entry":
         "typing.Protocol method; concrete impl runs",
+    "mdg_drawio.generator.generator:StyleProvider.edge_label_templates":
+        "typing.Protocol method; concrete impl runs",
     "mdg_drawio.layout._types:SizeResolver":
         "typing.Protocol; concrete resolver is injected",
     "mdg_drawio.layout._types:SizeResolver.__call__":

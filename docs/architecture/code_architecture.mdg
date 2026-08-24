@@ -19,6 +19,8 @@ uml.Package(engine, "Engine"):
         uml.Class(engine_derive, "derive")
     uml.Package(engine_merge_co, "merge()"):
         uml.Class(engine_merge, "merge")
+    uml.Package(engine_notation_info_co, "notation()"):
+        uml.Class(engine_notation_info, "notation_info")
     uml.Package(engine_preload_co, "Pre-load"):
         uml.Class(engine_preload, "preload")
     uml.Package(engine_validate_co, "XML Validation"):
@@ -91,6 +93,7 @@ uml.Dependency(engine_convert, layout)
 uml.Dependency(engine_convert, notation)
 uml.Dependency(engine_derive, reverse)
 uml.Dependency(engine_merge, reverse)
+uml.Dependency(engine_notation_info, notation)
 uml.Dependency(engine_preload, notation)
 uml.Dependency(generator_generator, contracts)
 uml.Dependency(generator_generator, generator_xml_utils)

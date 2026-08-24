@@ -58,6 +58,7 @@ MODULE_TO_LABEL: dict[str, str] = {
     "engine/convert.py": "convert()",
     "engine/derive.py": "derive()",
     "engine/merge.py": "merge()",
+    "engine/notation_info.py": "notation()",
     "engine/preload.py": "Pre-load",
     "engine/validate.py": "XML Validation",
     "contracts/models.py": "Models",
@@ -131,8 +132,9 @@ EXPECTED_RELATION_COUNTS: dict[str, int] = {
     # +25: the Reverse Derivation & Merge container's own Component/Code-page
     # edges -- engine.merge()/derive() -> reverse boundary, 9 new components'
     # intra-package and cross-package (-> notation) relations.
-    "Component": 63,
-    "Code": 63,
+    # +1: engine.notation() -> notation boundary (the `mdg notation` verb).
+    "Component": 64,
+    "Code": 64,
 }
 
 CONTEXT_RELATION_TYPES: set[str] = {

@@ -64,7 +64,7 @@ direction: TB
 c4.System_Boundary(drawiogen_co, "mdg-drawio"):
       c4.Component_DiagramTitle("[Components] mdg-drawio", "Engine-orchestrated pipeline: pre-load, parse, resolve layout, generate XML, validate.")
 
-  c4.Component(cli_co, "CLI main()", "Thin entry point in mdg_drawio/cli.py. Positional convert args (input .mdg, optional output .drawio) plus --force, or a merge/derive verb -- dispatches to engine.convert()/merge()/derive(). Returns exit code.", technology="Python (argparse)")
+  c4.Component(cli_co, "CLI main()", "Thin entry point in mdg_drawio/cli.py. Positional convert args (input .mdg, optional output .drawio) plus --force, or a merge/derive/notation verb -- dispatches to engine.convert()/merge()/derive()/notation_info(). Returns exit code.", technology="Python (argparse)")
 
   c4.Container_Boundary(engine_co_boundary, "Engine"):
       c4.Component(engine_convert_co, "convert()", "Full conversion pipeline orchestration. Detects notation, pre-loads registries/styles, parses pages, resolves layout config, injects overlays, runs layout, generates multipage XML, validates, and writes output.", technology="Python")
@@ -72,6 +72,7 @@ c4.System_Boundary(drawiogen_co, "mdg-drawio"):
       c4.Component(engine_validate_co, "XML Validation", "Validates generated draw.io XML before writing: unique diagram IDs, mandatory root cells (0 and 1), and edge source/target reference integrity.", technology="Python (xml.etree)")
       c4.Component(engine_merge_co, "merge()", "Thin re-export of mdg_drawio.reverse.merge_cli.main -- the CLI's merge verb delegates through engine, same as convert(). Lives in engine/merge.py.", technology="Python")
       c4.Component(engine_derive_co, "derive()", "Thin re-export of mdg_drawio.reverse.derive_cli.main -- the CLI's derive verb delegates through engine, same as convert(). Lives in engine/derive.py.", technology="Python")
+      c4.Component(engine_notation_info_co, "notation()", "The CLI's notation verb: lists notation libraries, or prints one library's full DSL palette (every function/variant + a ready-to-adapt example call) straight from its registry. Read-only. Lives in engine/notation_info.py.", technology="Python")
 
   c4.ContainerDb(palette_data_co, "Palette Data", "Generated JSON files from draw.io shape libraries. Produced via `make build-data`; consumed by notation style lookup.", technology="JSON (generated)")
 
@@ -128,6 +129,7 @@ c4.Rel(engine_convert_co, layout_co_boundary, "Resolves layout config", descript
 c4.Rel(engine_convert_co, contracts_co_boundary, "Uses contracts", description="")
 c4.Rel(engine_convert_co, generator_co_boundary, "Generates & overlays XML", description="")
 c4.Rel(engine_preload_co, notation_co_boundary, "Loads registries and styles", description="")
+c4.Rel(engine_notation_info_co, notation_co_boundary, "Loads registries via load_registry", description="")
 c4.Rel(engine_validate_co, generator_co_boundary, "Validates generated XML", description="")
 c4.Rel(models_contract_co, constants_contract_co, "Uses constants", description="")
 c4.Rel(generate_co, xml_utils_co, "Serializes XML", description="")
@@ -199,6 +201,7 @@ trace container_co -> code.layout__container_layout : realized-by
 trace dsl_engine_co -> code.notation__core_dsl_engine : realized-by
 trace engine_convert_co -> code.engine_convert : realized-by
 trace engine_derive_co -> code.engine_derive : realized-by
+trace engine_notation_info_co -> code.engine_notation_info : realized-by
 trace engine_merge_co -> code.engine_merge : realized-by
 trace engine_preload_co -> code.engine_preload : realized-by
 trace engine_validate_co -> code.engine_validate : realized-by

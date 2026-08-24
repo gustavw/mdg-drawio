@@ -52,7 +52,14 @@ python -m mdg_drawio input.mdg output.drawio --force
 
 mdg merge existing.mdg new.drawio [--write]  # splice hand-drawn cells into existing.mdg
 mdg derive diagram.drawio [--json]           # print which registry shape each cell derives to
+mdg notation [library] [--json]              # list libraries, or a library's full DSL palette
 ```
+
+`mdg notation <library>` (e.g. `mdg notation c4`) is the fastest way to see
+every callable function/variant for a notation plus a ready-to-adapt example
+call — read this before guessing DSL syntax from memory. `mdg notation`
+alone lists all seven libraries with their shape counts. Run `mdg` with no
+arguments for a one-screen overview of every command.
 
 ## Testing the pipeline
 

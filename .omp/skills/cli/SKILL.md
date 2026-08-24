@@ -24,9 +24,10 @@ mdg_drawio/
 
 The CLI imports ONLY from `mdg_drawio.engine` and stdlib. It never touches
 core, layout, generator, notation, or `mdg_drawio.reverse` directly — a verb
-that needs the reverse-derivation subsystem (`merge`, `derive`) is exposed as
-a thin re-export module under `mdg_drawio/engine/` (`engine/merge.py`,
-`engine/derive.py`) instead.
+that needs another subsystem (`merge`/`derive` need `mdg_drawio.reverse`;
+`notation` needs `mdg_drawio.notation`) is exposed as a thin re-export module
+under `mdg_drawio/engine/` instead (`engine/merge.py`, `engine/derive.py`,
+`engine/notation_info.py`).
 
 ## Usage
 
@@ -34,6 +35,8 @@ a thin re-export module under `mdg_drawio/engine/` (`engine/merge.py`,
 mdg <input.mdg> [output.drawio] [--force]
 mdg merge <existing.mdg> <new.drawio> [--write]
 mdg derive <diagram.drawio> [--json]
+mdg notation [library] [--json]
+mdg                          # or `mdg -h` / `mdg --help`: overview of all commands
 ```
 
 `convert` (no verb) takes positional args, never flags: first is always
@@ -44,8 +47,11 @@ validate each argument (clear error on a `.mdg`/`.drawio` mismatch), never to
 infer which is which. Omitting output derives `<input>.drawio` alongside it.
 `--force` skips the overlay read (full regeneration).
 
-`merge`/`derive` are real subcommands (first positional token), recognized
-before the convert parser ever runs — see `_SUBCOMMANDS` in `cli.py`.
+`merge`/`derive`/`notation` are real subcommands (first positional token),
+recognized before the convert parser ever runs — see `_SUBCOMMANDS` in
+`cli.py`. Bare `mdg` (no args) or `mdg -h`/`--help` shows a hand-authored
+`_TOP_LEVEL_HELP` overview of every command instead of convert's own help —
+keep that string in sync when you add or change a verb.
 
 ## Key functions
 
@@ -57,7 +63,9 @@ before the convert parser ever runs — see `_SUBCOMMANDS` in `cli.py`.
 All pipeline logic lives in `mdg_drawio.engine`:
 - `convert(input_path, output_path, force)` — full conversion pipeline
 - `merge.main(argv)` — re-export of `mdg_drawio.reverse.merge_cli.main`
-- `derive.main(argv)` — re-export of `mdg_drawio.reverse.__main__.main`
+- `derive.main(argv)` — re-export of `mdg_drawio.reverse.derive_cli.main`
+- `notation_info.main(argv)` — lists notation libraries, or one library's
+  full DSL palette (function/variant + example call), from its registry
 - `preload_core()` — load registries and styles into memory
 - `_generate_multipage(pages, size_of, overlays)` — produce multi-diagram mxfile
 - `validate_generated_xml(xml_string)` — pre-write validation
