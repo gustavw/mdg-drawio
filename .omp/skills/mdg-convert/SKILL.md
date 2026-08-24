@@ -41,15 +41,30 @@ Always validate before writing:
 
 ## CLI command reference
 
+Positional args, not flags: first is always input, second (optional) is
+output — never guessed from extension, so a wrong guess can't overwrite the
+`.mdg` source. Omitting output derives `<input>.drawio` alongside the input.
+
 ```bash
-mdg --force -i input.mdg -o output.drawio
-python -m mdg_drawio --force -i input.mdg -o output.drawio
+mdg input.mdg output.drawio --force
+mdg input.mdg --force                       # writes input.drawio alongside it
+python -m mdg_drawio input.mdg output.drawio --force
+
+mdg merge existing.mdg new.drawio [--write]  # splice hand-drawn cells into existing.mdg
+mdg derive diagram.drawio [--json]           # print which registry shape each cell derives to
+mdg notation [library] [--json]              # list libraries, or a library's full DSL palette
 ```
+
+`mdg notation <library>` (e.g. `mdg notation c4`) is the fastest way to see
+every callable function/variant for a notation plus a ready-to-adapt example
+call — read this before guessing DSL syntax from memory. `mdg notation`
+alone lists all seven libraries with their shape counts. Run `mdg` with no
+arguments for a one-screen overview of every command.
 
 ## Testing the pipeline
 
 ```bash
 make lint
 make test
-python -m mdg_drawio --force -i docs/architecture/c4_architecture.mdg -o /tmp/test.drawio
+python -m mdg_drawio docs/architecture/c4_architecture.mdg /tmp/test.drawio --force
 ```

@@ -42,7 +42,7 @@ _CODE_ARCH_MDG = (
 
 def _run_convert(input_path: Path, output_path: Path) -> int:
     """Run the CLI convert command and return the exit code."""
-    return main(["--force", "-i", str(input_path), "-o", str(output_path)])
+    return main([str(input_path), str(output_path), "--force"])
 
 
 def test_convert_produces_valid_xml() -> None:
@@ -612,7 +612,7 @@ def test_overlay_preserves_geometry_edges_and_anchors(tmp_path: Path) -> None:
     )
 
     # 1. Initial generation.
-    assert main(["--force", "-i", str(src), "-o", str(out)]) == 0
+    assert main([str(src), str(out), "--force"]) == 0
 
     # 2. Simulate manual draw.io edits: move node "a"; add exit/entry anchors
     #    and an elbow waypoint to the edge.
@@ -639,7 +639,7 @@ def test_overlay_preserves_geometry_edges_and_anchors(tmp_path: Path) -> None:
     tree.write(str(out), encoding="utf-8")
 
     # 3. Regenerate WITHOUT --force → engine reads the overlay from *out*.
-    assert main(["-i", str(src), "-o", str(out)]) == 0
+    assert main([str(src), str(out)]) == 0
 
     # 4. The manual edits must be preserved.
     root2 = ET.parse(str(out)).getroot()

@@ -1,4 +1,4 @@
-"""Tests for containment resolution (:mod:`scripts.reverse.containment`).
+"""Tests for containment resolution (:mod:`mdg_drawio.reverse.containment`).
 
 Two groups:
 
@@ -15,10 +15,10 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.reverse import containment
-from scripts.reverse import fixtures as fx
-from scripts.reverse.containment import Containment, resolve_containment
-from scripts.reverse.derive import (
+from mdg_drawio.reverse import containment
+from mdg_drawio.reverse import fixtures as fx
+from mdg_drawio.reverse.containment import Containment, resolve_containment
+from mdg_drawio.reverse.derive import (
     Candidate,
     CellResult,
     DocumentResult,
@@ -27,8 +27,8 @@ from scripts.reverse.derive import (
     load_cells,
     parent_map,
 )
-from scripts.reverse.naming import assign_semantic_ids
-from scripts.reverse.style_index import StyleIndex
+from mdg_drawio.reverse.naming import assign_semantic_ids
+from mdg_drawio.reverse.style_index import StyleIndex
 
 INDEX = StyleIndex.load()
 needs_data = pytest.mark.skipif(

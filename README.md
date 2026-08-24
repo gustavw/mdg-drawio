@@ -94,6 +94,14 @@ shape, and fails loudly on fingerprint drift or missing row-type metadata.
 
 Registry consistency is enforced by `tests/test_registries.py`.
 
+Explore a registry from the CLI instead of reading the YAML directly:
+
+```bash
+mdg notation                # list all libraries with their shape counts
+mdg notation c4              # every function/variant + a ready-to-adapt example call
+mdg notation c4 --json       # machine-readable
+```
+
 ## Dead-code analysis
 
 The CLI exposes one action (`convert`), but the pipeline branches on real input
@@ -161,28 +169,31 @@ language, so treat "truly dead" as a strong hint, not a proof:
 The forward pipeline turns a `.mdg` document into a `.drawio` diagram. The
 reverse — take a diagram a user drew directly in the draw.io UI and derive which
 registry shape each cell came from — lives in
-[`scripts/reverse/`](scripts/reverse/) as a proof of concept.
+[`mdg_drawio/reverse/`](mdg_drawio/reverse/) as a proof of concept.
 
 ```bash
-make derive FILE=path/to/diagram.drawio      # needs `make build-data`
+mdg derive path/to/diagram.drawio            # needs `make build-data`
+mdg derive path/to/diagram.drawio --json
+# or via make (same thing):
+make derive FILE=path/to/diagram.drawio
 ```
 
 It works in two layers:
 
-1. **Weighted style match** ([`scoring.py`](scripts/reverse/scoring.py)) — a
+1. **Weighted style match** ([`scoring.py`](mdg_drawio/reverse/scoring.py)) — a
    cell's style is scored against every registry shape's canonical style.
    Shape-defining tokens (`shape=`, `perimeter=`, bare shape names) carry a high
    weight; cosmetic tokens (colour, font, alignment, spacing) a small one. So a
    recoloured or re-fonted cell still matches its shape, while a cosmetic
    *agreement* still breaks ties between otherwise-identical shapes (e.g. C4
    `Person` vs `Person_Ext`, which differ only by fill colour).
-2. **Document-level ranking** ([`derive.py`](scripts/reverse/derive.py)) — most
+2. **Document-level ranking** ([`derive.py`](mdg_drawio/reverse/derive.py)) — most
    shapes (~78%) have a globally-unique style and resolve directly. For the rest,
    unambiguous cells vote for their library and a small version-recency prior
    defaults a lone ambiguous shape to the newest version: a solitary UML lifeline
    resolves to `uml25`, but add any uml-only shape and its anchor vote pulls the
    lifeline to `uml`.
-3. **Semantic naming** ([`naming.py`](scripts/reverse/naming.py)) — every
+3. **Semantic naming** ([`naming.py`](mdg_drawio/reverse/naming.py)) — every
    resolved cell gets a `.mdg`-ready `node_id` (`person1`, `system1`, ...), one
    counter per shape function, in document order. `node_id`s are author-chosen
    per `GRAMMAR.md`; a derived one is a starting point, not a fixed identity —
@@ -191,7 +202,7 @@ It works in two layers:
    round-trips today — should this scale to a large EA model needing stable
    external identities instead of mnemonic names.)
 
-4. **Containment resolution** ([`containment.py`](scripts/reverse/containment.py))
+4. **Containment resolution** ([`containment.py`](mdg_drawio/reverse/containment.py))
    — resolves where each cell nests and how deep, by climbing draw.io's own
    `parent=` chain to the nearest ancestor whose resolved shape has a non-empty
    registry `contains.allowed` (only `System_Boundary`/`Container_Boundary`
@@ -216,8 +227,8 @@ It works in two layers:
    parent declares), out of scope here; revisit if another notation gains a
    real parser with shapes that declare rows.*
 
-5. **Merging into an existing `.mdg`** ([`merge.py`](scripts/reverse/merge.py),
-   [`merge_cli.py`](scripts/reverse/merge_cli.py)) — splices genuinely new
+5. **Merging into an existing `.mdg`** ([`merge.py`](mdg_drawio/reverse/merge.py),
+   [`merge_cli.py`](mdg_drawio/reverse/merge_cli.py)) — splices genuinely new
    cells into an existing, hand-authored `.mdg` file's *text*, correctly
    indented and nested, without disturbing anything already there. This is a
    text-level merge, not a model-level one: re-serializing the whole document
@@ -226,6 +237,9 @@ It works in two layers:
    right place instead.
 
    ```bash
+   mdg merge path/to/existing.mdg path/to/diagram.drawio           # dry run
+   mdg merge path/to/existing.mdg path/to/diagram.drawio --write   # applies it
+   # or via make (same thing):
    make merge MDG=path/to/existing.mdg FILE=path/to/diagram.drawio          # dry run
    make merge MDG=path/to/existing.mdg FILE=path/to/diagram.drawio WRITE=1  # applies it
    ```
@@ -250,9 +264,12 @@ It works in two layers:
    (`mdg_drawio.notation.parse`) before `--write`/`WRITE=1` is honoured; if it
    doesn't parse cleanly, the file is left untouched and the error reported.
 
-   *Scope: vertices only. A new connector drawn between two shapes (a
-   `c4.Rel(...)`) is detected and counted, but not yet emitted — edges are a
-   separate, later extension.*
+   *Edges are emitted too, as flat top-level statements appended after any
+   new vertex subtree; an endpoint that doesn't resolve to a known node is
+   skipped and reported, same as an unresolved vertex. Dedup is text-level —
+   an edge is skipped only if its exact rendered line already exists, so a
+   logically-identical edge re-labeled or re-routed through a different
+   draw.io cell id is not caught (see `merge.py`'s docstring).*
 
 Each cell reports its derived shape, node id, nesting (nearest container +
 depth), similarity, a confidence, and how it was resolved (`unique` /

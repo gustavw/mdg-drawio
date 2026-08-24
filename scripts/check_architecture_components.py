@@ -56,6 +56,9 @@ DEFAULT_MDG_PATHS = (
 MODULE_TO_LABEL: dict[str, str] = {
     "cli.py": "CLI main()",
     "engine/convert.py": "convert()",
+    "engine/derive.py": "derive()",
+    "engine/merge.py": "merge()",
+    "engine/notation_info.py": "notation()",
     "engine/preload.py": "Pre-load",
     "engine/validate.py": "XML Validation",
     "contracts/models.py": "Models",
@@ -77,6 +80,15 @@ MODULE_TO_LABEL: dict[str, str] = {
     "notation/_core/normalize.py": "Normalize",
     "notation/_core/palette.py": "Palette",
     "notation/GRAMMAR.md": "GRAMMAR.md",
+    "reverse/containment.py": "Containment Resolution",
+    "reverse/derive.py": "Document-Level Ranking",
+    "reverse/derive_cli.py": "Derive CLI",
+    "reverse/fixtures.py": "Fixture Synthesis",
+    "reverse/merge.py": "Merge Planning",
+    "reverse/merge_cli.py": "Merge CLI",
+    "reverse/naming.py": "Semantic Naming",
+    "reverse/scoring.py": "Weighted Style Match",
+    "reverse/style_index.py": "Style Index",
 }
 
 # Boundaries that must exist on the Component page.
@@ -86,6 +98,7 @@ EXPECTED_BOUNDARIES: set[str] = {
     "generator_co_boundary",
     "layout_co_boundary",
     "notation_co_boundary",
+    "reverse_co_boundary",
 }
 
 # Files relative to mdg_drawio/ that are skipped.
@@ -94,11 +107,12 @@ SKIP_FILES: set[str] = {
     "__main__.py",
     "layout/layout.py",  # re-export shim for _types
     "generator/style_overrides.yaml",  # generation-time style config (not a module)
+    "reverse/__main__.py",  # POC standalone `derive` CLI entry point, not modeled
 }
 
 # Directories that are package containers (covered by boundary checks).
 SKIP_CONTAINER_DIRS: set[str] = {
-    "contracts", "engine", "generator", "layout", "notation",
+    "contracts", "engine", "generator", "layout", "notation", "reverse",
 }
 
 # Notation-specific.
@@ -112,13 +126,15 @@ COLLECTIVE_COMPONENT_SUBSTRS: tuple[str, ...] = (
 
 EXPECTED_RELATION_COUNTS: dict[str, int] = {
     "Context": 4,
-    "Container": 11,
-    "Component": 37,
-    # Net unchanged: notation/_core/registry.py gained an edge to contracts
-    # (reusing index_shapes_by_function instead of re-implementing it), while
-    # layout/_container_layout.py lost its only one (the padding constants it
-    # imported fed a default dict no caller ever reached).
-    "Code": 37,
+    # +2: engine -> reverse, reverse -> notation (the new Reverse Derivation &
+    # Merge container, added for the `mdg merge`/`mdg derive` subcommands).
+    "Container": 13,
+    # +25: the Reverse Derivation & Merge container's own Component/Code-page
+    # edges -- engine.merge()/derive() -> reverse boundary, 9 new components'
+    # intra-package and cross-package (-> notation) relations.
+    # +1: engine.notation() -> notation boundary (the `mdg notation` verb).
+    "Component": 64,
+    "Code": 64,
 }
 
 CONTEXT_RELATION_TYPES: set[str] = {
@@ -134,6 +150,7 @@ CONTAINER_PACKAGE_IDS: dict[str, str] = {
     "layout": "layout",
     "generator": "generator",
     "notation": "notation",
+    "reverse": "reverse",
 }
 CONTAINER_DATA_IDS: set[str] = {"palette_data"}
 CONTAINER_EXTERNAL_IDS: set[str] = {"author_c", "drawio_c"}

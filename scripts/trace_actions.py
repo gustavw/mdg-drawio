@@ -306,7 +306,7 @@ def _temp_input(perm: Permutation) -> Iterator[tuple[Path, Path]]:
 
 def _argv(input_path: Path, output_path: Path, force: bool) -> list[str]:
     """CLI arguments for one convert invocation."""
-    argv = ["-i", str(input_path), "-o", str(output_path)]
+    argv = [str(input_path), str(output_path)]
     if force:
         argv.append("--force")
     return argv

@@ -463,10 +463,10 @@ def test_coverage_generated_cell_counts_match_model(library: str) -> None:
     from mdg_drawio.engine.preload import preload_core
     from mdg_drawio.generator import create_style_provider, generate
     from mdg_drawio.generator.generator import (
-        _GenCtx,
         _coerce_variant,
         _compound_row_override,
         _edge_endpoint_label_cells,
+        _GenCtx,
     )
 
     source = (NOTATION_DIR / library / f"{library}_shapes_coverage.mdg").read_text()

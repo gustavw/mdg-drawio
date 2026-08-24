@@ -20,6 +20,7 @@ import base64
 import zlib
 from collections import defaultdict
 from dataclasses import dataclass, field
+from itertools import chain
 from urllib.parse import unquote
 from xml.etree import ElementTree as ET
 
@@ -28,16 +29,35 @@ from .style_index import StyleIndex, recency_prior
 
 # How close to the top similarity a candidate must be to count as a near-tie.
 DEFAULT_BAND = 0.02
+
+# draw.io wraps a cell carrying extra (non-style) attributes -- a C4 cell's
+# c4Name/c4Type, a BPMN task's label -- in one of two tags depending on the
+# app version that saved the file: the legacy ``<object>``, or the current
+# ``<UserObject>`` (also what this project's own generator emits, see
+# mdg_drawio/generator/generator.py's _wrap_object). Both carry the cell's
+# real id on the wrapper, not its inner <mxCell>, so both must be recognized
+# or a hand-edited file re-saved by a current draw.io (or produced by this
+# tool's own forward pipeline) silently loses every wrapped cell.
+_OBJECT_TAGS = ("object", "UserObject")
+
+
+def _iter_object_cells(model: ET.Element) -> list[ET.Element]:
+    return list(chain.from_iterable(model.iter(tag) for tag in _OBJECT_TAGS))
 # Below this similarity a cell has no plausible match at all.
 DEFAULT_SIM_FLOOR = 0.4
 
 # Confidence multipliers by how the cell was resolved (times the similarity).
+_CONFIDENCE_UNIQUE = 1.0
+_CONFIDENCE_SINGLE_LIBRARY = 0.85
+_CONFIDENCE_LIBRARY_VOTE = 0.7
+_CONFIDENCE_RECENCY_PRIOR = 0.45
+_CONFIDENCE_NONE = 0.0
 _CONFIDENCE: dict[str, float] = {
-    "unique": 1.0,
-    "single-library": 0.85,
-    "library-vote": 0.7,
-    "recency-prior": 0.45,
-    "none": 0.0,
+    "unique": _CONFIDENCE_UNIQUE,
+    "single-library": _CONFIDENCE_SINGLE_LIBRARY,
+    "library-vote": _CONFIDENCE_LIBRARY_VOTE,
+    "recency-prior": _CONFIDENCE_RECENCY_PRIOR,
+    "none": _CONFIDENCE_NONE,
 }
 
 
@@ -83,10 +103,17 @@ class DocumentResult:
 
 
 # ── parsing ──────────────────────────────────────────────────────────────────
+
+# Passed to zlib as negative wbits, telling it to expect a raw deflate stream
+# (no zlib/gzip header) -- draw.io's own compression format for a <diagram>
+# payload.
+_RAW_DEFLATE_WBITS = 15
+
+
 def _decompress(text: str) -> str | None:
     """Inflate draw.io's base64 + raw-deflate + url-encoded diagram payload."""
     try:
-        raw = zlib.decompress(base64.b64decode(text), -15)
+        raw = zlib.decompress(base64.b64decode(text), -_RAW_DEFLATE_WBITS)
         return unquote(raw.decode("utf-8"))
     except (ValueError, zlib.error, UnicodeDecodeError):
         return None
@@ -109,18 +136,19 @@ def _model_roots(root: ET.Element) -> list[ET.Element]:
 
 
 def _cell_elements(model: ET.Element) -> list[ET.Element]:
-    """The style-bearing ``mxCell`` elements, unwrapping ``<object>`` cells.
+    """The style-bearing ``mxCell`` elements, unwrapping ``<object>``/
+    ``<UserObject>`` cells.
 
-    drawio encodes an "object" cell's id on the wrapping ``<object>`` element,
-    not on its inner ``<mxCell>`` (see ``cellsToXml`` in extract_shapes.js) --
-    copy it down so every returned element carries its real id. Without this,
-    every object-wrapped cell's inner element reads as id "", so a document
-    with more than one (e.g. two C4 Person nodes) collapses to a single cell
-    via the id-based dedup in :func:`load_cells`.
+    drawio encodes such a cell's id on the wrapping element, not on its inner
+    ``<mxCell>`` (see ``cellsToXml`` in extract_shapes.js) -- copy it down so
+    every returned element carries its real id. Without this, every wrapped
+    cell's inner element reads as id "", so a document with more than one
+    (e.g. two C4 Person nodes) collapses to a single cell via the id-based
+    dedup in :func:`load_cells`.
     """
     cells: list[ET.Element] = []
     wrapped: set[int] = set()
-    for obj in model.iter("object"):
+    for obj in _iter_object_cells(model):
         inner = obj.find("mxCell")
         if inner is None:
             continue
@@ -155,12 +183,12 @@ def _page_prefix(page_index: int, multi_page: bool) -> str:
 
 
 def _object_attrs_by_id(model: ET.Element, prefix: str) -> dict[str, dict[str, str]]:
-    """Every ``<object>``-wrapped cell's own attributes, keyed by the same
-    page-prefixed id used for :attr:`Cell.cell_id` -- these carry the
-    user-typed label data a C4 object cell's plain ``value`` does not (see
+    """Every ``<object>``/``<UserObject>``-wrapped cell's own attributes, keyed
+    by the same page-prefixed id used for :attr:`Cell.cell_id` -- these carry
+    the user-typed label data a C4 object cell's plain ``value`` does not (see
     :class:`Cell`)."""
     out: dict[str, dict[str, str]] = {}
-    for obj in model.iter("object"):
+    for obj in _iter_object_cells(model):
         raw_id = obj.get("id")
         if raw_id:
             out[prefix + raw_id] = dict(obj.attrib)
@@ -309,6 +337,11 @@ def _resolve_cell(
     return chosen, decided
 
 
+# How many near-candidates a cell keeps for its ``alternatives`` display --
+# just enough for a human to sanity-check an ambiguous resolution.
+_MAX_DISPLAYED_CANDIDATES = 8
+
+
 def derive(
     cells: list[Cell],
     index: StyleIndex,
@@ -331,7 +364,7 @@ def derive(
             CellResult(
                 cell_id=cell.cell_id,
                 style=cell.style,
-                candidates=near[:8],
+                candidates=near[:_MAX_DISPLAYED_CANDIDATES],
                 chosen=chosen,
                 resolved_by=resolved_by,
                 confidence=confidence,

@@ -1,4 +1,4 @@
-"""Tests for the reverse derivation POC (:mod:`scripts.reverse`).
+"""Tests for the reverse derivation POC (:mod:`mdg_drawio.reverse`).
 
 Groups, roughly in dependency order:
 
@@ -11,7 +11,7 @@ Groups, roughly in dependency order:
   for a real bug this suite caught: object-wrapped cells losing their id;
 * ``fixtures`` helper unit tests (no data);
 * ``naming`` semantic-id assignment tests (no data);
-* CLI (``scripts.reverse.__main__``) tests, via a monkeypatched index (no data);
+* CLI (``mdg_drawio.reverse.derive_cli``) tests, via a monkeypatched index (no data);
 * data-gated end-to-end tests against the real palette -- the two version-
   priority scenarios from the design discussion, plus corpus-wide sanity
   checks. These skip without ``make build-data`` (palette styles are
@@ -28,9 +28,8 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
-from scripts.reverse import fixtures as fx
-from scripts.reverse.__main__ import main
-from scripts.reverse.derive import (
+from mdg_drawio.reverse import fixtures as fx
+from mdg_drawio.reverse.derive import (
     DEFAULT_BAND,
     DEFAULT_SIM_FLOOR,
     Cell,
@@ -38,8 +37,9 @@ from scripts.reverse.derive import (
     load_cells,
     parent_map,
 )
-from scripts.reverse.naming import assign_semantic_ids, semantic_base
-from scripts.reverse.scoring import (
+from mdg_drawio.reverse.derive_cli import main
+from mdg_drawio.reverse.naming import assign_semantic_ids, semantic_base
+from mdg_drawio.reverse.scoring import (
     BARE,
     COSMETIC_KEYS,
     SHAPE_KEYS,
@@ -47,7 +47,7 @@ from scripts.reverse.scoring import (
     parse_style,
     similarity,
 )
-from scripts.reverse.style_index import ShapeEntry, StyleIndex
+from mdg_drawio.reverse.style_index import ShapeEntry, StyleIndex
 
 INDEX = StyleIndex.load()
 needs_data = pytest.mark.skipif(

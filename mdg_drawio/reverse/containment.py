@@ -137,7 +137,7 @@ def resolve_containment(
     """Resolve every non-edge resolved cell's nearest legitimate container.
 
     ``node_ids`` is the ``cell_id -> semantic node_id`` mapping from
-    :func:`scripts.reverse.naming.assign_semantic_ids` -- a container's
+    :func:`mdg_drawio.reverse.naming.assign_semantic_ids` -- a container's
     reported identity is its semantic id, not its raw draw.io id. Edges are
     skipped entirely: ``.mdg`` declares relationships flat
     (``c4.Rel(a, b, ...)``), so containment is not meaningful for them.

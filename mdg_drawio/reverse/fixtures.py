@@ -22,6 +22,10 @@ _HEADER = '<mxfile><diagram name="Page-1"><mxGraphModel><root>'
 _ROOT_CELLS = '<mxCell id="0"/><mxCell id="1" parent="0"/>'
 _FOOTER = "</root></mxGraphModel></diagram></mxfile>"
 
+# Escaped so a style string's own literal quotes don't terminate the
+# surrounding style="..." XML attribute.
+QUOTE = '"'
+
 
 def perturb(style: str, **overrides: str) -> str:
     """Return ``style`` with the given ``key=value`` tokens set/replaced.
@@ -44,15 +48,25 @@ def cell_xml(
         f'height="{height}" as="geometry"/>'
     )
     return (
-        f'<mxCell id="{cell_id}" value="" style="{escape(style, {chr(34): "&quot;"})}" '
+        f'<mxCell id="{cell_id}" value="" style="{escape(style, {QUOTE: "&quot;"})}" '
         f'vertex="1" parent="{parent}">{geo}</mxCell>'
     )
+
+
+_GROUP_CELL_SIZE = 200
 
 
 def group_cell_xml(cell_id: str, parent: str = "1") -> str:
     """A Ctrl+G "group" cell: a vertex whose style is just the bare token
     ``group`` -- a UI bounding box, not a real shape."""
-    return cell_xml(cell_id, "group;", x=0, width=200, height=200, parent=parent)
+    return cell_xml(
+        cell_id,
+        "group;",
+        x=0,
+        width=_GROUP_CELL_SIZE,
+        height=_GROUP_CELL_SIZE,
+        parent=parent,
+    )
 
 
 def layer_cell_xml(cell_id: str, parent: str = "1") -> str:
@@ -73,7 +87,7 @@ def edge_cell_xml(
     (e.g. ``fx.get(index, "c4.rel.v1").style``) to synthesize one that does.
     """
     return (
-        f'<mxCell id="{cell_id}" style="{escape(style, {chr(34): "&quot;"})}" '
+        f'<mxCell id="{cell_id}" style="{escape(style, {QUOTE: "&quot;"})}" '
         f'edge="1" parent="{parent}" source="{source}" target="{target}">'
         f'<mxGeometry relative="1" as="geometry"/></mxCell>'
     )

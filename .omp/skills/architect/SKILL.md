@@ -43,7 +43,7 @@ relation at the wrong view — is an error.
    `realized-by` trace.
 3. **Regenerate the code view** — `python scripts/generate_code_arch.py --write`
    (never edit `code_architecture.mdg` by hand).
-4. **Generate drawio** — `mdg --force -i <file>.mdg -o <file>.drawio` for both.
+4. **Generate drawio** — `mdg <file>.mdg <file>.drawio --force` for both.
 5. **Verify the model** — these MUST pass:
    - `python scripts/check_traceability.py` (Component ↔ module parity, no orphans)
    - `python scripts/check_architecture_components.py` (C4 ↔ imports)

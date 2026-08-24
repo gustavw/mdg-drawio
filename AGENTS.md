@@ -24,8 +24,8 @@ in your head:
 
 - **`make check`** = `make lint` (mypy + ruff, zero issues) + `make test` +
   `make model-check` (architecture model consistent). Run before declaring done.
-- Pipeline smoke test: `mdg --force -i docs/architecture/c4_architecture.mdg -o
-  /tmp/t.drawio` must exit 0.
+- Pipeline smoke test: `mdg docs/architecture/c4_architecture.mdg /tmp/t.drawio
+  --force` must exit 0.
 - Advisory (not in `check`): `make verification` / `make coverage-gate`
   (per-Component coverage, ratchet ≥ 60%), `make dead-code`, `make dashboard`.
 - `make help` lists every target with a one-line description.
