@@ -1,16 +1,17 @@
 """CLI: merge newly hand-drawn cells from a ``.drawio`` into an existing
 ``.mdg`` file.
 
-    python -m scripts.reverse.merge_cli EXISTING.mdg NEW.drawio          # dry run
-    python -m scripts.reverse.merge_cli EXISTING.mdg NEW.drawio --write  # writes
+    mdg merge EXISTING.mdg NEW.drawio          # dry run
+    mdg merge EXISTING.mdg NEW.drawio --write  # writes
 
 Dry run is the default: it prints a unified diff of what WOULD change and
 never touches ``EXISTING.mdg``. ``--write`` re-parses the merged result
-through the same parser the real pipeline uses (:func:`scripts.reverse.merge.
-validate`) before writing anything -- if it doesn't parse cleanly, the file is
-left untouched and the error is reported. See :mod:`scripts.reverse.merge` for
-what "new" means and what this does and does not emit (vertices and edges;
-see that module's docstring for the edge dedup this does and does not catch).
+through the same parser the real pipeline uses (:func:`mdg_drawio.reverse.
+merge.validate`) before writing anything -- if it doesn't parse cleanly, the
+file is left untouched and the error is reported. See :mod:`mdg_drawio.
+reverse.merge` for what "new" means and what this does and does not emit
+(vertices and edges; see that module's docstring for the edge dedup this
+does and does not catch).
 """
 from __future__ import annotations
 
@@ -43,7 +44,7 @@ def _plan(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="python -m scripts.reverse.merge_cli")
+    parser = argparse.ArgumentParser(prog="mdg merge")
     parser.add_argument("mdg", help="path to the existing .mdg file")
     parser.add_argument("drawio", help="path to the hand-drawn .drawio file")
     parser.add_argument(

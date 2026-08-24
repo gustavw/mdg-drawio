@@ -284,7 +284,7 @@ def _write_row_types_sidecar(
     Row types (e.g. uml25's Item/Header/Divider) have no independent shape id
     of their own, so they live in a separate sidecar rather than as extra
     keys in <lib>_styles.json -- several consumers (test_styles_sidecar_is_fresh,
-    scripts/reverse/style_index.py) assume every key there is a real registry
+    mdg_drawio/reverse/style_index.py) assume every key there is a real registry
     shape id.
     """
     row_types = _build_row_types(registry, sidecar, anchor_cell)

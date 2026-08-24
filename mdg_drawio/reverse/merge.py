@@ -17,7 +17,7 @@ declared in the existing file; anything else is genuinely new.
 Safety: this module only ever computes a new text (:func:`render_merge`) or
 validates one (:func:`validate`, which re-parses the result through the same
 parser the real pipeline uses) -- it never writes a file itself. The CLI
-(``scripts/reverse/merge_cli.py``) is responsible for the dry-run-by-default,
+(``mdg_drawio/reverse/merge_cli.py``) is responsible for the dry-run-by-default,
 validate-before-write contract.
 
 Edges are emitted too, as flat top-level statements (``lib.Function(source,
@@ -49,7 +49,7 @@ from .style_index import registry_entry
 
 INDENT_STEP = "    "
 
-# Mirrors CALL_RE's shape (dsl_engine.py) independently -- scripts/reverse may
+# Mirrors CALL_RE's shape (dsl_engine.py) independently -- mdg_drawio/reverse may
 # not import a leading-underscore module member across the package boundary
 # (enforced by tests/test_architecture.py), so this is a small, purpose-built
 # re-implementation of just the structural facts a merge needs: is this line a
@@ -326,7 +326,7 @@ class NewNode:
 
     Not frozen: this is a builder, assembled incrementally by
     :func:`_build_forest` (which appends each node's children as it discovers
-    them), the same way :class:`~scripts.reverse.derive.CellResult` or
+    them), the same way :class:`~mdg_drawio.reverse.derive.CellResult` or
     ``mdg_drawio``'s own ``Node`` are mutated post-construction rather than
     replaced wholesale.
     """
@@ -448,7 +448,7 @@ def _resolve_endpoint(
     declared -- a dangling/unresolvable endpoint, so the edge can't be
     emitted (its declaration would reference an id that doesn't exist).
 
-    ``existing_ids`` is checked FIRST: :func:`~scripts.reverse.naming.
+    ``existing_ids`` is checked FIRST: :func:`~mdg_drawio.reverse.naming.
     assign_semantic_ids` mints a semantic id for every resolved cell
     regardless of whether it's already represented (see its own docstring),
     so an already-represented endpoint would otherwise resolve to a

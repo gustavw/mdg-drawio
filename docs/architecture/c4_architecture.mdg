@@ -34,6 +34,7 @@ c4.System_Boundary(drawiogen_c, "mdg-drawio"):
     c4.Container(generator, "Generator", "Produces valid draw.io XML from parsed Document instances. Reads geometry overlays to preserve manual layout adjustments across regenerations.", technology="Python (xml.etree)")
     c4.Container(notation, "Notation", "Seven registry-driven notation libraries sharing one block DSL engine, plus C4-specific builders. Shared core handles registry loading, exact variant dispatch, nesting validation, style lookup, and normalization.", technology="Python / YAML")
     c4.Container(palette_data, "Generated Data", "Pre-built JSON data extracted from draw.io shape libraries. Not committed. Supplies shape styles, dimensions, palette entries, and nested row-type templates consumed at startup.", technology="JSON (generated)")
+    c4.Container(reverse, "Reverse Derivation & Merge", "POC: derives which registry shape a hand-drawn draw.io cell came from (weighted style match + library ranking), assigns it a semantic .mdg node id, resolves containment, and splices genuinely new cells into an existing .mdg file's text. Exposed as the `mdg merge` CLI subcommand.", technology="Python")
 
 c4.Person(author_c, "Diagram Author / Developer", "Writes and maintains MDG files, refines diagrams visually in draw.io.", technology="")
 
@@ -41,6 +42,8 @@ c4.System_Ext(drawio_c, "draw.io / diagrams.net", "Visual editor used to inspect
 c4.Rel(author_c, cli, "Runs", description="")
 
 c4.Rel(cli, engine, "Delegates to", description="")
+c4.Rel(engine, reverse, "Delegates to (merge verb)", description="")
+c4.Rel(reverse, notation, "Parses .mdg, derives registry shapes", description="")
 c4.Rel(author_c, drawio_c, "Reviews and adjusts layout", description="")
 c4.Rel(engine, notation, "Pre-loads registries and styles", description="")
 
@@ -67,6 +70,7 @@ c4.System_Boundary(drawiogen_co, "mdg-drawio"):
       c4.Component(engine_convert_co, "convert()", "Full conversion pipeline orchestration. Detects notation, pre-loads registries/styles, parses pages, resolves layout config, injects overlays, runs layout, generates multipage XML, validates, and writes output.", technology="Python")
       c4.Component(engine_preload_co, "Pre-load", "Loads all YAML registries plus generated shape and row-type JSON into memory once at startup. Registries feed the notation registry cache; registries and styles are returned so the composition root builds the layout SizeResolver and generator StyleProvider by injection — zero filesystem I/O during parsing/layout/generation.", technology="Python (YAML/JSON)")
       c4.Component(engine_validate_co, "XML Validation", "Validates generated draw.io XML before writing: unique diagram IDs, mandatory root cells (0 and 1), and edge source/target reference integrity.", technology="Python (xml.etree)")
+      c4.Component(engine_merge_co, "merge()", "Thin re-export of mdg_drawio.reverse.merge_cli.main -- the CLI's merge verb delegates through engine, same as convert(). Lives in engine/merge.py.", technology="Python")
 
   c4.ContainerDb(palette_data_co, "Palette Data", "Generated JSON files from draw.io shape libraries. Produced via `make build-data`; consumed by notation style lookup.", technology="JSON (generated)")
 
@@ -100,10 +104,21 @@ c4.System_Boundary(drawiogen_co, "mdg-drawio"):
       c4.Component(grammar_co, "GRAMMAR.md", "Canonical DSL language specification. Defines document structure, call syntax, nesting rules, and how agents should use registries.", technology="Markdown")
       c4.Component(stubs_co, "Notation Parsers", "All seven libraries parse through the shared registry-driven DSL engine; C4 additionally supplies native node/edge builders. Library packages expose registries, coverage documents, and optional layout hooks.", technology="Python / YAML")
 
+  c4.Container_Boundary(reverse_co_boundary, "Reverse Derivation & Merge"):
+      c4.Component(reverse_scoring_co, "Weighted Style Match", "Scores a cell's style against every registry shape's canonical style. Shape-defining tokens (shape=, perimeter=, bare shape names) carry a high weight; cosmetic tokens (colour, font, alignment) a small one, so a recoloured/re-fonted cell still matches its shape while cosmetic agreement breaks ties (e.g. C4 Person vs Person_Ext). Lives in reverse/scoring.py.", technology="Python")
+      c4.Component(reverse_style_index_co, "Style Index", "Loads every registry shape's canonical style from the generated_data sidecars, ready to be scored against a query; holds notation-family version-recency metadata. Lives in reverse/style_index.py.", technology="Python (JSON)")
+      c4.Component(reverse_derive_co, "Document-Level Ranking", "Resolves each cell to a shape: unambiguous cells vote for their library, a small version-recency prior defaults a lone ambiguous shape to the newest version of its family. Parses a .drawio file into cells (unwrapping object/UserObject wrappers). Lives in reverse/derive.py.", technology="Python (xml.etree)")
+      c4.Component(reverse_naming_co, "Semantic Naming", "Assigns each resolved cell a semantic .mdg-ready node_id (person1, system1, ...), one counter per shape function, in document order; reserved_counters() seeds past an existing file's ids for merge. Lives in reverse/naming.py.", technology="Python")
+      c4.Component(reverse_containment_co, "Containment Resolution", "Resolves where each cell nests and how deep by climbing draw.io's parent= chain to the nearest ancestor with a non-empty registry contains.allowed, skipping layers/groups/unresolved ancestors with a recorded warning. Lives in reverse/containment.py.", technology="Python")
+      c4.Component(reverse_merge_co, "Merge Planning", "Splices genuinely new cells (vertices and edges) into an existing, hand-authored .mdg file's text at the right place and indent, without disturbing anything already there -- a text-level merge, not a model-level one. Never writes a file itself. Lives in reverse/merge.py.", technology="Python")
+      c4.Component(reverse_merge_cli_co, "Merge CLI", "The `mdg merge` subcommand. Dry-run by default (prints a unified diff); --write re-parses the merged result through the real .mdg parser before applying, refusing an invalid merge. Lives in reverse/merge_cli.py.", technology="Python (argparse)")
+      c4.Component(reverse_fixtures_co, "Fixture Synthesis", "Synthesizes ground-truth .drawio test data from the palette styles (canonical, perturbed, and multi-shape scenario cases) for the reverse-derivation test suite -- never committed, since palette styles are draw.io-copyright. Lives in reverse/fixtures.py.", technology="Python")
+
   c4.Person(author_co, "Diagram Author / Developer", "Writes MDG source, refines layout visually in draw.io.", technology="")
 
 c4.Rel(author_co, cli_co, "Runs", description="")
 c4.Rel(cli_co, engine_co_boundary, "Delegates to", description="")
+c4.Rel(engine_merge_co, reverse_co_boundary, "Delegates to", description="")
 c4.Rel(engine_convert_co, engine_preload_co, "Pre-loads registries and styles", description="")
 c4.Rel(engine_convert_co, engine_validate_co, "Validates XML before write", description="")
 c4.Rel(engine_convert_co, layout_co_boundary, "Resolves layout config", description="")
@@ -140,6 +155,27 @@ c4.Rel(palette_co, styles_co, "Groups palette entries", description="")
 c4.Rel(registries_co, grammar_co, "Conforms to spec", description="")
 c4.Rel(stubs_co, registries_co, "Dispatches calls through", description="")
 
+c4.Rel(reverse_containment_co, reverse_derive_co, "Uses derived cells/candidates", description="")
+c4.Rel(reverse_containment_co, reverse_scoring_co, "Parses style for containment checks", description="")
+c4.Rel(reverse_containment_co, reverse_style_index_co, "Looks up contains.allowed via the registry", description="")
+c4.Rel(reverse_derive_co, reverse_scoring_co, "Scores cells against the index", description="")
+c4.Rel(reverse_derive_co, reverse_style_index_co, "Loads the style index", description="")
+c4.Rel(reverse_naming_co, reverse_derive_co, "Reads resolved cell results", description="")
+c4.Rel(reverse_naming_co, reverse_style_index_co, "Reads version-recency metadata", description="")
+c4.Rel(reverse_style_index_co, notation_co_boundary, "Reads registry shapes via shapes_by_id", description="")
+c4.Rel(reverse_style_index_co, reverse_scoring_co, "Parses canonical styles for scoring", description="")
+c4.Rel(reverse_merge_co, reverse_containment_co, "Resolves new cells' nesting", description="")
+c4.Rel(reverse_merge_co, reverse_derive_co, "Derives shapes for new cells", description="")
+c4.Rel(reverse_merge_co, reverse_style_index_co, "Looks up registry entries", description="")
+c4.Rel(reverse_merge_co, notation_co_boundary, "Parses .mdg via notation.parse", description="")
+c4.Rel(reverse_merge_cli_co, reverse_merge_co, "Plans and renders the merge", description="")
+c4.Rel(reverse_merge_cli_co, reverse_containment_co, "Resolves new cells' nesting", description="")
+c4.Rel(reverse_merge_cli_co, reverse_derive_co, "Derives shapes for new cells", description="")
+c4.Rel(reverse_merge_cli_co, reverse_naming_co, "Assigns semantic node ids", description="")
+c4.Rel(reverse_merge_cli_co, reverse_style_index_co, "Loads the style index", description="")
+c4.Rel(reverse_fixtures_co, reverse_derive_co, "Feeds synthesized cells through derive()", description="")
+c4.Rel(reverse_fixtures_co, reverse_style_index_co, "Draws shapes from the style index", description="")
+
 # ---------------------------------------------------------------------------
 # Traceability meta-model (model-only; not rendered).
 # realized-by: Component -> module(s) in the Code view.
@@ -155,6 +191,7 @@ trace constants_contract_co -> code.contracts_constants : realized-by
 trace container_co -> code.layout__container_layout : realized-by
 trace dsl_engine_co -> code.notation__core_dsl_engine : realized-by
 trace engine_convert_co -> code.engine_convert : realized-by
+trace engine_merge_co -> code.engine_merge : realized-by
 trace engine_preload_co -> code.engine_preload : realized-by
 trace engine_validate_co -> code.engine_validate : realized-by
 trace generate_co -> code.generator_generator : realized-by
@@ -166,6 +203,14 @@ trace palette_co -> code.notation__core_palette : realized-by
 trace palettelayout_co -> code.layout_palette : realized-by
 trace process_co -> code.layout_process : realized-by
 trace registry_co -> code.notation__core_registry : realized-by
+trace reverse_containment_co -> code.reverse_containment : realized-by
+trace reverse_derive_co -> code.reverse_derive : realized-by
+trace reverse_fixtures_co -> code.reverse_fixtures : realized-by
+trace reverse_merge_co -> code.reverse_merge : realized-by
+trace reverse_merge_cli_co -> code.reverse_merge_cli : realized-by
+trace reverse_naming_co -> code.reverse_naming : realized-by
+trace reverse_scoring_co -> code.reverse_scoring : realized-by
+trace reverse_style_index_co -> code.reverse_style_index : realized-by
 trace sequence_co -> code.layout_sequence : realized-by
 trace size_resolver_co -> code.layout_size_resolver : realized-by
 trace styles_co -> code.notation__core_styles : realized-by

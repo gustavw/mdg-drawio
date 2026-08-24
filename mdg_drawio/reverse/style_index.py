@@ -22,12 +22,14 @@ from .scoring import DEFAULT_WEIGHTS, Weights, parse_style, similarity
 VERSION_RANK: dict[str, int] = {"uml": 1, "uml25": 2}
 
 
-def recency_prior(library: str, scale: float = 0.1) -> float:
-    """A tiny per-library prior favouring the newest version of a family.
+# Scaled well below one anchor vote (weight 1.0) so the recency prior only
+# ever breaks a tie the document evidence left open -- it can never override
+# an anchor.
+_DEFAULT_RECENCY_SCALE = 0.1
 
-    Scaled well below one anchor vote (weight ``1.0``) so it only ever breaks
-    a tie the document evidence left open -- it can never override an anchor.
-    """
+
+def recency_prior(library: str, scale: float = _DEFAULT_RECENCY_SCALE) -> float:
+    """A tiny per-library prior favouring the newest version of a family."""
     return VERSION_RANK.get(library, 0) * scale
 
 

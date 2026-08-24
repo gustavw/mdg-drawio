@@ -1,4 +1,5 @@
-"""Tests for merging new cells into an existing ``.mdg`` (:mod:`scripts.reverse.merge`).
+"""Tests for merging new cells into an existing ``.mdg``
+(:mod:`mdg_drawio.reverse.merge`).
 
 Three groups:
 
@@ -12,7 +13,7 @@ Three groups:
   skipped/unresolved cells, edge counting, label extraction, reserved-name
   collision avoidance) and a re-parse validation guard. These skip without
   ``make build-data``;
-* CLI tests (``scripts.reverse.merge_cli``) -- the dry-run/--write/abort
+* CLI tests (``mdg_drawio.reverse.merge_cli``) -- the dry-run/--write/abort
   safety contract, via a monkeypatched index.
 """
 from __future__ import annotations
@@ -24,10 +25,10 @@ import pytest
 
 from mdg_drawio.contracts import Document
 from mdg_drawio.notation import parse as parse_mdg
-from scripts.reverse import fixtures as fx
-from scripts.reverse import merge
-from scripts.reverse.containment import Containment, resolve_containment
-from scripts.reverse.derive import (
+from mdg_drawio.reverse import fixtures as fx
+from mdg_drawio.reverse import merge
+from mdg_drawio.reverse.containment import Containment, resolve_containment
+from mdg_drawio.reverse.derive import (
     Candidate,
     Cell,
     CellResult,
@@ -37,10 +38,10 @@ from scripts.reverse.derive import (
     load_cells,
     parent_map,
 )
-from scripts.reverse.merge import ExistingIndex, Insertion, MergePlan
-from scripts.reverse.merge_cli import main as merge_main
-from scripts.reverse.naming import assign_semantic_ids, reserved_counters
-from scripts.reverse.style_index import StyleIndex
+from mdg_drawio.reverse.merge import ExistingIndex, Insertion, MergePlan
+from mdg_drawio.reverse.merge_cli import main as merge_main
+from mdg_drawio.reverse.naming import assign_semantic_ids, reserved_counters
+from mdg_drawio.reverse.style_index import StyleIndex
 
 INDEX = StyleIndex.load()
 needs_data = pytest.mark.skipif(

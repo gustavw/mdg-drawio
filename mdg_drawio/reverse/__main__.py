@@ -1,12 +1,12 @@
 """CLI: derive registry shapes from a hand-drawn ``.drawio`` file.
 
-    python -m scripts.reverse path/to/diagram.drawio
-    python -m scripts.reverse path/to/diagram.drawio --json
+    python -m mdg_drawio.reverse path/to/diagram.drawio
+    python -m mdg_drawio.reverse path/to/diagram.drawio --json
 
 Prints, per cell, the derived shape, its library, a generated semantic
 ``.mdg`` node id (``person1``, ``system1``, ...; see
-:mod:`scripts.reverse.naming`), its nesting (nearest container + depth; see
-:mod:`scripts.reverse.containment`), similarity, confidence, and how it was
+:mod:`mdg_drawio.reverse.naming`), its nesting (nearest container + depth; see
+:mod:`mdg_drawio.reverse.containment`), similarity, confidence, and how it was
 resolved (unique / single-library / library-vote / recency-prior), plus the
 document-level library scores. Requires ``make build-data``.
 """
@@ -110,7 +110,7 @@ def _print_table(
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="python -m scripts.reverse")
+    parser = argparse.ArgumentParser(prog="python -m mdg_drawio.reverse")
     parser.add_argument("drawio", help="path to a .drawio file")
     parser.add_argument("--json", action="store_true", help="emit JSON")
     args = parser.parse_args(argv)

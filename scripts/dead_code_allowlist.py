@@ -98,4 +98,26 @@ ALLOWLIST: dict[str, str] = {
     #     empty name). Scaffolding for a DiagramTitle statement not yet wired.
     "mdg_drawio.notation.c4:_parse_diagram_title":
         "wired as a callback but diagram_title_call='' disables it",
+    # --- reverse-derivation test fixtures: synthesize .drawio XML for
+    #     tests/test_reverse_*.py only, never called from production code
+    #     (merge/derive/containment/naming/scoring/style_index). This sweep's
+    #     signal is CLI-sweep + static call-graph only, no regression-suite
+    #     trace (see tests/test_dead_code.py's own docstring), so a module
+    #     reachable only from tests is invisible to it by construction.
+    "mdg_drawio.reverse.fixtures:_as_cell":
+        "test-only fixture helper; reached only from tests/test_reverse_*.py",
+    "mdg_drawio.reverse.fixtures:cell_xml":
+        "test-only fixture helper; reached only from tests/test_reverse_*.py",
+    "mdg_drawio.reverse.fixtures:edge_cell_xml":
+        "test-only fixture helper; reached only from tests/test_reverse_*.py",
+    "mdg_drawio.reverse.fixtures:entry_cell":
+        "test-only fixture helper; reached only from tests/test_reverse_*.py",
+    "mdg_drawio.reverse.fixtures:group_cell_xml":
+        "test-only fixture helper; reached only from tests/test_reverse_*.py",
+    "mdg_drawio.reverse.fixtures:layer_cell_xml":
+        "test-only fixture helper; reached only from tests/test_reverse_*.py",
+    "mdg_drawio.reverse.fixtures:library_only_anchor":
+        "test-only fixture helper; reached only from tests/test_reverse_*.py",
+    "mdg_drawio.reverse.fixtures:perturb":
+        "test-only fixture helper; reached only from tests/test_reverse_*.py",
 }

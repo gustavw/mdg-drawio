@@ -89,15 +89,17 @@ dashboard:  ## Build the static D3 quality dashboard (dashboard.html)
 # Needs generated data (reads the palette styles). Usage:
 #   make derive FILE=path/to/diagram.drawio
 derive:  ## Reverse-derive registry shapes from a .drawio (FILE=...)
-	$(PYTHON) -m scripts.reverse $(FILE)
+	$(PYTHON) -m mdg_drawio.reverse $(FILE)
 
 # Merge newly hand-drawn cells from a .drawio into an existing .mdg, correctly
 # indented/nested. Dry run by default (prints a diff, touches nothing); pass
 # WRITE=1 to actually apply -- validated against the real .mdg parser first,
-# so an invalid merge is refused and the file left untouched. Usage:
+# so an invalid merge is refused and the file left untouched. Thin wrapper
+# around the `mdg merge` subcommand -- use that directly if `mdg` is on PATH.
+# Usage:
 #   make merge MDG=path/to/existing.mdg FILE=path/to/diagram.drawio [WRITE=1]
 merge:  ## Merge new .drawio cells into an existing .mdg (MDG=... FILE=... [WRITE=1])
-	$(PYTHON) -m scripts.reverse.merge_cli $(MDG) $(FILE) $(if $(WRITE),--write,)
+	$(PYTHON) -m mdg_drawio merge $(MDG) $(FILE) $(if $(WRITE),--write,)
 
 # Refresh the committed architecture diagrams from the model. Intentionally NOT
 # --force: the overlay round-trip preserves manually arranged node positions

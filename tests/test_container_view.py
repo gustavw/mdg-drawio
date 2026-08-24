@@ -401,9 +401,18 @@ _ORCHESTRATOR_FILES = {"__main__.py", "cli.py"}
 def _is_orchestrator(rel: str) -> bool:
     """Orchestrators wire the service packages together and are import-exempt.
 
-    The engine is a package (``engine/``); every module in it is an orchestrator.
+    The engine is a package (``engine/``); every module in it is an
+    orchestrator. ``reverse/`` is exempt for the same reason: deriving a
+    shape and merging into a ``.mdg`` inherently means reaching into
+    ``notation`` (parsing, registry lookup) -- it is engine's counterpart
+    for the reverse direction, not a peer of generator/layout/notation that
+    should stay siloed.
     """
-    return rel in _ORCHESTRATOR_FILES or rel.startswith("engine/")
+    return (
+        rel in _ORCHESTRATOR_FILES
+        or rel.startswith("engine/")
+        or rel.startswith("reverse/")
+    )
 
 
 def _cross_package_imports(path: str) -> list[tuple[str, int, str]]:
