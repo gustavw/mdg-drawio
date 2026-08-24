@@ -52,6 +52,7 @@ from mdg_drawio.layout import (
     ShapeScalingConfig,
     SizeResolver,
     absolute_node_boxes,
+    build_parent_map,
     create_size_resolver,
     create_style_resolver,
     dispatch_layout,
@@ -435,6 +436,27 @@ def _deduplicate_nodes(page: Document) -> None:
     page.nodes = deduped
 
 
+def _hide_implied_containment_edges(nodes: list[Node], edges: list[Edge]) -> None:
+    """Hide any edge whose endpoints are a direct parent-child pair.
+
+    Containment nesting already communicates the relationship visually; an
+    explicitly authored edge between a container and its own direct child
+    (any relation type, any notation) becomes a redundant line drawn through
+    the nesting. Only adjacent pairs are hidden -- an edge between a
+    grandparent and grandchild is a real cross-level relationship and stays
+    visible. The edge itself stays in the document (and so in the source
+    ``.mdg``); only its rendering is suppressed.
+    """
+    parent_by_id = build_parent_map(nodes)
+    direct_pairs = {
+        frozenset((child_id, parent_id))
+        for child_id, parent_id in parent_by_id.items()
+    }
+    for edge in edges:
+        if frozenset((edge.source_id, edge.target_id)) in direct_pairs:
+            edge.hidden = True
+
+
 def _inject_node_overlay(
     nodes: list[Node], overlay: GeometryOverlay | None
 ) -> None:
@@ -550,6 +572,8 @@ def _apply_layout_to_document(
     overlay = page.geometry_overlay
 
     _deduplicate_nodes(page)
+    if page.diagram.mode != PALETTE_MODE:
+        _hide_implied_containment_edges(page.nodes, page.edges)
     _inject_node_overlay(page.nodes, overlay)
     _resolve_node_sizes(page.nodes, size_of)
     scale_node_sizes(page.nodes, config)
@@ -631,6 +655,8 @@ def _generate_multipage(
         layout_config = replace(
             layout_config, rank_exclude_ids=rank_exclude_ids
         )
+        if page_doc.diagram.grid:
+            layout_config = replace(layout_config, grid=True)
         page_doc = _apply_layout_to_document(
             page_doc, size_of, layout_mode, layout_config
         )

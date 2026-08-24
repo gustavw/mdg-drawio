@@ -46,6 +46,7 @@ class _ContainerLayoutOptions:
     rank_gap: float
     column_gap: float
     default_padding: dict[str, float]
+    grid: bool = False
 
 
 @dataclass(frozen=True)
@@ -129,7 +130,7 @@ def _would_create_parent_cycle(
     return False
 
 
-def _build_parent_map(nodes: list[Node]) -> dict[str, str]:
+def build_parent_map(nodes: list[Node]) -> dict[str, str]:
     node_by_id = {node.id: node for node in nodes}
     parent_by_id: dict[str, str] = {}
 
@@ -274,18 +275,17 @@ def _position_children_grid(
     left: float,
     col_gap: float,
     row_gap: float,
+    cols: int,
 ) -> None:
-    """Pack *children* into a left-to-right, top-to-bottom grid.
+    """Pack *children* into a left-to-right, top-to-bottom grid of *cols* columns.
 
-    Column count targets ``_GRID_ASPECT`` so a coupled cluster stays compact
-    instead of stretching into one long row/column. Columns are sized to their
-    own widest member (and rows to their tallest), so a single wide child does
-    not inflate every column. Input order (rank order) is preserved as reading
-    order, so dependency flow is still roughly visible.
+    Columns are sized to their own widest member (and rows to their tallest),
+    so a single wide child does not inflate every column. Input order (rank
+    order) is preserved as reading order, so dependency flow is still roughly
+    visible.
     """
     if not children:
         return
-    cols = max(1, ceil((len(children) * _GRID_ASPECT) ** 0.5))
     rows = ceil(len(children) / cols)
 
     col_width = [0.0] * cols
@@ -595,16 +595,41 @@ def _layout_container_children(
     for child in children:
         child.width, child.height = _node_size(child, size_of)
 
-    if parent.extra.get("child_layout") == "stack":
-        _stack_children(parent, children)
-        return
-
     top_pad, right_pad, bottom_pad, left_pad = _padding_values(
         parent,
         options.default_padding,
     )
     child_gap = float(parent.extra.get("child_gap", options.column_gap))
     top = float(parent.extra.get("start_size", 0)) + top_pad
+
+    if options.grid:
+        # Document-level override (frontmatter `grid: true`, layered mode
+        # only): every container's siblings are forced into a square-ish
+        # grid, regardless of any per-shape ordering convention (stack
+        # containers, shared-rank-plan siblings) below.
+        cols = max(1, ceil(len(children) ** 0.5))
+        _position_children_grid(
+            children,
+            top=top,
+            left=left_pad,
+            col_gap=child_gap,
+            # A plain visual grid has no "rank" axis to justify a larger
+            # gap on one dimension -- unlike the degenerate-chain auto-grid
+            # below (a real dependency chain, where rank_gap matches the
+            # primary-axis spacing used everywhere else), both axes here
+            # use the same gap so rows and columns read as one uniform grid.
+            row_gap=child_gap,
+            cols=cols,
+        )
+        _grow_parent_to_fit_children(
+            parent, children, right_pad=right_pad, bottom_pad=bottom_pad
+        )
+        return
+
+    if parent.extra.get("child_layout") == "stack":
+        _stack_children(parent, children)
+        return
+
     horizontal = options.direction != "TB"
 
     if shared_rank_plan is not None:
@@ -639,12 +664,14 @@ def _layout_container_children(
         degenerate = max((len(rank) for rank in ranked), default=0) <= 1
         if degenerate and len(children) >= _GRID_MIN_CHILDREN:
             ordered = [child for rank in ranked for child in rank]
+            auto_cols = max(1, ceil((len(ordered) * _GRID_ASPECT) ** 0.5))
             _position_children_grid(
                 ordered,
                 top=top,
                 left=left_pad,
                 col_gap=child_gap,
                 row_gap=options.rank_gap,
+                cols=auto_cols,
             )
         else:
             _position_ranked_children(
@@ -737,6 +764,7 @@ def apply_container_layout(
     rank_gap: float,
     column_gap: float,
     default_padding: dict[str, float],
+    grid: bool = False,
 ) -> ContainerState:
     """Lay out generic parent/child containers and return hierarchy state.
 
@@ -749,7 +777,7 @@ def apply_container_layout(
     if not nodes:
         return ContainerState({}, [], {})
 
-    parent_by_id = _build_parent_map(nodes)
+    parent_by_id = build_parent_map(nodes)
     if not parent_by_id:
         return ContainerState(
             {},
@@ -764,6 +792,7 @@ def apply_container_layout(
         rank_gap=rank_gap,
         column_gap=column_gap,
         default_padding=default_padding,
+        grid=grid,
     )
 
     top_level_nodes = [
@@ -792,7 +821,7 @@ def absolute_node_boxes(
 ) -> dict[str, Box]:
     """Return absolute page-frame boxes for nodes with parent-relative children."""
     node_by_id = {node.id: node for node in nodes}
-    parent_by_id = _build_parent_map(nodes)
+    parent_by_id = build_parent_map(nodes)
     boxes: dict[str, Box] = {}
 
     def _box(node_id: str) -> Box:

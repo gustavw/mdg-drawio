@@ -392,6 +392,90 @@ def test_invalid_frontmatter_direction_is_rejected(
     assert "direction: sideways" in capsys.readouterr().err
 
 
+def _archimate_grid_source(mode: str, grid: bool) -> str:
+    """A Grouping containing 4 sibling BusinessServices, optionally gridded."""
+    grid_line = "grid: true\n" if grid else ""
+    return (
+        f'---\npage: "P"\nmode: {mode}\n{grid_line}---\n\n'
+        'archimate3.Grouping(gp1, "Grouping"):\n'
+        '    archimate3.BusinessService(bs1, "A")\n'
+        '    archimate3.BusinessService(bs2, "B")\n'
+        '    archimate3.BusinessService(bs3, "C")\n'
+        '    archimate3.BusinessService(bs4, "D")\n'
+    )
+
+
+def test_frontmatter_grid_true_forces_square_arrangement(tmp_path: Path) -> None:
+    """`grid: true` under `mode: layered` packs 4 siblings into a 2x2 grid,
+    not a single column."""
+    src = tmp_path / "grid.mdg"
+    src.write_text(_archimate_grid_source("layered", grid=True), encoding="utf-8")
+    assert _run_convert(src, tmp_path / "grid.drawio") == 0
+
+    pos = _boundary_child_positions(
+        tmp_path / "grid.drawio", ("bs1", "bs2", "bs3", "bs4")
+    )
+    xs = {x for x, _y in pos.values()}
+    ys = {y for _x, y in pos.values()}
+    assert len(xs) == 2, "expected 2 distinct columns"
+    assert len(ys) == 2, "expected 2 distinct rows"
+
+
+def test_invalid_frontmatter_grid_with_process_mode_is_rejected(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`grid: true` combined with `mode: process` fails loudly, not silently."""
+    src = tmp_path / "bad_grid.mdg"
+    src.write_text(_archimate_grid_source("process", grid=True), encoding="utf-8")
+
+    assert _run_convert(src, tmp_path / "bad_grid.drawio") == 1
+    assert "grid: true" in capsys.readouterr().err
+
+
+def _edge_hidden(output_path: Path, source: str, target: str) -> bool:
+    """Whether the edge cell for source->target is actually invisible.
+
+    draw.io hides a cell via the mxCell ``visible`` attribute, not a style
+    token -- a style-only "hidden=1" is inert and the edge still renders.
+    """
+    root = ET.parse(str(output_path)).getroot()
+    for el in root.iter("mxCell"):
+        if el.get("source") == source and el.get("target") == target:
+            return el.get("visible") == "0"
+    raise AssertionError(f"no edge cell found for {source}->{target}")
+
+
+def test_edge_between_direct_parent_child_is_hidden(tmp_path: Path) -> None:
+    """An explicit relationship edge between a container and its direct
+    nested child is hidden in the rendering -- nesting already shows it."""
+    src = tmp_path / "hide_direct.mdg"
+    src.write_text(
+        '---\npage: "P"\nmode: layered\n---\n\n'
+        'archimate3.Grouping(gp1, "Grouping"):\n'
+        '    archimate3.BusinessFunction(bf1, "Function")\n'
+        'archimate3.Composition(gp1, bf1, "")\n',
+        encoding="utf-8",
+    )
+    assert _run_convert(src, tmp_path / "hide_direct.drawio") == 0
+    assert _edge_hidden(tmp_path / "hide_direct.drawio", "gp1", "bf1")
+
+
+def test_edge_between_grandparent_grandchild_stays_visible(tmp_path: Path) -> None:
+    """A relationship edge between a grandparent and grandchild (not a direct
+    nesting pair) is a real cross-level relationship and must stay visible."""
+    src = tmp_path / "keep_visible.mdg"
+    src.write_text(
+        '---\npage: "P"\nmode: layered\n---\n\n'
+        'archimate3.Grouping(gp1, "Grouping"):\n'
+        '    archimate3.BusinessFunction(bf1, "Function"):\n'
+        '        archimate3.BusinessService(bs1, "Service")\n'
+        'archimate3.Composition(gp1, bs1, "")\n',
+        encoding="utf-8",
+    )
+    assert _run_convert(src, tmp_path / "keep_visible.drawio") == 0
+    assert not _edge_hidden(tmp_path / "keep_visible.drawio", "gp1", "bs1")
+
+
 def test_unknown_use_statement_is_rejected(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

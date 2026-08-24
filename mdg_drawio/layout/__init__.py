@@ -13,6 +13,7 @@ from __future__ import annotations
 from . import layered, palette, process, sequence
 from ._container_layout import (
     absolute_node_boxes,
+    build_parent_map,
     estimate_text_width,
 )
 from ._types import (
@@ -61,6 +62,7 @@ __all__ = [
     "SizeResolver",
     "Waypoint",
     "absolute_node_boxes",
+    "build_parent_map",
     "create_size_resolver",
     "create_style_resolver",
     "dispatch_layout",

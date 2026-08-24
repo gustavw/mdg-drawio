@@ -80,6 +80,7 @@ class LayeredLayout(BaseLayout):
             rank_gap=cfg.rank_gap,
             column_gap=cfg.column_gap,
             default_padding=default_padding,
+            grid=cfg.grid,
         )
 
         node_by_id = {n.id: n for n in nodes}

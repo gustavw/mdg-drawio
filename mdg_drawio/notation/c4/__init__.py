@@ -37,6 +37,7 @@ from .._core import (
     literal_string,
     literal_value,
     parse_block_source,
+    parse_bool_metadata,
     parse_call_arguments,
     parse_frontmatter,
     parse_keyword_int,
@@ -305,6 +306,13 @@ def _parse_diagram_title(
 def parse_page(source: str, page_name: str, _page_index: int = 0) -> Document:
     """Parse a single page of C4 DSL source into ``Document``."""
     metadata, body = parse_frontmatter(source)
+    mode = metadata.get("mode", "")
+    grid = parse_bool_metadata(metadata, "grid")
+    if grid and mode == "process":
+        raise DslError(
+            "`grid: true` is only valid with the layered layout mode "
+            f"(frontmatter `mode:`); got `mode: {mode}`"
+        )
 
     nodes, edges, diagram_name = parse_block_source(
         body,
@@ -339,8 +347,9 @@ def parse_page(source: str, page_name: str, _page_index: int = 0) -> Document:
         diagram=Diagram(
             name=diagram_name,
             description=diagram_description,
-            mode=metadata.get("mode", ""),
+            mode=mode,
             direction=metadata.get("direction", ""),
+            grid=grid,
         ),
         nodes=nodes,
         edges=edges,

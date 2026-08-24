@@ -333,6 +333,42 @@ def test_layered_lays_out_children_declared_by_contains(form: str) -> None:
     assert by_id["p"].height >= by_id["c"].height
 
 
+def test_layered_grid_config_forces_square_arrangement() -> None:
+    """``Config(grid=True)`` packs a container's children into a square-ish
+    grid instead of the default single-column/rank arrangement."""
+    parent = _node("p")
+    children = [_node(f"c{i}", width=100.0, height=50.0) for i in range(4)]
+    for child in children:
+        child.parent_id = "p"
+
+    result = LayeredLayout().apply(
+        [parent, *children], [], _size_of, config=Config(grid=True)
+    )
+
+    by_id = {n.id: n for n in result.nodes}
+    xs = {by_id[f"c{i}"].x for i in range(4)}
+    ys = {by_id[f"c{i}"].y for i in range(4)}
+    assert len(xs) == 2
+    assert len(ys) == 2
+
+
+def test_layered_grid_config_overrides_stack_child_layout() -> None:
+    """``grid: true`` is a document-wide override -- it applies even to a
+    container marked ``child_layout: stack`` (e.g. a BPMN pool's lanes)."""
+    parent = _node("p", child_layout="stack")
+    children = [_node(f"c{i}", width=100.0, height=50.0) for i in range(4)]
+    for child in children:
+        child.parent_id = "p"
+
+    result = LayeredLayout().apply(
+        [parent, *children], [], _size_of, config=Config(grid=True)
+    )
+
+    by_id = {n.id: n for n in result.nodes}
+    ys = {by_id[f"c{i}"].y for i in range(4)}
+    assert len(ys) == 2, "expected a grid, not a single stacked column"
+
+
 def _rel(
     *,
     object_attributes: dict[str, str | int | float | None] | None = None,

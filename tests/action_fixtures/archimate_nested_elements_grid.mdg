@@ -1,0 +1,16 @@
+---
+page: "Grid"
+mode: layered
+grid: true
+---
+
+archimate3.Grouping(gp1, "Grouping"):
+    archimate3.BusinessFunction(bf1, "Business Function"):
+        archimate3.BusinessService(bs1, "L1 A"):
+            archimate3.BusinessService(bs1a, "L2 A1")
+            archimate3.BusinessService(bs1b, "L2 A2")
+        archimate3.BusinessService(bs2, "L1 B"):
+            archimate3.BusinessService(bs2a, "L2 B1")
+            archimate3.BusinessService(bs2b, "L2 B2")
+
+archimate3.Composition(bf1, bs1, "")

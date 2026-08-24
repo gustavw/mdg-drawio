@@ -1,0 +1,4 @@
+archimate3.Grouping(gp1, "Grouping"):
+    archimate3.BusinessFunction(bf1, "Business Function"):
+        archimate3.BusinessService(bs1, "L1 Business Service"):
+            archimate3.BusinessService(bs2, "L2 Business Service")
