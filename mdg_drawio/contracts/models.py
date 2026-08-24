@@ -79,6 +79,7 @@ class Diagram:
     aspect_ratio: str = ""
     mode: str = ""                # layout mode: layered, sequence, process, palette
     direction: str = ""           # flow override: "TB"|"LR" (empty = config default)
+    grid: bool = False            # force square-grid sibling arrangement (layered only)
 
 
 # ---------------------------------------------------------------------------

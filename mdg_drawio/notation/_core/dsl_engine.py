@@ -114,6 +114,27 @@ def parse_frontmatter(source: str) -> tuple[dict[str, str], str]:
     return metadata, "\n".join(lines[end + 1:])
 
 
+_TRUE_VALUES = frozenset({"true", "1", "yes"})
+_FALSE_VALUES = frozenset({"false", "0", "no"})
+
+
+def parse_bool_metadata(metadata: dict[str, str], key: str) -> bool:
+    """Parse a boolean frontmatter value (e.g. ``grid: true``).
+
+    Absent -> False. An unrecognized value is a loud error, not a silent
+    falsy default.
+    """
+    raw = metadata.get(key, "")
+    if not raw:
+        return False
+    normalized = raw.strip().lower()
+    if normalized in _TRUE_VALUES:
+        return True
+    if normalized in _FALSE_VALUES:
+        return False
+    raise DslError(f"invalid `{key}: {raw}` in frontmatter; expected true or false")
+
+
 # ---------------------------------------------------------------------------
 # Page splitting
 # ---------------------------------------------------------------------------

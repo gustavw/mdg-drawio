@@ -8,6 +8,8 @@ header rule and its matching header clearance.
 
 from __future__ import annotations
 
+import re
+
 import pytest
 
 import mdg_drawio.generator.generator as gen
@@ -117,6 +119,50 @@ def test_non_palette_mode_applies_style_overrides() -> None:
     )
 
     assert "align=left" in generate(doc, provider)
+
+
+def test_has_alignment_tokens_detects_align_or_vertical_align() -> None:
+    assert gen._has_alignment_tokens("align=left;verticalAlign=top;")
+    assert gen._has_alignment_tokens("rounded=1;align=center;")
+    assert gen._has_alignment_tokens("rounded=1;verticalAlign=bottom;")
+    assert not gen._has_alignment_tokens("rounded=1;whiteSpace=wrap;")
+
+
+def test_apply_container_label_position_appends_top_left_tokens() -> None:
+    result = gen._apply_container_label_position("rounded=1;whiteSpace=wrap;")
+    tokens = _tokens(result)
+    assert tokens["align"] == "left"
+    assert tokens["verticalAlign"] == "top"
+    assert tokens["spacingLeft"] == "4"
+    assert tokens["spacingTop"] == "4"
+
+
+def test_apply_container_label_position_skips_shapes_with_own_alignment() -> None:
+    """A shape whose palette style already sets align/verticalAlign (e.g.
+    c4.System_Boundary's baked-in ``align=left;verticalAlign=bottom;``) is
+    left untouched -- the generic rule must never double-style it."""
+    style = "rounded=1;align=left;verticalAlign=bottom;"
+    assert gen._apply_container_label_position(style) == style
+
+
+def test_generate_pins_container_label_top_left_generically() -> None:
+    """Any notation's node gets a top-left label once it has real children
+    in this document -- not because of its type, but because of containment."""
+    provider = _provider({})
+    doc = Document(
+        diagram=Diagram(mode="layered"),
+        nodes=[
+            Node(id="parent", type="archimate3.grouping", label="Parent"),
+            Node(id="child", type="archimate3.businessfunction", label="Child",
+                 parent_id="parent"),
+        ],
+    )
+    xml = generate(doc, provider)
+    parent_style = re.search(r'id="parent"[^>]*style="([^"]*)"', xml)
+    child_style = re.search(r'id="child"[^>]*style="([^"]*)"', xml)
+    assert parent_style is not None and child_style is not None
+    assert "align=left;verticalAlign=top" in parent_style.group(1)
+    assert "align=left;verticalAlign=top" not in child_style.group(1)
 
 
 def test_convert_injects_type_padding_into_node_extra() -> None:

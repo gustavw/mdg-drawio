@@ -140,6 +140,28 @@ def _apply_corrections(style: str, corrections: dict[str, _StyleValue]) -> str:
     return ";".join(parts) + ";" if parts else ""
 
 
+def _has_alignment_tokens(style: str) -> bool:
+    """Whether *style* already sets its own ``align``/``verticalAlign``.
+
+    Checked against the fully-resolved style so a shape whose own palette
+    style already bakes in label positioning (e.g. ``c4.System_Boundary``'s
+    ``align=left;verticalAlign=bottom;``) is never double-styled.
+    """
+    tokens = {part.split("=", 1)[0] for part in style.split(";") if part}
+    return "align" in tokens or "verticalAlign" in tokens
+
+
+def _apply_container_label_position(style: str) -> str:
+    """Pin a genuine container's label top-left, matching ArchiMate/draw.io's
+    own nesting convention (a container's title sits top-left of its box)."""
+    if _has_alignment_tokens(style):
+        return style
+    return (
+        style.rstrip(";")
+        + ";align=left;verticalAlign=top;spacingLeft=4;spacingTop=4;"
+    )
+
+
 def _split_type(node_type: str) -> tuple[str, str]:
     """Split a namespaced type like ``c4.person`` into ``(library, function)``."""
     parts = node_type.split(".", 1)
@@ -503,6 +525,8 @@ def _append_node(mx_root: ET.Element, node: Node, ctx: _GenCtx) -> None:
     cell_attrs = _build_node_cell_attrs(
         node, node_id, parent_id, base_style, label=outer_label
     )
+    if ctx.apply_overrides and node_id in ctx.container_ids:
+        cell_attrs["style"] = _apply_container_label_position(cell_attrs["style"])
 
     wrapper = _maybe_wrap_object(mx_root, node, cell_attrs, ctx.styles)
     cell_parent: ET.Element = wrapper if wrapper is not None else mx_root
@@ -718,6 +742,10 @@ def _append_edge(mx_root: ET.Element, edge: Edge, ctx: _GenCtx) -> None:
         "source": source_id,
         "target": target_id,
     }
+    if edge.hidden:
+        # draw.io hides a cell via the mxCell `visible` attribute, not a style
+        # token -- a style-only "hidden=1" is inert and still renders.
+        edge_attrs["visible"] = "0"
 
     if edge.label:
         edge_attrs["value"] = edge.label
@@ -846,8 +874,6 @@ def _append_edge_child(
 def _style_overrides_for_edge(edge: Edge) -> str:
     """Build style override tokens for an edge."""
     tokens = _style_tokens(edge.style_overrides)
-    if edge.hidden:
-        tokens.append("hidden=1")
     anchor_tokens = _anchor_tokens("exit", edge.source_anchor)
     if anchor_tokens:
         tokens.append(anchor_tokens)

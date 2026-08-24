@@ -75,6 +75,7 @@ class Config:
     )
     shape_scaling: ShapeScalingConfig = field(default_factory=ShapeScalingConfig)
     rank_exclude_ids: frozenset[str] = frozenset()
+    grid: bool = False
 
 
 # ---------------------------------------------------------------------------
