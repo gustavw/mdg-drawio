@@ -164,9 +164,10 @@ registry shape each cell came from — lives in
 [`mdg_drawio/reverse/`](mdg_drawio/reverse/) as a proof of concept.
 
 ```bash
-make derive FILE=path/to/diagram.drawio      # needs `make build-data`
-# or directly:
-python -m mdg_drawio.reverse path/to/diagram.drawio
+mdg derive path/to/diagram.drawio            # needs `make build-data`
+mdg derive path/to/diagram.drawio --json
+# or via make (same thing):
+make derive FILE=path/to/diagram.drawio
 ```
 
 It works in two layers:

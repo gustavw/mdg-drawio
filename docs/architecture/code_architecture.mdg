@@ -15,6 +15,8 @@ uml.Package(contracts, "Contracts"):
 uml.Package(engine, "Engine"):
     uml.Package(engine_convert_co, "convert()"):
         uml.Class(engine_convert, "convert")
+    uml.Package(engine_derive_co, "derive()"):
+        uml.Class(engine_derive, "derive")
     uml.Package(engine_merge_co, "merge()"):
         uml.Class(engine_merge, "merge")
     uml.Package(engine_preload_co, "Pre-load"):
@@ -60,6 +62,8 @@ uml.Package(notation, "Notation"):
 uml.Package(reverse, "Reverse Derivation & Merge"):
     uml.Package(reverse_containment_co, "Containment Resolution"):
         uml.Class(reverse_containment, "containment")
+    uml.Package(reverse_derive_cli_co, "Derive CLI"):
+        uml.Class(reverse_derive_cli, "derive_cli")
     uml.Package(reverse_derive_co, "Document-Level Ranking"):
         uml.Class(reverse_derive, "derive")
     uml.Package(reverse_fixtures_co, "Fixture Synthesis"):
@@ -85,6 +89,7 @@ uml.Dependency(engine_convert, engine_validate)
 uml.Dependency(engine_convert, generator)
 uml.Dependency(engine_convert, layout)
 uml.Dependency(engine_convert, notation)
+uml.Dependency(engine_derive, reverse)
 uml.Dependency(engine_merge, reverse)
 uml.Dependency(engine_preload, notation)
 uml.Dependency(generator_generator, contracts)
@@ -120,6 +125,10 @@ uml.Dependency(reverse_containment, reverse_scoring)
 uml.Dependency(reverse_containment, reverse_style_index)
 uml.Dependency(reverse_derive, reverse_scoring)
 uml.Dependency(reverse_derive, reverse_style_index)
+uml.Dependency(reverse_derive_cli, reverse_containment)
+uml.Dependency(reverse_derive_cli, reverse_derive)
+uml.Dependency(reverse_derive_cli, reverse_naming)
+uml.Dependency(reverse_derive_cli, reverse_style_index)
 uml.Dependency(reverse_fixtures, reverse_derive)
 uml.Dependency(reverse_fixtures, reverse_style_index)
 uml.Dependency(reverse_merge, notation)

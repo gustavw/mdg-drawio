@@ -11,7 +11,7 @@ Groups, roughly in dependency order:
   for a real bug this suite caught: object-wrapped cells losing their id;
 * ``fixtures`` helper unit tests (no data);
 * ``naming`` semantic-id assignment tests (no data);
-* CLI (``mdg_drawio.reverse.__main__``) tests, via a monkeypatched index (no data);
+* CLI (``mdg_drawio.reverse.derive_cli``) tests, via a monkeypatched index (no data);
 * data-gated end-to-end tests against the real palette -- the two version-
   priority scenarios from the design discussion, plus corpus-wide sanity
   checks. These skip without ``make build-data`` (palette styles are
@@ -29,7 +29,6 @@ from xml.etree import ElementTree as ET
 import pytest
 
 from mdg_drawio.reverse import fixtures as fx
-from mdg_drawio.reverse.__main__ import main
 from mdg_drawio.reverse.derive import (
     DEFAULT_BAND,
     DEFAULT_SIM_FLOOR,
@@ -38,6 +37,7 @@ from mdg_drawio.reverse.derive import (
     load_cells,
     parent_map,
 )
+from mdg_drawio.reverse.derive_cli import main
 from mdg_drawio.reverse.naming import assign_semantic_ids, semantic_base
 from mdg_drawio.reverse.scoring import (
     BARE,

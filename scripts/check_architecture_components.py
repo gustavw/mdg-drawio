@@ -56,6 +56,7 @@ DEFAULT_MDG_PATHS = (
 MODULE_TO_LABEL: dict[str, str] = {
     "cli.py": "CLI main()",
     "engine/convert.py": "convert()",
+    "engine/derive.py": "derive()",
     "engine/merge.py": "merge()",
     "engine/preload.py": "Pre-load",
     "engine/validate.py": "XML Validation",
@@ -80,6 +81,7 @@ MODULE_TO_LABEL: dict[str, str] = {
     "notation/GRAMMAR.md": "GRAMMAR.md",
     "reverse/containment.py": "Containment Resolution",
     "reverse/derive.py": "Document-Level Ranking",
+    "reverse/derive_cli.py": "Derive CLI",
     "reverse/fixtures.py": "Fixture Synthesis",
     "reverse/merge.py": "Merge Planning",
     "reverse/merge_cli.py": "Merge CLI",
@@ -123,14 +125,14 @@ COLLECTIVE_COMPONENT_SUBSTRS: tuple[str, ...] = (
 
 EXPECTED_RELATION_COUNTS: dict[str, int] = {
     "Context": 4,
-    # +2: cli -> reverse, reverse -> notation (the new Reverse Derivation &
-    # Merge container, added for the `mdg merge` subcommand).
+    # +2: engine -> reverse, reverse -> notation (the new Reverse Derivation &
+    # Merge container, added for the `mdg merge`/`mdg derive` subcommands).
     "Container": 13,
-    # +21: the Reverse Derivation & Merge container's own Component/Code-page
-    # edges -- cli -> reverse boundary, 8 new components' intra-package and
-    # cross-package (-> notation) relations.
-    "Component": 58,
-    "Code": 58,
+    # +25: the Reverse Derivation & Merge container's own Component/Code-page
+    # edges -- engine.merge()/derive() -> reverse boundary, 9 new components'
+    # intra-package and cross-package (-> notation) relations.
+    "Component": 63,
+    "Code": 63,
 }
 
 CONTEXT_RELATION_TYPES: set[str] = {

@@ -41,9 +41,17 @@ Always validate before writing:
 
 ## CLI command reference
 
+Positional args, not flags: first is always input, second (optional) is
+output — never guessed from extension, so a wrong guess can't overwrite the
+`.mdg` source. Omitting output derives `<input>.drawio` alongside the input.
+
 ```bash
-mdg --force -i input.mdg -o output.drawio
-python -m mdg_drawio --force -i input.mdg -o output.drawio
+mdg input.mdg output.drawio --force
+mdg input.mdg --force                       # writes input.drawio alongside it
+python -m mdg_drawio input.mdg output.drawio --force
+
+mdg merge existing.mdg new.drawio [--write]  # splice hand-drawn cells into existing.mdg
+mdg derive diagram.drawio [--json]           # print which registry shape each cell derives to
 ```
 
 ## Testing the pipeline
@@ -51,5 +59,5 @@ python -m mdg_drawio --force -i input.mdg -o output.drawio
 ```bash
 make lint
 make test
-python -m mdg_drawio --force -i docs/architecture/c4_architecture.mdg -o /tmp/test.drawio
+python -m mdg_drawio docs/architecture/c4_architecture.mdg /tmp/test.drawio --force
 ```

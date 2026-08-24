@@ -14,6 +14,7 @@ Verification traceability is coverage-derived via `make verification`.
 | Engine | Pre-load | `engine/preload.py` |
 | Engine | XML Validation | `engine/validate.py` |
 | Engine | convert() | `engine/convert.py` |
+| Engine | derive() | `engine/derive.py` |
 | Engine | merge() | `engine/merge.py` |
 | Generator | Overlay | `generator/overlay.py` |
 | Generator | XML Utils | `generator/xml_utils.py` |
@@ -32,6 +33,7 @@ Verification traceability is coverage-derived via `make verification`.
 | Notation | Registry | `notation/_core/registry.py` |
 | Notation | Styles | `notation/_core/styles.py` |
 | Reverse Derivation & Merge | Containment Resolution | `reverse/containment.py` |
+| Reverse Derivation & Merge | Derive CLI | `reverse/derive_cli.py` |
 | Reverse Derivation & Merge | Document-Level Ranking | `reverse/derive.py` |
 | Reverse Derivation & Merge | Fixture Synthesis | `reverse/fixtures.py` |
 | Reverse Derivation & Merge | Merge CLI | `reverse/merge_cli.py` |

@@ -86,10 +86,11 @@ dashboard:  ## Build the static D3 quality dashboard (dashboard.html)
 
 # Reverse derivation (POC): given a hand-drawn .drawio, derive which registry
 # shape each cell came from via weighted style matching + library ranking.
-# Needs generated data (reads the palette styles). Usage:
+# Needs generated data (reads the palette styles). Thin wrapper around the
+# `mdg derive` subcommand -- use that directly if `mdg` is on PATH. Usage:
 #   make derive FILE=path/to/diagram.drawio
 derive:  ## Reverse-derive registry shapes from a .drawio (FILE=...)
-	$(PYTHON) -m mdg_drawio.reverse $(FILE)
+	$(PYTHON) -m mdg_drawio derive $(FILE)
 
 # Merge newly hand-drawn cells from a .drawio into an existing .mdg, correctly
 # indented/nested. Dry run by default (prints a diff, touches nothing); pass
@@ -107,7 +108,7 @@ merge:  ## Merge new .drawio cells into an existing .mdg (MDG=... FILE=... [WRIT
 # the gate, so hand-tuning their layout is safe.
 diagrams:  ## Refresh committed architecture .drawio (overlay-preserving)
 	@for f in $(ARCH_DIAGRAMS); do \
-		$(PYTHON) -m mdg_drawio -i $(ARCH_DIR)/$$f.mdg -o $(ARCH_DIR)/$$f.drawio; \
+		$(PYTHON) -m mdg_drawio $(ARCH_DIR)/$$f.mdg $(ARCH_DIR)/$$f.drawio; \
 	done
 
 clean:  ## Remove generated files
