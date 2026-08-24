@@ -23,6 +23,8 @@ uml.Package(engine, "Engine"):
         uml.Class(engine_notation_info, "notation_info")
     uml.Package(engine_preload_co, "Pre-load"):
         uml.Class(engine_preload, "preload")
+    uml.Package(engine_sync_co, "sync()"):
+        uml.Class(engine_sync, "sync")
     uml.Package(engine_validate_co, "XML Validation"):
         uml.Class(engine_validate, "validate")
 uml.Package(generator, "Generator"):
@@ -80,6 +82,8 @@ uml.Package(reverse, "Reverse Derivation & Merge"):
         uml.Class(reverse_scoring, "scoring")
     uml.Package(reverse_style_index_co, "Style Index"):
         uml.Class(reverse_style_index, "style_index")
+    uml.Package(reverse_sync_cli_co, "Sync CLI"):
+        uml.Class(reverse_sync_cli, "sync_cli")
 uml.Package(cli_co, "CLI main()"):
     uml.Class(cli, "cli")
 
@@ -95,6 +99,7 @@ uml.Dependency(engine_derive, reverse)
 uml.Dependency(engine_merge, reverse)
 uml.Dependency(engine_notation_info, notation)
 uml.Dependency(engine_preload, notation)
+uml.Dependency(engine_sync, reverse)
 uml.Dependency(generator_generator, contracts)
 uml.Dependency(generator_generator, generator_xml_utils)
 uml.Dependency(generator_overlay, contracts)
@@ -147,3 +152,8 @@ uml.Dependency(reverse_naming, reverse_derive)
 uml.Dependency(reverse_naming, reverse_style_index)
 uml.Dependency(reverse_style_index, notation)
 uml.Dependency(reverse_style_index, reverse_scoring)
+uml.Dependency(reverse_sync_cli, reverse)
+uml.Dependency(reverse_sync_cli, reverse_containment)
+uml.Dependency(reverse_sync_cli, reverse_derive)
+uml.Dependency(reverse_sync_cli, reverse_naming)
+uml.Dependency(reverse_sync_cli, reverse_style_index)

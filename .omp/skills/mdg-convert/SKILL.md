@@ -50,7 +50,8 @@ mdg input.mdg output.drawio --force
 mdg input.mdg --force                       # writes input.drawio alongside it
 python -m mdg_drawio input.mdg output.drawio --force
 
-mdg merge existing.mdg new.drawio [--write]  # splice hand-drawn cells into existing.mdg
+mdg merge existing.mdg new.drawio [--write]  # ADD hand-drawn cells into existing.mdg (never removes)
+mdg sync existing.mdg diagram.drawio [--write]  # ADD + REMOVE -- draw.io as sole source of truth
 mdg derive diagram.drawio [--json]           # print which registry shape each cell derives to
 mdg notation [library] [--json]              # list libraries, or a library's full DSL palette
 ```
@@ -60,6 +61,12 @@ every callable function/variant for a notation plus a ready-to-adapt example
 call — read this before guessing DSL syntax from memory. `mdg notation`
 alone lists all seven libraries with their shape counts. Run `mdg` with no
 arguments for a one-screen overview of every command.
+
+`merge` vs `sync`: both splice new hand-drawn cells into an existing `.mdg`
+identically. `sync` additionally deletes any vertex/edge whose draw.io cell
+no longer exists (whole subtree for a removed container) -- use it when the
+`.drawio` should fully dictate the `.mdg`'s contents; use plain `merge` when
+you only ever want to add, never lose something someone typed by hand.
 
 ## Testing the pipeline
 

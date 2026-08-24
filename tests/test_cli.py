@@ -60,6 +60,7 @@ def test_bare_invocation_shows_overview_and_exits_nonzero(
     assert main([]) == 1
     out = capsys.readouterr().out
     assert "mdg merge" in out
+    assert "mdg sync" in out
     assert "mdg derive" in out
     assert "mdg notation" in out
 
@@ -71,6 +72,7 @@ def test_bare_help_flag_shows_overview_and_exits_zero(
     assert main([flag]) == 0
     out = capsys.readouterr().out
     assert "mdg merge" in out
+    assert "mdg sync" in out
     assert "mdg notation" in out
 
 

@@ -35,6 +35,13 @@ logically-identical edge re-labeled or re-routed through a different cell_id
 is NOT detected as a duplicate. Closing that gap needs cross-referencing
 existing edge declarations against the registry (which function names are
 edges) rather than a text-level check; out of scope here.
+
+:func:`plan_sync`/:func:`render_sync` (the `mdg sync` verb) extend this with
+removal: draw.io as the sole source of truth, so a vertex or edge no longer
+present there is deleted from the ``.mdg`` too, not just left stale. Uses the
+SAME identity convention and the SAME registry-``kind`` classification
+:func:`_is_edge_shape` already relies on -- just applied to the *existing*
+text instead of a freshly-derived cell.
 """
 from __future__ import annotations
 
@@ -660,6 +667,287 @@ def render_merge(existing: ExistingIndex, plan: MergePlan) -> str:
         else:
             lines[insertion.anchor_line : insertion.anchor_line] = [insertion.text]
     return "\n".join(lines) + "\n"
+
+
+_NS_FUNCTION_RE = re.compile(
+    r"^[ \t]*(?P<ns>[A-Za-z_]\w*)\.(?P<function>[A-Za-z_]\w*)"
+    r"\((?P<args>.*)\)\s*:?\s*$"
+)
+_VARIANT_KWARG_RE = re.compile(r"^variant\s*=\s*(\d+)$")
+
+
+def _split_top_level_args(args: str) -> list[str]:
+    """Every top-level comma-separated argument in a call's raw argument
+    string, respecting quoting/nesting (same scan as :func:`_first_arg_token`,
+    generalized to return every segment instead of just the first)."""
+    if not args.strip():
+        return []
+    segments: list[str] = []
+    depth = 0
+    quote: str | None = None
+    start = 0
+    for i, ch in enumerate(args):
+        if quote:
+            if ch == "\\":
+                continue
+            if ch == quote:
+                quote = None
+            continue
+        if ch in "\"'":
+            quote = ch
+        elif ch in "([{":
+            depth += 1
+        elif ch in ")]}":
+            depth -= 1
+        elif ch == "," and depth == 0:
+            segments.append(args[start:i].strip())
+            start = i + 1
+    segments.append(args[start:].strip())
+    return segments
+
+
+@dataclass(frozen=True)
+class ExistingEdge:
+    """One existing top-level edge declaration, as parsed from the ``.mdg``
+    text (not from the ``.drawio`` -- these are the file's OWN edge lines,
+    whatever wrote them)."""
+
+    line_index: int
+    source_token: str
+    target_token: str
+
+
+def _existing_edges(existing: ExistingIndex) -> list[ExistingEdge]:
+    """Every existing DSL line that resolves, via the registry, to an edge
+    shape -- with its raw source/target argument tokens.
+
+    ``index_existing``'s ``node_line`` cannot answer this: it records a call
+    line under its FIRST argument token regardless of kind, so an edge line
+    is silently invisible there once its source's own vertex declaration has
+    already claimed that key (see that function's docstring). Classifying by
+    the registry's ``kind`` (mirrors :func:`_is_edge_shape`) is the only
+    reliable signal available from text alone.
+    """
+    edges: list[ExistingEdge] = []
+    for i, line in enumerate(existing.clean_lines):
+        match = _NS_FUNCTION_RE.match(line)
+        if not match:
+            continue
+        args = _split_top_level_args(match.group("args"))
+        if len(args) < 2:
+            continue
+        variant = 1
+        for extra in args[2:]:
+            kwarg = _VARIANT_KWARG_RE.match(extra)
+            if kwarg:
+                variant = int(kwarg.group(1))
+                break
+        ns, function = match.group("ns"), match.group("function")
+        entry = registry_entry(f"{ns}.{function.lower()}.v{variant}")
+        if entry is None or entry.get("kind") != "edge":
+            continue
+        edges.append(ExistingEdge(i, args[0], args[1]))
+    return edges
+
+
+def _block_range(existing: ExistingIndex, node_id: str) -> tuple[int, int]:
+    """``[start, end)`` line range spanning ``node_id``'s own declaration and
+    everything nested under it -- the whole subtree that must disappear
+    together if ``node_id`` itself is gone. Mirrors the block-boundary scan
+    :func:`_child_insertion` already does to find where a container's
+    existing children end.
+    """
+    start = existing.node_line[node_id]
+    if not _opens_block(existing, node_id):
+        return start, start + 1
+    container_indent = len(existing.node_indent[node_id])
+    end = start + 1
+    for i in range(start + 1, len(existing.lines)):
+        line = existing.lines[i]
+        if not line.strip():
+            end = i + 1
+            continue
+        indent_width = len(line) - len(line.lstrip(" \t"))
+        if indent_width <= container_indent:
+            break
+        end = i + 1
+    return start, end
+
+
+def _merge_ranges(ranges: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    """Sorted, non-overlapping union of ``[start, end)`` ranges -- a removed
+    node nested inside another removed node's own range collapses into one
+    (its block is already covered by the outer one)."""
+    if not ranges:
+        return []
+    ordered = sorted(ranges)
+    merged = [ordered[0]]
+    for start, end in ordered[1:]:
+        last_start, last_end = merged[-1]
+        if start <= last_end:
+            merged[-1] = (last_start, max(last_end, end))
+        else:
+            merged.append((start, end))
+    return merged
+
+
+@dataclass(frozen=True)
+class SyncPlan:
+    """``mdg sync``'s plan: everything :class:`MergePlan` already computes
+    (additions), plus the existing line ranges to delete -- vertices/edges
+    no longer present in the current ``.drawio``. draw.io is the source of
+    truth: anything genuinely gone there is removed here, never left behind.
+    """
+
+    merge_plan: MergePlan
+    removed_ranges: list[tuple[int, int]]
+    removed_vertex_count: int
+    removed_edge_count: int
+
+
+def _represents_a_surviving_edge(
+    cell_id: str, raw_cells: dict[str, RawCell], surviving_pairs: set[tuple[str, str]]
+) -> bool:
+    """Whether *cell_id* is an edge cell whose (source, target) pair already
+    has a surviving existing ``.mdg`` line -- see :func:`plan_sync`."""
+    raw = raw_cells.get(cell_id)
+    if raw is None or not raw.is_edge or raw.source_id is None or raw.target_id is None:
+        return False
+    return (raw.source_id, raw.target_id) in surviving_pairs
+
+
+def plan_sync(
+    existing: ExistingIndex,
+    cells: list[Cell],
+    result: DocumentResult,
+    node_ids: dict[str, str],
+    containments: dict[str, Containment],
+    raw_cells: dict[str, RawCell],
+) -> SyncPlan:
+    """Compute :func:`plan_merge`'s usual additions PLUS removal of any
+    existing vertex or edge no longer present in the current ``.drawio``.
+
+    Vertices/edges that persist keep their exact existing text untouched --
+    same "don't disturb what's already there" contract as ``plan_merge``;
+    only genuinely gone content is deleted and genuinely new content is
+    added. A vertex whose OWN cell_id is gone takes its whole nested subtree
+    with it (:func:`_block_range`); an edge is removed if either endpoint is
+    gone, or if it survives but no current edge cell connects that same
+    (source, target) pair any more.
+    """
+    current_cell_ids = {c.cell_id for c in cells}
+    removed_roots = existing.node_ids() - current_cell_ids
+    vertex_ranges = [_block_range(existing, node_id) for node_id in removed_roots]
+
+    existing_edges = _existing_edges(existing)
+    current_edge_pairs = {
+        (raw.source_id, raw.target_id)
+        for raw in raw_cells.values()
+        if raw.is_edge and raw.source_id and raw.target_id
+    }
+    removed_edge_lines = [
+        edge.line_index
+        for edge in existing_edges
+        if edge.source_token in removed_roots
+        or edge.target_token in removed_roots
+        or (edge.source_token, edge.target_token) not in current_edge_pairs
+    ]
+    edge_ranges = [(i, i + 1) for i in removed_edge_lines]
+
+    removed_ranges = _merge_ranges(vertex_ranges + edge_ranges)
+
+    # A node_id whose declaration falls inside a removed range must not
+    # block the add-phase from re-deriving a cell that individually still
+    # exists in the .drawio (e.g. a shape whose old parent container was
+    # deleted, now re-parented or top-level): its old declaration is gone,
+    # so it must look "new" again, not "already represented".
+    removed_line_set = {i for start, end in removed_ranges for i in range(start, end)}
+    surviving_ids = {
+        node_id
+        for node_id, line in existing.node_line.items()
+        if line not in removed_line_set
+    }
+    reduced_existing = ExistingIndex(
+        existing.lines,
+        existing.clean_lines,
+        {k: v for k, v in existing.node_line.items() if k in surviving_ids},
+        {k: v for k, v in existing.node_indent.items() if k in surviving_ids},
+    )
+
+    # A surviving edge line is kept by (source, target) PAIR equivalence
+    # (plan_merge/_build_edge_insertion only dedups by exact rendered TEXT),
+    # so a survivor whose text differs (e.g. a hand-authored label plan_merge
+    # would never reproduce) must be kept OUT of the add-phase entirely --
+    # otherwise it looks like a second, textually-distinct "new" edge for the
+    # very same relationship plan_sync just decided not to touch.
+    removed_edge_line_set = set(removed_edge_lines)
+    surviving_pairs = {
+        (edge.source_token, edge.target_token)
+        for edge in existing_edges
+        if edge.line_index not in removed_edge_line_set
+    }
+    reduced_cells = [
+        cell
+        for cell in result.cells
+        if not _represents_a_surviving_edge(cell.cell_id, raw_cells, surviving_pairs)
+    ]
+    reduced_result = DocumentResult(
+        reduced_cells, result.library_scores, result.anchor_votes
+    )
+
+    merge_plan = plan_merge(
+        reduced_existing, cells, reduced_result, node_ids, containments, raw_cells
+    )
+
+    return SyncPlan(
+        merge_plan, removed_ranges, len(removed_roots), len(removed_edge_lines)
+    )
+
+
+def render_sync(existing: ExistingIndex, plan: SyncPlan) -> str:
+    """The full synced text: existing lines minus every removed range, plus
+    :func:`plan_merge`'s usual insertions for genuinely new content.
+
+    Applies removal first -- computing a remap from old to new line indices
+    -- then reuses :func:`render_merge`'s own splice/colon-fix/tie-break
+    logic unchanged against the filtered lines and remapped insertions.
+    """
+    removed = {i for start, end in plan.removed_ranges for i in range(start, end)}
+    remap: dict[int, int] = {}
+    kept = 0
+    for i in range(len(existing.lines) + 1):
+        remap[i] = kept
+        if i < len(existing.lines) and i not in removed:
+            kept += 1
+
+    filtered_lines = [
+        line for i, line in enumerate(existing.lines) if i not in removed
+    ]
+    filtered_clean_lines = [
+        line for i, line in enumerate(existing.clean_lines) if i not in removed
+    ]
+    remapped_insertions = [
+        Insertion(
+            anchor_line=remap[insertion.anchor_line],
+            text=insertion.text,
+            colon_fix_line=(
+                None
+                if insertion.colon_fix_line is None
+                else remap[insertion.colon_fix_line]
+            ),
+            top_level=insertion.top_level,
+            anchor_depth=insertion.anchor_depth,
+        )
+        for insertion in plan.merge_plan.insertions
+    ]
+    filtered_existing = ExistingIndex(filtered_lines, filtered_clean_lines, {}, {})
+    remapped_plan = MergePlan(
+        remapped_insertions,
+        plan.merge_plan.skipped,
+        plan.merge_plan.new_edge_count,
+        plan.merge_plan.new_node_count,
+    )
+    return render_merge(filtered_existing, remapped_plan)
 
 
 def validate(text: str) -> str | None:

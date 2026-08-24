@@ -271,6 +271,28 @@ It works in two layers:
    logically-identical edge re-labeled or re-routed through a different
    draw.io cell id is not caught (see `merge.py`'s docstring).*
 
+6. **Reconciling against draw.io** (`mdg sync`, same `merge.py`/`sync_cli.py`)
+   — like merge, but draw.io is the *sole* source of truth: alongside the
+   same additions merge already makes, a vertex or edge whose draw.io cell no
+   longer exists is **removed** from the `.mdg` too — its whole nested
+   subtree, if it was a container. Anything that survives keeps its exact
+   existing text untouched, same "don't disturb what's already there"
+   contract as merge.
+
+   ```bash
+   mdg sync path/to/existing.mdg path/to/diagram.drawio           # dry run
+   mdg sync path/to/existing.mdg path/to/diagram.drawio --write   # applies it
+   ```
+
+   An edge's identity for this purpose is its `(source, target)` node_id
+   pair (edges have no id of their own in the grammar): a pair still
+   connected by *some* edge in the current `.drawio` keeps its existing
+   line exactly as authored, even if the label changed; a pair no longer
+   connected — or whose endpoint was itself removed — is deleted. A shape
+   whose old declaration was removed only because its *container* was
+   deleted, but that individually still exists in the `.drawio`, is
+   re-derived under a fresh name at its current position rather than lost.
+
 Each cell reports its derived shape, node id, nesting (nearest container +
 depth), similarity, a confidence, and how it was resolved (`unique` /
 `single-library` / `library-vote` / `recency-prior`). The palette styles are
