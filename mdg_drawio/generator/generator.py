@@ -184,6 +184,7 @@ class StyleProvider(Protocol):
     def style_corrections(self, node_type: str) -> dict[str, _StyleValue]: ...
     def type_padding(self, node_type: str) -> dict[str, _StyleValue]: ...
     def row_type_entry(self, type_str: str) -> dict | None: ...
+    def edge_label_templates(self, edge_type: str, variant: int = 1) -> list[dict]: ...
 
 
 @dataclass(frozen=True)
@@ -269,6 +270,22 @@ class PaletteStyleProvider:
         if attrs.get("placeholders") != "1":
             return "", False
         return str(cells[0].get("value", "")), True
+
+    def edge_label_templates(self, edge_type: str, variant: int = 1) -> list[dict]:
+        """Endpoint label-cell templates (source/target cardinality) from the palette.
+
+        The palette's first captured cell is the edge line itself; any cells
+        after it are label markers anchored near one endpoint via geometry
+        ``x`` (negative = source side, positive = target side). Only their
+        position/style is reused here -- the label text comes from the
+        authored call's ``source_label``/``target_label``.
+        """
+        library, function = _split_type(edge_type)
+        if not library:
+            return []
+        entry = self._palette_entry(library, function, variant)
+        cells = (entry or {}).get("cells") or []
+        return [cell for cell in cells[1:] if isinstance(cell, dict)]
 
     def style_corrections(self, node_type: str) -> dict[str, _StyleValue]:
         return self.overrides.get(node_type, {}).get("style", {})
@@ -769,6 +786,8 @@ def _append_edge(mx_root: ET.Element, edge: Edge, ctx: _GenCtx) -> None:
 
     for child in edge.child_cells:
         _append_edge_child(mx_root, edge_id, child, ctx)
+    for child in _edge_endpoint_label_cells(edge, ctx, variant):
+        _append_edge_child(mx_root, edge_id, child, ctx)
 
 
 def _is_terminal_point(as_value: str) -> bool:
@@ -830,6 +849,55 @@ def _append_edge_geometry(edge_cell: ET.Element, edge: Edge) -> None:
     geo_attrs.update(_non_null_attrs(edge.geometry_attributes))
     geometry = ET.SubElement(edge_cell, "mxGeometry", geo_attrs)
     _append_points_array(geometry, _collect_edge_waypoints(geometry, edge))
+
+
+def _edge_endpoint_label_cells(
+    edge: Edge, ctx: _GenCtx, variant: int
+) -> list[ChildCell]:
+    """Build source/target cardinality label cells for an edge, if authored.
+
+    ``source_label``/``target_label`` are registry-declared passthrough
+    keywords (e.g. ``erd.Rel``, ``uml.Relation``/``Association``) carried in
+    ``edge.extra``; on their own they never reach the generated XML. The
+    palette template supplies position and base style per endpoint (via
+    ``edge_label_templates``); a slot with no authored value is skipped
+    rather than falling back to the palette's own example text.
+    """
+    templates = ctx.styles.edge_label_templates(edge.type, variant)
+    if not templates:
+        return []
+    vertical_align = edge.extra.get("label_vertical_align")
+    cells: list[ChildCell] = []
+    for template in templates:
+        geometry = template.get("geometry") or {}
+        try:
+            x = float(geometry.get("x", 0))
+        except (TypeError, ValueError):
+            x = 0.0
+        if x > 0:
+            slot = "target_label"
+        elif x < 0:
+            slot = "source_label"
+        else:
+            continue
+        value = edge.extra.get(slot)
+        if not value:
+            continue
+        overrides = _style_string_to_overrides(str(template.get("style", "")))
+        if vertical_align:
+            overrides["verticalAlign"] = vertical_align
+        cells.append(
+            ChildCell(
+                label=str(value),
+                style_overrides=overrides,
+                geometry_attributes={
+                    key: geometry[key]
+                    for key in ("x", "y", "width", "height", "relative")
+                    if key in geometry
+                },
+            )
+        )
+    return cells
 
 
 def _append_edge_child(

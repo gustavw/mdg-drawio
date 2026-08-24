@@ -462,7 +462,12 @@ def test_uml25_divider_dashed_keyword_changes_generated_style() -> None:
 def test_coverage_generated_cell_counts_match_model(library: str) -> None:
     from mdg_drawio.engine.preload import preload_core
     from mdg_drawio.generator import create_style_provider, generate
-    from mdg_drawio.generator.generator import _compound_row_override
+    from mdg_drawio.generator.generator import (
+        _GenCtx,
+        _coerce_variant,
+        _compound_row_override,
+        _edge_endpoint_label_cells,
+    )
 
     source = (NOTATION_DIR / library / f"{library}_shapes_coverage.mdg").read_text()
     doc = parse(source)
@@ -482,9 +487,17 @@ def test_coverage_generated_cell_counts_match_model(library: str) -> None:
         for node in doc.nodes
         if (override := _compound_row_override(node, style_provider)) is not None
     )
+    # A relation with an authored source_label/target_label (e.g. erd.Rel,
+    # uml.Relation/Association) renders one extra vertex per endpoint label --
+    # also with no corresponding top-level Node (see _edge_endpoint_label_cells).
+    gen_ctx = _GenCtx(styles=style_provider)
+    extra_edge_label_cells = sum(
+        len(_edge_endpoint_label_cells(edge, gen_ctx, _coerce_variant(edge)))
+        for edge in doc.edges
+    )
     assert sum(
         cell.get("vertex") == "1" for cell in root.iter("mxCell")
-    ) == len(doc.nodes) + extra_compound_cells
+    ) == len(doc.nodes) + extra_compound_cells + extra_edge_label_cells
     assert sum(cell.get("edge") == "1" for cell in root.iter("mxCell")) == len(
         doc.edges
     )
@@ -592,6 +605,37 @@ def test_erd_nested_rowkey_renders_key_and_text_subcells() -> None:
     alternate = text_geometry.find("mxRectangle")
     assert alternate is not None
     assert alternate.get("as") == "alternateBounds"
+
+
+@needs_sidecars
+def test_erd_rel_renders_authored_cardinality_labels() -> None:
+    """source_label/target_label are registry-declared passthrough keywords;
+    they must render as real label cells, not be silently dropped."""
+    root = _generate_xml(
+        'use erd\n'
+        'erd.Table(a, "A")\n'
+        'erd.Table(b, "B")\n'
+        'erd.Rel(a, b, "omfattas av", target_label="0..n", variant=4)'
+    )
+    edge_id = _cell(root, "e_a->b").get("id")
+    assert edge_id is not None
+    labels = _children_of(root, edge_id)
+    assert [c.get("value") for c in labels] == ["0..n"]
+    assert "align=right" in (labels[0].get("style") or "")
+
+
+@needs_sidecars
+def test_erd_rel_renders_both_endpoint_labels() -> None:
+    root = _generate_xml(
+        'use erd\n'
+        'erd.Table(a, "A")\n'
+        'erd.Table(b, "B")\n'
+        'erd.Rel(a, b, "", source_label="M", target_label="N", variant=4)'
+    )
+    edge_id = _cell(root, "e_a->b").get("id")
+    assert edge_id is not None
+    labels = _children_of(root, edge_id)
+    assert {c.get("value") for c in labels} == {"M", "N"}
 
 
 @needs_sidecars

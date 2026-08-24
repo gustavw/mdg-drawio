@@ -93,16 +93,6 @@ ALLOWLIST: dict[str, str] = {
         "build-data palette pipeline only",
     "mdg_drawio.notation._core.palette:top_level":
         "build-data palette pipeline only",
-    # --- edge child-cell rendering only. Node child cells (NodeChildCell) are
-    #     reachable since Phase 2's compound-row rendering (erd Row/RowKey's
-    #     [key tag, text label] sub-cells; see
-    #     mdg_drawio.generator.generator:_compound_row_override and
-    #     todo/notation-coverage-parser.md Phase 2). The edge-side equivalent
-    #     (Edge.child_cells: list[ChildCell]) has no notation emitting it yet.
-    "mdg_drawio.contracts.models:ChildCell":
-        "edge child-cell rendering; no notation emits edge child_cells yet",
-    "mdg_drawio.generator.generator:_append_edge_child":
-        "edge child-cell rendering; no notation emits edge child_cells yet",
     # --- inert callback: c4 passes ``diagram_title_call=""`` to
     #     parse_block_source, so this handler can never fire (no DSL call has an
     #     empty name). Scaffolding for a DiagramTitle statement not yet wired.
