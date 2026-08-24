@@ -34,7 +34,7 @@ c4.System_Boundary(drawiogen_c, "mdg-drawio"):
     c4.Container(generator, "Generator", "Produces valid draw.io XML from parsed Document instances. Reads geometry overlays to preserve manual layout adjustments across regenerations.", technology="Python (xml.etree)")
     c4.Container(notation, "Notation", "Seven registry-driven notation libraries sharing one block DSL engine, plus C4-specific builders. Shared core handles registry loading, exact variant dispatch, nesting validation, style lookup, and normalization.", technology="Python / YAML")
     c4.Container(palette_data, "Generated Data", "Pre-built JSON data extracted from draw.io shape libraries. Not committed. Supplies shape styles, dimensions, palette entries, and nested row-type templates consumed at startup.", technology="JSON (generated)")
-    c4.Container(reverse, "Reverse Derivation & Merge", "POC: derives which registry shape a hand-drawn draw.io cell came from (weighted style match + library ranking), assigns it a semantic .mdg node id, resolves containment, and splices genuinely new cells into an existing .mdg file's text. Exposed as the `mdg merge` CLI subcommand.", technology="Python")
+    c4.Container(reverse, "Reverse Derivation & Merge", "POC: derives which registry shape a hand-drawn draw.io cell came from (weighted style match + library ranking), assigns it a semantic .mdg node id, resolves containment, and splices genuinely new cells into an existing .mdg file's text -- or, for `mdg sync`, also removes any vertex/edge no longer present, draw.io as source of truth. Exposed as the `mdg merge`/`mdg sync` CLI subcommands.", technology="Python")
 
 c4.Person(author_c, "Diagram Author / Developer", "Writes and maintains MDG files, refines diagrams visually in draw.io.", technology="")
 
@@ -64,7 +64,7 @@ direction: TB
 c4.System_Boundary(drawiogen_co, "mdg-drawio"):
       c4.Component_DiagramTitle("[Components] mdg-drawio", "Engine-orchestrated pipeline: pre-load, parse, resolve layout, generate XML, validate.")
 
-  c4.Component(cli_co, "CLI main()", "Thin entry point in mdg_drawio/cli.py. Positional convert args (input .mdg, optional output .drawio) plus --force, or a merge/derive/notation verb -- dispatches to engine.convert()/merge()/derive()/notation_info(). Returns exit code.", technology="Python (argparse)")
+  c4.Component(cli_co, "CLI main()", "Thin entry point in mdg_drawio/cli.py. Positional convert args (input .mdg, optional output .drawio) plus --force, or a merge/sync/derive/notation verb -- dispatches to engine.convert()/merge()/sync()/derive()/notation_info(). Returns exit code.", technology="Python (argparse)")
 
   c4.Container_Boundary(engine_co_boundary, "Engine"):
       c4.Component(engine_convert_co, "convert()", "Full conversion pipeline orchestration. Detects notation, pre-loads registries/styles, parses pages, resolves layout config, injects overlays, runs layout, generates multipage XML, validates, and writes output.", technology="Python")
@@ -72,6 +72,7 @@ c4.System_Boundary(drawiogen_co, "mdg-drawio"):
       c4.Component(engine_validate_co, "XML Validation", "Validates generated draw.io XML before writing: unique diagram IDs, mandatory root cells (0 and 1), and edge source/target reference integrity.", technology="Python (xml.etree)")
       c4.Component(engine_merge_co, "merge()", "Thin re-export of mdg_drawio.reverse.merge_cli.main -- the CLI's merge verb delegates through engine, same as convert(). Lives in engine/merge.py.", technology="Python")
       c4.Component(engine_derive_co, "derive()", "Thin re-export of mdg_drawio.reverse.derive_cli.main -- the CLI's derive verb delegates through engine, same as convert(). Lives in engine/derive.py.", technology="Python")
+      c4.Component(engine_sync_co, "sync()", "Thin re-export of mdg_drawio.reverse.sync_cli.main -- the CLI's sync verb delegates through engine, same as convert(). Lives in engine/sync.py.", technology="Python")
       c4.Component(engine_notation_info_co, "notation()", "The CLI's notation verb: lists notation libraries, or prints one library's full DSL palette (every function/variant + a ready-to-adapt example call) straight from its registry. Read-only. Lives in engine/notation_info.py.", technology="Python")
 
   c4.ContainerDb(palette_data_co, "Palette Data", "Generated JSON files from draw.io shape libraries. Produced via `make build-data`; consumed by notation style lookup.", technology="JSON (generated)")
@@ -115,6 +116,7 @@ c4.System_Boundary(drawiogen_co, "mdg-drawio"):
       c4.Component(reverse_merge_co, "Merge Planning", "Splices genuinely new cells (vertices and edges) into an existing, hand-authored .mdg file's text at the right place and indent, without disturbing anything already there -- a text-level merge, not a model-level one. Never writes a file itself. Lives in reverse/merge.py.", technology="Python")
       c4.Component(reverse_merge_cli_co, "Merge CLI", "The `mdg merge` subcommand. Dry-run by default (prints a unified diff); --write re-parses the merged result through the real .mdg parser before applying, refusing an invalid merge. Lives in reverse/merge_cli.py.", technology="Python (argparse)")
       c4.Component(reverse_derive_cli_co, "Derive CLI", "The `mdg derive` subcommand (also `python -m mdg_drawio.reverse` via a thin __main__.py). Prints, per cell, the derived shape, semantic node id, nesting, similarity, and confidence (table or --json). Lives in reverse/derive_cli.py.", technology="Python (argparse)")
+      c4.Component(reverse_sync_cli_co, "Sync CLI", "The `mdg sync` subcommand: reconciles an existing .mdg against a hand-edited .drawio, draw.io as source of truth -- adds genuinely new cells (via merge planning) AND removes any vertex/edge no longer present. Dry-run by default; --write re-parses before applying. Lives in reverse/sync_cli.py.", technology="Python (argparse)")
       c4.Component(reverse_fixtures_co, "Fixture Synthesis", "Synthesizes ground-truth .drawio test data from the palette styles (canonical, perturbed, and multi-shape scenario cases) for the reverse-derivation test suite -- never committed, since palette styles are draw.io-copyright. Lives in reverse/fixtures.py.", technology="Python")
 
   c4.Person(author_co, "Diagram Author / Developer", "Writes MDG source, refines layout visually in draw.io.", technology="")
@@ -123,6 +125,7 @@ c4.Rel(author_co, cli_co, "Runs", description="")
 c4.Rel(cli_co, engine_co_boundary, "Delegates to", description="")
 c4.Rel(engine_merge_co, reverse_co_boundary, "Delegates to", description="")
 c4.Rel(engine_derive_co, reverse_co_boundary, "Delegates to", description="")
+c4.Rel(engine_sync_co, reverse_co_boundary, "Delegates to", description="")
 c4.Rel(engine_convert_co, engine_preload_co, "Pre-loads registries and styles", description="")
 c4.Rel(engine_convert_co, engine_validate_co, "Validates XML before write", description="")
 c4.Rel(engine_convert_co, layout_co_boundary, "Resolves layout config", description="")
@@ -182,6 +185,11 @@ c4.Rel(reverse_derive_cli_co, reverse_containment_co, "Resolves each cell's nest
 c4.Rel(reverse_derive_cli_co, reverse_derive_co, "Derives shapes for every cell", description="")
 c4.Rel(reverse_derive_cli_co, reverse_naming_co, "Assigns semantic node ids", description="")
 c4.Rel(reverse_derive_cli_co, reverse_style_index_co, "Loads the style index", description="")
+c4.Rel(reverse_sync_cli_co, reverse_merge_co, "Plans/renders additions + removals", description="")
+c4.Rel(reverse_sync_cli_co, reverse_containment_co, "Resolves cells' nesting", description="")
+c4.Rel(reverse_sync_cli_co, reverse_derive_co, "Derives shapes for cells", description="")
+c4.Rel(reverse_sync_cli_co, reverse_naming_co, "Assigns semantic node ids", description="")
+c4.Rel(reverse_sync_cli_co, reverse_style_index_co, "Loads the style index", description="")
 c4.Rel(reverse_fixtures_co, reverse_derive_co, "Feeds synthesized cells through derive()", description="")
 c4.Rel(reverse_fixtures_co, reverse_style_index_co, "Draws shapes from the style index", description="")
 
@@ -201,6 +209,7 @@ trace container_co -> code.layout__container_layout : realized-by
 trace dsl_engine_co -> code.notation__core_dsl_engine : realized-by
 trace engine_convert_co -> code.engine_convert : realized-by
 trace engine_derive_co -> code.engine_derive : realized-by
+trace engine_sync_co -> code.engine_sync : realized-by
 trace engine_notation_info_co -> code.engine_notation_info : realized-by
 trace engine_merge_co -> code.engine_merge : realized-by
 trace engine_preload_co -> code.engine_preload : realized-by
@@ -220,6 +229,7 @@ trace reverse_derive_cli_co -> code.reverse_derive_cli : realized-by
 trace reverse_fixtures_co -> code.reverse_fixtures : realized-by
 trace reverse_merge_co -> code.reverse_merge : realized-by
 trace reverse_merge_cli_co -> code.reverse_merge_cli : realized-by
+trace reverse_sync_cli_co -> code.reverse_sync_cli : realized-by
 trace reverse_naming_co -> code.reverse_naming : realized-by
 trace reverse_scoring_co -> code.reverse_scoring : realized-by
 trace reverse_style_index_co -> code.reverse_style_index : realized-by

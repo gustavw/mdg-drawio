@@ -2,9 +2,10 @@
 
 Thin shell around the engine. Parses arguments, delegates to
 ``mdg_drawio.engine.convert`` (default action), ``mdg_drawio.engine.merge``
-(``merge`` verb), ``mdg_drawio.engine.derive`` (``derive`` verb), or
-``mdg_drawio.engine.notation_info`` (``notation`` verb) -- CLI never imports
-outside ``mdg_drawio.engine`` (see ``test_cli_is_thin_shell``).
+(``merge`` verb), ``mdg_drawio.engine.derive`` (``derive`` verb),
+``mdg_drawio.engine.notation_info`` (``notation`` verb), or
+``mdg_drawio.engine.sync`` (``sync`` verb) -- CLI never imports outside
+``mdg_drawio.engine`` (see ``test_cli_is_thin_shell``).
 """
 
 from __future__ import annotations
@@ -15,11 +16,11 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from mdg_drawio.engine import convert, derive, merge, notation_info
+from mdg_drawio.engine import convert, derive, merge, notation_info, sync
 
 # Recognized first-token verbs. Anything else is the implicit `convert`
 # action -- no verb required, so `main(["diagram.mdg"])` dispatches to it.
-_SUBCOMMANDS = ("merge", "derive", "notation")
+_SUBCOMMANDS = ("merge", "derive", "notation", "sync")
 
 _MDG_SUFFIX = ".mdg"
 _DRAWIO_SUFFIX = ".drawio"
@@ -34,6 +35,7 @@ mdg -- convert MDG notation source into draw.io diagrams (and back).
 usage:
   mdg <input.mdg> [output.drawio] [--force]
   mdg merge <existing.mdg> <new.drawio> [--write]
+  mdg sync <existing.mdg> <diagram.drawio> [--write]
   mdg derive <diagram.drawio> [--json]
   mdg notation [library] [--json]
 
@@ -44,8 +46,14 @@ commands:
              guessed from extension. --force ignores any existing .drawio's
              overlay (manual layout) and fully regenerates.
   merge      Splice hand-drawn cells from an existing .drawio into an
-             existing .mdg file's text, correctly indented. Dry-run by
-             default (prints a diff); --write applies it after re-validating.
+             existing .mdg file's text, correctly indented. Never removes
+             anything. Dry-run by default (prints a diff); --write applies
+             it after re-validating.
+  sync       Reconcile an .mdg file against a hand-edited .drawio, treating
+             draw.io as the source of truth: adds new shapes/relations
+             (like merge) AND removes any whose draw.io cell no longer
+             exists. Untouched content keeps its exact text. Dry-run by
+             default; --write applies it after re-validating.
   derive     Read-only: print which registry shape each cell in a .drawio
              file resolves to (similarity score, confidence, how it was
              decided). Writes nothing.
@@ -78,6 +86,7 @@ def _build_convert_parser() -> argparse.ArgumentParser:
         prog="mdg",
         description="Convert an MDG notation file to a draw.io diagram.",
         epilog="Also available: `mdg merge EXISTING.mdg NEW.drawio [--write]`, "
+        "`mdg sync EXISTING.mdg DIAGRAM.drawio [--write]`, "
         "`mdg derive DIAGRAM.drawio [--json]`, `mdg notation [library]`. "
         "Run `mdg` with no arguments for an overview of all commands.",
     )
@@ -131,6 +140,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         if verb == "merge":
             return merge.main(rest)
+        if verb == "sync":
+            return sync.main(rest)
         if verb == "derive":
             return derive.main(rest)
         if verb == "notation":

@@ -1,9 +1,9 @@
 """Conversion engine package. Public entry points: ``convert()``, ``merge``,
-``derive``, ``notation_info``."""
+``derive``, ``notation_info``, ``sync``."""
 
 from __future__ import annotations
 
-from . import derive, merge, notation_info
+from . import derive, merge, notation_info, sync
 from .convert import convert
 
-__all__ = ["convert", "derive", "merge", "notation_info"]
+__all__ = ["convert", "derive", "merge", "notation_info", "sync"]

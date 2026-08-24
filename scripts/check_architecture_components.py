@@ -59,6 +59,7 @@ MODULE_TO_LABEL: dict[str, str] = {
     "engine/derive.py": "derive()",
     "engine/merge.py": "merge()",
     "engine/notation_info.py": "notation()",
+    "engine/sync.py": "sync()",
     "engine/preload.py": "Pre-load",
     "engine/validate.py": "XML Validation",
     "contracts/models.py": "Models",
@@ -89,6 +90,7 @@ MODULE_TO_LABEL: dict[str, str] = {
     "reverse/naming.py": "Semantic Naming",
     "reverse/scoring.py": "Weighted Style Match",
     "reverse/style_index.py": "Style Index",
+    "reverse/sync_cli.py": "Sync CLI",
 }
 
 # Boundaries that must exist on the Component page.
@@ -133,8 +135,10 @@ EXPECTED_RELATION_COUNTS: dict[str, int] = {
     # edges -- engine.merge()/derive() -> reverse boundary, 9 new components'
     # intra-package and cross-package (-> notation) relations.
     # +1: engine.notation() -> notation boundary (the `mdg notation` verb).
-    "Component": 64,
-    "Code": 64,
+    # +6: engine.sync() -> reverse boundary, plus the new Sync CLI component's
+    # own intra-package edges (the `mdg sync` verb).
+    "Component": 70,
+    "Code": 70,
 }
 
 CONTEXT_RELATION_TYPES: set[str] = {
