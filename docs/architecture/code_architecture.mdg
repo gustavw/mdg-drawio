@@ -52,6 +52,13 @@ uml.Package(layout, "Layout Engine"):
     uml.Package(types_co, "Types & BaseLayout"):
         uml.Class(layout__types, "_types")
         uml.Class(layout_layout, "layout")
+uml.Package(markup, "Markup Conversion"):
+    uml.Package(markup_inline_co, "Inline Conversion"):
+        uml.Class(markup__inline, "_inline")
+    uml.Package(markup_to_html_co, "Markdown to HTML"):
+        uml.Class(markup__to_html, "_to_html")
+    uml.Package(markup_to_markdown_co, "HTML to Markdown"):
+        uml.Class(markup__to_markdown, "_to_markdown")
 uml.Package(notation, "Notation"):
     uml.Package(dsl_engine_co, "DSL Engine (_core)"):
         uml.Class(notation__core_dsl_engine, "dsl_engine")
@@ -125,6 +132,8 @@ uml.Dependency(layout_size_resolver, contracts)
 uml.Dependency(layout_size_resolver, layout__container_layout)
 uml.Dependency(layout_size_resolver, layout__types)
 uml.Dependency(layout_size_resolver, layout_config)
+uml.Dependency(markup__to_html, markup__inline)
+uml.Dependency(markup__to_markdown, markup__inline)
 uml.Dependency(notation__core_dsl_engine, contracts)
 uml.Dependency(notation__core_dsl_engine, notation__core_registry)
 uml.Dependency(notation__core_registry, contracts)
