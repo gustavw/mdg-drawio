@@ -396,9 +396,15 @@ def _build_node_cell_attrs(
     (e.g. erd RowKey), whose text lives in a child cell, not the row itself.
     """
     full_style = base_style
-    overrides = _tokens_to_style(_style_tokens(node.style_overrides))
-    if overrides:
-        full_style = full_style.rstrip(";") + ";" + overrides
+    if node.style_overrides:
+        # Strip any token the override also sets (e.g. a palette shape's own
+        # align=) first, rather than relying on draw.io's last-wins parsing
+        # of a duplicated key -- same discipline as _apply_corrections.
+        full_style = _strip_style_tokens(full_style, set(node.style_overrides))
+        overrides = _tokens_to_style(_style_tokens(node.style_overrides))
+        full_style = (
+            full_style.rstrip(";") + ";" + overrides if full_style else overrides
+        )
     if isinstance(node.extra.get("dashed"), bool):
         full_style = _apply_corrections(
             full_style, {"dashed": 1 if node.extra["dashed"] else None}

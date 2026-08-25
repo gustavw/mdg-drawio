@@ -664,6 +664,40 @@ def test_overlay_preserves_geometry_edges_and_anchors(tmp_path: Path) -> None:
     ), "edge waypoint coordinates not preserved"
 
 
+def test_overlay_preserves_a_manually_changed_text_alignment(
+    tmp_path: Path,
+) -> None:
+    """A user switching a node's label to left-aligned directly in draw.io
+    must survive a plain regenerate, not just its position -- c4.Person's own
+    palette style bakes in ``align=center``, so this also guards that the
+    override cleanly replaces it rather than leaving both tokens in the
+    style string (draw.io's own last-wins parsing would still render
+    correctly, but a duplicate token is exactly what _apply_corrections's
+    "stays clean" discipline elsewhere in this file exists to avoid)."""
+    src = tmp_path / "rt.mdg"
+    out = tmp_path / "rt.drawio"
+    src.write_text('c4.Person(a, "A")\n', encoding="utf-8")
+
+    assert main([str(src), str(out), "--force"]) == 0
+    tree = ET.parse(str(out))
+    root = tree.getroot()
+    cell = _inner_cell(root, "a")
+    style = cell.get("style", "")
+    assert "align=center" in style
+    cell.set("style", style.replace("align=center", "align=left"))
+    tree.write(str(out), encoding="utf-8")
+
+    assert main([str(src), str(out)]) == 0
+    style2 = _inner_cell(ET.parse(str(out)).getroot(), "a").get("style", "")
+    assert style2.count("align=") == 1, f"duplicate align token: {style2!r}"
+    assert "align=left" in style2
+
+    # --force still fully regenerates, discarding the manual style edit too.
+    assert main([str(src), str(out), "--force"]) == 0
+    style3 = _inner_cell(ET.parse(str(out)).getroot(), "a").get("style", "")
+    assert "align=center" in style3
+
+
 def test_convert_reports_dsl_parse_errors(
     capsys: pytest.CaptureFixture[str],
     tmp_path: Path,
