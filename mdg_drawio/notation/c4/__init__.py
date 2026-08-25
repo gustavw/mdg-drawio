@@ -32,6 +32,7 @@ from mdg_drawio.contracts import (
 from .._core import (
     DslError,
     build_pages_document,
+    extract_block_variables,
     is_none_literal,
     literal_or_name,
     literal_string,
@@ -101,14 +102,16 @@ def _subtitle(function: str, c4_type: str, technology: str) -> str:
 
 
 def _parse_keyword_args(
-    args: list[ast.AST | ast.keyword], line_number: int
+    args: list[ast.AST | ast.keyword],
+    line_number: int,
+    blocks: dict[str, str] | None = None,
 ) -> dict[str, _KeywordValue]:
     """Extract C4 keyword arguments while preserving numeric literals."""
     kw_args: dict[str, _KeywordValue] = {}
     for kw in args:
         if not isinstance(kw, ast.keyword) or kw.arg is None:
             continue
-        value = literal_value(kw.value, kw.arg)
+        value = literal_value(kw.value, kw.arg, blocks)
         if isinstance(value, bool) or not isinstance(value, (str, int, float)):
             raise DslError(
                 f"{kw.arg}= must be a string, identifier, or number",
@@ -119,15 +122,22 @@ def _parse_keyword_args(
 
 
 def _parse_node(
-    function: str, args: list[ast.AST | ast.keyword], line_number: int
+    function: str,
+    args: list[ast.AST | ast.keyword],
+    line_number: int,
+    blocks: dict[str, str] | None = None,
 ) -> Node:
     """Build a ``Node`` from a C4 node call.
 
     Expected positional args: (node_id, label, description?)
     Keyword args: variant=N, technology=
+
+    *blocks* is the table of declared ``block`` variables -- consulted only
+    for string-valued fields (label, data-source parts, keyword values), never
+    for ``node_id`` (see ``literal_value``'s own docstring for why).
     """
     pos_args = [a for a in args if not isinstance(a, ast.keyword)]
-    kw_args = _parse_keyword_args(args, line_number)
+    kw_args = _parse_keyword_args(args, line_number, blocks)
 
     if len(pos_args) < 1:
         raise DslError(
@@ -142,7 +152,7 @@ def _parse_node(
     # reverted -- it was scoped here to c4 alone, but the equivalent default
     # in the shared dsl_engine.py builder broke every other notation's
     # intentionally-unlabeled shapes once they started forward-rendering too).
-    label = literal_string(pos_args[1], "label") if len(pos_args) >= 2 else ""
+    label = literal_string(pos_args[1], "label", blocks) if len(pos_args) >= 2 else ""
     variant = parse_keyword_int(kw_args, "variant", 1, line_number)
     technology = kw_args.get("technology", "")
     if not isinstance(technology, str):
@@ -152,7 +162,7 @@ def _parse_node(
     # authoring error, not something to silently drop (the surrounding
     # ``parse_block_source`` wraps the ValueError with the line number).
     parts: list[str] = [
-        literal_string(pos_args[i], f"argument {i + 1}")
+        literal_string(pos_args[i], f"argument {i + 1}", blocks)
         for i in range(2, len(pos_args))
     ]
 
@@ -212,15 +222,21 @@ def _select_rel_variant(
 
 
 def _parse_edge(
-    function: str, args: list[ast.AST | ast.keyword], line_number: int
+    function: str,
+    args: list[ast.AST | ast.keyword],
+    line_number: int,
+    blocks: dict[str, str] | None = None,
 ) -> Edge:
     """Build an ``Edge`` from a C4 edge call.
 
     Expected positional args: (source_id, target_id, label?)
     Keyword args: technology=, description=, variant=N
+
+    *blocks* is consulted only for the label/keyword string fields, never for
+    ``source``/``target`` (see ``literal_value``'s docstring).
     """
     pos_args = [a for a in args if not isinstance(a, ast.keyword)]
-    kw_args = _parse_keyword_args(args, line_number)
+    kw_args = _parse_keyword_args(args, line_number, blocks)
 
     if len(pos_args) < 2:
         raise DslError(
@@ -245,7 +261,7 @@ def _parse_edge(
     unconnected = source_is_none and target_is_none
     source_id = "" if unconnected else literal_or_name(pos_args[0], "source")
     target_id = "" if unconnected else literal_or_name(pos_args[1], "target")
-    label = literal_string(pos_args[2], "label") if len(pos_args) >= 3 else ""
+    label = literal_string(pos_args[2], "label", blocks) if len(pos_args) >= 3 else ""
     technology = kw_args.get("technology", "")
     if not isinstance(technology, str):
         raise DslError("technology= must be a string or identifier", line_number)
@@ -303,8 +319,19 @@ def _parse_diagram_title(
     return default
 
 
-def parse_page(source: str, page_name: str, _page_index: int = 0) -> Document:
-    """Parse a single page of C4 DSL source into ``Document``."""
+def parse_page(
+    source: str,
+    page_name: str,
+    _page_index: int = 0,
+    *,
+    blocks: dict[str, str] | None = None,
+) -> Document:
+    """Parse a single page of C4 DSL source into ``Document``.
+
+    *blocks* is the file-wide table of declared ``block`` variables (see
+    ``extract_block_variables``); it is bound into the node/edge builder
+    closures below so ``_parse_node``/``_parse_edge`` can resolve them.
+    """
     metadata, body = parse_frontmatter(source)
     mode = metadata.get("mode", "")
     grid = parse_bool_metadata(metadata, "grid")
@@ -314,6 +341,16 @@ def parse_page(source: str, page_name: str, _page_index: int = 0) -> Document:
             f"(frontmatter `mode:`); got `mode: {mode}`"
         )
 
+    def _build_node(
+        function: str, args: list[ast.AST | ast.keyword], line_number: int
+    ) -> Node:
+        return _parse_node(function, args, line_number, blocks)
+
+    def _build_edge(
+        function: str, args: list[ast.AST | ast.keyword], line_number: int
+    ) -> Edge:
+        return _parse_edge(function, args, line_number, blocks)
+
     nodes, edges, diagram_name = parse_block_source(
         body,
         namespace=_NAMESPACE,
@@ -321,8 +358,9 @@ def parse_page(source: str, page_name: str, _page_index: int = 0) -> Document:
         diagram_name_default=page_name,
         parse_diagram_title=_parse_diagram_title,
         is_edge=_is_edge,
-        build_node=_parse_node,
-        build_edge=_parse_edge,
+        build_node=_build_node,
+        build_edge=_build_edge,
+        blocks=blocks,
     )
     diagram_name = diagram_name or _DIAGRAM_TITLE_DEFAULT
 
@@ -375,5 +413,10 @@ def parse(source: str) -> Document | MultiPageDocument:
         >>> doc = parse(text)
         >>> len(doc.nodes) if isinstance(doc, Document) else len(doc.pages)
     """
+    blocks, source = extract_block_variables(source)
     pages = split_pages(source)
-    return build_pages_document(pages, parse_page)
+
+    def _build_page(page_source: str, page_name: str, page_index: int) -> Document:
+        return parse_page(page_source, page_name, page_index, blocks=blocks)
+
+    return build_pages_document(pages, _build_page)
