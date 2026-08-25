@@ -18,6 +18,15 @@ from mdg_drawio.contracts import (
 
 _ANCHOR_STYLE_KEYS = frozenset({"exitX", "exitY", "entryX", "entryY"})
 
+# Per-instance style tokens preserved verbatim across a plain regenerate
+# (`mdg in.mdg out.drawio`) -- purely cosmetic text formatting a user commonly
+# hand-adjusts in the draw.io UI, which a fresh generation would otherwise
+# reset to the palette/config default. Deliberately narrow: colours (fill/
+# stroke/font) are excluded because this codebase routinely uses them to
+# encode a real notation distinction (e.g. C4 Person vs Person_Ext), so
+# blindly freezing them could mask an intentional type change in the .mdg.
+_PRESERVED_NODE_STYLE_KEYS = frozenset({"align", "verticalAlign"})
+
 
 def _read_cell_geometry(
     cell_id: str,
@@ -44,6 +53,20 @@ def _read_cell_geometry(
             except ValueError:
                 continue
     return (cell_id, geo) if geo else None
+
+
+def _read_cell_style_overrides(cell: ET.Element) -> dict[str, str]:
+    """Read the preserved-key subset of a vertex cell's style string."""
+    style = cell.get("style", "")
+    overrides: dict[str, str] = {}
+    for token in style.split(";"):
+        token = token.strip()
+        if not token or "=" not in token:
+            continue
+        key, _, value = token.partition("=")
+        if key in _PRESERVED_NODE_STYLE_KEYS:
+            overrides[key] = value
+    return overrides
 
 
 def _read_edge_waypoints(cell: ET.Element) -> list[tuple[float, float]]:
@@ -133,6 +156,9 @@ def _read_diagram_overlay(diagram: ET.Element) -> GeometryOverlay:
         node_geo = _read_cell_geometry(cell_id, cell)
         if node_geo:
             result.nodes[node_geo[0]] = node_geo[1]
+            style_overrides = _read_cell_style_overrides(cell)
+            if style_overrides:
+                result.node_styles[node_geo[0]] = style_overrides
             continue
         edge_anchor = _read_edge_anchors(cell_id, cell)
         if edge_anchor:

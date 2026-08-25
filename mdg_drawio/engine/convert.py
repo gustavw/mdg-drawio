@@ -460,7 +460,13 @@ def _hide_implied_containment_edges(nodes: list[Node], edges: list[Edge]) -> Non
 def _inject_node_overlay(
     nodes: list[Node], overlay: GeometryOverlay | None
 ) -> None:
-    """Apply existing node positions from overlay."""
+    """Apply existing node positions and preserved style tokens from overlay.
+
+    Style tokens (e.g. text alignment) are applied last, so a manual edit
+    made directly in draw.io always wins over the palette/config default on
+    the next plain regenerate -- the same "what's already there survives"
+    contract geometry already gets.
+    """
     if not overlay:
         return
     for node in nodes:
@@ -470,6 +476,8 @@ def _inject_node_overlay(
             node.y = geo.get("y", node.y)
             node.width = geo.get("width", node.width)
             node.height = geo.get("height", node.height)
+        if node.id in overlay.node_styles:
+            node.style_overrides.update(overlay.node_styles[node.id])
 
 
 def _resolve_node_sizes(

@@ -263,8 +263,15 @@ class GeometryOverlay:
     Injected into ``Document`` before layout/generation. Layout respects
     node positions that already exist; generation reads edge anchors and
     elbow waypoints, preserving manual adjustments.
+
+    ``node_styles`` carries a small, deliberately narrow allowlist of
+    per-instance cosmetic style tokens (see ``generator.overlay``'s
+    ``_PRESERVED_NODE_STYLE_KEYS``) read back the same way -- e.g. a user
+    switching one node's text to left-aligned in the draw.io UI must survive
+    a plain regenerate, not just its position.
     """
     nodes: dict[str, dict[str, float]] = field(default_factory=dict)
+    node_styles: dict[str, dict[str, str]] = field(default_factory=dict)
     edges: dict[str, EdgeAnchorOverlay] = field(default_factory=dict)
 
 
