@@ -91,6 +91,9 @@ MODULE_TO_LABEL: dict[str, str] = {
     "reverse/scoring.py": "Weighted Style Match",
     "reverse/style_index.py": "Style Index",
     "reverse/sync_cli.py": "Sync CLI",
+    "markup/_inline.py": "Inline Conversion",
+    "markup/_to_html.py": "Markdown to HTML",
+    "markup/_to_markdown.py": "HTML to Markdown",
 }
 
 # Boundaries that must exist on the Component page.
@@ -101,6 +104,7 @@ EXPECTED_BOUNDARIES: set[str] = {
     "layout_co_boundary",
     "notation_co_boundary",
     "reverse_co_boundary",
+    "markup_co_boundary",
 }
 
 # Files relative to mdg_drawio/ that are skipped.
@@ -114,7 +118,7 @@ SKIP_FILES: set[str] = {
 
 # Directories that are package containers (covered by boundary checks).
 SKIP_CONTAINER_DIRS: set[str] = {
-    "contracts", "engine", "generator", "layout", "notation", "reverse",
+    "contracts", "engine", "generator", "layout", "notation", "reverse", "markup",
 }
 
 # Notation-specific.
@@ -137,8 +141,11 @@ EXPECTED_RELATION_COUNTS: dict[str, int] = {
     # +1: engine.notation() -> notation boundary (the `mdg notation` verb).
     # +6: engine.sync() -> reverse boundary, plus the new Sync CLI component's
     # own intra-package edges (the `mdg sync` verb).
-    "Component": 70,
-    "Code": 70,
+    # +2: the new Markup Conversion container's own intra-package edges
+    # (markdown_to_html/html_to_markdown -> shared inline conversion). Zero
+    # project imports otherwise, so no new Container-level edge.
+    "Component": 72,
+    "Code": 72,
 }
 
 CONTEXT_RELATION_TYPES: set[str] = {
@@ -155,6 +162,7 @@ CONTAINER_PACKAGE_IDS: dict[str, str] = {
     "generator": "generator",
     "notation": "notation",
     "reverse": "reverse",
+    "markup": "markup",
 }
 CONTAINER_DATA_IDS: set[str] = {"palette_data"}
 CONTAINER_EXTERNAL_IDS: set[str] = {"author_c", "drawio_c"}

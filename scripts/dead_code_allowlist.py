@@ -122,4 +122,56 @@ ALLOWLIST: dict[str, str] = {
         "test-only fixture helper; reached only from tests/test_reverse_*.py",
     "mdg_drawio.reverse.fixtures:perturb":
         "test-only fixture helper; reached only from tests/test_reverse_*.py",
+    # --- mdg_drawio.markup: markdown <-> HTML conversion for rich-text shape
+    #     labels. A standalone utility, deliberately not yet wired into the
+    #     DSL or the generator (see the package docstring) -- reached only
+    #     from tests/test_markup.py today, same "no regression-suite trace"
+    #     gap as reverse.fixtures above. Remove these entries once something
+    #     in mdg_drawio (not just tests) actually calls this package.
+    "mdg_drawio.markup._to_html:markdown_to_html":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_html:_consume_fenced_code":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_html:_consume_blockquote":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_html:_consume_list":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_html:_looks_like_table":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_html:_consume_table":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_html:_split_table_row":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_html:_consume_paragraph":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_html:_consume_table.<locals>._render_row":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_html:_starts_new_block":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_markdown:html_to_markdown":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_markdown:_render_heading":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_markdown:_render_paragraph":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_markdown:_render_blockquote":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_markdown:_render_pre":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_markdown:_render_list":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_markdown:_render_table":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._to_markdown:_render_block":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._inline:markdown_inline_to_html":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._inline:markdown_inline_to_html.<locals>._restore":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._inline:html_inline_to_markdown":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._inline:_stash":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    "mdg_drawio.markup._inline:_escape_markdown_text":
+        "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
 }

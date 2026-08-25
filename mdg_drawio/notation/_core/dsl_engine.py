@@ -136,6 +136,67 @@ def parse_bool_metadata(metadata: dict[str, str], key: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Block (text) variables
+# ---------------------------------------------------------------------------
+
+_BLOCK_VAR_RE = re.compile(
+    r'^[ \t]*block[ \t]+(?P<name>[A-Za-z_]\w*)[ \t]*=[ \t]*"""'
+    r'(?P<content>.*?)"""[ \t]*$',
+    re.MULTILINE | re.DOTALL,
+)
+
+
+def _dedent_block_content(content: str) -> str:
+    """Drop exactly one leading and one trailing newline, if present -- the
+    fence lines (the ``\"\"\"`` and the line it's on) are punctuation, not
+    content, the same convention a Python docstring or a YAML ``|`` block
+    scalar uses."""
+    if content.startswith("\r\n"):
+        content = content[2:]
+    elif content.startswith("\n"):
+        content = content[1:]
+    if content.endswith("\r\n"):
+        content = content[:-2]
+    elif content.endswith("\n"):
+        content = content[:-1]
+    return content
+
+
+def extract_block_variables(source: str) -> tuple[dict[str, str], str]:
+    """Extract every ``block NAME = \"\"\"...\"\"\"`` declaration from *source*.
+
+    A block variable holds free-form multi-line text (typically markdown --
+    see :mod:`mdg_drawio.markup`) that stands in for a quoted string literal
+    anywhere a call argument expects one (see ``literal_value``):
+    ``general.Text(n1, my_text)`` reads exactly as if ``my_text`` had been
+    written inline as a quoted string, once ``my_text`` is a declared block.
+
+    Declarations are recognized file-wide and order-independent -- a block
+    is commonly placed BELOW the call that references it, so this runs as
+    one whole-source pre-pass before any per-line/per-page parsing, not a
+    top-to-bottom "declare before use" scan.
+
+    Returns ``(variables, source_with_declarations_removed)``. A duplicate
+    name keeps its FIRST declaration (defensive; mirrors the reverse
+    module's ``index_existing`` precedent for malformed input). An
+    unclosed ``block NAME = \"\"\"`` (no matching closing fence anywhere)
+    is not touched here -- it falls through to the ordinary per-line
+    parser, which reports it as invalid syntax with a line number, same as
+    any other malformed call.
+    """
+    variables: dict[str, str] = {}
+
+    def _consume(match: re.Match[str]) -> str:
+        name = match.group("name")
+        if name not in variables:
+            variables[name] = _dedent_block_content(match.group("content"))
+        return ""
+
+    cleaned = _BLOCK_VAR_RE.sub(_consume, source)
+    return variables, cleaned
+
+
+# ---------------------------------------------------------------------------
 # Page splitting
 # ---------------------------------------------------------------------------
 
@@ -319,18 +380,32 @@ def parse_call_arguments(
     return [*expr.args, *expr.keywords]
 
 
-def literal_value(node: ast.AST, field_name: str = "") -> object:
-    """Extract a Python literal or identifier from an AST node."""
+def literal_value(
+    node: ast.AST, field_name: str = "", blocks: dict[str, str] | None = None
+) -> object:
+    """Extract a Python literal or identifier from an AST node.
+
+    A bare identifier that names a declared ``block`` variable (see
+    ``extract_block_variables``) resolves to that block's text instead of
+    its own spelling. This is the ONLY place that substitution happens --
+    id-typed extraction (``literal_or_name``/``_identifier_like_value``)
+    never takes *blocks*, so a block variable can never satisfy a
+    node_id/source/target argument by accident.
+    """
     if isinstance(node, ast.Name):
+        if blocks and node.id in blocks:
+            return blocks[node.id]
         return node.id
     if isinstance(node, ast.Constant):
         return node.value
     raise ValueError(f"{field_name} must be a literal or identifier")
 
 
-def literal_string(node: ast.AST, field_name: str = "") -> str:
+def literal_string(
+    node: ast.AST, field_name: str = "", blocks: dict[str, str] | None = None
+) -> str:
     """Extract a string literal from an AST node."""
-    value = literal_value(node, field_name)
+    value = literal_value(node, field_name, blocks)
     if not isinstance(value, str):
         raise ValueError(f"{field_name} must be a string, got {type(value).__name__}")
     return value
@@ -528,12 +603,18 @@ def parse_block_source(
     is_edge: IsEdge,
     build_node: NodeBuilder,
     build_edge: EdgeBuilder,
+    blocks: dict[str, str] | None = None,
 ) -> tuple[list[Node], list[Edge], str]:
     """Parse a block-syntax DSL source into nodes, edges, and a diagram name.
 
     Handles the container stack (indent-based ``parent_id`` assignment) and
     ``opens_block`` detection (trailing colon). Notation-specific logic lives
     in the callbacks.
+
+    *blocks* is the table of declared ``block`` variables (see
+    ``extract_block_variables``), consulted for foreign-namespace passthrough
+    calls only -- *build_node*/*build_edge* are responsible for consulting it
+    themselves for own-namespace calls (typically by closing over it).
 
     Returns ``(nodes, edges, diagram_name)``.
     """
@@ -567,6 +648,7 @@ def parse_block_source(
                 edges=edges,
                 container_stack=container_stack,
                 state=state,
+                blocks=blocks,
             )
         except (ValueError, TypeError) as exc:
             raise DslError(str(exc), line_number) from exc
@@ -589,11 +671,18 @@ def _process_block_call(
     edges: list[Edge],
     container_stack: list[_ContainerFrame],
     state: dict[str, str],
+    blocks: dict[str, str] | None = None,
 ) -> None:
     """Process one parsed block call, mutating nodes/edges/container_stack.
 
     ``state["diagram_name"]`` is updated in place when a diagram-title call is
     seen. Kept separate so ``parse_block_source`` can wrap each call uniformly.
+
+    *blocks* (declared ``block`` variables) is only consulted for the
+    foreign-namespace (passthrough) path below -- an own-namespace call goes
+    through the injected ``build_node``/``build_edge`` callback instead,
+    which the caller is responsible for having already bound to *blocks*
+    itself (see ``parse_block_source``).
     """
     if _process_registry_root(call, line_number, container_stack, state):
         return
@@ -632,6 +721,7 @@ def _process_block_call(
                 line_number,
                 edges,
                 declared_specs,
+                blocks,
             )
         else:
             node = _build_passthrough_node(
@@ -643,6 +733,7 @@ def _process_block_call(
                 nodes,
                 container_stack,
                 declared_specs,
+                blocks,
             )
             if call.opens_block:
                 container_stack.append(
@@ -1064,6 +1155,7 @@ def _passthrough_variant(
 
 def _passthrough_keyword_extra(
     args: list[ast.AST | ast.keyword],
+    blocks: dict[str, str] | None = None,
 ) -> dict[str, object]:
     """Preserve declared row/shape keywords (``key=``, ``dashed=``, ...) onto
     the node for later consumption (e.g. compound row rendering).
@@ -1079,7 +1171,7 @@ def _passthrough_keyword_extra(
         arg_name = arg.arg
         if arg_name == "variant":
             continue
-        extra[arg_name] = literal_value(arg.value, arg_name)
+        extra[arg_name] = literal_value(arg.value, arg_name, blocks)
     return extra
 
 
@@ -1092,6 +1184,7 @@ def _build_passthrough_node(
     nodes: list[Node],
     container_stack: list[_ContainerFrame],
     declared_specs: list[dict[str, object]] | None,
+    blocks: dict[str, str] | None = None,
 ) -> Node:
     """Build a passthrough Node.
 
@@ -1102,6 +1195,12 @@ def _build_passthrough_node(
     ``Node.extra``. An unregistered function (``declared_specs`` is
     ``None``) keeps the lenient legacy behavior -- no arg-count or
     keyword-binding validation, just the first two positional arguments.
+
+    *blocks* (declared ``block NAME = \"\"\"...\"\"\"`` variables, see
+    ``extract_block_variables``) resolves a bare identifier used where a
+    string value is expected -- ``label``/``text`` and every other
+    non-id declared value -- to that block's text. ``node_id`` extraction
+    (:func:`_extract_arg_id`) never sees *blocks*.
     """
     if declared_specs is not None:
         bound = _bind_registry_args(ns, name, args, declared_specs, line_number)
@@ -1116,10 +1215,14 @@ def _build_passthrough_node(
                 line_number,
             )
         label_value = bound.get("label", bound.get("text"))
-        label = _extract_arg_string(label_value) if label_value is not None else ""
+        label = (
+            _extract_arg_string(label_value, blocks)
+            if label_value is not None
+            else ""
+        )
         extra = {
             str(spec["name"]): literal_value(
-                bound[str(spec["name"])], str(spec["name"])
+                bound[str(spec["name"])], str(spec["name"]), blocks
             )
             for spec in declared_specs
             if str(spec["name"]) not in ("node_id", "label", "text")
@@ -1139,8 +1242,10 @@ def _build_passthrough_node(
                 f"identifier)",
                 line_number,
             )
-        label = _extract_arg_string(pos_args[1]) if len(pos_args) >= 2 else ""
-        extra = _passthrough_keyword_extra(args)
+        label = (
+            _extract_arg_string(pos_args[1], blocks) if len(pos_args) >= 2 else ""
+        )
+        extra = _passthrough_keyword_extra(args, blocks)
 
     node = Node(
         id=node_id,
@@ -1164,6 +1269,7 @@ def _build_passthrough_edge(
     line_number: int,
     edges: list[Edge],
     declared_specs: list[dict[str, object]],
+    blocks: dict[str, str] | None = None,
 ) -> None:
     """Build a passthrough Edge for a foreign-namespace edge call.
 
@@ -1172,6 +1278,9 @@ def _build_passthrough_edge(
     so *declared_specs* is always a real signature -- unlike
     ``_build_passthrough_node``, there is no unregistered-function fallback
     here, since an unregistered function is never treated as an edge.
+
+    *blocks* resolves a declared ``block`` variable used as ``label`` or any
+    other non-id value arg -- see ``_build_passthrough_node``.
     """
     bound = _bind_registry_args(ns, name, args, declared_specs, line_number)
     source_value = bound.get("source")
@@ -1179,7 +1288,9 @@ def _build_passthrough_edge(
     label_value = bound.get("label")
     source_id = _extract_arg_id(source_value) if source_value is not None else ""
     target_id = _extract_arg_id(target_value) if target_value is not None else ""
-    label = _extract_arg_string(label_value) if label_value is not None else ""
+    label = (
+        _extract_arg_string(label_value, blocks) if label_value is not None else ""
+    )
     source_is_none = source_value is not None and is_none_literal(source_value)
     target_is_none = target_value is not None and is_none_literal(target_value)
     unconnected = source_is_none and target_is_none
@@ -1193,7 +1304,7 @@ def _build_passthrough_edge(
         spec_name = str(spec["name"])
         if spec_name in ("source", "target", "label") or spec_name not in bound:
             continue
-        extra[spec_name] = literal_value(bound[spec_name], spec_name)
+        extra[spec_name] = literal_value(bound[spec_name], spec_name, blocks)
     edge = Edge(
         id=f"palette-edge-{len(edges) + 1}" if unconnected else "",
         type=f"{ns}.{name}",
@@ -1230,9 +1341,15 @@ def _ensure_endpoint_free_edge_ids_are_unique(
         used_ids.add(candidate)
 
 
-def _extract_arg_string(node: ast.AST) -> str:
-    """Best-effort extraction of a string or identifier from an AST node."""
+def _extract_arg_string(node: ast.AST, blocks: dict[str, str] | None = None) -> str:
+    """Best-effort extraction of a string or identifier from an AST node.
+
+    A bare identifier naming a declared ``block`` variable resolves to that
+    block's text -- see ``literal_value`` for the same substitution rule.
+    """
     if isinstance(node, ast.Name):
+        if blocks and node.id in blocks:
+            return blocks[node.id]
         return node.id
     if isinstance(node, ast.Constant) and isinstance(node.value, str):
         return node.value

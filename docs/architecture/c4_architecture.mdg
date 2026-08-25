@@ -35,6 +35,7 @@ c4.System_Boundary(drawiogen_c, "mdg-drawio"):
     c4.Container(notation, "Notation", "Seven registry-driven notation libraries sharing one block DSL engine, plus C4-specific builders. Shared core handles registry loading, exact variant dispatch, nesting validation, style lookup, and normalization.", technology="Python / YAML")
     c4.Container(palette_data, "Generated Data", "Pre-built JSON data extracted from draw.io shape libraries. Not committed. Supplies shape styles, dimensions, palette entries, and nested row-type templates consumed at startup.", technology="JSON (generated)")
     c4.Container(reverse, "Reverse Derivation & Merge", "POC: derives which registry shape a hand-drawn draw.io cell came from (weighted style match + library ranking), assigns it a semantic .mdg node id, resolves containment, and splices genuinely new cells into an existing .mdg file's text -- or, for `mdg sync`, also removes any vertex/edge no longer present, draw.io as source of truth. Exposed as the `mdg merge`/`mdg sync` CLI subcommands.", technology="Python")
+    c4.Container(markup, "Markup Conversion", "Markdown <-> HTML conversion for rich-text shape labels (a table-driven subset: bold/italic/strike/headings/lists/links/images/blockquote/code/tables). Zero project imports -- stdlib only. Standalone utility, not yet wired into the DSL or generator.", technology="Python")
 
 c4.Person(author_c, "Diagram Author / Developer", "Writes and maintains MDG files, refines diagrams visually in draw.io.", technology="")
 
@@ -119,6 +120,11 @@ c4.System_Boundary(drawiogen_co, "mdg-drawio"):
       c4.Component(reverse_sync_cli_co, "Sync CLI", "The `mdg sync` subcommand: reconciles an existing .mdg against a hand-edited .drawio, draw.io as source of truth -- adds genuinely new cells (via merge planning) AND removes any vertex/edge no longer present. Dry-run by default; --write re-parses before applying. Lives in reverse/sync_cli.py.", technology="Python (argparse)")
       c4.Component(reverse_fixtures_co, "Fixture Synthesis", "Synthesizes ground-truth .drawio test data from the palette styles (canonical, perturbed, and multi-shape scenario cases) for the reverse-derivation test suite -- never committed, since palette styles are draw.io-copyright. Lives in reverse/fixtures.py.", technology="Python")
 
+  c4.Container_Boundary(markup_co_boundary, "Markup Conversion"):
+      c4.Component(markup_inline_co, "Inline Conversion", "Bold/italic/strike/code/link/image/line-break, both directions, plus the backslash-escaping and HTML-entity handling that keeps a round trip faithful (a literal '*' or '<' in real text survives unmangled). Lives in markup/_inline.py.", technology="Python (re, html)")
+      c4.Component(markup_to_html_co, "Markdown to HTML", "Block-level markdown_to_html(): headings, paragraphs, lists, blockquotes, fenced code, hr, simple tables -- delegates inline spans to Inline Conversion. Lives in markup/_to_html.py.", technology="Python (re)")
+      c4.Component(markup_to_markdown_co, "HTML to Markdown", "Block-level html_to_markdown(): recognizes the same tag set in reverse, including bare inline HTML with no block wrapper at all (the common draw.io cell-label shape). Lives in markup/_to_markdown.py.", technology="Python (re)")
+
   c4.Person(author_co, "Diagram Author / Developer", "Writes MDG source, refines layout visually in draw.io.", technology="")
 
 c4.Rel(author_co, cli_co, "Runs", description="")
@@ -192,6 +198,8 @@ c4.Rel(reverse_sync_cli_co, reverse_naming_co, "Assigns semantic node ids", desc
 c4.Rel(reverse_sync_cli_co, reverse_style_index_co, "Loads the style index", description="")
 c4.Rel(reverse_fixtures_co, reverse_derive_co, "Feeds synthesized cells through derive()", description="")
 c4.Rel(reverse_fixtures_co, reverse_style_index_co, "Draws shapes from the style index", description="")
+c4.Rel(markup_to_html_co, markup_inline_co, "Converts inline spans within each block", description="")
+c4.Rel(markup_to_markdown_co, markup_inline_co, "Converts inline markup within each block", description="")
 
 # ---------------------------------------------------------------------------
 # Traceability meta-model (model-only; not rendered).
@@ -227,6 +235,9 @@ trace reverse_containment_co -> code.reverse_containment : realized-by
 trace reverse_derive_co -> code.reverse_derive : realized-by
 trace reverse_derive_cli_co -> code.reverse_derive_cli : realized-by
 trace reverse_fixtures_co -> code.reverse_fixtures : realized-by
+trace markup_inline_co -> code.markup__inline : realized-by
+trace markup_to_html_co -> code.markup__to_html : realized-by
+trace markup_to_markdown_co -> code.markup__to_markdown : realized-by
 trace reverse_merge_co -> code.reverse_merge : realized-by
 trace reverse_merge_cli_co -> code.reverse_merge_cli : realized-by
 trace reverse_sync_cli_co -> code.reverse_sync_cli : realized-by

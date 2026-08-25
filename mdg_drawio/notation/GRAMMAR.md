@@ -115,6 +115,35 @@ Keep literal notation markup in labels verbatim: guillemets `<<keyword>>`,
 braces `{abstract}`, brackets `[state]`, and `\n` for a line break. The
 renderer does not add or strip notation markup.
 
+## Text block variables
+
+A `block` statement declares a reusable, multi-line text variable:
+
+```mdg
+block notes = """
+# Open questions
+**billing** service, *maybe* retry_count.
+"""
+
+general.Text(n1, notes)
+```
+
+- Syntax: `block NAME = """<content>"""`, where `NAME` is a bare identifier
+  and `<content>` spans one or more lines between the triple-quote fences. A
+  single leading and trailing newline right after/before the fences is
+  dropped; everything else in the content is kept as-is.
+- `NAME` may then be used **in place of a string literal** anywhere a call
+  expects one (a label, a keyword value, a data-source part, …) — it is
+  substituted with the block's content, e.g. `general.Text(n1, notes)`.
+- Declarations are file-wide and order-independent: a block may be declared
+  anywhere in the document (including after its own use) and is visible on
+  every page of a multi-page document.
+- Declaring the same `NAME` twice keeps the first declaration; later ones are
+  ignored.
+- A block variable can never be used where an id is expected (`node_id`,
+  edge `source`/`target`) — those positions always treat a bare identifier as
+  an id reference, never as a block substitution.
+
 ## Comments
 
 `#` starts a comment (whole-line or trailing). Coverage sheets use trailing

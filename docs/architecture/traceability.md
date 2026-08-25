@@ -29,6 +29,9 @@ Verification traceability is coverage-derived via `make verification`.
 | Layout Engine | SequenceLayout | `layout/sequence.py` |
 | Layout Engine | Size Resolver | `layout/size_resolver.py` |
 | Layout Engine | Types & BaseLayout | `layout/_types.py`<br>`layout/layout.py` |
+| Markup Conversion | HTML to Markdown | `markup/_to_markdown.py` |
+| Markup Conversion | Inline Conversion | `markup/_inline.py` |
+| Markup Conversion | Markdown to HTML | `markup/_to_html.py` |
 | Notation | DSL Engine (_core) | `notation/_core/dsl_engine.py` |
 | Notation | Normalize | `notation/_core/normalize.py` |
 | Notation | Palette | `notation/_core/palette.py` |
