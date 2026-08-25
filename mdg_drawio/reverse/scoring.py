@@ -4,8 +4,13 @@ A draw.io style is a ``;``-separated list of tokens, each either bare
 (``ellipse``) or ``key=value`` (``fillColor=#083F75``). Token order is not
 significant. For reverse matching we weight tokens by the job they do:
 
-* **shape-defining** (``shape=``, ``perimeter=``, and any bare token -- the
-  built-in shape name) -- high weight; these decide *which* shape.
+* **shape-defining** (``shape=``, ``perimeter=``, any bare token -- the
+  built-in shape name -- and ``startArrow=``/``endArrow=``) -- high weight;
+  these decide *which* shape, or for an edge with no ``shape=`` token at all
+  (most connectors), *which* relationship/connector kind. An ERD crow's-foot
+  edge, for instance, is entirely identified by its arrow ends (``ERmandOne``,
+  ``ERzeroToMany``, ...) -- every other token on it is shared with a plain,
+  unmarked line.
 * **cosmetic** (colour, font, alignment, spacing, opacity) -- small weight, per
   the design: a user recolouring or re-fonting a cell must still match, yet a
   cosmetic *agreement* still tips otherwise-identical candidates apart.
@@ -24,7 +29,13 @@ from dataclasses import dataclass
 from typing import Final
 
 # Tokens whose *key* is inherently shape-defining even though it takes a value.
-SHAPE_KEYS: Final[frozenset[str]] = frozenset({"shape", "perimeter"})
+# ``startArrow``/``endArrow`` are here, not in the generic structural bucket,
+# because for edge shapes they play ``shape=``'s role: the same style is
+# shared by every cardinality variant of an ERD relationship (see module
+# docstring) and only the arrow ends tell them apart.
+SHAPE_KEYS: Final[frozenset[str]] = frozenset(
+    {"shape", "perimeter", "startArrow", "endArrow"}
+)
 
 # Keys dropped before comparison: never present on any palette candidate (a
 # canonical shape style has no live editor state), yet always present on a

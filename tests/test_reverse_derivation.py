@@ -118,6 +118,22 @@ def test_raising_cosmetic_weight_increases_colour_sensitivity() -> None:
     assert flat_gap > default_gap > 0
 
 
+def test_arrow_ends_outweigh_an_unrelated_shared_token() -> None:
+    """A real bug: an ERD crow's-foot edge (``endArrow=ERmandOne``, no
+    ``shape=`` to anchor on) was matching a plain unmarked line over its own
+    dedicated cardinality shape, because the plain line happened to also
+    share an unrelated token (``rounded=0``) the dedicated shape lacks.
+    Treating the arrow ends as shape-defining (weight ``shape``, not
+    ``structural``) fixes this: the correct semantic match now wins even
+    though it disagrees on more *other* tokens."""
+    query = parse_style("fontSize=12;html=1;endArrow=ERmandOne;rounded=0;")
+    plain_line = parse_style("endArrow=none;html=1;rounded=0;")
+    mandatory_one = parse_style(
+        "edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERmandOne;"
+    )
+    assert similarity(query, mandatory_one) > similarity(query, plain_line)
+
+
 # ── synthetic ranking policy (no data) ───────────────────────────────────────
 def _entry(shape_id: str, library: str, style: str) -> ShapeEntry:
     return ShapeEntry(shape_id, library, style, f"sha1:{shape_id}", parse_style(style))
