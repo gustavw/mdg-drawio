@@ -321,6 +321,7 @@ class _GenCtx:
     styles: StyleProvider
     child_seq: dict[str, int] = field(default_factory=dict)
     container_ids: set[str] = field(default_factory=set)
+    used_edge_ids: set[str] = field(default_factory=set)
     # Type-level style overrides are skipped for palette/golden output so it
     # stays true to the raw palette (see ``PALETTE_MODE``).
     apply_overrides: bool = True
@@ -330,6 +331,25 @@ class _GenCtx:
         seq = self.child_seq.get(parent_id, 0)
         self.child_seq[parent_id] = seq + 1
         return f"{parent_id}__c{seq}"
+
+    def unique_edge_id(self, base_id: str) -> str:
+        """Disambiguate an edge cell id against every id already emitted.
+
+        Multiple edges between the same (source, target) pair are legal --
+        e.g. two distinct ArchiMate relationships between the same two
+        elements -- but they compute the identical id under both the c4-native
+        scheme (``f"{source}->{target}"``, assigned at parse time) and the
+        passthrough fallback (``f"e_{source}->{target}"``, assigned here).
+        Without disambiguation, the second such edge collides with the first
+        as a duplicate cell id.
+        """
+        candidate = base_id
+        suffix = 2
+        while candidate in self.used_edge_ids:
+            candidate = f"{base_id}-{suffix}"
+            suffix += 1
+        self.used_edge_ids.add(candidate)
+        return candidate
 
 
 def _node_geometry(node: Node) -> tuple[float, float, float, float]:
@@ -744,7 +764,7 @@ def _coerce_variant(edge: Edge) -> int:
 
 def _append_edge(mx_root: ET.Element, edge: Edge, ctx: _GenCtx) -> None:
     """Append a single edge to the mxGraphModel root."""
-    edge_id = edge.id or f"e_{edge.source_id}->{edge.target_id}"
+    edge_id = ctx.unique_edge_id(edge.id or f"e_{edge.source_id}->{edge.target_id}")
     source_id = edge.source_id
     target_id = edge.target_id
 
