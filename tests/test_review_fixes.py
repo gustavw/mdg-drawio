@@ -143,6 +143,51 @@ def test_foreign_palette_edges_allow_none_endpoints_with_unique_ids() -> None:
     assert [edge.id for edge in doc.edges] == ["palette-edge-1", "palette-edge-2"]
 
 
+def _generate_c4_xml(source: str) -> str:
+    from mdg_drawio.engine.preload import preload_core
+    from mdg_drawio.generator import create_style_provider, generate
+
+    registries, styles = preload_core()
+    provider = create_style_provider(registries, styles)
+    doc = parse(source)
+    assert isinstance(doc, Document)
+    return generate(doc, provider)
+
+
+def test_parallel_native_edges_get_disambiguated_generated_ids() -> None:
+    """Two c4.Rel calls between the same (source, target) pair both compute
+    the identical `f"{source}->{target}"` id at parse time -- without
+    disambiguation at generation, this is a duplicate cell id."""
+    xml = _generate_c4_xml(
+        'c4.Person(a, "A")\n'
+        'c4.System(b, "B")\n'
+        'c4.Rel(a, b, "one")\n'
+        'c4.Rel(a, b, "two")'
+    )
+    assert validate_generated_xml(xml) == []
+    root = ET.fromstring(xml)
+    # A c4 Rel is wrapped in a <UserObject> (label-template substitution);
+    # the id lives there, not on the plain mxCell nested inside it.
+    edge_ids = [
+        obj.get("id") for obj in root.iter("UserObject") if "source" in obj[0].attrib
+    ]
+    assert edge_ids == ["a->b", "a->b-2"]
+
+
+def test_parallel_passthrough_edges_get_disambiguated_generated_ids() -> None:
+    """Foreign-namespace edges leave ``Edge.id`` empty and rely on the
+    generator's own fallback (``f"e_{source}->{target}"``) -- the same
+    collision as the native case above, one layer later."""
+    xml = _generate_c4_xml(
+        'use bpmn2\n'
+        'bpmn2.User(a, "A")\n'
+        'bpmn2.User(b, "B")\n'
+        'bpmn2.Association(a, b)\n'
+        'bpmn2.MessageFlow(a, b)'
+    )
+    assert validate_generated_xml(xml) == []
+
+
 def test_default_anchor_emits_no_attachment_tokens() -> None:
     import mdg_drawio.generator.generator as generator
 
