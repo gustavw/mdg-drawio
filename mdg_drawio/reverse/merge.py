@@ -50,6 +50,7 @@ from dataclasses import dataclass, field
 
 from mdg_drawio.contracts import Document
 from mdg_drawio.notation import parse as parse_mdg
+from mdg_drawio.notation import shapes_by_function
 
 from .containment import Containment
 from .derive import Cell, CellResult, DocumentResult, RawCell
@@ -65,9 +66,35 @@ INDENT_STEP = "    "
 # understand args, kwargs, or foreign-namespace passthrough the way the real
 # engine does.
 _CALL_LINE_RE = re.compile(
-    r"^(?P<indent>[ \t]*)(?:[A-Za-z_]\w*\.)?[A-Za-z_]\w*"
+    r"^(?P<indent>[ \t]*)(?:(?P<ns>[A-Za-z_]\w*)\.)?(?P<func>[A-Za-z_]\w*)"
     r"\((?P<args>.*)\)\s*(?P<colon>:?)\s*$"
 )
+
+
+def _is_edge_call(ns: str | None, func: str) -> bool:
+    """Whether ``ns.func`` names a registered EDGE-kind shape.
+
+    ``False`` (lenient) if *ns* is absent or unresolvable -- matches this
+    codebase's existing precedent that an unregistered/ambiguous function
+    keeps generic (vertex-like) behaviour rather than erroring. Used by
+    :func:`index_existing` so an edge's own line is never mistaken for a
+    vertex declaration naming its first argument: an edge's args are
+    references to OTHER nodes' ids, not a declaration of its own (an edge
+    has no id of its own in the ``.mdg`` grammar to key on -- see the module
+    docstring). Without this, a vertex whose real declaration line is lost
+    (e.g. to an earlier bug) but whose edges survive looks "already
+    represented" forever, by the edge line's own source token -- sync can
+    then never re-derive and restore the missing vertex.
+    """
+    if not ns:
+        return False
+    try:
+        entries = shapes_by_function(ns).get(func)
+    except (KeyError, FileNotFoundError):
+        return False
+    if not entries:
+        return False
+    return entries[0].get("kind") == "edge"
 
 
 def _comment_start(line: str) -> int | None:
@@ -165,7 +192,9 @@ class ExistingIndex:
 def index_existing(text: str) -> ExistingIndex:
     """Scan an existing ``.mdg`` for every declared node_id, keeping the
     FIRST declaration if an id oddly repeats (defensive, mirrors load_cells'
-    keep-first precedent for malformed input)."""
+    keep-first precedent for malformed input). An edge call's own line is
+    skipped entirely (see :func:`_is_edge_call`) -- its first argument is a
+    reference to another node, not a declaration of its own."""
     lines = text.splitlines()
     clean_lines = [_strip_inline_comment(line) for line in lines]
     node_line: dict[str, int] = {}
@@ -173,6 +202,8 @@ def index_existing(text: str) -> ExistingIndex:
     for i, line in enumerate(clean_lines):
         match = _CALL_LINE_RE.match(line)
         if not match:
+            continue
+        if _is_edge_call(match.group("ns"), match.group("func")):
             continue
         node_id = _first_arg_token(match.group("args"))
         if node_id and node_id not in node_line:
@@ -763,6 +794,42 @@ def _existing_edges(existing: ExistingIndex) -> list[ExistingEdge]:
     return edges
 
 
+def _rewrite_edge_line(
+    raw_line: str,
+    clean_line: str,
+    old_source: str,
+    new_source: str,
+    old_target: str,
+    new_target: str,
+) -> str | None:
+    """Rebuild an existing edge line with its source/target tokens updated
+    to *new_source*/*new_target*, preserving everything else about the line
+    (label, variant, any trailing comment) verbatim. ``None`` if the line
+    doesn't parse as expected (defensive; should not happen for a line
+    :func:`_existing_edges` already classified as an edge).
+
+    Used for a SURVIVING edge (kept, not re-derived) whose endpoint was
+    itself renamed this run (a reparented or self-healed survivor, see
+    plan_sync) -- otherwise its kept-verbatim text goes on referencing an id
+    nothing declares any more, and the next forward-generate's XML
+    validation rejects it as a dangling reference.
+    """
+    match = _NS_FUNCTION_RE.match(clean_line)
+    if match is None:
+        return None
+    args = _split_top_level_args(match.group("args"))
+    if len(args) < 2:
+        return None
+    if args[0] == old_source:
+        args[0] = new_source
+    if args[1] == old_target:
+        args[1] = new_target
+    comment_start = _comment_start(raw_line)
+    comment = f" {raw_line[comment_start:]}" if comment_start is not None else ""
+    ns, function = match.group("ns"), match.group("function")
+    return f"{ns}.{function}({', '.join(args)}){comment}"
+
+
 def _block_range(existing: ExistingIndex, node_id: str) -> tuple[int, int]:
     """``[start, end)`` line range spanning ``node_id``'s own declaration and
     everything nested under it -- the whole subtree that must disappear
@@ -810,12 +877,19 @@ class SyncPlan:
     (additions), plus the existing line ranges to delete -- vertices/edges
     no longer present in the current ``.drawio``. draw.io is the source of
     truth: anything genuinely gone there is removed here, never left behind.
+
+    ``edge_token_rewrites`` (existing line index -> replacement text) covers
+    a SURVIVING edge (kept, not re-derived) whose source or target was
+    itself renamed this run -- its kept-verbatim text would otherwise go on
+    referencing an id nothing declares any more. See
+    :func:`_rewrite_edge_line`.
     """
 
     merge_plan: MergePlan
     removed_ranges: list[tuple[int, int]]
     removed_vertex_count: int
     removed_edge_count: int
+    edge_token_rewrites: dict[int, str]
 
 
 def _represents_a_surviving_edge(
@@ -971,8 +1045,38 @@ def plan_sync(
         reduced_existing, cells, reduced_result, node_ids, containments, raw_cells
     )
 
+    # A surviving edge is normally kept byte-identical -- but if either
+    # endpoint's raw cell_id now maps to a DIFFERENT node_id than the token
+    # already in its text (a reparented or self-healed survivor renamed this
+    # same run), that text has gone stale: rewrite just the source/target
+    # tokens, preserving the rest of the line (label, variant, comment).
+    edge_token_rewrites: dict[int, str] = {}
+    for edge in existing_edges:
+        if edge.line_index in removed_edge_line_set:
+            continue
+        if (edge.source_token, edge.target_token) not in surviving_pairs:
+            continue
+        new_source = node_ids.get(edge.source_token, edge.source_token)
+        new_target = node_ids.get(edge.target_token, edge.target_token)
+        if new_source == edge.source_token and new_target == edge.target_token:
+            continue
+        rewritten = _rewrite_edge_line(
+            existing.lines[edge.line_index],
+            existing.clean_lines[edge.line_index],
+            edge.source_token,
+            new_source,
+            edge.target_token,
+            new_target,
+        )
+        if rewritten is not None:
+            edge_token_rewrites[edge.line_index] = rewritten
+
     return SyncPlan(
-        merge_plan, removed_ranges, len(removed_roots), len(removed_edge_lines)
+        merge_plan,
+        removed_ranges,
+        len(removed_roots),
+        len(removed_edge_lines),
+        edge_token_rewrites,
     )
 
 
@@ -993,10 +1097,16 @@ def render_sync(existing: ExistingIndex, plan: SyncPlan) -> str:
             kept += 1
 
     filtered_lines = [
-        line for i, line in enumerate(existing.lines) if i not in removed
+        plan.edge_token_rewrites.get(i, line)
+        for i, line in enumerate(existing.lines)
+        if i not in removed
     ]
     filtered_clean_lines = [
-        line for i, line in enumerate(existing.clean_lines) if i not in removed
+        _strip_inline_comment(plan.edge_token_rewrites[i])
+        if i in plan.edge_token_rewrites
+        else line
+        for i, line in enumerate(existing.clean_lines)
+        if i not in removed
     ]
     remapped_insertions = [
         Insertion(
