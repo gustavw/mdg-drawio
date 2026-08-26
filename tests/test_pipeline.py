@@ -698,6 +698,58 @@ def test_overlay_preserves_a_manually_changed_text_alignment(
     assert "align=center" in style3
 
 
+@needs_sidecars
+def test_overlay_regrows_container_to_fit_a_manually_moved_child(
+    tmp_path: Path,
+) -> None:
+    """Regression: a child dragged far outside a container's auto-packed
+    bounds kept its own moved position on a plain regenerate (the overlay
+    round-trip already worked per-node) while the CONTAINER stayed at its
+    stale auto-computed size, clipping/overflowing the child -- nothing
+    re-grew the parent after the second overlay pass restored the child."""
+    src = tmp_path / "rt.mdg"
+    out = tmp_path / "rt.drawio"
+    src.write_text(
+        '---\ntitle: "t"\nmode: layered\n---\n\n'
+        'general.VerticalContainer(v1, "Group"):\n'
+        '    erd.EntityRect(e1, "One")\n'
+        '    erd.EntityRect(e2, "Two")\n',
+        encoding="utf-8",
+    )
+
+    assert main([str(src), str(out), "--force"]) == 0
+
+    # Drag e1 far outside the container's current (tightly auto-packed) bounds.
+    tree = ET.parse(str(out))
+    root = tree.getroot()
+    e1_geo = _inner_cell(root, "e1").find("mxGeometry")
+    assert e1_geo is not None
+    moved_x, moved_y = 900.0, 700.0
+    e1_geo.set("x", str(moved_x))
+    e1_geo.set("y", str(moved_y))
+    tree.write(str(out), encoding="utf-8")
+
+    # Regenerate WITHOUT --force -> engine reads the overlay from *out*.
+    assert main([str(src), str(out)]) == 0
+
+    root2 = ET.parse(str(out)).getroot()
+    e1_geo2 = _inner_cell(root2, "e1").find("mxGeometry")
+    assert e1_geo2 is not None
+    assert float(e1_geo2.get("x", "0")) == moved_x, "child x not preserved"
+    assert float(e1_geo2.get("y", "0")) == moved_y, "child y not preserved"
+    e1_width = float(e1_geo2.get("width", "0"))
+    e1_height = float(e1_geo2.get("height", "0"))
+
+    v1_geo = _inner_cell(root2, "v1").find("mxGeometry")
+    assert v1_geo is not None
+    v1_width = float(v1_geo.get("width", "0"))
+    v1_height = float(v1_geo.get("height", "0"))
+    assert v1_width >= moved_x + e1_width, "container not widened to fit moved child"
+    assert (
+        v1_height >= moved_y + e1_height
+    ), "container not heightened to fit moved child"
+
+
 def test_convert_reports_dsl_parse_errors(
     capsys: pytest.CaptureFixture[str],
     tmp_path: Path,
