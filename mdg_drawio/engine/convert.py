@@ -57,6 +57,8 @@ from mdg_drawio.layout import (
     create_style_resolver,
     dispatch_layout,
     estimate_text_width,
+    padding_dict,
+    regrow_containers_to_fit_children,
     resolve_page_size,
     scale_node_sizes,
 )
@@ -603,6 +605,11 @@ def _apply_layout_to_document(
     page.edges = result.edges
 
     _inject_node_overlay(page.nodes, overlay)
+    # The overlay above can move a container's children away from the
+    # positions layout grew the container to fit -- re-fit every container
+    # to its children's now-final geometry so a manually-repositioned child
+    # doesn't overflow (or leave dead space in) a stale-sized parent.
+    regrow_containers_to_fit_children(page.nodes, padding_dict(config or Config()))
 
     page_width, page_height = _resolve_page_size_for_final_content(
         result.nodes, result.edges,
