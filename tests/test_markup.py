@@ -132,6 +132,28 @@ def test_html_to_markdown_bare_inline_with_no_block_wrapper() -> None:
     assert html_to_markdown("Some <b>bold</b> text") == "Some **bold** text"
 
 
+def test_html_to_markdown_div_wrapped_lines_join_with_a_single_newline() -> None:
+    """draw.io's own editor wraps each typed line in its own <div> -- a line
+    break, not a paragraph -- so consecutive <div>s must read as one
+    multi-line label (single "\\n"), not blank-line-separated paragraphs
+    (the <p> behaviour)."""
+    html = "<div>line one</div><div>line two</div><div>line three</div>"
+    assert html_to_markdown(html) == "line one\nline two\nline three"
+
+
+def test_html_to_markdown_bare_text_then_a_trailing_div() -> None:
+    """The real bug this guards: leading plain text followed by exactly one
+    <div>-wrapped line, no wrapper around the first line at all -- draw.io
+    produces this when a user types a second line onto an existing label."""
+    html = "Missar vi något här emellan??<div>(spelregler/affärskrav)</div>"
+    expected = "Missar vi något här emellan??\n(spelregler/affärskrav)"
+    assert html_to_markdown(html) == expected
+
+
+def test_html_to_markdown_div_content_still_gets_inline_formatting() -> None:
+    assert html_to_markdown("<div><b>bold</b> line</div>") == "**bold** line"
+
+
 def test_html_to_markdown_nested_inline_inside_a_link() -> None:
     html = '<a href="url"><b>bold link</b></a>'
     assert html_to_markdown(html) == "[**bold link**](url)"

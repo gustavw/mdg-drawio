@@ -364,6 +364,47 @@ def test_classify_new_cells_rejects_vertex_shape_for_raw_edge(
     ]
 
 
+def test_label_for_converts_a_div_wrapped_html_value_instead_of_dropping_it() -> None:
+    """Regression: a hand-drawn cell's HTML value (draw.io sets html=1 for
+    any multi-line label -- each line its own <div>) used to be dropped
+    entirely just for containing a '<', losing the label outright instead
+    of converting it."""
+    cell = Cell(
+        cell_id="n1",
+        style="whiteSpace=wrap;html=1;",
+        value="Missar vi något här emellan??<div>(spelregler/affärskrav)</div>",
+        tokens={},
+    )
+    assert (
+        merge._label_for(cell)
+        == "Missar vi något här emellan??\n(spelregler/affärskrav)"
+    )
+
+
+def test_label_for_leaves_plain_text_with_no_angle_bracket_untouched() -> None:
+    cell = Cell(cell_id="n1", style="", value="Plain label", tokens={})
+    assert merge._label_for(cell) == "Plain label"
+
+
+def test_render_declaration_emits_the_converted_multiline_label(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        merge, "_shape_meta", lambda _shape_id: ("erd", "EntityRect", 1)
+    )
+    cell = Cell(
+        cell_id="n1",
+        style="whiteSpace=wrap;html=1;",
+        value="Missar vi något här emellan??<div>(spelregler/affärskrav)</div>",
+        tokens={},
+    )
+    line = merge._render_declaration(cell, "erd.entityrect.v1", "n1", "", False)
+    assert line == (
+        'erd.EntityRect(n1, "Missar vi något här emellan??\\n'
+        '(spelregler/affärskrav)")'
+    )
+
+
 def test_render_edge_uses_c4_description_as_label(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -49,6 +49,7 @@ import re
 from dataclasses import dataclass, field
 
 from mdg_drawio.contracts import Document
+from mdg_drawio.markup import html_to_markdown
 from mdg_drawio.notation import parse as parse_mdg
 from mdg_drawio.notation import shapes_by_function
 
@@ -276,26 +277,32 @@ def _label_for(cell: Cell) -> str | None:
        template substitution involved).
     3. The cell's own ``value`` -- a bare (non-object-wrapped) vertex or edge.
 
-    Anything that still looks like a template placeholder or carries raw
-    HTML is skipped rather than guessed at.
+    Anything that still looks like a template placeholder is skipped rather
+    than guessed at. Raw HTML (draw.io renders a label as HTML whenever its
+    style sets ``html=1`` -- the common case, including a plain multi-line
+    label typed in the UI, each line its own ``<div>``) is converted to
+    markdown via :func:`~mdg_drawio.markup.html_to_markdown` rather than
+    discarded -- losing an entire label just because it has formatting (or
+    simply spans more than one line) would otherwise silently drop real
+    content the user typed.
     """
     name = cell.object_attrs.get("c4Name", "").strip()
     if name and "%" not in name:
         return name
     label = cell.object_attrs.get("label", "").strip()
-    if label and "%" not in label and "<" not in label:
-        return label
+    if label and "%" not in label:
+        return html_to_markdown(label) if "<" in label else label
     value = cell.value.strip()
-    if value and "%" not in value and "<" not in value:
-        return value
+    if value and "%" not in value:
+        return html_to_markdown(value) if "<" in value else value
     return None
 
 
 def _edge_label_for(cell: Cell) -> str | None:
     """Extract connector text, including C4's edge-specific object field."""
     description = cell.object_attrs.get("c4Description", "").strip()
-    if description and "%" not in description and "<" not in description:
-        return description
+    if description and "%" not in description:
+        return html_to_markdown(description) if "<" in description else description
     return _label_for(cell)
 
 
