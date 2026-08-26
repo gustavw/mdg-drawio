@@ -19,13 +19,19 @@ from mdg_drawio.contracts import (
 _ANCHOR_STYLE_KEYS = frozenset({"exitX", "exitY", "entryX", "entryY"})
 
 # Per-instance style tokens preserved verbatim across a plain regenerate
-# (`mdg in.mdg out.drawio`) -- purely cosmetic text formatting a user commonly
+# (`mdg in.mdg out.drawio`) -- purely cosmetic tweaks a user commonly
 # hand-adjusts in the draw.io UI, which a fresh generation would otherwise
-# reset to the palette/config default. Deliberately narrow: colours (fill/
-# stroke/font) are excluded because this codebase routinely uses them to
-# encode a real notation distinction (e.g. C4 Person vs Person_Ext), so
-# blindly freezing them could mask an intentional type change in the .mdg.
-_PRESERVED_NODE_STYLE_KEYS = frozenset({"align", "verticalAlign"})
+# reset to the palette/config default. This module has no notion of which
+# notation a cell belongs to (it reads the .drawio in isolation, before any
+# .mdg is even parsed), so it reads every one of these unconditionally --
+# engine/convert.py's `_inject_node_overlay` is what actually applies them,
+# and it excludes the colour keys for a node whose library encodes real
+# meaning in colour (e.g. C4 Person vs Person_Ext) once it knows the node's
+# type, so a manual colour tweak there can never mask an intentional .mdg
+# type/variant change. See convert.py's `_COLOR_SEMANTIC_LIBRARIES`.
+_PRESERVED_NODE_STYLE_KEYS = frozenset(
+    {"align", "verticalAlign", "fillColor", "strokeColor", "fontColor"}
+)
 
 
 def _read_cell_geometry(

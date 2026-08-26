@@ -698,6 +698,56 @@ def test_overlay_preserves_a_manually_changed_text_alignment(
     assert "align=center" in style3
 
 
+def test_overlay_preserves_a_manually_changed_fill_color_for_a_decorative_notation(
+    tmp_path: Path,
+) -> None:
+    """A user recolouring an ERD entity directly in draw.io must survive a
+    plain regenerate -- erd doesn't encode any real distinction in colour,
+    so it's treated as decorative, the same as text alignment."""
+    src = tmp_path / "rt.mdg"
+    out = tmp_path / "rt.drawio"
+    src.write_text('erd.EntityRect(e1, "Regelverk")\n', encoding="utf-8")
+
+    assert main([str(src), str(out), "--force"]) == 0
+    tree = ET.parse(str(out))
+    root = tree.getroot()
+    cell = _inner_cell(root, "e1")
+    style = cell.get("style", "")
+    assert "fillColor=" not in style, "test assumes no pre-existing fillColor"
+    cell.set("style", style + "fillColor=#FFF2CC;strokeColor=#D6B656;")
+    tree.write(str(out), encoding="utf-8")
+
+    assert main([str(src), str(out)]) == 0
+    style2 = _inner_cell(ET.parse(str(out)).getroot(), "e1").get("style", "")
+    assert style2.count("fillColor=") == 1, f"duplicate fillColor token: {style2!r}"
+    assert "fillColor=#FFF2CC" in style2
+    assert "strokeColor=#D6B656" in style2
+
+
+def test_overlay_does_not_preserve_fill_color_for_a_color_semantic_notation(
+    tmp_path: Path,
+) -> None:
+    """A user recolouring a C4 Person directly in draw.io must NOT survive a
+    plain regenerate -- C4 (and ArchiMate/UML/UML2.5) use colour to encode a
+    real .mdg-driven type distinction (e.g. Person vs Person_Ext), so
+    freezing a manual colour there could mask an intentional variant
+    change (see convert.py's _COLOR_SEMANTIC_LIBRARIES)."""
+    src = tmp_path / "rt.mdg"
+    out = tmp_path / "rt.drawio"
+    src.write_text('c4.Person(a, "A")\n', encoding="utf-8")
+
+    assert main([str(src), str(out), "--force"]) == 0
+    tree = ET.parse(str(out))
+    root = tree.getroot()
+    cell = _inner_cell(root, "a")
+    cell.set("style", cell.get("style", "") + "fillColor=#FF0000;")
+    tree.write(str(out), encoding="utf-8")
+
+    assert main([str(src), str(out)]) == 0
+    style2 = _inner_cell(ET.parse(str(out)).getroot(), "a").get("style", "")
+    assert "fillColor=#FF0000" not in style2
+
+
 @needs_sidecars
 def test_overlay_regrows_container_to_fit_a_manually_moved_child(
     tmp_path: Path,

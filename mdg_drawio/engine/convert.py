@@ -459,15 +459,37 @@ def _hide_implied_containment_edges(nodes: list[Node], edges: list[Edge]) -> Non
             edge.hidden = True
 
 
+# draw.io colour style keys read into the overlay (see generator/overlay.py's
+# _PRESERVED_NODE_STYLE_KEYS) but excluded from a node whose library is in
+# _COLOR_SEMANTIC_LIBRARIES below.
+_COLOR_STYLE_KEYS = frozenset({"fillColor", "strokeColor", "fontColor"})
+
+# Notations where colour routinely encodes a real, .mdg-driven distinction
+# (a C4 Person vs Person_Ext, an ArchiMate layer convention, a UML
+# stereotype) rather than a purely decorative choice -- a manual colour
+# tweak there is deliberately NOT preserved across a plain regenerate, so it
+# can never mask an intentional type/variant change made in the .mdg.
+# Every other notation's colour (erd, general, bpmn2, ...) is treated as
+# decorative and preserved the same way text alignment already is. Extend
+# this set, never the exclusion logic itself, if another notation turns out
+# to encode meaning in colour too.
+_COLOR_SEMANTIC_LIBRARIES = frozenset({"archimate3", "c4", "uml", "uml25"})
+
+
+def _node_library(node_type: str) -> str:
+    return node_type.split(".", 1)[0]
+
+
 def _inject_node_overlay(
     nodes: list[Node], overlay: GeometryOverlay | None
 ) -> None:
     """Apply existing node positions and preserved style tokens from overlay.
 
-    Style tokens (e.g. text alignment) are applied last, so a manual edit
-    made directly in draw.io always wins over the palette/config default on
-    the next plain regenerate -- the same "what's already there survives"
-    contract geometry already gets.
+    Style tokens (e.g. text alignment, fill/stroke/font colour) are applied
+    last, so a manual edit made directly in draw.io always wins over the
+    palette/config default on the next plain regenerate -- the same "what's
+    already there survives" contract geometry already gets. Colour keys are
+    dropped first for a node in a _COLOR_SEMANTIC_LIBRARIES notation.
     """
     if not overlay:
         return
@@ -479,7 +501,12 @@ def _inject_node_overlay(
             node.width = geo.get("width", node.width)
             node.height = geo.get("height", node.height)
         if node.id in overlay.node_styles:
-            node.style_overrides.update(overlay.node_styles[node.id])
+            style = overlay.node_styles[node.id]
+            if _node_library(node.type) in _COLOR_SEMANTIC_LIBRARIES:
+                style = {
+                    k: v for k, v in style.items() if k not in _COLOR_STYLE_KEYS
+                }
+            node.style_overrides.update(style)
 
 
 def _resolve_node_sizes(
