@@ -36,6 +36,7 @@ from mdg_drawio.reverse.derive import (
     derive,
     load_cells,
     parent_map,
+    rewrite_cell_ids,
 )
 from mdg_drawio.reverse.derive_cli import main
 from mdg_drawio.reverse.naming import assign_semantic_ids, semantic_base
@@ -509,6 +510,107 @@ def test_parent_map_and_load_cells_agree_on_multi_page_ids() -> None:
     )
     cell_ids = {c.cell_id for c in load_cells(doc)}
     assert cell_ids <= set(parent_map(doc))
+
+
+# ── rewrite_cell_ids (no data) ────────────────────────────────────────────────
+def test_rewrite_cell_ids_returns_none_for_empty_renames() -> None:
+    doc = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        "</root></mxGraphModel>"
+    )
+    assert rewrite_cell_ids(doc, {}) is None
+
+
+def test_rewrite_cell_ids_returns_none_when_nothing_matches() -> None:
+    doc = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell id="5" style="shape=a;" vertex="1" parent="1"/>'
+        "</root></mxGraphModel>"
+    )
+    assert rewrite_cell_ids(doc, {"nonexistent": "e1"}) is None
+
+
+def test_rewrite_cell_ids_renames_id_and_every_reference() -> None:
+    """A renamed vertex's id must update everywhere it's referenced: a
+    child's `parent`, and an edge's `source`/`target`."""
+    doc = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell id="5" style="shape=a;" vertex="1" parent="1"/>'
+        '<mxCell id="6" style="shape=b;" vertex="1" parent="5"/>'
+        '<mxCell id="7" style="edgeStyle=x;" edge="1" parent="1" '
+        'source="5" target="6"/>'
+        "</root></mxGraphModel>"
+    )
+    out = rewrite_cell_ids(doc, {"5": "entityrect1"})
+    assert out is not None
+    cells = {c.get("id"): c for c in ET.fromstring(out).iter("mxCell")}
+    assert "5" not in cells
+    assert cells["entityrect1"].get("style") == "shape=a;"
+    assert cells["6"].get("parent") == "entityrect1"
+    assert cells["7"].get("source") == "entityrect1"
+    assert cells["7"].get("target") == "6"  # untouched -- not renamed
+
+
+def test_rewrite_cell_ids_renames_the_wrapper_of_an_object_cell() -> None:
+    doc = (
+        '<mxfile><diagram name="P"><mxGraphModel><root>'
+        '<mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<object id="5" label="A"><mxCell style="shape=a;" vertex="1" '
+        'parent="1"/></object>'
+        "</root></mxGraphModel></diagram></mxfile>"
+    )
+    out = rewrite_cell_ids(doc, {"5": "entityrect1"})
+    assert out is not None
+    root = ET.fromstring(out)
+    obj = next(root.iter("object"))
+    assert obj.get("id") == "entityrect1"
+    cells = load_cells(out)
+    assert [c.cell_id for c in cells] == ["entityrect1"]
+
+
+def test_rewrite_cell_ids_respects_multi_page_prefixes() -> None:
+    """Only the targeted page's cell is renamed -- the SAME raw id on
+    another page, not named in `renames`, is left untouched."""
+    page = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell id="2" style="shape=x;" vertex="1" parent="1"/>'
+        "</root></mxGraphModel>"
+    )
+    doc = (
+        "<mxfile>"
+        f'<diagram name="Page-1">{page}</diagram>'
+        f'<diagram name="Page-2">{page}</diagram>'
+        "</mxfile>"
+    )
+    out = rewrite_cell_ids(doc, {"1:2": "entityrect1"})
+    assert out is not None
+    models = list(ET.fromstring(out).iter("mxGraphModel"))
+    page1_ids = {c.get("id") for c in models[0].iter("mxCell")}
+    page2_ids = {c.get("id") for c in models[1].iter("mxCell")}
+    assert "2" in page1_ids and "entityrect1" not in page1_ids
+    assert "entityrect1" in page2_ids and "2" not in page2_ids
+
+
+def test_rewrite_cell_ids_converts_a_compressed_page_to_inline_xml() -> None:
+    """A renamed compressed page is rewritten as inline XML rather than
+    re-compressed -- draw.io reads both forms interchangeably."""
+    inner = (
+        '<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>'
+        '<mxCell id="2" style="ellipse;html=1;" vertex="1" parent="1"/>'
+        "</root></mxGraphModel>"
+    )
+    payload = zlib.compressobj(-1, zlib.DEFLATED, -15)
+    packed = payload.compress(inner.encode()) + payload.flush()
+    b64 = base64.b64encode(packed).decode()
+    doc = f'<mxfile><diagram name="P">{b64}</diagram></mxfile>'
+
+    out = rewrite_cell_ids(doc, {"2": "entityrect1"})
+    assert out is not None
+    diagram = next(ET.fromstring(out).iter("diagram"))
+    assert diagram.text is None or not diagram.text.strip()
+    assert diagram.find("mxGraphModel") is not None
+    cells = load_cells(out)
+    assert [c.cell_id for c in cells] == ["entityrect1"]
 
 
 def test_malformed_xml_raises() -> None:

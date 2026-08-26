@@ -369,12 +369,21 @@ class MergePlan:
     of insertion operations: a brand-new container with new children inside
     it is ONE insertion (its whole subtree renders as one text block) but
     several new nodes -- reporting insertion count would understate what
-    changed."""
+    changed.
+
+    ``renamed_ids`` (draw.io cell_id -> the fresh semantic node_id just
+    minted for it) covers every newly-added VERTEX -- an edge cell has no id
+    of its own in the ``.mdg`` grammar to keep in step (see the module
+    docstring), so it is never a rename target. ``mdg sync --write`` applies
+    this to the ``.drawio`` file itself (:func:`~mdg_drawio.reverse.derive.
+    rewrite_cell_ids`) so a later plain regenerate's geometry overlay can
+    still find the cell by id."""
 
     insertions: list[Insertion]
     skipped: list[str]
     new_edge_count: int
     new_node_count: int
+    renamed_ids: dict[str, str]
 
 
 def _build_forest(
@@ -633,7 +642,10 @@ def plan_merge(
     )
     if edge_insertion is not None:
         insertions.append(edge_insertion)
-    return MergePlan(insertions, skipped, new_edge_count, len(new_cells))
+    renamed_ids = {c.cell_id: node_ids[c.cell_id] for c in new_cells}
+    return MergePlan(
+        insertions, skipped, new_edge_count, len(new_cells), renamed_ids
+    )
 
 
 def render_merge(existing: ExistingIndex, plan: MergePlan) -> str:
@@ -946,6 +958,7 @@ def render_sync(existing: ExistingIndex, plan: SyncPlan) -> str:
         plan.merge_plan.skipped,
         plan.merge_plan.new_edge_count,
         plan.merge_plan.new_node_count,
+        plan.merge_plan.renamed_ids,
     )
     return render_merge(filtered_existing, remapped_plan)
 
