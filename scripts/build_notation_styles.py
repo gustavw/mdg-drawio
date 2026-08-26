@@ -265,6 +265,7 @@ def _build_library(
         sidecar[shape["id"]] = {
             "fingerprint": fingerprint,
             "style": style,
+            "kind": shape["kind"],
             "width": geometry.get("width"),
             "height": geometry.get("height"),
             "cells": cells,

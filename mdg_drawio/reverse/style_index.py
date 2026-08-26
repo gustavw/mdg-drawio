@@ -58,6 +58,11 @@ class ShapeEntry:
     style: str
     fingerprint: str
     tokens: dict[str, object] = field(compare=False)
+    # The registry's ``kind`` ("vertex"/"edge"/"diagram"), defaulting to
+    # "vertex" for a sidecar built before this field existed -- keeps a stale
+    # (unrebuilt) ``generated_data`` cache from crashing rather than silently
+    # matching edge cells, the safer of the two failure directions.
+    kind: str = "vertex"
 
 
 @dataclass(frozen=True)
@@ -97,6 +102,7 @@ class StyleIndex:
                         style=style,
                         fingerprint=str(rec.get("fingerprint") or ""),
                         tokens=parse_style(style),
+                        kind=str(rec.get("kind") or "vertex"),
                     )
                 )
         return cls(entries)

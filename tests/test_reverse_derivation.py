@@ -135,12 +135,16 @@ def test_arrow_ends_outweigh_an_unrelated_shared_token() -> None:
 
 
 # ── synthetic ranking policy (no data) ───────────────────────────────────────
-def _entry(shape_id: str, library: str, style: str) -> ShapeEntry:
-    return ShapeEntry(shape_id, library, style, f"sha1:{shape_id}", parse_style(style))
+def _entry(
+    shape_id: str, library: str, style: str, kind: str = "vertex"
+) -> ShapeEntry:
+    return ShapeEntry(
+        shape_id, library, style, f"sha1:{shape_id}", parse_style(style), kind=kind
+    )
 
 
-def _cell(style: str, cell_id: str = "1") -> Cell:
-    return Cell(cell_id, style, "", parse_style(style))
+def _cell(style: str, cell_id: str = "1", is_edge: bool = False) -> Cell:
+    return Cell(cell_id, style, "", parse_style(style), is_edge=is_edge)
 
 
 WIDGET_STYLE = "shape=widget;html=1;"
@@ -220,6 +224,32 @@ def test_below_floor_similarity_resolves_to_no_match() -> None:
     assert cell.candidates == []
     assert cell.resolved_by == "none"
     assert cell.confidence == 0.0
+
+
+def test_edge_cell_never_resolves_to_a_vertex_only_entry() -> None:
+    """Regression: an edge cell used to be scored against the WHOLE index,
+    vertex entries included -- a bare edge style with only boilerplate
+    tokens (html=1;rounded=0;) could out-score every real edge candidate
+    against a vertex whose canonical style happens to be equally bare (a
+    composite shape's near-empty anchor cell), silently "resolving" the
+    edge to a shape it structurally cannot be."""
+    idx = StyleIndex(
+        [_entry("lib.bareanchor.v1", "lib", "html=1;rounded=0;", kind="vertex")]
+    )
+    result = derive(
+        [_cell("edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;", is_edge=True)], idx
+    )
+    cell = result.cells[0]
+    assert cell.chosen is None
+    assert cell.candidates == []
+
+
+def test_vertex_cell_never_resolves_to_an_edge_only_entry() -> None:
+    idx = StyleIndex([_entry("lib.rel.v1", "lib", "html=1;rounded=0;", kind="edge")])
+    result = derive([_cell("html=1;rounded=0;", is_edge=False)], idx)
+    cell = result.cells[0]
+    assert cell.chosen is None
+    assert cell.candidates == []
 
 
 def test_band_widens_or_narrows_the_candidate_set() -> None:
@@ -720,6 +750,21 @@ def test_scenario_anchor_pulls_ambiguous_shape_to_older_library() -> None:
     assert lifeline_cell.chosen.library == "uml"
     assert "lifeline" in lifeline_cell.chosen.shape_id
     assert lifeline_cell.resolved_by == "library-vote"
+
+
+@needs_data
+def test_default_edge_style_never_resolves_to_a_vertex_shape() -> None:
+    """A real bug: a bare default connector (drawn with no distinguishing
+    ``shape=`` token) resolved to uml25.portwithprovidedinterface.v1 -- a
+    VERTEX (a UML port icon), because that composite shape's canonical style
+    is its near-empty anchor cell (html=1;rounded=0;), which a plain default
+    edge also carries."""
+    doc = fx.document(fx.edge_cell_xml("e1", "src", "tgt"))
+    result = derive(load_cells(doc), INDEX)
+    chosen = result.cells[0].chosen
+    if chosen is not None:
+        assert fx.get(INDEX, chosen.shape_id).kind == "edge"
+        assert chosen.shape_id != "uml25.portwithprovidedinterface.v1"
 
 
 def _structurally_unique_entry(index: StyleIndex) -> ShapeEntry:
