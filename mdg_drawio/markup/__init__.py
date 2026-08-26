@@ -10,6 +10,7 @@ implementation. Exactly these constructs convert, both ways:
 | ``<i>``/``<em>``             | ``*text*``           | Italic         |
 | ``<s>``                      | ``~~text~~``         | Strikethrough  |
 | ``<br>``                     | newline / ``<br>``   | Line break     |
+| ``<div>`` (HTML -> MD only)  | newline              | draw.io's own per-line wrapper |
 | ``<p>``                      | blank line between   | Paragraph      |
 | ``<hr>``                     | ``---``              | Horizontal rule|
 | ``<h1>``                     | ``# H``              | Heading 1      |
@@ -29,9 +30,12 @@ happens to look like syntax (a literal ``*``, a literal ``<``) survives a
 round trip instead of being silently reinterpreted -- see
 ``mdg_drawio.markup._inline`` for exactly how.
 
-Standalone utility, not (yet) wired into the DSL or the generator: nothing
-here changes how a ``.mdg`` string literal is parsed or how a label gets
-written to ``.drawio`` XML today.
+``html_to_markdown`` recovers a hand-drawn cell's label for ``.mdg``
+during reverse derivation (``mdg_drawio.reverse.merge``): a draw.io label is
+HTML whenever ``html=1`` is set, so extracting it as plain text would lose
+real formatting or drop the label outright the moment it contains a ``<``.
+``markdown_to_html`` is not (yet) wired into the forward generator -- a
+``.mdg`` label is still written to ``.drawio`` XML as literal text today.
 """
 from __future__ import annotations
 

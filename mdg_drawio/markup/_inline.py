@@ -87,6 +87,7 @@ _INLINE_TOKEN_RE = re.compile(
     r"|<(?:b|strong)\b[^>]*>(?P<bold>.*?)</(?:b|strong)>"
     r"|<(?:i|em)\b[^>]*>(?P<italic>.*?)</(?:i|em)>"
     r"|<s\b[^>]*>(?P<strike>.*?)</s>"
+    r"|<div\b[^>]*>(?P<div>.*?)</div>"
     r"|<br\s*/?>",
     re.IGNORECASE | re.DOTALL,
 )
@@ -100,6 +101,38 @@ def _escape_markdown_text(text: str) -> str:
     return _MD_SPECIAL_RE.sub(r"\\\1", html.unescape(text))
 
 
+def _render_inline_token(match: re.Match[str]) -> str:
+    """The markdown for one ``_INLINE_TOKEN_RE`` match."""
+    if match.group("code") is not None:
+        return f"`{html.unescape(match.group('code'))}`"
+    if match.group("img_attrs") is not None:
+        attrs = match.group("img_attrs")
+        src_match = _IMG_SRC_ATTR_RE.search(attrs)
+        alt_match = _IMG_ALT_ATTR_RE.search(attrs)
+        src = src_match.group(1) if src_match else ""
+        alt = alt_match.group(1) if alt_match else ""
+        return f"![{alt}]({src})"
+    if match.group("href") is not None:
+        text = html_inline_to_markdown(match.group("link_text"))
+        return f"[{text}]({match.group('href')})"
+    if match.group("bold") is not None:
+        return f"**{html_inline_to_markdown(match.group('bold'))}**"
+    if match.group("italic") is not None:
+        return f"*{html_inline_to_markdown(match.group('italic'))}*"
+    if match.group("strike") is not None:
+        return f"~~{html_inline_to_markdown(match.group('strike'))}~~"
+    if match.group("div") is not None:
+        # draw.io's own editor wraps each typed line in its own <div> -- a
+        # line break, not a semantic block/paragraph -- so a leading "\n"
+        # (not the block layer's blank-line-separated "\n\n") is what makes
+        # a multi-<div> label read as one multi-line label rather than
+        # several disconnected paragraphs. A <div> with nothing before it
+        # leaves a leading "\n" a caller is expected to .strip() away
+        # (html_to_markdown's entry points already do).
+        return "\n" + html_inline_to_markdown(match.group("div"))
+    return "\n"  # <br>
+
+
 def html_inline_to_markdown(fragment: str) -> str:
     """Convert HTML inline markup in *fragment* to markdown, protecting code
     spans (kept literal) and escaping plain text for round-trip fidelity."""
@@ -108,26 +141,7 @@ def html_inline_to_markdown(fragment: str) -> str:
     for match in _INLINE_TOKEN_RE.finditer(fragment):
         if match.start() > pos:
             out.append(_escape_markdown_text(fragment[pos : match.start()]))
-        if match.group("code") is not None:
-            out.append(f"`{html.unescape(match.group('code'))}`")
-        elif match.group("img_attrs") is not None:
-            attrs = match.group("img_attrs")
-            src_match = _IMG_SRC_ATTR_RE.search(attrs)
-            alt_match = _IMG_ALT_ATTR_RE.search(attrs)
-            src = src_match.group(1) if src_match else ""
-            alt = alt_match.group(1) if alt_match else ""
-            out.append(f"![{alt}]({src})")
-        elif match.group("href") is not None:
-            out.append(f"[{html_inline_to_markdown(match.group('link_text'))}]"
-                        f"({match.group('href')})")
-        elif match.group("bold") is not None:
-            out.append(f"**{html_inline_to_markdown(match.group('bold'))}**")
-        elif match.group("italic") is not None:
-            out.append(f"*{html_inline_to_markdown(match.group('italic'))}*")
-        elif match.group("strike") is not None:
-            out.append(f"~~{html_inline_to_markdown(match.group('strike'))}~~")
-        else:
-            out.append("\n")  # <br>
+        out.append(_render_inline_token(match))
         pos = match.end()
     if pos < len(fragment):
         out.append(_escape_markdown_text(fragment[pos:]))

@@ -35,7 +35,7 @@ c4.System_Boundary(drawiogen_c, "mdg-drawio"):
     c4.Container(notation, "Notation", "Seven registry-driven notation libraries sharing one block DSL engine, plus C4-specific builders. Shared core handles registry loading, exact variant dispatch, nesting validation, style lookup, and normalization.", technology="Python / YAML")
     c4.Container(palette_data, "Generated Data", "Pre-built JSON data extracted from draw.io shape libraries. Not committed. Supplies shape styles, dimensions, palette entries, and nested row-type templates consumed at startup.", technology="JSON (generated)")
     c4.Container(reverse, "Reverse Derivation & Merge", "POC: derives which registry shape a hand-drawn draw.io cell came from (weighted style match + library ranking), assigns it a semantic .mdg node id, resolves containment, and splices genuinely new cells into an existing .mdg file's text -- or, for `mdg sync`, also removes any vertex/edge no longer present, draw.io as source of truth. Exposed as the `mdg merge`/`mdg sync` CLI subcommands.", technology="Python")
-    c4.Container(markup, "Markup Conversion", "Markdown <-> HTML conversion for rich-text shape labels (a table-driven subset: bold/italic/strike/headings/lists/links/images/blockquote/code/tables). Zero project imports -- stdlib only. Standalone utility, not yet wired into the DSL or generator.", technology="Python")
+    c4.Container(markup, "Markup Conversion", "Markdown <-> HTML conversion for rich-text shape labels (a table-driven subset: bold/italic/strike/headings/lists/links/images/blockquote/code/tables). Zero project imports -- stdlib only. html_to_markdown recovers a .mdg label from a hand-drawn cell's HTML value during reverse derivation; markdown_to_html is not yet wired into the forward generator.", technology="Python")
 
 c4.Person(author_c, "Diagram Author / Developer", "Writes and maintains MDG files, refines diagrams visually in draw.io.", technology="")
 
@@ -45,6 +45,7 @@ c4.Rel(author_c, cli, "Runs", description="")
 c4.Rel(cli, engine, "Delegates to", description="")
 c4.Rel(engine, reverse, "Delegates to (merge/derive verbs)", description="")
 c4.Rel(reverse, notation, "Parses .mdg, derives registry shapes", description="")
+c4.Rel(reverse, markup, "Converts an HTML label to markdown", description="")
 c4.Rel(author_c, drawio_c, "Reviews and adjusts layout", description="")
 c4.Rel(engine, notation, "Pre-loads registries and styles", description="")
 
@@ -184,6 +185,7 @@ c4.Rel(reverse_merge_co, reverse_derive_co, "Derives shapes for new cells", desc
 c4.Rel(reverse_merge_co, reverse_style_index_co, "Looks up registry entries", description="")
 c4.Rel(reverse_merge_co, notation_co_boundary, "Parses .mdg via notation.parse", description="")
 c4.Rel(reverse_merge_co, contracts_co_boundary, "Uses contracts", description="")
+c4.Rel(reverse_merge_co, markup_co_boundary, "Converts an HTML label to markdown", description="")
 c4.Rel(reverse_merge_cli_co, reverse_merge_co, "Plans and renders the merge", description="")
 c4.Rel(reverse_merge_cli_co, reverse_containment_co, "Resolves new cells' nesting", description="")
 c4.Rel(reverse_merge_cli_co, reverse_derive_co, "Derives shapes for new cells", description="")
