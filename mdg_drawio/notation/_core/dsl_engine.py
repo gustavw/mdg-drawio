@@ -920,7 +920,10 @@ def _validate_child_allowed(
     if same_namespace:
         if parent_frame.allowed is None or name in parent_frame.allowed:
             return
-    elif parent_frame.allowed is None and parent_frame.namespace in _STRUCTURAL_NAMESPACES:
+    elif (
+        parent_frame.allowed is None
+        and parent_frame.namespace in _STRUCTURAL_NAMESPACES
+    ):
         # A wildcard container on a structural palette page (general, misc,
         # advanced, basic, arrows, flowchart) is a freeform grouping, not a
         # notation-specific compartment -- it may hold any library's shapes.
