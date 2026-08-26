@@ -134,7 +134,8 @@ EXPECTED_RELATION_COUNTS: dict[str, int] = {
     "Context": 4,
     # +2: engine -> reverse, reverse -> notation (the new Reverse Derivation &
     # Merge container, added for the `mdg merge`/`mdg derive` subcommands).
-    "Container": 13,
+    # +1: reverse -> contracts (reverse/merge.py now uses contracts.Document).
+    "Container": 14,
     # +25: the Reverse Derivation & Merge container's own Component/Code-page
     # edges -- engine.merge()/derive() -> reverse boundary, 9 new components'
     # intra-package and cross-package (-> notation) relations.
@@ -144,8 +145,10 @@ EXPECTED_RELATION_COUNTS: dict[str, int] = {
     # +2: the new Markup Conversion container's own intra-package edges
     # (markdown_to_html/html_to_markdown -> shared inline conversion). Zero
     # project imports otherwise, so no new Container-level edge.
-    "Component": 72,
-    "Code": 72,
+    # +1: reverse/merge.py now imports mdg_drawio.contracts (Document, for
+    # sync's reparent detection) -- reverse_merge_co -> contracts_co_boundary.
+    "Component": 73,
+    "Code": 73,
 }
 
 CONTEXT_RELATION_TYPES: set[str] = {
