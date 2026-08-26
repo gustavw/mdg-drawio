@@ -76,6 +76,11 @@ class Cell:
     value: str
     tokens: dict[str, object] = field(compare=False)
     object_attrs: dict[str, str] = field(default_factory=dict, compare=False)
+    # From the source ``mxCell``'s own ``edge="1"`` attribute -- ground truth
+    # for whether this cell IS an edge, independent of what it scores against.
+    # Used to keep an edge cell from ever resolving to a vertex-kind shape (or
+    # vice versa): see the kind filter in :func:`_near_candidates`.
+    is_edge: bool = False
 
 
 @dataclass(frozen=True)
@@ -230,6 +235,7 @@ def load_cells(source: str) -> list[Cell]:
                     value=element.get("value") or "",
                     tokens=parse_style(style),
                     object_attrs=object_attrs.get(cell_id, {}),
+                    is_edge=element.get("edge") == "1",
                 )
             )
     return cells
@@ -290,8 +296,20 @@ def parent_map(source: str) -> dict[str, RawCell]:
 def _near_candidates(
     cell: Cell, index: StyleIndex, weights: Weights, band: float, floor: float
 ) -> list[Candidate]:
-    """The cell's candidates within ``band`` of its top similarity."""
-    scored = index.score_all(cell.tokens, weights)
+    """The cell's candidates within ``band`` of its top similarity.
+
+    Scored only against entries whose registry ``kind`` agrees with whether
+    ``cell`` is itself an edge -- an edge cell can never resolve to a vertex
+    (or vice versa), no matter how similar their styles score. Without this,
+    a bare/default edge style can out-score every real edge candidate against
+    a vertex shape whose canonical style happens to be near-empty boilerplate
+    (e.g. a composite shape's anchor cell), silently "resolving" the edge to
+    something it structurally cannot be.
+    """
+    scored = [
+        s for s in index.score_all(cell.tokens, weights)
+        if (s.entry.kind == "edge") == cell.is_edge
+    ]
     if not scored or scored[0].sim < floor:
         return []
     top = scored[0].sim

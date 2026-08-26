@@ -105,10 +105,24 @@ def entry_cell(
     style: str | None = None,
     parent: str = "1",
 ) -> str:
-    """A fixture cell for one shape entry (its canonical style by default)."""
-    return cell_xml(
-        cell_id, style if style is not None else entry.style, x, 120, 120, parent
-    )
+    """A fixture cell for one shape entry (its canonical style by default).
+
+    Serialized as an ``edge="1"`` cell for an edge-kind entry, a plain
+    ``vertex="1"`` cell otherwise -- derivation now checks that attribute
+    against the candidate's registry ``kind`` (see :func:`.derive._near_
+    candidates`), so a relationship shape's style wrapped in a vertex cell
+    would no longer resolve to itself.
+    """
+    resolved_style = style if style is not None else entry.style
+    if entry.kind == "edge":
+        return edge_cell_xml(
+            cell_id,
+            source=f"{cell_id}-src",
+            target=f"{cell_id}-tgt",
+            parent=parent,
+            style=resolved_style,
+        )
+    return cell_xml(cell_id, resolved_style, x, 120, 120, parent)
 
 
 def get(index: StyleIndex, shape_id: str) -> ShapeEntry:
@@ -129,7 +143,9 @@ def find(index: StyleIndex, library: str, needle: str) -> ShapeEntry:
 
 def _as_cell(entry: ShapeEntry) -> Cell:
     """A throwaway derivation cell carrying one entry's canonical style."""
-    return Cell(entry.shape_id, entry.style, "", entry.tokens)
+    return Cell(
+        entry.shape_id, entry.style, "", entry.tokens, is_edge=entry.kind == "edge"
+    )
 
 
 def library_only_anchor(index: StyleIndex, library: str) -> ShapeEntry:
