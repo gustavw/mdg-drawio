@@ -536,6 +536,68 @@ def _grow_parent_to_fit_children(
     parent.height = height
 
 
+def regrow_containers_to_fit_children(
+    nodes: list[Node], default_padding: dict[str, float]
+) -> None:
+    """Re-fit every container's width/height to its children's CURRENT
+    geometry, deepest containers first.
+
+    ``engine/convert.py`` re-applies the geometry overlay a second time
+    after layout, restoring each node's own prior manual position/size --
+    but a container was already grown (via :func:`_grow_parent_to_fit_
+    children`) to fit the positions layout computed *before* that overlay
+    pass, and nothing re-grows it afterward. If the overlay-restored
+    children end up somewhere else, the container's stored size goes stale:
+    too small (children overflow/clip past its border) or too large (dead
+    space), which reads as "the container lost its manual layout" even
+    though the children themselves are exactly where they were left.
+
+    Only touches containers :func:`_layout_container_children` actually
+    positioned (flagged via ``_RELATIVE_CHILDREN_KEY``) -- anything else
+    was never grown to fit children in the first place, so there is nothing
+    to redo. A ``child_layout: stack`` container (:func:`_stack_children`)
+    is refit with NO padding, matching its own tight-fit invariant (the
+    parent's size is the exact stacked extent, unpadded, so draw.io's own
+    stack re-layout on load is a no-op) -- applying the generic padding
+    here would widen/heighten it every regenerate even when nothing moved.
+    """
+    if not nodes:
+        return
+    parent_by_id = build_parent_map(nodes)
+    if not parent_by_id:
+        return
+    node_by_id = {node.id: node for node in nodes}
+    by_parent = _children_by_parent(nodes, parent_by_id)
+
+    def regrow(parent_id: str) -> None:
+        children = by_parent.get(parent_id, [])
+        for child in children:
+            if child.id in by_parent:
+                regrow(child.id)
+        if children:
+            _regrow_one_container(
+                node_by_id[parent_id], children, default_padding
+            )
+
+    for node in nodes:
+        if node.id not in parent_by_id and node.id in by_parent:
+            regrow(node.id)
+
+
+def _regrow_one_container(
+    parent: Node, children: list[Node], default_padding: dict[str, float]
+) -> None:
+    if not parent.extra.get(_RELATIVE_CHILDREN_KEY):
+        return
+    if parent.extra.get("child_layout") == "stack":
+        right_pad, bottom_pad = 0.0, 0.0
+    else:
+        _, right_pad, bottom_pad, _ = _padding_values(parent, default_padding)
+    _grow_parent_to_fit_children(
+        parent, children, right_pad=right_pad, bottom_pad=bottom_pad
+    )
+
+
 # Row text padding (item spacingLeft 4 + spacingRight 4) and a cushion so text
 # rendered at draw.io's default font never wraps against our 11px width estimate.
 _STACK_TEXT_PADDING = 8.0

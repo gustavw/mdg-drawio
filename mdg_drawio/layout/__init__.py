@@ -15,6 +15,7 @@ from ._container_layout import (
     absolute_node_boxes,
     build_parent_map,
     estimate_text_width,
+    regrow_containers_to_fit_children,
 )
 from ._types import (
     BaseLayout,
@@ -25,6 +26,7 @@ from ._types import (
     Waypoint,
 )
 from .config import Config, ShapeScalingConfig, resolve_page_size
+from .layered import padding_dict
 from .size_resolver import create_size_resolver, create_style_resolver, scale_node_sizes
 
 _registry: dict[str, type[BaseLayout]] = {}
@@ -68,7 +70,9 @@ __all__ = [
     "dispatch_layout",
     "estimate_text_width",
     "modes",
+    "padding_dict",
     "register_layout",
+    "regrow_containers_to_fit_children",
     "resolve_page_size",
     "scale_node_sizes",
 ]

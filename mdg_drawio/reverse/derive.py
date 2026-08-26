@@ -124,20 +124,30 @@ def _decompress(text: str) -> str | None:
         return None
 
 
-def _model_roots(root: ET.Element) -> list[ET.Element]:
-    """Yield every ``<mxGraphModel>`` in the file, inflating compressed ones."""
+def _page_models(root: ET.Element) -> list[tuple[ET.Element | None, ET.Element]]:
+    """Every page's ``(owning <diagram> element, <mxGraphModel>)``, inflating
+    compressed diagrams. The owning element is ``None`` for a bare
+    ``<mxGraphModel>``-rooted document (no ``<diagram>``/``<mxfile>``
+    wrapper) -- :func:`rewrite_cell_ids` needs it to splice a rewritten
+    compressed page back in; :func:`_model_roots` just drops it.
+    """
     if root.tag == "mxGraphModel":
-        return [root]
-    models: list[ET.Element] = []
+        return [(None, root)]
+    pairs: list[tuple[ET.Element | None, ET.Element]] = []
     for diagram in root.iter("diagram"):
         inner = diagram.find("mxGraphModel")
         if inner is not None:
-            models.append(inner)
+            pairs.append((diagram, inner))
         elif diagram.text and diagram.text.strip():
             xml = _decompress(diagram.text.strip())
             if xml:
-                models.append(ET.fromstring(xml))
-    return models
+                pairs.append((diagram, ET.fromstring(xml)))
+    return pairs
+
+
+def _model_roots(root: ET.Element) -> list[ET.Element]:
+    """Every ``<mxGraphModel>`` in the file, inflating compressed ones."""
+    return [model for _diagram, model in _page_models(root)]
 
 
 def _cell_elements(model: ET.Element) -> list[ET.Element]:
@@ -185,6 +195,81 @@ def _page_prefix(page_index: int, multi_page: bool) -> str:
     (and every parent reference to it, see :func:`parent_map`) prefixed with
     its page index so cross-page collisions can never silently merge."""
     return f"{page_index}:" if multi_page else ""
+
+
+def _page_id_map(
+    model: ET.Element, prefix: str, renames: dict[str, str]
+) -> dict[str, str]:
+    """This page's slice of *renames* (page-prefixed cell_id -> new id),
+    reduced to bare (unprefixed) raw ids -- draw.io attributes are always
+    page-local, never carrying the prefix :func:`load_cells`/:func:`parent_map`
+    add for their own cross-page bookkeeping."""
+    id_map: dict[str, str] = {}
+    for element in _cell_elements(model):
+        raw_id = element.get("id")
+        if raw_id is None:
+            continue
+        new_id = renames.get(prefix + raw_id)
+        if new_id is not None:
+            id_map[raw_id] = new_id
+    return id_map
+
+
+def _rename_page_ids(model: ET.Element, id_map: dict[str, str]) -> None:
+    """Rename every ``id`` in *id_map*, fixing up every ``parent``/``source``/
+    ``target`` reference to it -- covers both an unwrapped ``mxCell`` and an
+    ``<object>``/``<UserObject>`` wrapper (and, harmlessly, an inner ``mxCell``
+    that independently repeats the wrapper's id)."""
+    for el in model.iter():
+        old_id = el.get("id")
+        if old_id is not None and old_id in id_map:
+            el.set("id", id_map[old_id])
+        for attr in ("parent", "source", "target"):
+            old_ref = el.get(attr)
+            if old_ref is not None and old_ref in id_map:
+                el.set(attr, id_map[old_ref])
+
+
+def rewrite_cell_ids(source: str, renames: dict[str, str]) -> str | None:
+    """Rename draw.io cell ids per *renames* (page-prefixed cell_id -> new
+    id, the same convention as :attr:`Cell.cell_id`), fixing up every
+    parent/source/target reference along the way. Returns the rewritten XML
+    text, or ``None`` if nothing in *renames* matched any cell actually in
+    the document (including when *renames* itself is empty).
+
+    Keeps a newly ``mdg sync``'d cell's ``.drawio`` id in step with the
+    fresh semantic id ``sync`` just minted for it in the ``.mdg`` --
+    otherwise a later plain regenerate's geometry overlay (which matches a
+    node by id) can never find that cell again, and whatever manual layout
+    it had is silently discarded the moment ``sync`` runs, not preserved.
+
+    A page stored as compressed ``<diagram>`` text is rewritten as inline
+    ``<mxGraphModel>`` XML instead of being re-compressed -- draw.io reads
+    both forms interchangeably, and re-implementing draw.io's own
+    compression format against a live file, with no round-trip safety net
+    other than this function itself, is a needless risk for what is
+    otherwise a purely cosmetic storage choice. A page with nothing to
+    rename is left completely untouched, compressed or not.
+    """
+    if not renames:
+        return None
+    root = _parse_root(source)
+    pairs = _page_models(root)
+    multi_page = len(pairs) > 1
+    changed = False
+
+    for page_index, (diagram, model) in enumerate(pairs):
+        prefix = _page_prefix(page_index, multi_page)
+        id_map = _page_id_map(model, prefix, renames)
+        if not id_map:
+            continue
+        _rename_page_ids(model, id_map)
+        changed = True
+        if diagram is not None and diagram.find("mxGraphModel") is None:
+            diagram.text = None
+            diagram.append(model)
+
+    return ET.tostring(root, encoding="unicode") if changed else None
 
 
 def _object_attrs_by_id(model: ET.Element, prefix: str) -> dict[str, dict[str, str]]:
