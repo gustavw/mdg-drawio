@@ -185,6 +185,42 @@ def test_sync_removes_an_edge_whose_pair_no_longer_exists() -> None:
 
 
 @needs_data
+def test_sync_rewrites_a_surviving_edges_stale_token_when_its_endpoint_is_renamed() -> (
+    None
+):
+    """A vertex whose own declaration was already lost (e.g. an earlier bug)
+    but whose edge survives gets re-derived under a fresh id -- but the OLD
+    edge line still names the now-undeclared id. It must be rewritten to
+    the fresh id, not left dangling, or the very next forward-generate
+    rejects it as a reference to nothing (the real bug reported against a
+    user's diagram: 'edge ... references unknown cell')."""
+    person = fx.get(INDEX, "c4.person.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
+    existing_text = (
+        '---\ntitle: "T"\nmode: layered\n---\n\n'
+        'c4.Person(bob, "Bob")\n'
+        'c4.Rel(orphan, bob, "calls")\n'
+    )
+    # "orphan"'s own cell is drawn (and resolves fine), but its .mdg
+    # declaration was already lost -- only the edge line above still names it.
+    doc = fx.document(
+        fx.entry_cell(person, cell_id="orphan", parent="1"),
+        fx.entry_cell(person, cell_id="bob", parent="1", x=300),
+        fx.edge_cell_xml("e1", source="orphan", target="bob", style=rel.style),
+    )
+    _, plan, synced = _run_sync_pipeline(existing_text, doc)
+    assert merge.validate(synced) is None
+    assert "orphan" not in synced
+    document = parse_mdg(synced)
+    assert isinstance(document, Document)
+    by_id = {n.id: n for n in document.nodes}
+    assert "bob" in by_id
+    new_person = next(n for n in document.nodes if n.id != "bob")
+    rel_lines = [line for line in synced.splitlines() if line.startswith("c4.Rel(")]
+    assert rel_lines == [f'c4.Rel({new_person.id}, bob, "calls")']
+
+
+@needs_data
 def test_sync_keeps_an_edge_whose_pair_still_exists_untouched() -> None:
     """A survives, b survives, the connector between them still exists in
     the .drawio -- the existing edge line must be left exactly as-is, even
