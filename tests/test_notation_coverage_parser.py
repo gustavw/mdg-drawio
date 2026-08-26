@@ -325,6 +325,20 @@ def test_wildcard_containment_stays_within_parent_namespace() -> None:
         )
 
 
+def test_structural_wildcard_container_accepts_any_namespace() -> None:
+    # general.VerticalContainer is a freeform structural grouping (no
+    # metamodel semantics of its own), so it's exempt from the
+    # same-namespace rule other wildcard containers (e.g. uml.Package
+    # above) enforce.
+    doc = parse(
+        'general.VerticalContainer(v1, "Group"):\n'
+        '    erd.EntityRect(e1, "Customer")'
+    )
+    assert isinstance(doc, Document)
+    entity = next(n for n in doc.nodes if n.id == "e1")
+    assert entity.parent_id == "v1"
+
+
 def test_edge_cannot_be_nested_as_a_row() -> None:
     with pytest.raises(DslError, match="edges cannot be nested"):
         parse(

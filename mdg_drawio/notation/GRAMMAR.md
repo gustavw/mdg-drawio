@@ -89,6 +89,18 @@ children MEAN depends on the registry entry of the parent function:
       c4.Container(api, "API", "Handles requests.")
   ```
 
+  Exception: a wildcard `contains.allowed: ['*']` container on one of
+  draw.io's structural/annotation palette pages (`general`, `misc`,
+  `advanced`, `basic`, `arrows`, `flowchart`) may hold vertices from *any*
+  library, not just its own. These pages have no metamodel semantics of
+  their own — they're freeform grouping/annotation shapes used to structure
+  or note an existing diagram, so cross-library nesting is allowed.
+
+  ```mdg
+  general.VerticalContainer(v1, "Structural group"):
+      erd.EntityRect(e1, "Customer")
+  ```
+
 - Parent declares **neither** → it cannot take a block; a trailing colon is an
   error.
 
