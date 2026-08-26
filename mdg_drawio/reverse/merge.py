@@ -50,6 +50,7 @@ from dataclasses import dataclass, field
 
 from mdg_drawio.contracts import Document
 from mdg_drawio.notation import parse as parse_mdg
+from mdg_drawio.notation import shapes_by_function
 
 from .containment import Containment
 from .derive import Cell, CellResult, DocumentResult, RawCell
@@ -65,9 +66,35 @@ INDENT_STEP = "    "
 # understand args, kwargs, or foreign-namespace passthrough the way the real
 # engine does.
 _CALL_LINE_RE = re.compile(
-    r"^(?P<indent>[ \t]*)(?:[A-Za-z_]\w*\.)?[A-Za-z_]\w*"
+    r"^(?P<indent>[ \t]*)(?:(?P<ns>[A-Za-z_]\w*)\.)?(?P<func>[A-Za-z_]\w*)"
     r"\((?P<args>.*)\)\s*(?P<colon>:?)\s*$"
 )
+
+
+def _is_edge_call(ns: str | None, func: str) -> bool:
+    """Whether ``ns.func`` names a registered EDGE-kind shape.
+
+    ``False`` (lenient) if *ns* is absent or unresolvable -- matches this
+    codebase's existing precedent that an unregistered/ambiguous function
+    keeps generic (vertex-like) behaviour rather than erroring. Used by
+    :func:`index_existing` so an edge's own line is never mistaken for a
+    vertex declaration naming its first argument: an edge's args are
+    references to OTHER nodes' ids, not a declaration of its own (an edge
+    has no id of its own in the ``.mdg`` grammar to key on -- see the module
+    docstring). Without this, a vertex whose real declaration line is lost
+    (e.g. to an earlier bug) but whose edges survive looks "already
+    represented" forever, by the edge line's own source token -- sync can
+    then never re-derive and restore the missing vertex.
+    """
+    if not ns:
+        return False
+    try:
+        entries = shapes_by_function(ns).get(func)
+    except (KeyError, FileNotFoundError):
+        return False
+    if not entries:
+        return False
+    return entries[0].get("kind") == "edge"
 
 
 def _comment_start(line: str) -> int | None:
@@ -165,7 +192,9 @@ class ExistingIndex:
 def index_existing(text: str) -> ExistingIndex:
     """Scan an existing ``.mdg`` for every declared node_id, keeping the
     FIRST declaration if an id oddly repeats (defensive, mirrors load_cells'
-    keep-first precedent for malformed input)."""
+    keep-first precedent for malformed input). An edge call's own line is
+    skipped entirely (see :func:`_is_edge_call`) -- its first argument is a
+    reference to another node, not a declaration of its own."""
     lines = text.splitlines()
     clean_lines = [_strip_inline_comment(line) for line in lines]
     node_line: dict[str, int] = {}
@@ -173,6 +202,8 @@ def index_existing(text: str) -> ExistingIndex:
     for i, line in enumerate(clean_lines):
         match = _CALL_LINE_RE.match(line)
         if not match:
+            continue
+        if _is_edge_call(match.group("ns"), match.group("func")):
             continue
         node_id = _first_arg_token(match.group("args"))
         if node_id and node_id not in node_line:

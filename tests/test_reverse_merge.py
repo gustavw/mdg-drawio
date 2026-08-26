@@ -66,6 +66,32 @@ def test_index_existing_keeps_first_on_duplicate_id() -> None:
     assert existing.node_line == {"dup": 0}
 
 
+def test_index_existing_does_not_treat_an_edges_line_as_a_vertex_declaration() -> None:
+    """Regression: a vertex whose OWN declaration is lost (e.g. to an
+    earlier bug) but whose edges survive must not look "already
+    represented" forever, keyed off the edge line's own first argument --
+    sync could then never re-derive and restore the missing vertex."""
+    text = 'erd.ZeroToManyMandOne(orphan, e02, "omfattar")\nerd.EntityRect(e02, "B")\n'
+    existing = merge.index_existing(text)
+    assert "orphan" not in existing.node_ids()
+    assert "e02" in existing.node_ids()
+
+
+def test_index_existing_is_lenient_for_an_unregistered_namespace() -> None:
+    """No registry to check against (an unknown/foreign namespace) -- keeps
+    the existing, lenient generic-node treatment rather than erroring."""
+    text = 'foreignlib.Whatever(x1, "A")\n'
+    existing = merge.index_existing(text)
+    assert "x1" in existing.node_ids()
+
+
+def test_is_edge_call_true_for_a_registered_edge_false_for_a_vertex() -> None:
+    assert merge._is_edge_call("erd", "ZeroToManyMandOne") is True
+    assert merge._is_edge_call("erd", "EntityRect") is False
+    assert merge._is_edge_call(None, "EntityRect") is False
+    assert merge._is_edge_call("erd", "NotARealFunction") is False
+
+
 def test_first_arg_token_bare_and_quoted() -> None:
     assert merge._first_arg_token('sys1, "label"') == "sys1"
     assert merge._first_arg_token('"550e8400-e29b", "label"') == "550e8400-e29b"
