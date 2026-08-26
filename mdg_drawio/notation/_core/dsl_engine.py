@@ -33,6 +33,17 @@ from mdg_drawio.contracts import (
 # The DSL engine holds no registry cache of its own: it reads through
 # ``registry`` (the single pre-load cache) via ``shapes_by_function``.
 
+# draw.io's own structural/annotation palette pages (as opposed to a real
+# notation library like erd/uml25/c4/bpmn2/archimate3): a wildcard
+# ``contains: {allowed: ['*']}`` container in one of these namespaces is a
+# freeform visual grouping with no metamodel semantics, so it may legitimately
+# hold shapes from any other library. Only "general" is registered today
+# (see general_registry.yaml); the rest are listed so they inherit the same
+# exception the moment they are registered.
+_STRUCTURAL_NAMESPACES: frozenset[str] = frozenset(
+    {"general", "misc", "advanced", "basic", "arrows", "flowchart"}
+)
+
 # ---------------------------------------------------------------------------
 # Regexes
 # ---------------------------------------------------------------------------
@@ -909,6 +920,11 @@ def _validate_child_allowed(
     if same_namespace:
         if parent_frame.allowed is None or name in parent_frame.allowed:
             return
+    elif parent_frame.allowed is None and parent_frame.namespace in _STRUCTURAL_NAMESPACES:
+        # A wildcard container on a structural palette page (general, misc,
+        # advanced, basic, arrows, flowchart) is a freeform grouping, not a
+        # notation-specific compartment -- it may hold any library's shapes.
+        return
     if parent_frame.allowed is None:
         expected = f"{parent_frame.namespace}.*"
     else:
