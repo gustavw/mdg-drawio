@@ -15,10 +15,12 @@ Two groups:
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pytest
 
+from mdg_drawio import main as convert_main
 from mdg_drawio.contracts import Document
 from mdg_drawio.notation import parse as parse_mdg
 from mdg_drawio.reverse import fixtures as fx
@@ -294,6 +296,86 @@ def test_sync_cli_write_applies_the_sync(
     assert "bob" not in written
     assert merge.validate(written) is None
     assert "wrote" in capsys.readouterr().out
+
+
+@needs_data
+def test_sync_cli_write_renames_the_new_cells_drawio_id_to_match(
+    tmp_path: Path,
+) -> None:
+    """A cell drawn directly in draw.io (a raw, non-semantic id, never
+    round-tripped through this tool before) must have its .drawio id
+    renamed to the fresh semantic id sync just minted for it in the .mdg --
+    an already-existing cell's id (already matching) is left untouched."""
+    person = fx.get(INDEX, "c4.person.v1")
+    doc = fx.document(
+        fx.entry_cell(person, cell_id="alice", parent="1"),  # already exists
+        fx.entry_cell(person, cell_id="raw123", parent="1", x=300),  # new
+    )
+    mdg_path = _write(tmp_path, "existing.mdg", _TWO_SYSTEM_MDG)
+    drawio_path = _write(tmp_path, "diagram.drawio", doc)
+
+    assert sync_main([str(mdg_path), str(drawio_path), "--write"]) == 0
+
+    document = parse_mdg(mdg_path.read_text(encoding="utf-8"))
+    assert isinstance(document, Document)
+    new_id = next(n.id for n in document.nodes if n.id != "alice")
+
+    drawio_root = ET.parse(str(drawio_path)).getroot()
+    ids = {el.get("id") for el in drawio_root.iter() if el.get("id")}
+    assert new_id in ids, "new cell's .drawio id not renamed to match"
+    assert "raw123" not in ids
+    assert "alice" in ids, "an already-represented cell's id must be left alone"
+
+
+def _geometry(root: ET.Element, cell_id: str) -> ET.Element:
+    """The ``<mxGeometry>`` for *cell_id*, unwrapping object/UserObject --
+    the forward generator (unlike sync's fixtures) wraps a c4.Person cell,
+    putting its id on the wrapper and its geometry on the inner mxCell."""
+    for el in root.iter():
+        if el.get("id") == cell_id:
+            mx = el if el.tag == "mxCell" else el.find("mxCell")
+            assert mx is not None
+            geo = mx.find("mxGeometry")
+            assert geo is not None
+            return geo
+    raise AssertionError(f"cell {cell_id!r} not found")
+
+
+@needs_data
+def test_sync_write_lets_a_later_plain_regenerate_keep_the_new_cells_layout(
+    tmp_path: Path,
+) -> None:
+    """End-to-end regression: without the id rename above, a cell's .drawio
+    id (``raw123``) and its fresh .mdg id (whatever sync minted) disagree,
+    so a later PLAIN regenerate's geometry overlay -- which matches a node
+    by id -- can never find that cell again. Any manual position given to
+    it after sync would be silently discarded on the next regenerate
+    instead of preserved, exactly like every other node's already is."""
+    person = fx.get(INDEX, "c4.person.v1")
+    doc = fx.document(fx.entry_cell(person, cell_id="raw123", parent="1"))
+    mdg_path = _write(
+        tmp_path, "existing.mdg", '---\ntitle: "T"\nmode: layered\n---\n\n'
+    )
+    drawio_path = _write(tmp_path, "diagram.drawio", doc)
+
+    assert sync_main([str(mdg_path), str(drawio_path), "--write"]) == 0
+    document = parse_mdg(mdg_path.read_text(encoding="utf-8"))
+    assert isinstance(document, Document)
+    new_id = document.nodes[0].id
+
+    # Simulate a manual move in draw.io.
+    tree = ET.parse(str(drawio_path))
+    geo = _geometry(tree.getroot(), new_id)
+    geo.set("x", "777")
+    geo.set("y", "666")
+    tree.write(str(drawio_path), encoding="utf-8")
+
+    # A plain regenerate (no --force) reads the overlay from *drawio_path*.
+    assert convert_main([str(mdg_path), str(drawio_path)]) == 0
+
+    moved = _geometry(ET.parse(str(drawio_path)).getroot(), new_id)
+    assert float(moved.get("x", "0")) == 777.0, "moved x not preserved"
+    assert float(moved.get("y", "0")) == 666.0, "moved y not preserved"
 
 
 @needs_data

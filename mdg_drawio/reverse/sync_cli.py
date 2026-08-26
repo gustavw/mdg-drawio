@@ -24,7 +24,7 @@ import sys
 
 from . import merge
 from .containment import resolve_containment
-from .derive import derive, load_cells, parent_map
+from .derive import derive, load_cells, parent_map, rewrite_cell_ids
 from .naming import assign_semantic_ids, reserved_counters
 from .style_index import StyleIndex
 
@@ -79,6 +79,13 @@ def main(argv: list[str] | None = None) -> int:
         print(f"sync would produce invalid .mdg -- aborting: {error}", file=sys.stderr)
         return 1
 
+    # Every newly-minted node gets its .drawio cell id renamed to match --
+    # otherwise the NEXT plain regenerate's geometry overlay (which matches
+    # a node by id) can never find that cell again, and it silently loses
+    # whatever manual layout it has the moment sync runs.
+    synced_drawio = rewrite_cell_ids(args.drawio, plan.merge_plan.renamed_ids)
+    renamed_count = len(plan.merge_plan.renamed_ids) if synced_drawio else 0
+
     if not args.write:
         diff = difflib.unified_diff(
             existing_text.splitlines(keepends=True),
@@ -94,15 +101,29 @@ def main(argv: list[str] | None = None) -> int:
             f"{plan.removed_edge_count} removed edge(s) -- "
             "dry run, use --write to apply."
         )
+        if renamed_count:
+            print(
+                f"{renamed_count} cell id(s) in {args.drawio} would also be "
+                "renamed to match, so a later plain regenerate can still "
+                "find them and keep their manual layout."
+            )
         return 0
 
     with open(args.mdg, "w", encoding="utf-8") as handle:
         handle.write(synced_text)
+    if synced_drawio is not None:
+        with open(args.drawio, "w", encoding="utf-8") as handle:
+            handle.write(synced_drawio)
+    rename_note = (
+        f", renamed {renamed_count} cell id(s) in {args.drawio}"
+        if renamed_count
+        else ""
+    )
     print(
         f"wrote {plan.merge_plan.new_node_count} new element(s), "
         f"{plan.merge_plan.new_edge_count} new edge(s), "
         f"{plan.removed_vertex_count} removed element(s), "
-        f"{plan.removed_edge_count} removed edge(s) to {args.mdg}"
+        f"{plan.removed_edge_count} removed edge(s) to {args.mdg}{rename_note}"
     )
     return 0
 

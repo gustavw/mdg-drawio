@@ -123,21 +123,21 @@ def test_needs_colon_false_when_line_already_ends_in_colon() -> None:
 
 def test_render_merge_splices_and_fixes_colon() -> None:
     existing = merge.index_existing("box(b1)\n")
-    plan = MergePlan([Insertion(1, "    leaf(c1)", colon_fix_line=0)], [], 0, 1)
+    plan = MergePlan([Insertion(1, "    leaf(c1)", colon_fix_line=0)], [], 0, 1, {})
     out = merge.render_merge(existing, plan)
     assert out == "box(b1):\n    leaf(c1)\n"
 
 
 def test_render_merge_top_level_append_adds_blank_line_separator() -> None:
     existing = merge.index_existing('box(b1, "X")\n')
-    plan = MergePlan([Insertion(1, 'box(b2, "Y")', top_level=True)], [], 0, 1)
+    plan = MergePlan([Insertion(1, 'box(b2, "Y")', top_level=True)], [], 0, 1, {})
     out = merge.render_merge(existing, plan)
     assert out == 'box(b1, "X")\n\nbox(b2, "Y")\n'
 
 
 def test_render_merge_top_level_append_no_extra_blank_after_blank_line() -> None:
     existing = merge.index_existing("box(b1)\n\n")
-    plan = MergePlan([Insertion(2, "box(b2)", top_level=True)], [], 0, 1)
+    plan = MergePlan([Insertion(2, "box(b2)", top_level=True)], [], 0, 1, {})
     out = merge.render_merge(existing, plan)
     assert out.count("\n\n") == 1  # no doubled-up blank line
 
@@ -221,7 +221,7 @@ def test_render_merge_orders_same_line_ties_by_anchor_depth() -> None:
     )
     shallow = Insertion(2, "    c4.Person(person1)", anchor_depth=0)
     deep = Insertion(2, "        c4.Component(component1)", anchor_depth=1)
-    plan = MergePlan([shallow, deep], [], 0, 2)
+    plan = MergePlan([shallow, deep], [], 0, 2, {})
     out = merge.render_merge(existing, plan)
     assert out == (
         'c4.System_Boundary(sysA, "A"):\n'
@@ -230,7 +230,7 @@ def test_render_merge_orders_same_line_ties_by_anchor_depth() -> None:
         "    c4.Person(person1)\n"
     )
     # Order of insertions in the plan must not change the result.
-    plan_reordered = MergePlan([deep, shallow], [], 0, 2)
+    plan_reordered = MergePlan([deep, shallow], [], 0, 2, {})
     assert merge.render_merge(existing, plan_reordered) == out
 
 
