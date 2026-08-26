@@ -71,7 +71,7 @@ class LayeredLayout(BaseLayout):
             return Result(nodes=[], edges=[], page_width=pw, page_height=ph)
 
         _default_node_sizes(nodes, size_of)
-        default_padding = _padding_dict(cfg)
+        default_padding = padding_dict(cfg)
         container_state = apply_container_layout(
             nodes,
             edges,
@@ -145,7 +145,7 @@ def _default_node_sizes(nodes: list[Node], size_of: SizeResolver) -> None:
             node.height = float(h)
 
 
-def _padding_dict(cfg: Config) -> dict[str, float]:
+def padding_dict(cfg: Config) -> dict[str, float]:
     """Flatten the config's boundary padding into a side→value dict."""
     return {
         "top": cfg.boundary_padding.top,
