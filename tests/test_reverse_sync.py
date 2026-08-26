@@ -72,11 +72,18 @@ def test_block_range_spans_a_containers_nested_children() -> None:
 def _run_sync_pipeline(
     existing_text: str, drawio_doc: str
 ) -> tuple[merge.ExistingIndex, merge.SyncPlan, str]:
+    # Mirrors sync_cli._plan's real node_ids construction (an already-
+    # existing cell keeps its own id, never a freshly-minted one) so this
+    # test helper exercises the same path the CLI actually runs.
     existing = merge.index_existing(existing_text)
     cells = load_cells(drawio_doc)
     result = derive(cells, INDEX)
     reserved = reserved_counters(existing.node_ids())
-    node_ids = {s.cell_id: s.node_id for s in assign_semantic_ids(result, reserved)}
+    existing_ids = existing.node_ids()
+    node_ids = {
+        s.cell_id: s.cell_id if s.cell_id in existing_ids else s.node_id
+        for s in assign_semantic_ids(result, reserved)
+    }
     raw_cells = parent_map(drawio_doc)
     containments = {
         c.cell_id: c for c in resolve_containment(result, raw_cells, node_ids)
@@ -134,7 +141,10 @@ def test_sync_reparents_a_survivor_whose_old_container_was_removed() -> None:
     """A child cell that still exists in the .drawio, but whose OLD parent
     container is gone, must be re-derived fresh (re-parented per the
     CURRENT .drawio), not silently dropped just because its old declaration
-    line was inside the removed container's block."""
+    line was inside the removed container's block -- and it keeps its OWN
+    established id doing so (not a freshly-minted one), the same identity
+    convention every other survivor gets, so a later regenerate's geometry
+    overlay can still find it by id."""
     person = fx.get(INDEX, "c4.person.v1")
     existing_text = (
         '---\ntitle: "T"\npage: "P"\nmode: layered\n---\n\n'
@@ -148,14 +158,8 @@ def test_sync_reparents_a_survivor_whose_old_container_was_removed() -> None:
     document = parse_mdg(synced)
     assert isinstance(document, Document)
     by_id = {n.id: n for n in document.nodes}
-    # "inner"'s old declaration is gone along with its container, so it's
-    # re-derived under a FRESH semantic id (the identity convention only
-    # holds for cells whose declaration was never removed) -- but it must
-    # still be present, now top-level, not silently dropped.
     assert "b1" not in by_id
-    assert "inner" not in by_id
-    new_person = next(n for n in document.nodes if n.type == "c4.Person")
-    assert new_person.parent_id is None
+    assert by_id["inner"].parent_id is None
 
 
 @needs_data
@@ -241,6 +245,65 @@ def test_sync_adds_and_removes_in_the_same_run() -> None:
     document = parse_mdg(synced)
     assert isinstance(document, Document)
     assert len(document.nodes) == 2  # alice (kept) + carol (new); bob gone
+
+
+@needs_data
+def test_sync_reparents_a_survivor_dragged_into_a_new_container() -> None:
+    """A cell whose OWN id is unchanged, but that the user visually moved
+    into a container in draw.io, must have its .mdg declaration re-nested
+    to match -- otherwise its stale top-level declaration silently
+    disagrees with where it actually sits, and a later plain regenerate's
+    overlay applies its now-container-relative geometry as if it were
+    still page-absolute, visibly misplacing it. Its existing edge must
+    survive completely untouched -- reparenting is not removal."""
+    person = fx.get(INDEX, "c4.person.v1")
+    boundary = fx.get(INDEX, "c4.system_boundary.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
+    existing_text = (
+        '---\ntitle: "T"\nmode: layered\n---\n\n'
+        'c4.Person(alice, "Alice")\n'
+        'c4.Person(bob, "Bob")\n'
+        'c4.Rel(alice, bob, "custom hand-authored label")\n'
+    )
+    doc = fx.document(
+        fx.entry_cell(boundary, cell_id="box1", parent="1"),
+        fx.entry_cell(person, cell_id="alice", parent="box1"),  # now inside box1
+        fx.entry_cell(person, cell_id="bob", parent="1", x=300),
+        fx.edge_cell_xml("e1", source="alice", target="bob", style=rel.style),
+    )
+    _, plan, synced = _run_sync_pipeline(existing_text, doc)
+    assert merge.validate(synced) is None
+    # The edge's exact existing text must be preserved, not removed+recreated.
+    assert 'c4.Rel(alice, bob, "custom hand-authored label")' in synced.splitlines()
+    assert plan.removed_edge_count == 0
+
+    document = parse_mdg(synced)
+    assert isinstance(document, Document)
+    by_id = {n.id: n for n in document.nodes}
+    assert by_id["bob"].parent_id is None
+    box = next(n for n in document.nodes if n.type == "c4.System_Boundary")
+    assert by_id["alice"].parent_id == box.id
+
+
+@needs_data
+def test_sync_leaves_an_unmoved_survivor_completely_untouched() -> None:
+    """A cell whose container is unchanged must not be touched at all --
+    reparent detection must not misfire on the common case."""
+    person = fx.get(INDEX, "c4.person.v1")
+    boundary = fx.get(INDEX, "c4.system_boundary.v1")
+    existing_text = (
+        '---\ntitle: "T"\nmode: layered\n---\n\n'
+        'c4.System_Boundary(box1, "Box"):\n'
+        '    c4.Person(alice, "Alice")\n'
+    )
+    doc = fx.document(
+        fx.entry_cell(boundary, cell_id="box1", parent="1"),
+        fx.entry_cell(person, cell_id="alice", parent="box1"),
+    )
+    _, plan, synced = _run_sync_pipeline(existing_text, doc)
+    assert plan.merge_plan.new_node_count == 0
+    assert plan.removed_vertex_count == 0
+    assert synced.rstrip() == existing_text.rstrip()
 
 
 @needs_data

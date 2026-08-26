@@ -36,11 +36,26 @@ def _plan(
     cells = load_cells(drawio_path)
     result = derive(cells, index)
     reserved = reserved_counters(existing.node_ids())
-    node_ids = {s.cell_id: s.node_id for s in assign_semantic_ids(result, reserved)}
+    # A cell whose raw id ALREADY matches an existing declared node_id keeps
+    # THAT id -- never the fresh one assign_semantic_ids mints for every
+    # resolved cell unconditionally -- regardless of whether its declaration
+    # ends up removed, reparented, or left alone below. Without this, a
+    # survivor being reparented (see plan_sync) would get renamed out from
+    # under itself: resolve_containment would report a *different* cell's
+    # freshly-minted (not yet corrected) name as its container, so anything
+    # nested under an otherwise-untouched, already-existing container would
+    # falsely look reparented too, purely because of container identity
+    # churn its own containment never actually had.
+    existing_ids = existing.node_ids()
+    node_ids = {
+        s.cell_id: s.cell_id if s.cell_id in existing_ids else s.node_id
+        for s in assign_semantic_ids(result, reserved)
+    }
     raw_cells = parent_map(drawio_path)
     containments = {
         c.cell_id: c for c in resolve_containment(result, raw_cells, node_ids)
     }
+
     plan = merge.plan_sync(existing, cells, result, node_ids, containments, raw_cells)
     synced_text = merge.render_sync(existing, plan)
     return plan, synced_text

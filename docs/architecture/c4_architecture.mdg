@@ -55,6 +55,7 @@ c4.Rel(engine, generator, "Delegates XML generation", description="")
 c4.Rel(layout, contracts, "Uses data models", description="")
 c4.Rel(notation, contracts, "Uses data models", description="")
 c4.Rel(generator, contracts, "Uses data models", description="")
+c4.Rel(reverse, contracts, "Uses data models", description="")
 
 ---
 page: "Component"
@@ -182,6 +183,7 @@ c4.Rel(reverse_merge_co, reverse_containment_co, "Resolves new cells' nesting", 
 c4.Rel(reverse_merge_co, reverse_derive_co, "Derives shapes for new cells", description="")
 c4.Rel(reverse_merge_co, reverse_style_index_co, "Looks up registry entries", description="")
 c4.Rel(reverse_merge_co, notation_co_boundary, "Parses .mdg via notation.parse", description="")
+c4.Rel(reverse_merge_co, contracts_co_boundary, "Uses contracts", description="")
 c4.Rel(reverse_merge_cli_co, reverse_merge_co, "Plans and renders the merge", description="")
 c4.Rel(reverse_merge_cli_co, reverse_containment_co, "Resolves new cells' nesting", description="")
 c4.Rel(reverse_merge_cli_co, reverse_derive_co, "Derives shapes for new cells", description="")

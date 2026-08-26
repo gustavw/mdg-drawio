@@ -48,6 +48,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from mdg_drawio.contracts import Document
 from mdg_drawio.notation import parse as parse_mdg
 
 from .containment import Containment
@@ -828,6 +829,51 @@ def _represents_a_surviving_edge(
     return (raw.source_id, raw.target_id) in surviving_pairs
 
 
+def _existing_parent_by_id(existing: ExistingIndex) -> dict[str, str | None] | None:
+    """``{node_id: parent_node_id}`` for every vertex the existing ``.mdg``
+    text currently declares, parsed the same way the real forward pipeline
+    would see it -- ``None`` if the text doesn't parse (defensive: sync must
+    never itself be the reason an otherwise-workable file becomes
+    unparseable to reason about; a caller that can't determine parentage
+    simply skips reparent detection for this run rather than crashing)."""
+    try:
+        document = parse_mdg("\n".join(existing.lines))
+    # Deliberately broad, mirroring validate()'s own contract: any parse
+    # failure here just disables reparent detection, never sync itself.
+    except Exception:
+        return None
+    if not isinstance(document, Document):
+        return None
+    return {node.id: node.parent_id for node in document.nodes}
+
+
+def _reparented_survivor_ids(
+    existing: ExistingIndex,
+    current_cell_ids: set[str],
+    containments: dict[str, Containment],
+) -> set[str]:
+    """Existing node ids whose container in the CURRENT ``.drawio`` (per
+    *containments*) no longer matches what the existing ``.mdg`` text
+    currently declares -- e.g. a cell the user dragged into a different or
+    newly-created container without otherwise changing it. Its own cell_id
+    still matches, so ``plan_sync``'s "don't disturb what's already there"
+    contract would otherwise leave its declaration exactly where it is,
+    silently stale relative to where it now actually sits.
+    """
+    existing_parent_by_id = _existing_parent_by_id(existing)
+    if existing_parent_by_id is None:
+        return set()
+    reparented = set()
+    for node_id, old_parent in existing_parent_by_id.items():
+        if node_id not in current_cell_ids:
+            continue  # genuinely gone -- the other removal path covers it
+        containment = containments.get(node_id)
+        new_parent = containment.container_node_id if containment else None
+        if new_parent != old_parent:
+            reparented.add(node_id)
+    return reparented
+
+
 def plan_sync(
     existing: ExistingIndex,
     cells: list[Cell],
@@ -846,9 +892,23 @@ def plan_sync(
     with it (:func:`_block_range`); an edge is removed if either endpoint is
     gone, or if it survives but no current edge cell connects that same
     (source, target) pair any more.
+
+    A survivor whose CONTAINER changed (:func:`_reparented_survivor_ids`) --
+    still present, own id unchanged, just moved to sit under a different
+    parent in the current ``.drawio`` -- has its own declaration (and any
+    subtree nested under it) removed and re-derived too, same as a genuinely
+    new cell, so it lands back under its current container instead of
+    silently keeping a stale parent. Its OWN existing edges are deliberately
+    NOT swept up in that removal (only a truly-gone vertex forces its edges
+    out): they reference it by id, unaffected by where its declaration now
+    lives in the file.
     """
     current_cell_ids = {c.cell_id for c in cells}
-    removed_roots = existing.node_ids() - current_cell_ids
+    truly_removed_roots = existing.node_ids() - current_cell_ids
+    reparented_roots = _reparented_survivor_ids(
+        existing, current_cell_ids, containments
+    )
+    removed_roots = truly_removed_roots | reparented_roots
     vertex_ranges = [_block_range(existing, node_id) for node_id in removed_roots]
 
     existing_edges = _existing_edges(existing)
@@ -860,8 +920,8 @@ def plan_sync(
     removed_edge_lines = [
         edge.line_index
         for edge in existing_edges
-        if edge.source_token in removed_roots
-        or edge.target_token in removed_roots
+        if edge.source_token in truly_removed_roots
+        or edge.target_token in truly_removed_roots
         or (edge.source_token, edge.target_token) not in current_edge_pairs
     ]
     edge_ranges = [(i, i + 1) for i in removed_edge_lines]
