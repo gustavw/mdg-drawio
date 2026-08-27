@@ -42,6 +42,7 @@ def _resolve_shape_entry(
     node_type: str,
     registries: dict[str, dict] | None,
     styles: dict[str, dict] | None,
+    variant: int = 1,
 ) -> dict | None:
     """Resolve a node type to its palette style entry (``{shape_id: entry}``).
 
@@ -64,7 +65,11 @@ def _resolve_shape_entry(
         by_func = index_shapes_by_function(reg.get("shapes", []))
         entries = by_func.get(function)
         if entries:
-            entry = styles_for_lib.get(entries[0]["id"])
+            registry_entry = next(
+                (item for item in entries if item.get("variant", 1) == variant),
+                entries[0],
+            )
+            entry = styles_for_lib.get(registry_entry["id"])
             if entry is not None:
                 return entry
 
@@ -78,6 +83,29 @@ def _resolve_shape_entry(
     return None
 
 
+@dataclass(frozen=True)
+class _RegistrySizeResolver:
+    registries: dict[str, dict] | None
+    styles: dict[str, dict] | None
+
+    def __call__(self, node_type: str) -> tuple[float, float]:
+        return self.resolve_variant(node_type, 1)
+
+    def resolve_variant(
+        self, node_type: str, variant: int
+    ) -> tuple[float, float]:
+        entry = _resolve_shape_entry(
+            node_type, self.registries, self.styles, variant
+        )
+        if entry is None:
+            return (DEFAULT_NODE_WIDTH, DEFAULT_NODE_HEIGHT)
+        raw_w = entry.get("width")
+        raw_h = entry.get("height")
+        width = float(raw_w) if raw_w is not None else DEFAULT_NODE_WIDTH
+        height = float(raw_h) if raw_h is not None else DEFAULT_NODE_HEIGHT
+        return (width, height)
+
+
 def create_size_resolver(
     registries: dict[str, dict] | None = None,
     styles: dict[str, dict] | None = None,
@@ -88,17 +116,7 @@ def create_size_resolver(
     *styles* is ``{library: {shape_id: entry}}``.
     """
 
-    def size_of(node_type: str) -> tuple[float, float]:
-        entry = _resolve_shape_entry(node_type, registries, styles)
-        if entry is None:
-            return (DEFAULT_NODE_WIDTH, DEFAULT_NODE_HEIGHT)
-        raw_w = entry.get("width")
-        raw_h = entry.get("height")
-        w = float(raw_w) if raw_w is not None else DEFAULT_NODE_WIDTH
-        h = float(raw_h) if raw_h is not None else DEFAULT_NODE_HEIGHT
-        return (w, h)
-
-    return size_of
+    return _RegistrySizeResolver(registries, styles)
 
 
 def create_style_resolver(

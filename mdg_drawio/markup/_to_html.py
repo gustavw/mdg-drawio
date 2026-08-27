@@ -27,7 +27,21 @@ def _split_table_row(line: str) -> list[str]:
         stripped = stripped[1:]
     if stripped.endswith("|"):
         stripped = stripped[:-1]
-    return [cell.strip() for cell in stripped.split("|")]
+    cells: list[str] = []
+    start = 0
+    for index, char in enumerate(stripped):
+        if char != "|":
+            continue
+        preceding_backslashes = 0
+        cursor = index - 1
+        while cursor >= 0 and stripped[cursor] == "\\":
+            preceding_backslashes += 1
+            cursor -= 1
+        if preceding_backslashes % 2 == 0:
+            cells.append(stripped[start:index].strip())
+            start = index + 1
+    cells.append(stripped[start:].strip())
+    return cells
 
 
 def _consume_fenced_code(lines: list[str], start: int) -> tuple[int, str]:

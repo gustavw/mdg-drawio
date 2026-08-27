@@ -28,6 +28,7 @@ from mdg_drawio.layout.layered import LayeredLayout
 from mdg_drawio.layout.palette import PaletteLayout
 from mdg_drawio.layout.process import ProcessLayout
 from mdg_drawio.layout.sequence import SequenceLayout
+from mdg_drawio.layout.size_resolver import create_size_resolver
 
 
 def _size_of(node_type: str) -> tuple[float, float]:
@@ -179,6 +180,23 @@ def test_process_rank_excluded_node_floats_above_its_connected_task() -> None:
     # while the ranked edge gets routed.
     assert routed["a->data"].waypoints == []
     assert routed["a->b"].waypoints != []
+
+
+def test_top_level_excluded_node_stays_inside_final_page_bounds() -> None:
+    nodes = [_node("task"), _node("data")]
+    edges = [
+        Edge(id="association", type="c4.Rel", source_id="data", target_id="task")
+    ]
+    result = ProcessLayout().apply(
+        nodes,
+        edges,
+        _size_of,
+        Config(rank_exclude_ids=frozenset({"data"})),
+    )
+
+    assert all(node.x >= 0 and node.y >= 0 for node in result.nodes)
+    assert all(node.x + node.width <= result.page_width for node in result.nodes)
+    assert all(node.y + node.height <= result.page_height for node in result.nodes)
 
 
 def test_process_rank_excluded_node_shared_by_two_tasks_floats_above_first() -> None:
@@ -568,3 +586,50 @@ def test_palette_malformed_json_raises_valueerror(tmp_path: Path) -> None:
     layout.palette_path = str(bad)
     with pytest.raises(ValueError, match="could not read palette file"):
         layout.apply([_node("a")], [], _size_of)
+
+
+def test_palette_clears_positions_when_path_is_unset(tmp_path: Path) -> None:
+    palette_file = tmp_path / "palette.json"
+    palette_file.write_text(
+        json.dumps([{"id": "a", "x": 200, "y": 300}]), encoding="utf-8"
+    )
+    layout = PaletteLayout()
+    layout.palette_path = palette_file
+    first = layout.apply([_node("a")], [], _size_of)
+    assert (first.nodes[0].x, first.nodes[0].y) == (200.0, 300.0)
+
+    layout.palette_path = None
+    second = layout.apply([_node("a")], [], _size_of)
+    assert (second.nodes[0].x, second.nodes[0].y) == (0.0, 0.0)
+
+
+def test_registry_size_resolver_uses_node_variant_in_layout() -> None:
+    registries = {
+        "bpmn2": {
+            "shapes": [
+                {
+                    "id": "bpmn2.horizontalpool.v1",
+                    "function": "HorizontalPool",
+                    "variant": 1,
+                },
+                {
+                    "id": "bpmn2.horizontalpool.v2",
+                    "function": "HorizontalPool",
+                    "variant": 2,
+                },
+            ]
+        }
+    }
+    styles = {
+        "bpmn2": {
+            "bpmn2.horizontalpool.v1": {"width": 480, "height": 380},
+            "bpmn2.horizontalpool.v2": {"width": 480, "height": 360},
+        }
+    }
+    node = Node(id="pool", type="bpmn2.HorizontalPool", variant=2)
+
+    result = SequenceLayout().apply(
+        [node], [], create_size_resolver(registries, styles)
+    )
+
+    assert (result.nodes[0].width, result.nodes[0].height) == (480.0, 360.0)

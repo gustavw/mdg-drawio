@@ -128,7 +128,15 @@ def _import_targets(node: ast.AST, source: Path) -> list[str]:
     """
     if isinstance(node, ast.ImportFrom):
         dotted = _resolve_import(node, source)
-        return [dotted] if dotted is not None else []
+        if dotted is None:
+            return []
+        if node.level and node.module is None:
+            # ``from . import sibling`` imports the sibling module, not merely
+            # the current package.  Keep every alias as a candidate; the
+            # dotted index later discards aliases that are attributes rather
+            # than importable modules.
+            return [f"{dotted}.{alias.name}" for alias in node.names]
+        return [dotted]
     if isinstance(node, ast.Import):
         return [
             alias.name

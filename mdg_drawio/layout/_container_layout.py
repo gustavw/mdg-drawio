@@ -11,7 +11,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from math import ceil
 
-from ._types import Edge, Node, SizeResolver
+from ._types import Edge, Node, SizeResolver, resolve_node_size
 
 # Per-character width table for estimate_text_width, from Helvetica metrics at
 # _DEFAULT_FONT_SIZE. Kept together here (the only consumer) rather than in
@@ -88,7 +88,7 @@ def estimate_text_width(
 
 
 def _node_size(node: Node, size_of: SizeResolver) -> tuple[float, float]:
-    default_w, default_h = size_of(node.type)
+    default_w, default_h = resolve_node_size(size_of, node)
     w = node.width if node.width else float(default_w)
     h = node.height if node.height else float(default_h)
     return w, h

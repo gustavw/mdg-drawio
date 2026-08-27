@@ -8,15 +8,10 @@ palette conform, zero exceptions) -- the middle segment is already a clean,
 human-chosen semantic name, so no extra registry lookup is needed.
 
 This assigns ``<base><n>`` per resolved cell (``person1``, ``person2``,
-``system1``, ...), counted per base name in document order. Genuinely
-versioned variants of ONE concept (an actor, matched against ``uml`` or
-``uml25`` -- see ``style_index.VERSION_RANK``) intentionally still share one
-counter, matching how a human would name the same real-world thing regardless
-of which palette version drew it. But the base alone is not enough to scope
-a counter: unrelated libraries can share a base string for unrelated concepts
-(e.g. C4's ``Container`` -- an application/service -- and a generic draw.io
-``swimlane`` grouping box both slug to ``"container"``), so counters are
-actually scoped per (version-family, base) pair -- see :func:`_counter_scope`.
+``system1``, ...), counted per base name in document order. The counter is
+global across notation libraries because ``.mdg`` node ids themselves are
+global: unrelated concepts that happen to share a base still need distinct ids
+or the forward pipeline would treat one as a duplicate and drop it.
 
 The mapping is a small, explicit, pure function of the resolved shapes and
 their document order -- re-deriving it after a manual rename costs nothing, so
@@ -29,7 +24,6 @@ import re
 from dataclasses import dataclass
 
 from .derive import DocumentResult
-from .style_index import VERSION_RANK
 
 _NAME_RE = re.compile(r"^(\D+)(\d+)$")
 
@@ -39,25 +33,6 @@ def semantic_base(shape_id: str) -> str:
     ``person_ext``. Falls back to the whole id if it doesn't conform."""
     parts = shape_id.split(".")
     return parts[1] if len(parts) >= 2 else shape_id
-
-
-def _family_of(library: str) -> str:
-    """Collapse versioned-variant libraries into one shared scope key; every
-    other library is its own scope. ``VERSION_RANK`` today names exactly one
-    family (uml/uml25) -- if it ever grows to cover more than one *distinct*
-    family, this must group by family, not flatten every entry into one
-    bucket."""
-    return "|".join(sorted(VERSION_RANK)) if library in VERSION_RANK else library
-
-
-def _counter_scope(shape_id: str) -> str:
-    """The counter-collision scope for a shape id: unrelated concepts that
-    happen to share a base string across different libraries (e.g. C4's
-    Container vs. a generic draw.io swimlane, both based "container") get
-    independent counters, while genuinely versioned variants of one concept
-    (uml/uml25) still share one -- see :func:`_family_of`."""
-    library = shape_id.split(".")[0]
-    return f"{_family_of(library)}.{semantic_base(shape_id)}"
 
 
 def reserved_counters(existing_node_ids: set[str]) -> dict[str, int]:
@@ -99,10 +74,10 @@ def assign_semantic_ids(
     unidentified shape has no semantic name to derive. ``reserved`` (see
     :func:`reserved_counters`) seeds each base's counter above whatever is
     already used in an existing document being merged into; omit it (the
-    default) when naming a document from scratch. ``reserved`` is keyed by
-    base alone (an existing ``.mdg`` id carries no library information), so
-    it seeds every :func:`_counter_scope` sharing that base -- conservative,
-    since we can't know which scope originally produced an existing name.
+    default) when naming a document from scratch. Node ids are global within a
+    document, so every notation sharing a semantic base also shares its counter:
+    C4's ``container1`` and General's ``container2`` must remain distinct even
+    though the underlying concepts come from different libraries.
     """
     reserved = reserved or {}
     counters: dict[str, int] = {}
@@ -112,9 +87,8 @@ def assign_semantic_ids(
             continue
         shape_id = cell.chosen.shape_id
         base = semantic_base(shape_id)
-        scope = _counter_scope(shape_id)
-        if scope not in counters:
-            counters[scope] = reserved.get(base, 0)
-        counters[scope] += 1
-        assigned.append(SemanticId(cell.cell_id, f"{base}{counters[scope]}", base))
+        if base not in counters:
+            counters[base] = reserved.get(base, 0)
+        counters[base] += 1
+        assigned.append(SemanticId(cell.cell_id, f"{base}{counters[base]}", base))
     return assigned

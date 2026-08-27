@@ -74,6 +74,18 @@ def test_plain_import_is_captured_as_a_dependency() -> None:
     assert "mdg_drawio.generator" in gen._import_targets(node, source)
 
 
+def test_relative_sibling_import_targets_the_module() -> None:
+    """``from . import sibling`` must not collapse to the package node."""
+    import ast
+
+    gen = _load_generator()
+    node = ast.parse("from . import merge").body[0]
+    source = ROOT / "mdg_drawio" / "reverse" / "merge_cli.py"
+
+    assert gen._import_targets(node, source) == ["mdg_drawio.reverse.merge"]
+    assert ("reverse_merge_cli", "reverse_merge") in gen.import_edges()
+
+
 def test_every_edge_endpoint_is_declared() -> None:
     """Every dependency edge must connect declared nodes (no dangling ids)."""
     content = CODE_ARCH_MDG.read_text(encoding="utf-8")

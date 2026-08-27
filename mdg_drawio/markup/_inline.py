@@ -14,7 +14,7 @@ import re
 # NOT ``_``: this table's italic syntax is ``*text*`` only, so underscore
 # carries no meaning here -- escaping it would just add noise to ordinary
 # text (identifiers, snake_case, URLs) for no protective benefit.
-_ESCAPABLE = r"\\`*~\[\]!"
+_ESCAPABLE = r"\\`*~\[\]!|"
 _ESCAPE_RE = re.compile(r"\\([" + _ESCAPABLE + r"])")
 _MD_SPECIAL_RE = re.compile(r"([" + _ESCAPABLE + r"])")
 
@@ -109,12 +109,12 @@ def _render_inline_token(match: re.Match[str]) -> str:
         attrs = match.group("img_attrs")
         src_match = _IMG_SRC_ATTR_RE.search(attrs)
         alt_match = _IMG_ALT_ATTR_RE.search(attrs)
-        src = src_match.group(1) if src_match else ""
-        alt = alt_match.group(1) if alt_match else ""
+        src = html.unescape(src_match.group(1)) if src_match else ""
+        alt = html.unescape(alt_match.group(1)) if alt_match else ""
         return f"![{alt}]({src})"
     if match.group("href") is not None:
         text = html_inline_to_markdown(match.group("link_text"))
-        return f"[{text}]({match.group('href')})"
+        return f"[{text}]({html.unescape(match.group('href'))})"
     if match.group("bold") is not None:
         return f"**{html_inline_to_markdown(match.group('bold'))}**"
     if match.group("italic") is not None:

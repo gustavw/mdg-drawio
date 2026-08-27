@@ -12,10 +12,10 @@ Run from anywhere:
 """
 from __future__ import annotations
 
-import shutil
 import subprocess
 import sys
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 ROOT = Path(__file__).parent.parent
 PALETTE_SCRIPT = ROOT / "tools" / "palette" / "generate_palette.py"
@@ -23,13 +23,27 @@ STYLES_SCRIPT = ROOT / "tools" / "styles" / "generate_outputs.py"
 DATA_DIR = ROOT / "mdg_drawio" / "generated_data"
 
 
-def run(script: Path) -> None:
+def run(script: Path, *args: str) -> None:
     result = subprocess.run(
-        [sys.executable, str(script)],
+        [sys.executable, str(script), *args],
         cwd=str(script.parent),
     )
     if result.returncode != 0:
         sys.exit(result.returncode)
+
+
+def _install_staged_data(staged_data: Path) -> None:
+    """Replace generated data only after the staged build has succeeded."""
+    backup = staged_data.parent / "previous-generated-data"
+    had_previous = DATA_DIR.exists()
+    if had_previous:
+        DATA_DIR.rename(backup)
+    try:
+        staged_data.rename(DATA_DIR)
+    except BaseException:
+        if had_previous:
+            backup.rename(DATA_DIR)
+        raise
 
 
 def main() -> None:
@@ -39,12 +53,22 @@ def main() -> None:
     print("\n=== Step 2: Generate JSON outputs ===")
     run(STYLES_SCRIPT)
 
-    if DATA_DIR.exists():
-        shutil.rmtree(DATA_DIR)
-
-    target = DATA_DIR.relative_to(ROOT)
+    try:
+        target = DATA_DIR.relative_to(ROOT)
+    except ValueError:
+        target = DATA_DIR
     print(f"\n=== Step 3: Build notation style sidecars in {target}/ ===")
-    run(ROOT / "scripts" / "build_notation_styles.py")
+    DATA_DIR.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(
+        dir=DATA_DIR.parent, prefix=".generated-data-build-"
+    ) as temp_dir:
+        staged_data = Path(temp_dir) / DATA_DIR.name
+        run(
+            ROOT / "scripts" / "build_notation_styles.py",
+            "--output-dir",
+            str(staged_data),
+        )
+        _install_staged_data(staged_data)
 
 
 if __name__ == "__main__":

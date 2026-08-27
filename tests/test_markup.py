@@ -166,6 +166,31 @@ def test_html_to_markdown_url_with_underscore_is_never_escaped() -> None:
     assert html_to_markdown(html) == "[link](http://example.com/foo_bar)"
 
 
+@pytest.mark.parametrize(
+    ("html", "markdown"),
+    [
+        ('<a href="https://example.test/?a=1&amp;b=2">link</a>',
+         "[link](https://example.test/?a=1&b=2)"),
+        ('<img src="image.png?a=1&amp;b=2" alt="Tom &amp; Jerry">',
+         "![Tom & Jerry](image.png?a=1&b=2)"),
+    ],
+)
+def test_html_to_markdown_decodes_entities_in_attributes(
+    html: str, markdown: str
+) -> None:
+    assert html_to_markdown(html) == markdown
+    assert markdown_to_html(markdown) == f"<p>{html}</p>"
+
+
+def test_table_cell_with_pipe_round_trips_without_creating_a_column() -> None:
+    html = "<table><tr><th>a | b</th></tr><tr><td>c | d</td></tr></table>"
+
+    markdown = html_to_markdown(html)
+
+    assert markdown == "| a \\| b |\n| --- |\n| c \\| d |"
+    assert markdown_to_html(markdown) == html
+
+
 def test_html_to_markdown_decodes_entities_in_plain_text() -> None:
     assert html_to_markdown("Tom &amp; Jerry") == "Tom & Jerry"
 

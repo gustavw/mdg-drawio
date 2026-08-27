@@ -24,8 +24,9 @@ Checks:
 
 5. Import integrity (bidirectional)
    Forward: every cross-package c4.Rel must have a matching Python import.
-   Reverse: every cross-package ``import mdg_drawio.<pkg>`` must have a
-   matching c4.Rel on the Component page.
+   Reverse: every Component making a cross-package
+   ``import mdg_drawio.<pkg>`` must have its own matching c4.Rel on the
+   Component page.
 
 Exit 0: all checks pass. Exit 1: one or more mismatches.
 
@@ -151,7 +152,10 @@ EXPECTED_RELATION_COUNTS: dict[str, int] = {
     # +1: reverse/merge.py now imports mdg_drawio.markup.html_to_markdown
     # (recovering a hand-drawn cell's HTML label as a .mdg label) --
     # reverse_merge_co -> markup_co_boundary.
-    "Component": 74,
+    # +8: every importing Component now documents its own cross-package edge;
+    # package-level coverage may no longer hide a sibling Component's import.
+    # -1: semantic naming no longer imports version-recency metadata.
+    "Component": 81,
     "Code": 74,
 }
 
@@ -572,30 +576,23 @@ def _collect_component_imports(component: str) -> set[str]:
 
 
 def _collect_all_cross_package_imports() -> set[tuple[str, str]]:
-    """Return {(src_pkg, tgt_pkg)} for all cross-package imports."""
+    """Return ``{(source_component, target_package)}`` for real imports.
+
+    Iterating the modules declared by ``realized-by`` keeps the reverse check
+    at the same Component granularity as the forward check.  A dependency in
+    one module can therefore no longer document every sibling Component in
+    the package accidentally.
+    """
     pairs: set[tuple[str, str]] = set()
-    pkg_dir = REPO_ROOT / "mdg_drawio"
-    for pyfile in pkg_dir.rglob("*.py"):
-        rel = pyfile.relative_to(pkg_dir)
-        parts = rel.parts
-        src_pkg = parts[0][:-3] if parts[0].endswith(".py") else parts[0]
-        if src_pkg in ("__init__", "__main__"):
-            continue
-        try:
-            tree = ast.parse(pyfile.read_text())
-        except SyntaxError:
-            continue
-        for node in ast.walk(tree):
-            modules: list[str] = []
-            if isinstance(node, ast.ImportFrom) and node.module:
-                modules.append(node.module)
-            elif isinstance(node, ast.Import):
-                modules.extend(alias.name for alias in node.names)
-            for module in modules:
-                if module.startswith("mdg_drawio."):
-                    tgt_pkg = module.split(".")[1]
-                    if tgt_pkg != src_pkg:
-                        pairs.add((src_pkg, tgt_pkg))
+    for component, modules in COMPONENT_TO_MODULE.items():
+        src_pkg = ID_TO_PACKAGE[component]
+        assert src_pkg is not None
+        for module in _imports_of(PKG_DIR / rel for rel in modules):
+            if not module.startswith("mdg_drawio."):
+                continue
+            tgt_pkg = module.split(".")[1]
+            if tgt_pkg != src_pkg:
+                pairs.add((component, tgt_pkg))
     return pairs
 
 
@@ -934,7 +931,14 @@ def _verify_cross_package_import(
     Component (via COMPONENT_TO_MODULE). Only endpoints with no realizing
     module — boundaries and non-code ids — fall back to whole-package imports.
     """
-    mdg_pairs.add((src_pkg, tgt_pkg))
+    pair = (r.source, tgt_pkg)
+    if pair in mdg_pairs:
+        print(
+            f"  DUPLICATE EDGE: line {r.line}: {r.source} documents "
+            f"mdg_drawio.{tgt_pkg} more than once"
+        )
+        return RelationCheckResult(errors=1)
+    mdg_pairs.add(pair)
     if r.source in COMPONENT_TO_MODULE:
         src_imports = _collect_component_imports(r.source)
         scope = f"{r.source} modules"
@@ -1042,11 +1046,12 @@ def check_import_integrity(component_page: Page) -> int:
 
     # Reverse: cross-package import -> MDG edge.
     code_pairs = _collect_all_cross_package_imports()
-    for src_pkg, tgt_pkg in sorted(code_pairs):
-        if (src_pkg, tgt_pkg) not in mdg_pairs:
+    for src_component, tgt_pkg in sorted(code_pairs):
+        if (src_component, tgt_pkg) not in mdg_pairs:
+            modules = sorted(COMPONENT_TO_MODULE[src_component])
             print(
-                f"  MISSING EDGE: import mdg_drawio.{tgt_pkg} in {src_pkg}/ "
-                f"- no matching c4.Rel on Component page"
+                f"  MISSING EDGE: {src_component} ({modules}) imports "
+                f"mdg_drawio.{tgt_pkg} - no matching c4.Rel on Component page"
             )
             errors += 1
 

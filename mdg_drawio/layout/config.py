@@ -12,6 +12,7 @@ defaults of their own.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from math import ceil
 
 from mdg_drawio.contracts import (
     DEFAULT_BOTTOM_PADDING,
@@ -126,14 +127,14 @@ def resolve_page_size(
         if aspect_ratio:
             a_w, a_h = parse_aspect_ratio(aspect_ratio)
             target_ratio = a_w / a_h
-            content_ratio = content_width / content_height
+            page_ratio = page_w / page_h
 
-            if content_ratio > target_ratio:
-                page_h = page_w * a_h / a_w
+            if page_ratio > target_ratio:
+                page_h = max(page_h, page_w * a_h / a_w)
             else:
-                page_w = page_h * a_w / a_h
+                page_w = max(page_w, page_h * a_w / a_h)
 
-    return int(page_w), int(page_h)
+    return ceil(page_w), ceil(page_h)
 
 
 def nodes_placed(content_width: float, content_height: float) -> bool:

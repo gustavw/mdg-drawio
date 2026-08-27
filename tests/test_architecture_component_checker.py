@@ -193,3 +193,19 @@ def test_checker_rejects_import_without_documented_edge(tmp_path: Path) -> None:
 
     assert result.returncode == 1
     assert "MISSING EDGE" in result.stdout
+    assert "engine_convert_co" in result.stdout
+
+
+def test_reverse_import_check_is_component_granular(tmp_path: Path) -> None:
+    """A sibling Component's documented package edge cannot hide an import."""
+    source = ARCHITECTURE_MDG.read_text(encoding="utf-8")
+    mutated = source.replace(
+        'c4.Rel(engine_convert_co, layout_co_boundary, "Resolves layout config"',
+        'c4.Rel(engine_validate_co, layout_co_boundary, "Resolves layout config"',
+        1,
+    )
+
+    result = _run_checker(mutated, tmp_path)
+
+    assert result.returncode == 1
+    assert "MISSING EDGE: engine_convert_co" in result.stdout

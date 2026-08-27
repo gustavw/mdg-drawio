@@ -25,6 +25,7 @@ from ._types import (
     Result,
     SizeResolver,
     Waypoint,
+    resolve_node_size,
 )
 from .config import Config, resolve_page_size
 
@@ -138,7 +139,7 @@ class LayeredLayout(BaseLayout):
 def _default_node_sizes(nodes: list[Node], size_of: SizeResolver) -> None:
     """Fill in missing width/height from the size resolver, in place."""
     for node in nodes:
-        w, h = size_of(node.type)
+        w, h = resolve_node_size(size_of, node)
         if not node.width:
             node.width = float(w)
         if not node.height:
