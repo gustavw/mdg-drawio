@@ -272,7 +272,10 @@ class GeometryOverlay:
     """
     nodes: dict[str, dict[str, float]] = field(default_factory=dict)
     node_styles: dict[str, dict[str, str]] = field(default_factory=dict)
-    edges: dict[str, EdgeAnchorOverlay] = field(default_factory=dict)
+    # Endpoint identity is not unique: parallel relationships are legal.
+    # Preserve overlays in draw.io document order so each authored edge gets
+    # its own anchors and route during regeneration.
+    edges: dict[str, list[EdgeAnchorOverlay]] = field(default_factory=dict)
 
 
 @dataclass
@@ -293,5 +296,4 @@ class MultiPageDocument:
     def __post_init__(self) -> None:
         if not self.pages:
             raise ValueError("MultiPageDocument.pages must not be empty")
-
 

@@ -11,6 +11,7 @@ derived from the draw.io shape library and gitignored with the rest of
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from collections.abc import Callable
@@ -275,10 +276,8 @@ def _build_library(
 
 def _write_row_types_sidecar(
     library: str,
-    registry: dict[str, Any],
-    sidecar: dict[str, Any],
+    row_types: dict[str, Any],
     out_dir: Path,
-    anchor_cell: Callable[[list[dict[str, Any]], str], dict[str, Any]],
 ) -> int:
     """Write (or clean up) <lib>_row_types.json; returns the entry count.
 
@@ -288,7 +287,6 @@ def _write_row_types_sidecar(
     mdg_drawio/reverse/style_index.py) assume every key there is a real registry
     shape id.
     """
-    row_types = _build_row_types(registry, sidecar, anchor_cell)
     row_types_path = out_dir / f"{library}_row_types.json"
     if row_types:
         row_types_path.write_text(json.dumps(row_types, indent=1), encoding="utf-8")
@@ -297,7 +295,7 @@ def _write_row_types_sidecar(
     return len(row_types)
 
 
-def _main() -> None:
+def _main(out_dir: Path | None = None) -> None:
     sys.path.insert(0, str(ROOT))
 
     from mdg_drawio.notation import LIBRARIES, load_registry
@@ -307,30 +305,52 @@ def _main() -> None:
 
     if not PALETTE_OUTPUT_DIR.exists():
         sys.exit("tools/styles/output/ missing — run `make build-data` first")
-    out_dir = DATA_DIR / "notation"
-    out_dir.mkdir(parents=True, exist_ok=True)
+    notation_dir = (out_dir or DATA_DIR) / "notation"
     all_errors: list[str] = []
+    built: list[tuple[str, dict[str, Any], dict[str, Any]]] = []
     for library in LIBRARIES:
         registry = load_registry(library)
         sidecar, errors = _build_library(
             library, registry, anchor_cell, flatten_entries, style_fingerprint
         )
         all_errors.extend(errors)
-        path = out_dir / f"{library}_styles.json"
-        path.write_text(json.dumps(sidecar, indent=1), encoding="utf-8")
-        row_type_count = _write_row_types_sidecar(
-            library, registry, sidecar, out_dir, anchor_cell
-        )
-        print(
-            f"{library}: {len(sidecar)} shapes, {row_type_count} row types -> "
-            f"{path.relative_to(ROOT)}"
-        )
+        built.append((library, registry, sidecar))
     if all_errors:
         print(f"\n{len(all_errors)} PALETTE VALIDATION ERRORS:", file=sys.stderr)
         for e in all_errors:
             print(f"  {e}", file=sys.stderr)
         sys.exit(1)
 
+    prepared = [
+        (
+            library,
+            sidecar,
+            _build_row_types(registry, sidecar, anchor_cell),
+        )
+        for library, registry, sidecar in built
+    ]
+    notation_dir.mkdir(parents=True, exist_ok=True)
+    for library, sidecar, row_types in prepared:
+        path = notation_dir / f"{library}_styles.json"
+        path.write_text(json.dumps(sidecar, indent=1), encoding="utf-8")
+        row_type_count = _write_row_types_sidecar(
+            library, row_types, notation_dir
+        )
+        try:
+            display_path = path.relative_to(ROOT)
+        except ValueError:
+            display_path = path
+        print(
+            f"{library}: {len(sidecar)} shapes, {row_type_count} row types -> "
+            f"{display_path}"
+        )
+
 
 if __name__ == "__main__":
-    _main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        help="generated-data destination (defaults to the runtime DATA_DIR)",
+    )
+    _main(parser.parse_args().output_dir)

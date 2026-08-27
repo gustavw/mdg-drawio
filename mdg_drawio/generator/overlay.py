@@ -168,7 +168,7 @@ def _read_diagram_overlay(diagram: ET.Element) -> GeometryOverlay:
             continue
         edge_anchor = _read_edge_anchors(cell_id, cell)
         if edge_anchor:
-            result.edges[edge_anchor[0]] = edge_anchor[1]
+            result.edges.setdefault(edge_anchor[0], []).append(edge_anchor[1])
     return result
 
 

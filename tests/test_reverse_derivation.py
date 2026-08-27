@@ -678,12 +678,8 @@ def test_assign_semantic_ids_gives_each_distinct_base_its_own_counter() -> None:
     assert assigned["12"] == "widget2"
 
 
-def test_assign_semantic_ids_scopes_by_library_except_version_families() -> None:
-    """Regression: an unrelated library sharing a base string with uml/uml25
-    (real registry example: C4's Container -- an application/service -- vs. a
-    generic draw.io swimlane grouping box, both slugging to "container") must
-    NOT share a counter. Only genuine version-family members
-    (style_index.VERSION_RANK: uml/uml25) intentionally still do."""
+def test_assign_semantic_ids_are_globally_unique_across_libraries() -> None:
+    """Every notation shares the document-wide ``node_id`` namespace."""
     idx = StyleIndex(
         [
             _entry("uml.widget.v1", "uml", "shape=uw;"),
@@ -700,14 +696,12 @@ def test_assign_semantic_ids_scopes_by_library_except_version_families() -> None
     assigned = {a.cell_id: a.node_id for a in assign_semantic_ids(result)}
     assert assigned["10"] == "widget1"  # uml
     assert assigned["11"] == "widget2"  # uml25 -- shares uml's counter (by design)
-    assert assigned["12"] == "widget1"  # unrelated library -- independent counter
+    assert assigned["12"] == "widget3"  # unrelated library, same global id namespace
 
 
 @needs_data
-def test_naming_c4_container_and_general_container_get_independent_counters() -> None:
-    """The exact real-registry collision the synthetic test above guards
-    against: c4.container.v1 (a C4 metaclass) and general.container.v1 (a
-    bare draw.io swimlane) both slug to "container"."""
+def test_naming_c4_container_and_general_container_get_unique_ids() -> None:
+    """Real registry shapes with the same base still need unique node ids."""
     c4_container = fx.get(INDEX, "c4.container.v1")
     general_container = fx.get(INDEX, "general.container.v1")
     doc = fx.document(
@@ -717,7 +711,7 @@ def test_naming_c4_container_and_general_container_get_independent_counters() ->
     result = derive(load_cells(doc), INDEX)
     assigned = {a.cell_id: a.node_id for a in assign_semantic_ids(result)}
     assert assigned["10"] == "container1"
-    assert assigned["11"] == "container1"
+    assert assigned["11"] == "container2"
 
 
 def test_assign_semantic_ids_skips_unresolved_cells() -> None:

@@ -15,10 +15,13 @@ Improvements over the DrawIoGen reference:
 from __future__ import annotations
 
 import ast
+import math
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Protocol, cast
+
+import yaml
 
 from mdg_drawio.contracts import (
     PAGE_PREFIX_LENGTH,
@@ -85,7 +88,7 @@ def strip_inline_comment(line: str) -> str:
     while i < len(line):
         ch = line[i]
         if in_quote:
-            if ch == "\\" and in_quote != "'":
+            if ch == "\\":
                 i += 2
                 continue
             if ch == in_quote:
@@ -109,20 +112,39 @@ def parse_frontmatter(source: str) -> tuple[dict[str, str], str]:
     Returns ``(metadata_dict, body)``. If no frontmatter is present,
     metadata is empty and body is the full source unchanged.
     """
-    lines = source.lstrip("\n").split("\n")
-    if not lines or lines[0].rstrip() != "---":
+    lines = source.split("\n")
+    start = next(
+        (i for i, line in enumerate(lines) if line.strip() == "---"), None
+    )
+    if start is None:
+        return {}, source
+    end = next(
+        (i for i in range(start + 1, len(lines)) if lines[i].strip() == "---"),
+        None,
+    )
+    if end is None:
         return {}, source
     try:
-        end = lines.index("---", 1)
-    except ValueError:
-        return {}, source
+        loaded = yaml.safe_load("\n".join(lines[start + 1 : end])) or {}
+    except yaml.YAMLError as exc:
+        raise DslError("invalid YAML frontmatter", start + 1) from exc
+    if not isinstance(loaded, dict):
+        raise DslError("frontmatter must be a YAML mapping", start + 1)
     metadata: dict[str, str] = {}
-    for line in lines[1:end]:
-        if ":" in line:
-            key, _, raw = line.partition(":")
-            value = raw.strip().strip('"').strip("'")
-            metadata[key.strip()] = value
-    return metadata, "\n".join(lines[end + 1:])
+    for key, value in loaded.items():
+        if not isinstance(key, str) or isinstance(value, (dict, list)):
+            raise DslError("frontmatter keys and values must be scalars", start + 1)
+        if isinstance(value, bool):
+            metadata[key] = str(value).lower()
+        elif value is None:
+            metadata[key] = ""
+        else:
+            metadata[key] = str(value)
+    # Blank the frontmatter rather than deleting it. Downstream parser errors
+    # can then keep referring to the original source line numbers.
+    body_lines = list(lines)
+    body_lines[start : end + 1] = [""] * (end - start + 1)
+    return metadata, "\n".join(body_lines)
 
 
 _TRUE_VALUES = frozenset({"true", "1", "yes"})
@@ -201,7 +223,9 @@ def extract_block_variables(source: str) -> tuple[dict[str, str], str]:
         name = match.group("name")
         if name not in variables:
             variables[name] = _dedent_block_content(match.group("content"))
-        return ""
+        # Preserve the declaration's line footprint so errors after it retain
+        # their source-file line number.
+        return "\n" * match.group(0).count("\n")
 
     cleaned = _BLOCK_VAR_RE.sub(_consume, source)
     return variables, cleaned
@@ -211,135 +235,10 @@ def extract_block_variables(source: str) -> tuple[dict[str, str], str]:
 # Page splitting
 # ---------------------------------------------------------------------------
 
-def _frontmatter_prefix(raw_lines: list[str]) -> tuple[list[str], int]:
-    """Return frontmatter lines and index where the body starts.
-
-    If the frontmatter contains a ``page:`` field, it is per-page frontmatter
-    and should be included in the body — return empty frontmatter.
-    """
-    if not raw_lines or raw_lines[0].rstrip() != "---":
-        return [], 0
-    try:
-        end = raw_lines.index("---", 1)
-    except ValueError:
-        return [], 0
-    if end <= 0:
-        return [], 0
-    fm_lines = ["---", *raw_lines[1:end], "---"]
-    if "page:" in "\n".join(fm_lines):
-        return [], 0
-    return fm_lines, end + 1
-
-
 def _page_name_from_statement(stripped: str) -> str:
     """Extract the page name from a stripped page statement."""
     quote = stripped[PAGE_PREFIX_LENGTH]
     return stripped[QUOTE_OFFSET:].rstrip(quote + " \t")
-
-
-def _has_per_page_frontmatter(body_lines: list[str]) -> bool:
-    """True if the body uses ``---`` + ``page:`` per-page frontmatter."""
-    return any(line.strip() == "---" for line in body_lines)
-
-
-def _collect_page_sections(
-    body_lines: list[str],
-    default_title: str,
-) -> tuple[list[str], list[tuple[str, list[str]]]]:
-    """Collect global header lines and page-specific body lines."""
-    if _has_per_page_frontmatter(body_lines):
-        return [], _collect_per_page_sections(body_lines)
-    return _collect_legacy_page_sections(body_lines, default_title)
-
-
-def _collect_per_page_sections(
-    body_lines: list[str],
-) -> list[tuple[str, list[str]]]:
-    """Parse per-page ``---`` + ``page:`` YAML frontmatter blocks.
-
-    The frontmatter block is retained at the head of each page section so the
-    per-page parser can recover *all* its metadata (``mode``, ``direction``, …)
-    via ``parse_frontmatter`` — not just the ``page:`` name used to delimit
-    sections here.
-    """
-    sections: list[tuple[str, list[str]]] = []
-    current_name = ""
-    current_lines: list[str] = []
-    fm_lines: list[str] = []
-    in_frontmatter = False
-
-    def flush() -> None:
-        if fm_lines or current_lines:
-            sections.append((current_name, [*fm_lines, *current_lines]))
-
-    for line in body_lines:
-        stripped = line.strip()
-
-        if stripped == "---" and not in_frontmatter:
-            in_frontmatter = True
-            flush()
-            current_name = ""
-            current_lines = []
-            fm_lines = [line]
-            continue
-
-        if in_frontmatter:
-            fm_lines.append(line)
-            if stripped.startswith("page:"):
-                current_name = stripped.split(":", 1)[1].strip().strip('"').strip("'")
-            elif stripped == "---":
-                in_frontmatter = False
-            continue
-
-        current_lines.append(line)
-
-    flush()
-    return sections
-
-
-def _collect_legacy_page_sections(
-    body_lines: list[str],
-    default_title: str,
-) -> tuple[list[str], list[tuple[str, list[str]]]]:
-    """Parse legacy ``page "Name"`` statement sections."""
-    global_header: list[str] = []
-    page_sections: list[tuple[str, list[str]]] = []
-    current_name = default_title
-    current_lines: list[str] | None = None
-
-    for line in body_lines:
-        stripped = line.strip()
-        if stripped.startswith('page "') or stripped.startswith("page '"):
-            if current_lines is not None:
-                page_sections.append((current_name, current_lines))
-            current_name = _page_name_from_statement(stripped)
-            current_lines = []
-        elif current_lines is None:
-            global_header.append(line)
-        else:
-            current_lines.append(line)
-
-    if current_lines is not None:
-        page_sections.append((current_name, current_lines))
-
-    return global_header, page_sections
-
-
-def _prefix_page_sources(
-    frontmatter_prefix: list[str],
-    global_header: list[str],
-    page_sections: list[tuple[str, list[str]]],
-) -> list[tuple[str, str]]:
-    """Prepend global page context to every page body."""
-    header_lines = [*frontmatter_prefix, *global_header]
-    header_prefix = "\n".join(header_lines)
-    if header_prefix:
-        header_prefix += "\n"
-    return [
-        (name, header_prefix + "\n".join(lines))
-        for name, lines in page_sections
-    ]
-
 
 def split_pages(source: str) -> list[tuple[str, str]]:
     """Split a DSL source on ``page "Name"`` statements.
@@ -351,21 +250,72 @@ def split_pages(source: str) -> list[tuple[str, str]]:
     Returns ``[(page_name, page_source), ...]``. If no page statement is
     found, returns a single entry with the frontmatter title or empty name.
     """
-    raw_lines = source.lstrip("\n").split("\n")
-    frontmatter_prefix, body_start = _frontmatter_prefix(raw_lines)
-    body_lines = raw_lines[body_start:]
-
+    lines = source.split("\n")
     metadata, _ = parse_frontmatter(source)
     default_title = metadata.get("title", "")
 
-    global_header, page_sections = _collect_page_sections(
-        body_lines, default_title
-    )
+    legacy_markers = [
+        i
+        for i, line in enumerate(lines)
+        if line.strip().startswith(('page "', "page '"))
+    ]
+    if legacy_markers:
+        pages: list[tuple[str, str]] = []
+        first = legacy_markers[0]
+        global_indices = set(range(first))
+        for marker_index, start in enumerate(legacy_markers):
+            legacy_end = (
+                legacy_markers[marker_index + 1]
+                if marker_index + 1 < len(legacy_markers)
+                else len(lines)
+            )
+            selected = global_indices | set(range(start + 1, legacy_end))
+            page_lines = [line if i in selected else "" for i, line in enumerate(lines)]
+            pages.append(
+                (_page_name_from_statement(lines[start].strip()), "\n".join(page_lines))
+            )
+        return pages
 
-    if not page_sections:
-        return [(default_title, "\n".join(body_lines))]
+    page_frontmatters: list[tuple[int, int, str]] = []
+    i = 0
+    while i < len(lines):
+        if lines[i].strip() != "---":
+            i += 1
+            continue
+        frontmatter_end = next(
+            (j for j in range(i + 1, len(lines)) if lines[j].strip() == "---"),
+            None,
+        )
+        if frontmatter_end is None:
+            break
+        try:
+            loaded = yaml.safe_load(
+                "\n".join(lines[i + 1 : frontmatter_end])
+            ) or {}
+        except yaml.YAMLError:
+            loaded = {}
+        if isinstance(loaded, dict) and "page" in loaded:
+            page_frontmatters.append((i, frontmatter_end, str(loaded["page"])))
+        i = frontmatter_end + 1
 
-    return _prefix_page_sources(frontmatter_prefix, global_header, page_sections)
+    if not page_frontmatters:
+        # Keep the complete source: parse_frontmatter() blanks its own lines
+        # while retaining metadata and line-number alignment.
+        return [(default_title, source)]
+
+    first = page_frontmatters[0][0]
+    global_indices = set(range(first))
+    pages = []
+    for page_index, (start, _fm_end, name) in enumerate(page_frontmatters):
+        end = (
+            page_frontmatters[page_index + 1][0]
+            if page_index + 1 < len(page_frontmatters)
+            else len(lines)
+        )
+        selected = global_indices | set(range(start, end))
+        page_lines = [line if j in selected else "" for j, line in enumerate(lines)]
+        pages.append((name, "\n".join(page_lines)))
+    return pages
 
 
 
@@ -467,7 +417,9 @@ def parse_keyword_int(
     # bool is a subclass of int; reject it so ``variant=True`` is not silently 1.
     if isinstance(raw, bool):
         raise DslError(f"{key}= must be an integer, got {raw!r}", line_number)
-    if isinstance(raw, (int, float)):
+    if isinstance(raw, int):
+        return raw
+    if isinstance(raw, float) and math.isfinite(raw) and raw.is_integer():
         return int(raw)
     raise DslError(f"{key}= must be an integer, got {raw!r}", line_number)
 

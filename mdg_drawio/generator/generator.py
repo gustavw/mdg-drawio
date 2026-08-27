@@ -321,7 +321,7 @@ class _GenCtx:
     styles: StyleProvider
     child_seq: dict[str, int] = field(default_factory=dict)
     container_ids: set[str] = field(default_factory=set)
-    used_edge_ids: set[str] = field(default_factory=set)
+    used_cell_ids: set[str] = field(default_factory=set)
     # Type-level style overrides are skipped for palette/golden output so it
     # stays true to the raw palette (see ``PALETTE_MODE``).
     apply_overrides: bool = True
@@ -329,8 +329,13 @@ class _GenCtx:
     def next_child_id(self, parent_id: str) -> str:
         """Generate a stable child cell ID: ``parent__cN``."""
         seq = self.child_seq.get(parent_id, 0)
+        candidate = f"{parent_id}__c{seq}"
+        while candidate in self.used_cell_ids:
+            seq += 1
+            candidate = f"{parent_id}__c{seq}"
         self.child_seq[parent_id] = seq + 1
-        return f"{parent_id}__c{seq}"
+        self.used_cell_ids.add(candidate)
+        return candidate
 
     def unique_edge_id(self, base_id: str) -> str:
         """Disambiguate an edge cell id against every id already emitted.
@@ -345,10 +350,10 @@ class _GenCtx:
         """
         candidate = base_id
         suffix = 2
-        while candidate in self.used_edge_ids:
+        while candidate in self.used_cell_ids:
             candidate = f"{base_id}-{suffix}"
             suffix += 1
-        self.used_edge_ids.add(candidate)
+        self.used_cell_ids.add(candidate)
         return candidate
 
 
@@ -1052,7 +1057,14 @@ def generate(
     ET.SubElement(mx_root, "mxCell", {"id": ROOT_CELL_ID})
     ET.SubElement(mx_root, "mxCell", {"id": PAGE_CELL_ID, "parent": ROOT_CELL_ID})
 
-    ctx = _GenCtx(styles=styles, apply_overrides=document.diagram.mode != PALETTE_MODE)
+    ctx = _GenCtx(
+        styles=styles,
+        apply_overrides=document.diagram.mode != PALETTE_MODE,
+        # Reserve authored node ids before emitting recursive child cells or
+        # edges.  A child generated for ``a`` must not steal an authored
+        # ``a__c0`` id merely because that node appears later in the document.
+        used_cell_ids={ROOT_CELL_ID, PAGE_CELL_ID, *(n.id for n in document.nodes)},
+    )
 
     # Identify container nodes — needed for conditional orthogonal edge routing.
     # Collect the referenced parent ids in one pass first; the nested `any(...)`

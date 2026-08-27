@@ -36,6 +36,23 @@ class SizeResolver(Protocol):
     def __call__(self, node_type: str) -> tuple[float, float]: ...
 
 
+def resolve_node_size(
+    size_of: SizeResolver, node: Node
+) -> tuple[float, float]:
+    """Resolve a node's size while preserving the legacy resolver port.
+
+    Registry-backed resolvers expose ``resolve_variant`` so variants can have
+    distinct geometry.  Hand-written/test resolvers that implement only the
+    original ``Callable[[str], tuple[float, float]]`` contract keep working.
+    """
+    variant_resolver = getattr(size_of, "resolve_variant", None)
+    if callable(variant_resolver):
+        width, height = variant_resolver(node.type, node.variant)
+        return float(width), float(height)
+    width, height = size_of(node.type)
+    return float(width), float(height)
+
+
 class BaseLayout(ABC):
     """Canonical base for every layout mode.
 

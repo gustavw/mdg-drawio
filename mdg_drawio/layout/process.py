@@ -7,13 +7,16 @@ data artifacts positioned by the caller).
 from __future__ import annotations
 
 from collections import defaultdict
+from math import ceil
 
+from ._container_layout import absolute_node_boxes
 from ._types import (
     BaseLayout,
     Edge,
     Node,
     Result,
     SizeResolver,
+    resolve_node_size,
 )
 from .config import Config
 from .layered import LayeredLayout
@@ -22,7 +25,7 @@ from .layered import LayeredLayout
 def _resolve_missing_sizes(nodes: list[Node], size_of: SizeResolver) -> None:
     """Fill missing dimensions for nodes that bypass layered layout."""
     for node in nodes:
-        width, height = size_of(node.type)
+        width, height = resolve_node_size(size_of, node)
         if not node.width:
             node.width = float(width)
         if not node.height:
@@ -119,6 +122,33 @@ def _position_excluded_nodes(
         node.y = anchor.y - node.height - gap
 
 
+def _fit_final_bounds(
+    nodes: list[Node], result: Result, cfg: Config
+) -> tuple[int, int]:
+    """Keep floating top-level nodes on-canvas and include them in page size."""
+    boxes = absolute_node_boxes(nodes)
+    if not boxes:
+        return result.page_width, result.page_height
+
+    min_x = min(x for x, _, _, _ in boxes.values())
+    min_y = min(y for _, y, _, _ in boxes.values())
+    shift_x = max(0.0, -min_x)
+    shift_y = max(0.0, -min_y)
+    if shift_x or shift_y:
+        for node in nodes:
+            if not node.parent_id:
+                node.x += shift_x
+                node.y += shift_y
+        boxes = absolute_node_boxes(nodes)
+
+    max_x = max(x + width for x, _, width, _ in boxes.values())
+    max_y = max(y + height for _, y, _, height in boxes.values())
+    return (
+        max(result.page_width, ceil(max_x + cfg.margin_x)),
+        max(result.page_height, ceil(max_y + cfg.margin_y)),
+    )
+
+
 class ProcessLayout(BaseLayout):
     """Left-to-right process flow layout.
 
@@ -179,12 +209,13 @@ class ProcessLayout(BaseLayout):
 
         laid_out = result.nodes + excluded_nodes
         routed_edges = result.edges + passthrough_edges
+        page_width, page_height = _fit_final_bounds(laid_out, result, cfg)
 
         return Result(
             nodes=laid_out,
             edges=routed_edges,
-            page_width=result.page_width,
-            page_height=result.page_height,
+            page_width=page_width,
+            page_height=page_height,
         )
 
 

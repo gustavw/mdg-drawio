@@ -18,7 +18,6 @@ Design decisions (improvements over DrawIoGen reference):
 from __future__ import annotations
 
 import ast
-import re
 
 from mdg_drawio.contracts import (
     C4_SCALER_SUBTITLE_KEY,
@@ -39,7 +38,6 @@ from .._core import (
     literal_value,
     parse_block_source,
     parse_bool_metadata,
-    parse_call_arguments,
     parse_frontmatter,
     parse_keyword_int,
     split_pages,
@@ -51,12 +49,6 @@ _DIAGRAM_TITLE_CALLS = frozenset({
     "Container_DiagramTitle",
     "Component_DiagramTitle",
 })
-# Precompiled once — the patterns are static, so there is no need to rebuild
-# them on every ``parse_page`` call.
-_DIAGRAM_TITLE_RES = tuple(
-    re.compile(rf"{_NAMESPACE}\.{call_name}\((?P<args>.*)\)", re.MULTILINE)
-    for call_name in _DIAGRAM_TITLE_CALLS
-)
 _EDGE_FUNCTIONS = frozenset({"Rel"})
 _DIAGRAM_TITLE_DEFAULT = "C4 Diagram"
 _C4_TYPE_LABELS: dict[str, str] = {
@@ -341,9 +333,23 @@ def parse_page(
             f"(frontmatter `mode:`); got `mode: {mode}`"
         )
 
+    diagram_title_name = ""
+    diagram_description = ""
+
     def _build_node(
         function: str, args: list[ast.AST | ast.keyword], line_number: int
     ) -> Node:
+        nonlocal diagram_title_name, diagram_description
+        if function in _DIAGRAM_TITLE_CALLS:
+            positional = [arg for arg in args if not isinstance(arg, ast.keyword)]
+            if positional:
+                diagram_title_name = literal_string(
+                    positional[0], "title", blocks
+                )
+            if len(positional) >= 2:
+                diagram_description = literal_string(
+                    positional[1], "description", blocks
+                )
         return _parse_node(function, args, line_number, blocks)
 
     def _build_edge(
@@ -364,22 +370,11 @@ def parse_page(
     )
     diagram_name = diagram_name or _DIAGRAM_TITLE_DEFAULT
 
-    # A DiagramTitle call renders an on-canvas title node; it also supplies the
-    # page name AS A FALLBACK only. An explicit `page:` frontmatter name always
-    # wins — otherwise the tab would read "[System Context] mdg-drawio" instead
-    # of "Context". The title's second arg is the diagram description.
-    diagram_description = ""
-    for call_re in _DIAGRAM_TITLE_RES:
-        for match in call_re.finditer(body):
-            try:
-                parsed = parse_call_arguments(match.group("args"))
-                pos = [a for a in parsed if not isinstance(a, ast.keyword)]
-                if pos and not page_name:
-                    diagram_name = literal_string(pos[0], "title")
-                if len(pos) >= 2:
-                    diagram_description = literal_string(pos[1], "description")
-            except (DslError, ValueError):
-                pass
+    # DiagramTitle is metadata as well as a rendered node. Capture it through
+    # the normal parsed-call path so comments cannot masquerade as calls and
+    # block variables are resolved consistently with node labels.
+    if diagram_title_name and not page_name:
+        diagram_name = diagram_title_name
 
     return Document(
         diagram=Diagram(

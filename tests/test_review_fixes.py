@@ -11,9 +11,16 @@ import xml.etree.ElementTree as ET
 
 import pytest
 
-from mdg_drawio.contracts import Anchor, Document
+from mdg_drawio.contracts import (
+    Anchor,
+    Diagram,
+    Document,
+    Edge,
+    Node,
+    NodeChildCell,
+)
 from mdg_drawio.engine.validate import validate_generated_xml
-from mdg_drawio.layout.config import parse_aspect_ratio
+from mdg_drawio.layout.config import parse_aspect_ratio, resolve_page_size
 from mdg_drawio.notation import DslError, parse
 from mdg_drawio.notation._core import parse_keyword_int
 from mdg_drawio.notation._core.registry import load_registry, set_registries
@@ -188,6 +195,81 @@ def test_parallel_passthrough_edges_get_disambiguated_generated_ids() -> None:
     assert validate_generated_xml(xml) == []
 
 
+def _generate_document_xml(document: Document) -> str:
+    from mdg_drawio.engine.preload import preload_core
+    from mdg_drawio.generator import create_style_provider, generate
+
+    registries, styles = preload_core()
+    return generate(document, create_style_provider(registries, styles))
+
+
+def test_edge_id_does_not_collide_with_authored_node_id() -> None:
+    document = Document(
+        diagram=Diagram(),
+        nodes=[
+            Node(id="a", type="c4.System"),
+            Node(id="b", type="c4.System"),
+            Node(id="same", type="c4.System"),
+        ],
+        edges=[Edge(id="same", type="c4.Rel", source_id="a", target_id="b")],
+    )
+
+    xml = _generate_document_xml(document)
+
+    assert validate_generated_xml(xml) == []
+    assert 'id="same-2"' in xml
+
+
+def test_generated_child_id_does_not_collide_with_later_authored_node() -> None:
+    document = Document(
+        diagram=Diagram(),
+        nodes=[
+            Node(
+                id="a",
+                type="c4.System",
+                child_cells=[NodeChildCell(label="child")],
+            ),
+            Node(id="a__c0", type="c4.System"),
+        ],
+    )
+
+    xml = _generate_document_xml(document)
+
+    assert validate_generated_xml(xml) == []
+    assert 'id="a__c1"' in xml
+
+
+def test_parallel_edge_overlays_preserve_individual_routes() -> None:
+    from mdg_drawio.engine.convert import _inject_edge_overlay
+    from mdg_drawio.generator.overlay import read_overlay_xml
+
+    xml = """<mxfile><diagram><mxGraphModel><root>
+      <mxCell id="0"/><mxCell id="1" parent="0"/>
+      <mxCell id="a" vertex="1" parent="1"/>
+      <mxCell id="b" vertex="1" parent="1"/>
+      <mxCell id="a-&gt;b" edge="1" parent="1" source="a" target="b">
+        <mxGeometry relative="1" as="geometry"><Array as="points">
+          <mxPoint x="10" y="20"/>
+        </Array></mxGeometry>
+      </mxCell>
+      <mxCell id="a-&gt;b-2" edge="1" parent="1" source="a" target="b">
+        <mxGeometry relative="1" as="geometry"><Array as="points">
+          <mxPoint x="30" y="40"/>
+        </Array></mxGeometry>
+      </mxCell>
+    </root></mxGraphModel></diagram></mxfile>"""
+    (overlay,) = read_overlay_xml(xml)
+    edges = [
+        Edge(id="a->b", type="c4.Rel", source_id="a", target_id="b"),
+        Edge(id="a->b", type="c4.Rel", source_id="a", target_id="b"),
+    ]
+
+    _inject_edge_overlay(edges, overlay)
+
+    assert [(p.x, p.y) for p in edges[0].waypoints] == [(10.0, 20.0)]
+    assert [(p.x, p.y) for p in edges[1].waypoints] == [(30.0, 40.0)]
+
+
 def test_default_anchor_emits_no_attachment_tokens() -> None:
     import mdg_drawio.generator.generator as generator
 
@@ -218,6 +300,20 @@ def test_invalid_aspect_ratio_is_rejected(value: str) -> None:
 
 def test_valid_aspect_ratio_parses() -> None:
     assert parse_aspect_ratio("16:9") == (16, 9)
+
+
+def test_aspect_ratio_only_expands_margin_adjusted_page() -> None:
+    page_width, page_height = resolve_page_size(
+        content_width=400,
+        content_height=299,
+        margin_x=40,
+        margin_y=40,
+        aspect_ratio="4:3",
+    )
+
+    assert page_width >= 480
+    assert page_height >= 379
+    assert page_width / page_height == pytest.approx(4 / 3, abs=0.01)
 
 
 # ---------------------------------------------------------------------------

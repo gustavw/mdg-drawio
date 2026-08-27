@@ -58,13 +58,16 @@ def _render_table(inner: str) -> str:
     if not rows:
         return ""
     header, *body = rows
-    cells = [html_inline_to_markdown(c).strip() for c in header]
+    def _cell(source: str) -> str:
+        return html_inline_to_markdown(source).strip()
+
+    cells = [_cell(c) for c in header]
     lines = [
         "| " + " | ".join(cells) + " |",
         "| " + " | ".join("---" for _ in cells) + " |",
     ]
     for row in body:
-        row_cells = [html_inline_to_markdown(c).strip() for c in row]
+        row_cells = [_cell(c) for c in row]
         lines.append("| " + " | ".join(row_cells) + " |")
     return "\n".join(lines)
 

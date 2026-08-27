@@ -46,6 +46,7 @@ class PaletteLayout(BaseLayout):
 
     def _load_positions(self) -> None:
         """Load pre-baked positions from ``palette_path`` if one is set."""
+        self._positions = []
         if self.palette_path is None:
             return
         try:

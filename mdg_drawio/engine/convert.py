@@ -516,7 +516,11 @@ def _resolve_node_sizes(
     for node in nodes:
         if node.width > 0 and node.height > 0:
             continue
-        w, h = size_of(node.type)
+        variant_resolver = getattr(size_of, "resolve_variant", None)
+        if callable(variant_resolver):
+            w, h = variant_resolver(node.type, node.variant)
+        else:
+            w, h = size_of(node.type)
         node.width = w
         node.height = h
 
@@ -526,18 +530,19 @@ def _inject_edge_overlay(
 ) -> None:
     """Apply existing edge anchors and waypoints from overlay.
 
-    The overlay key is ``"{source}->{target}"`` — the same identity the C4
-    parser assigns as the edge id. Parallel edges between the same pair of nodes
-    therefore share a key and cannot be told apart on a round-trip; the pre-write
-    duplicate-id validation (``engine/validate.py``) rejects such documents up
-    front, so this path never sees genuinely-ambiguous parallel edges.
+    Parallel edges share endpoint identity, so their overlays are consumed in
+    document order rather than overwriting one another in a dictionary.
     """
     if not overlay:
         return
+    edge_occurrences: dict[str, int] = {}
     for edge in edges:
         edge_key = f"{edge.source_id}->{edge.target_id}"
-        if edge_key in overlay.edges:
-            ea = overlay.edges[edge_key]
+        occurrence = edge_occurrences.get(edge_key, 0)
+        edge_occurrences[edge_key] = occurrence + 1
+        overlays = overlay.edges.get(edge_key, [])
+        if occurrence < len(overlays):
+            ea = overlays[occurrence]
             if ea.exit_x:
                 edge.style_overrides["exitX"] = ea.exit_x
             if ea.exit_y:
