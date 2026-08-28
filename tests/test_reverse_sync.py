@@ -343,6 +343,53 @@ def test_sync_leaves_an_unmoved_survivor_completely_untouched() -> None:
 
 
 @needs_data
+def test_sync_updates_a_surviving_nodes_label_without_losing_other_arguments() -> None:
+    person = fx.get(INDEX, "c4.person.v1")
+    existing_text = (
+        '---\ntitle: "T"\nmode: layered\n---\n\n'
+        'c4.Person(alice, "Old label", "Keep description", technology="web") '
+        '# keep comment\n'
+    )
+    labeled_cell = (
+        '<object id="alice" c4Name="New label"><mxCell style="'
+        f'{person.style}" vertex="1" parent="1">'
+        '<mxGeometry x="0" y="0" width="120" height="120" as="geometry"/>'
+        '</mxCell></object>'
+    )
+
+    _, plan, synced = _run_sync_pipeline(existing_text, fx.document(labeled_cell))
+
+    assert len(plan.node_label_rewrites) == 1
+    assert plan.merge_plan.new_node_count == 0
+    assert plan.removed_vertex_count == 0
+    assert (
+        'c4.Person(alice, "New label", "Keep description", technology="web") '
+        '# keep comment'
+    ) in synced.splitlines()
+    assert merge.validate(synced) is None
+
+
+@needs_data
+def test_sync_updates_a_label_containing_an_equals_sign() -> None:
+    person = fx.get(INDEX, "c4.person.v1")
+    existing_text = (
+        '---\ntitle: "T"\nmode: layered\n---\n\n'
+        'c4.Person(alice, "status=old", "Keep description")\n'
+    )
+    labeled_cell = (
+        '<object id="alice" c4Name="status=new"><mxCell style="'
+        f'{person.style}" vertex="1" parent="1">'
+        '<mxGeometry x="0" y="0" width="120" height="120" as="geometry"/>'
+        '</mxCell></object>'
+    )
+
+    _, _, synced = _run_sync_pipeline(existing_text, fx.document(labeled_cell))
+
+    assert 'c4.Person(alice, "status=new", "Keep description")' in synced
+    assert merge.validate(synced) is None
+
+
+@needs_data
 def test_sync_reports_nothing_to_sync_when_nothing_changed() -> None:
     person = fx.get(INDEX, "c4.person.v1")
     system = fx.get(INDEX, "c4.system.v1")
@@ -395,6 +442,29 @@ def test_sync_cli_write_applies_the_sync(
     assert "bob" not in written
     assert merge.validate(written) is None
     assert "wrote" in capsys.readouterr().out
+
+
+@needs_data
+def test_sync_cli_write_applies_a_drawio_label_edit(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    person = fx.get(INDEX, "c4.person.v1")
+    labeled_cell = (
+        '<object id="alice" c4Name="Renamed in draw.io"><mxCell style="'
+        f'{person.style}" vertex="1" parent="1">'
+        '<mxGeometry x="0" y="0" width="120" height="120" as="geometry"/>'
+        '</mxCell></object>'
+    )
+    mdg_text = '---\ntitle: "T"\nmode: layered\n---\n\nc4.Person(alice, "Alice")\n'
+    mdg_path = _write(tmp_path, "existing.mdg", mdg_text)
+    drawio_path = _write(tmp_path, "diagram.drawio", fx.document(labeled_cell))
+
+    assert sync_main([str(mdg_path), str(drawio_path), "--write"]) == 0
+
+    written = mdg_path.read_text(encoding="utf-8")
+    assert 'c4.Person(alice, "Renamed in draw.io")' in written
+    assert "1 updated label(s)" in capsys.readouterr().out
+    assert merge.validate(written) is None
 
 
 @needs_data

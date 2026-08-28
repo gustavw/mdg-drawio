@@ -85,7 +85,13 @@ def main(argv: list[str] | None = None) -> int:
         for reason in plan.merge_plan.skipped:
             print(f"  {reason}", file=sys.stderr)
 
-    if not plan.merge_plan.insertions and not plan.removed_ranges:
+    updated_label_count = len(plan.node_label_rewrites)
+    if (
+        not plan.merge_plan.insertions
+        and not plan.removed_ranges
+        and not plan.node_label_rewrites
+        and not plan.edge_token_rewrites
+    ):
         print("nothing to sync -- already up to date.")
         return 0
 
@@ -113,7 +119,8 @@ def main(argv: list[str] | None = None) -> int:
             f"\n{plan.merge_plan.new_node_count} new element(s), "
             f"{plan.merge_plan.new_edge_count} new edge(s), "
             f"{plan.removed_vertex_count} removed element(s), "
-            f"{plan.removed_edge_count} removed edge(s) -- "
+            f"{plan.removed_edge_count} removed edge(s), "
+            f"{updated_label_count} updated label(s) -- "
             "dry run, use --write to apply."
         )
         if renamed_count:
@@ -138,7 +145,8 @@ def main(argv: list[str] | None = None) -> int:
         f"wrote {plan.merge_plan.new_node_count} new element(s), "
         f"{plan.merge_plan.new_edge_count} new edge(s), "
         f"{plan.removed_vertex_count} removed element(s), "
-        f"{plan.removed_edge_count} removed edge(s) to {args.mdg}{rename_note}"
+        f"{plan.removed_edge_count} removed edge(s), "
+        f"{updated_label_count} updated label(s) to {args.mdg}{rename_note}"
     )
     return 0
 
