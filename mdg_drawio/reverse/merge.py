@@ -725,6 +725,8 @@ _NS_FUNCTION_RE = re.compile(
     r"\((?P<args>.*)\)\s*:?\s*$"
 )
 _VARIANT_KWARG_RE = re.compile(r"^variant\s*=\s*(\d+)$")
+_LABEL_KWARG_RE = re.compile(r"^label\s*=")
+_KWARG_RE = re.compile(r"^[A-Za-z_]\w*\s*=")
 
 
 def _split_top_level_args(args: str) -> list[str]:
@@ -837,6 +839,46 @@ def _rewrite_edge_line(
     return f"{ns}.{function}({', '.join(args)}){comment}"
 
 
+def _rewrite_node_label_line(
+    raw_line: str,
+    clean_line: str,
+    new_label: str,
+) -> str | None:
+    """Replace one surviving node declaration's label and preserve its shape.
+
+    The node id, function, description/other arguments, block colon, indentation,
+    and trailing comment remain intact. Both the normal positional label and the
+    registry-supported ``label=`` spelling are handled. ``None`` is defensive:
+    callers leave an unparseable line untouched rather than risking corruption.
+    """
+    match = _NS_FUNCTION_RE.match(clean_line)
+    if match is None:
+        return None
+    args = _split_top_level_args(match.group("args"))
+    if not args:
+        return None
+
+    rendered_label = f'"{_escape_dsl_string(new_label)}"'
+    label_kwarg = next(
+        (i for i, argument in enumerate(args) if _LABEL_KWARG_RE.match(argument)),
+        None,
+    )
+    if label_kwarg is not None:
+        args[label_kwarg] = f"label={rendered_label}"
+    elif len(args) >= 2 and _KWARG_RE.match(args[1]) is None:
+        args[1] = rendered_label
+    else:
+        args.insert(1, rendered_label)
+
+    indent_width = len(raw_line) - len(raw_line.lstrip(" \t"))
+    indent = raw_line[:indent_width]
+    colon = ":" if clean_line.rstrip().endswith(":") else ""
+    comment_start = _comment_start(raw_line)
+    comment = f" {raw_line[comment_start:]}" if comment_start is not None else ""
+    ns, function = match.group("ns"), match.group("function")
+    return f"{indent}{ns}.{function}({', '.join(args)}){colon}{comment}"
+
+
 def _block_range(existing: ExistingIndex, node_id: str) -> tuple[int, int]:
     """``[start, end)`` line range spanning ``node_id``'s own declaration and
     everything nested under it -- the whole subtree that must disappear
@@ -885,17 +927,16 @@ class SyncPlan:
     no longer present in the current ``.drawio``. draw.io is the source of
     truth: anything genuinely gone there is removed here, never left behind.
 
-    ``edge_token_rewrites`` (existing line index -> replacement text) covers
-    a SURVIVING edge (kept, not re-derived) whose source or target was
-    itself renamed this run -- its kept-verbatim text would otherwise go on
-    referencing an id nothing declares any more. See
-    :func:`_rewrite_edge_line`.
+    ``node_label_rewrites`` applies labels edited in draw.io to SURVIVING node
+    declarations without re-deriving/reordering them. ``edge_token_rewrites``
+    similarly covers a surviving edge whose source or target was renamed.
     """
 
     merge_plan: MergePlan
     removed_ranges: list[tuple[int, int]]
     removed_vertex_count: int
     removed_edge_count: int
+    node_label_rewrites: dict[int, str]
     edge_token_rewrites: dict[int, str]
 
 
@@ -926,6 +967,38 @@ def _existing_parent_by_id(existing: ExistingIndex) -> dict[str, str | None] | N
     if not isinstance(document, Document):
         return None
     return {node.id: node.parent_id for node in document.nodes}
+
+
+def _surviving_node_label_rewrites(
+    existing: ExistingIndex,
+    cells: list[Cell],
+    surviving_ids: set[str],
+) -> dict[int, str]:
+    """Line rewrites for surviving nodes whose draw.io label was edited."""
+    try:
+        document = parse_mdg("\n".join(existing.lines))
+    except Exception:
+        return {}
+    if not isinstance(document, Document):
+        return {}
+
+    old_labels = {node.id: node.label for node in document.nodes}
+    cells_by_id = {cell.cell_id: cell for cell in cells if not cell.is_edge}
+    rewrites: dict[int, str] = {}
+    for node_id in surviving_ids:
+        cell = cells_by_id.get(node_id)
+        if cell is None:
+            continue
+        new_label = _label_for(cell)
+        if new_label is None or new_label == old_labels.get(node_id):
+            continue
+        line_index = existing.node_line[node_id]
+        rewritten = _rewrite_node_label_line(
+            existing.lines[line_index], existing.clean_lines[line_index], new_label
+        )
+        if rewritten is not None:
+            rewrites[line_index] = rewritten
+    return rewrites
 
 
 def _reparented_survivor_ids(
@@ -1052,6 +1125,10 @@ def plan_sync(
         reduced_existing, cells, reduced_result, node_ids, containments, raw_cells
     )
 
+    node_label_rewrites = _surviving_node_label_rewrites(
+        existing, cells, surviving_ids
+    )
+
     # A surviving edge is normally kept byte-identical -- but if either
     # endpoint's raw cell_id now maps to a DIFFERENT node_id than the token
     # already in its text (a reparented or self-healed survivor renamed this
@@ -1083,6 +1160,7 @@ def plan_sync(
         removed_ranges,
         len(removed_roots),
         len(removed_edge_lines),
+        node_label_rewrites,
         edge_token_rewrites,
     )
 
@@ -1103,14 +1181,15 @@ def render_sync(existing: ExistingIndex, plan: SyncPlan) -> str:
         if i < len(existing.lines) and i not in removed:
             kept += 1
 
+    line_rewrites = {**plan.edge_token_rewrites, **plan.node_label_rewrites}
     filtered_lines = [
-        plan.edge_token_rewrites.get(i, line)
+        line_rewrites.get(i, line)
         for i, line in enumerate(existing.lines)
         if i not in removed
     ]
     filtered_clean_lines = [
-        _strip_inline_comment(plan.edge_token_rewrites[i])
-        if i in plan.edge_token_rewrites
+        _strip_inline_comment(line_rewrites[i])
+        if i in line_rewrites
         else line
         for i, line in enumerate(existing.clean_lines)
         if i not in removed
