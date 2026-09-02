@@ -245,6 +245,45 @@ def test_sync_keeps_an_edge_whose_pair_still_exists_untouched() -> None:
 
 
 @needs_data
+def test_sync_adds_a_second_distinct_edge_drawn_between_an_already_connected_pair() -> (
+    None
+):
+    """A pair that already has one surviving edge line gets a SECOND,
+    differently-labeled edge cell drawn between the very same two nodes
+    (e.g. hand-drawing an additional relationship without deleting the
+    first). The (source, target) pair is not a unique identity once more
+    than one edge connects it -- the surviving line's pair must only budget
+    OUT the one current cell it already accounts for, not every current
+    cell that happens to share that pair, or the second, genuinely new edge
+    is silently dropped and `mdg sync` wrongly reports nothing changed."""
+    person = fx.get(INDEX, "c4.person.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
+    existing_text = (
+        '---\ntitle: "T"\npage: "P"\nmode: layered\n---\n\n'
+        'c4.Person(alice, "Alice")\n'
+        'c4.Person(bob, "Bob")\n'
+        "c4.Rel(alice, bob, \"calls\")\n"
+    )
+    second_edge = (
+        f'<mxCell id="e2" style="{rel.style}" edge="1" parent="1" '
+        'source="alice" target="bob" value="emails">'
+        '<mxGeometry relative="1" as="geometry"/></mxCell>'
+    )
+    doc = fx.document(
+        fx.entry_cell(person, cell_id="alice", parent="1"),
+        fx.entry_cell(person, cell_id="bob", parent="1", x=300),
+        fx.edge_cell_xml("e1", source="alice", target="bob", style=rel.style),
+        second_edge,
+    )
+    _, plan, synced = _run_sync_pipeline(existing_text, doc)
+    assert plan.removed_edge_count == 0
+    assert plan.merge_plan.new_edge_count == 1
+    assert merge.validate(synced) is None
+    assert 'c4.Rel(alice, bob, "calls")' in synced
+    assert 'c4.Rel(alice, bob, "emails")' in synced
+
+
+@needs_data
 def test_sync_removes_an_edge_whose_endpoint_was_removed() -> None:
     """"bob" itself is gone -- the edge referencing it must go too, even
     though nothing else about the edge's pair changed."""

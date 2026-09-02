@@ -46,6 +46,7 @@ text instead of a freshly-derived cell.
 from __future__ import annotations
 
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 
 from mdg_drawio.contracts import Document
@@ -940,15 +941,43 @@ class SyncPlan:
     edge_token_rewrites: dict[int, str]
 
 
-def _represents_a_surviving_edge(
-    cell_id: str, raw_cells: dict[str, RawCell], surviving_pairs: set[tuple[str, str]]
-) -> bool:
-    """Whether *cell_id* is an edge cell whose (source, target) pair already
-    has a surviving existing ``.mdg`` line -- see :func:`plan_sync`."""
-    raw = raw_cells.get(cell_id)
-    if raw is None or not raw.is_edge or raw.source_id is None or raw.target_id is None:
-        return False
-    return (raw.source_id, raw.target_id) in surviving_pairs
+def _split_surviving_and_extra_cells(
+    cells: list[CellResult],
+    raw_cells: dict[str, RawCell],
+    surviving_pair_counts: Counter[tuple[str, str]],
+) -> list[CellResult]:
+    """*cells*, holding back only as many edge cells per (source, target)
+    pair as that pair already has surviving ``.mdg`` lines for -- see
+    :func:`plan_sync`.
+
+    A pair's surviving-line count is a BUDGET, not a blanket exclusion: if
+    the current ``.drawio`` has MORE edge cells for a pair than the ``.mdg``
+    already has surviving lines for, the extra cells represent a genuinely
+    distinct additional relationship the user just drew between the same two
+    nodes -- they must reach the normal new-edge pipeline
+    (:func:`plan_merge`/:func:`_build_edge_insertion`), not be discarded here
+    just because that pair "already has an edge". Without this, drawing a
+    second relation between two nodes that already have one made ``mdg
+    sync`` report "nothing to sync" and silently drop the new relation
+    entirely -- the (source, target) identity model this whole module relies
+    on already doesn't distinguish multiple simultaneous edges per pair (see
+    the module docstring), so it must not pretend it does by treating any
+    pair match as proof a cell is "the same" survivor.
+    """
+    remaining = Counter(surviving_pair_counts)
+    kept: list[CellResult] = []
+    for cell in cells:
+        raw = raw_cells.get(cell.cell_id)
+        pair = (
+            (raw.source_id, raw.target_id)
+            if raw is not None and raw.is_edge and raw.source_id and raw.target_id
+            else None
+        )
+        if pair is not None and remaining.get(pair, 0) > 0:
+            remaining[pair] -= 1
+            continue
+        kept.append(cell)
+    return kept
 
 
 def _existing_parent_by_id(existing: ExistingIndex) -> dict[str, str | None] | None:
@@ -1107,16 +1136,15 @@ def plan_sync(
     # otherwise it looks like a second, textually-distinct "new" edge for the
     # very same relationship plan_sync just decided not to touch.
     removed_edge_line_set = set(removed_edge_lines)
-    surviving_pairs = {
+    surviving_pair_counts = Counter(
         (edge.source_token, edge.target_token)
         for edge in existing_edges
         if edge.line_index not in removed_edge_line_set
-    }
-    reduced_cells = [
-        cell
-        for cell in result.cells
-        if not _represents_a_surviving_edge(cell.cell_id, raw_cells, surviving_pairs)
-    ]
+    )
+    surviving_pairs = set(surviving_pair_counts)
+    reduced_cells = _split_surviving_and_extra_cells(
+        result.cells, raw_cells, surviving_pair_counts
+    )
     reduced_result = DocumentResult(
         reduced_cells, result.library_scores, result.anchor_votes
     )
