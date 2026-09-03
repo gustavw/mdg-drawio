@@ -919,42 +919,6 @@ def _existing_edges(existing: ExistingIndex) -> list[ExistingEdge]:
     return edges
 
 
-def _rewrite_edge_line(
-    raw_line: str,
-    clean_line: str,
-    old_source: str,
-    new_source: str,
-    old_target: str,
-    new_target: str,
-) -> str | None:
-    """Rebuild an existing edge line with its source/target tokens updated
-    to *new_source*/*new_target*, preserving everything else about the line
-    (label, variant, any trailing comment) verbatim. ``None`` if the line
-    doesn't parse as expected (defensive; should not happen for a line
-    :func:`_existing_edges` already classified as an edge).
-
-    Used for a SURVIVING edge (kept, not re-derived) whose endpoint was
-    itself renamed this run (a reparented or self-healed survivor, see
-    plan_sync) -- otherwise its kept-verbatim text goes on referencing an id
-    nothing declares any more, and the next forward-generate's XML
-    validation rejects it as a dangling reference.
-    """
-    match = _NS_FUNCTION_RE.match(clean_line)
-    if match is None:
-        return None
-    args = _split_top_level_args(match.group("args"))
-    if len(args) < 2:
-        return None
-    if args[0] == old_source:
-        args[0] = new_source
-    if args[1] == old_target:
-        args[1] = new_target
-    comment_start = _comment_start(raw_line)
-    comment = f" {raw_line[comment_start:]}" if comment_start is not None else ""
-    ns, function = match.group("ns"), match.group("function")
-    return f"{ns}.{function}({', '.join(args)}){comment}"
-
-
 def _replace_keyword(
     args: list[str], name: str, rendered_value: str | None
 ) -> None:

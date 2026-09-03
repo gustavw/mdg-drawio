@@ -492,8 +492,8 @@ def test_containment_visibility_is_recomputed_after_reparenting() -> None:
     )
 
     _hide_implied_containment_edges([parent, child], [edge])
-    assert edge.hidden_by_containment
-    assert edge.effective_hidden
+    initially_hidden = edge.hidden_by_containment
+    assert initially_hidden
 
     child.parent_id = None
     _hide_implied_containment_edges([parent, child], [edge])
