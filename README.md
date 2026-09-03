@@ -275,20 +275,21 @@ It works in two layers:
    — like merge, but draw.io is the *sole* source of truth: alongside the
    same additions merge already makes, a vertex or edge whose draw.io cell no
    longer exists is **removed** from the `.mdg` too — its whole nested
-   subtree, if it was a container. Anything that survives keeps its exact
-   existing text untouched, same "don't disturb what's already there"
-   contract as merge.
+   subtree, if it was a container. Surviving declarations keep their comments
+   and compatible extra arguments while semantic edits made in draw.io are
+   reconciled into the `.mdg`.
 
    ```bash
    mdg sync path/to/existing.mdg path/to/diagram.drawio           # dry run
    mdg sync path/to/existing.mdg path/to/diagram.drawio --write   # applies it
    ```
 
-   An edge's identity for this purpose is its `(source, target)` node_id
-   pair (edges have no id of their own in the grammar): a pair still
-   connected by *some* edge in the current `.drawio` keeps its existing
-   line exactly as authored, even if the label changed; a pair no longer
-   connected — or whose endpoint was itself removed — is deleted. A shape
+   An edge's identity is its draw.io cell id, persisted as the common
+   `edge_id="..."` keyword. On the first sync, legacy declarations without an
+   `edge_id` are matched by type, endpoints, label and visibility (with an
+   endpoint-pair fallback), then migrated in place. Later syncs can therefore
+   update or remove the correct relationship even when parallel edges share
+   endpoints. A shape
    whose old declaration was removed only because its *container* was
    deleted, but that individually still exists in the `.drawio`, is
    re-derived under a fresh name at its current position rather than lost.

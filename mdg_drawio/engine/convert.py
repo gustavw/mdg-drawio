@@ -531,19 +531,27 @@ def _inject_edge_overlay(
 ) -> None:
     """Apply existing edge anchors and waypoints from overlay.
 
-    Parallel edges share endpoint identity, so their overlays are consumed in
-    document order rather than overwriting one another in a dictionary.
+    Persistent edge ids select the exact route. Legacy endpoint-pair overlays
+    are consumed in document order as a backwards-compatible fallback.
     """
     if not overlay:
         return
     edge_occurrences: dict[str, int] = {}
+    consumed_overlay_ids: set[str] = set()
     for edge in edges:
+        by_id = (
+            overlay.edges_by_id.get(edge.id)
+            if edge.id and edge.id not in consumed_overlay_ids
+            else None
+        )
+        if by_id is not None:
+            consumed_overlay_ids.add(edge.id)
         edge_key = f"{edge.source_id}->{edge.target_id}"
         occurrence = edge_occurrences.get(edge_key, 0)
         edge_occurrences[edge_key] = occurrence + 1
         overlays = overlay.edges.get(edge_key, [])
-        if occurrence < len(overlays):
-            ea = overlays[occurrence]
+        ea = by_id or (overlays[occurrence] if occurrence < len(overlays) else None)
+        if ea is not None:
             if ea.exit_x:
                 edge.style_overrides["exitX"] = ea.exit_x
             if ea.exit_y:

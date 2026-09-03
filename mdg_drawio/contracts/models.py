@@ -203,6 +203,7 @@ class Edge:
     """
 
     id: str = ""
+    id_is_explicit: bool = False
     type: str = ""
     source_id: str = ""
     target_id: str = ""
@@ -284,6 +285,7 @@ class GeometryOverlay:
     """
     nodes: dict[str, dict[str, float]] = field(default_factory=dict)
     node_styles: dict[str, dict[str, str]] = field(default_factory=dict)
+    edges_by_id: dict[str, EdgeAnchorOverlay] = field(default_factory=dict)
     # Endpoint identity is not unique: parallel relationships are legal.
     # Preserve overlays in draw.io document order so each authored edge gets
     # its own anchors and route during regeneration.

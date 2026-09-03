@@ -465,6 +465,22 @@ def test_visible_control_requires_a_boolean() -> None:
         parse('c4.Rel(a, b, "calls", visible="no")')
 
 
+@pytest.mark.parametrize("source", [
+    'c4.Rel(a, b, "calls", edge_id="relationship-1")',
+    'use erd\nerd.Rel(a, b, "calls", edge_id="relationship-1")',
+])
+def test_registered_edges_accept_persistent_edge_id(source: str) -> None:
+    doc = parse(source)
+    assert isinstance(doc, Document)
+    assert doc.edges[0].id == "relationship-1"
+    assert doc.edges[0].id_is_explicit
+
+
+def test_edge_id_is_rejected_on_nodes() -> None:
+    with pytest.raises(DslError, match="unknown keyword argument.*edge_id"):
+        parse('c4.Person(a, "A", edge_id="not-an-edge")')
+
+
 def test_native_c4_call_rejects_excess_positional_arguments() -> None:
     with pytest.raises(DslError, match="too many positional arguments"):
         parse('c4.Person(person, "Person", "Bio", "extra")')

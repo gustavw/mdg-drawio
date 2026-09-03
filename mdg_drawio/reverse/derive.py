@@ -84,6 +84,8 @@ class Cell:
     actual_visible: bool = True
     mdg_visibility: str | None = None
     mdg_expected_visible: bool | None = None
+    mdg_type: str | None = None
+    mdg_variant: int | None = None
 
 
 @dataclass(frozen=True)
@@ -329,6 +331,12 @@ def load_cells(source: str) -> list[Cell]:
                     mdg_expected_visible=(
                         element.get("mdgExpectedVisible") == "1"
                         if element.get("mdgExpectedVisible") in ("0", "1")
+                        else None
+                    ),
+                    mdg_type=element.get("mdgType"),
+                    mdg_variant=(
+                        int(element.get("mdgVariant", ""))
+                        if element.get("mdgVariant", "").isdigit()
                         else None
                     ),
                 )

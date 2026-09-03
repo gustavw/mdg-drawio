@@ -337,7 +337,7 @@ class _GenCtx:
         self.used_cell_ids.add(candidate)
         return candidate
 
-    def unique_edge_id(self, base_id: str) -> str:
+    def unique_edge_id(self, base_id: str, *, explicit: bool = False) -> str:
         """Disambiguate an edge cell id against every id already emitted.
 
         Multiple edges between the same (source, target) pair are legal --
@@ -348,6 +348,8 @@ class _GenCtx:
         Without disambiguation, the second such edge collides with the first
         as a duplicate cell id.
         """
+        if explicit and base_id in self.used_cell_ids:
+            raise ValueError(f"explicit edge_id {base_id!r} is already in use")
         candidate = base_id
         suffix = 2
         while candidate in self.used_cell_ids:
@@ -775,7 +777,10 @@ def _coerce_variant(edge: Edge) -> int:
 
 def _append_edge(mx_root: ET.Element, edge: Edge, ctx: _GenCtx) -> None:
     """Append a single edge to the mxGraphModel root."""
-    edge_id = ctx.unique_edge_id(edge.id or f"e_{edge.source_id}->{edge.target_id}")
+    edge_id = ctx.unique_edge_id(
+        edge.id or f"e_{edge.source_id}->{edge.target_id}",
+        explicit=edge.id_is_explicit,
+    )
     source_id = edge.source_id
     target_id = edge.target_id
 
@@ -795,6 +800,8 @@ def _append_edge(mx_root: ET.Element, edge: Edge, ctx: _GenCtx) -> None:
         if edge.visible is None
         else ("visible" if edge.visible else "hidden")
     )
+    edge_attrs["mdgType"] = edge.type
+    edge_attrs["mdgVariant"] = str(variant)
     edge_attrs["mdgExpectedVisible"] = "0" if edge.effective_hidden else "1"
     if edge.effective_hidden:
         # draw.io hides a cell via the mxCell `visible` attribute, not a style

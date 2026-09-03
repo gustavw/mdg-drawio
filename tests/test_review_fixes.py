@@ -220,6 +220,28 @@ def test_edge_id_does_not_collide_with_authored_node_id() -> None:
     assert 'id="same-2"' in xml
 
 
+def test_explicit_edge_id_collision_fails_instead_of_changing_identity() -> None:
+    with pytest.raises(ValueError, match="explicit edge_id 'same' is already in use"):
+        _generate_c4_xml(
+            'c4.Person(a, "A")\n'
+            'c4.System(same, "B")\n'
+            'c4.Rel(a, same, edge_id="same")'
+        )
+
+
+def test_generated_edge_carries_type_and_variant_provenance() -> None:
+    root = ET.fromstring(
+        _generate_c4_xml(
+            'c4.Person(a, "A")\n'
+            'c4.System(b, "B")\n'
+            'c4.Rel(a, b, variant=2, edge_id="relationship-1")'
+        )
+    )
+    edge = next(cell for cell in root.iter("mxCell") if cell.get("edge") == "1")
+    assert edge.get("mdgType") == "c4.Rel"
+    assert edge.get("mdgVariant") == "2"
+
+
 def test_generated_child_id_does_not_collide_with_later_authored_node() -> None:
     document = Document(
         diagram=Diagram(),
@@ -268,6 +290,37 @@ def test_parallel_edge_overlays_preserve_individual_routes() -> None:
 
     assert [(p.x, p.y) for p in edges[0].waypoints] == [(10.0, 20.0)]
     assert [(p.x, p.y) for p in edges[1].waypoints] == [(30.0, 40.0)]
+
+
+def test_parallel_edge_overlays_follow_stable_ids_after_reordering() -> None:
+    from mdg_drawio.engine.convert import _inject_edge_overlay
+    from mdg_drawio.generator.overlay import read_overlay_xml
+
+    xml = """<mxfile><diagram><mxGraphModel><root>
+      <mxCell id="0"/><mxCell id="1" parent="0"/>
+      <mxCell id="a" vertex="1" parent="1"/>
+      <mxCell id="b" vertex="1" parent="1"/>
+      <mxCell id="first" edge="1" parent="1" source="a" target="b">
+        <mxGeometry relative="1" as="geometry"><Array as="points">
+          <mxPoint x="10" y="20"/>
+        </Array></mxGeometry>
+      </mxCell>
+      <mxCell id="second" edge="1" parent="1" source="a" target="b">
+        <mxGeometry relative="1" as="geometry"><Array as="points">
+          <mxPoint x="30" y="40"/>
+        </Array></mxGeometry>
+      </mxCell>
+    </root></mxGraphModel></diagram></mxfile>"""
+    (overlay,) = read_overlay_xml(xml)
+    edges = [
+        Edge(id="second", type="c4.Rel", source_id="a", target_id="b"),
+        Edge(id="first", type="c4.Rel", source_id="a", target_id="b"),
+    ]
+
+    _inject_edge_overlay(edges, overlay)
+
+    assert [(point.x, point.y) for point in edges[0].waypoints] == [(30.0, 40.0)]
+    assert [(point.x, point.y) for point in edges[1].waypoints] == [(10.0, 20.0)]
 
 
 def test_default_anchor_emits_no_attachment_tokens() -> None:

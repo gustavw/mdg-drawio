@@ -240,11 +240,10 @@ Components at review time — now have direct unit tests
 per-Component floor via `make coverage-gate` (`COVERAGE_MIN` = 60%, a ratchet;
 see §2).
 
-**One follow-up deliberately left open** (documented, not code-changed):
-- **Parallel edges**: C4 assigns edge ids as `source->target`, so parallel edges
-  share an id and are now *rejected up front* by the duplicate-id check rather
-  than silently losing overlay waypoints. A true parallel-edge story needs unique
-  edge identity — a separate design decision.
+**Parallel-edge follow-up (completed).** Relationships now support persistent
+`edge_id` values matching draw.io cell ids. Sync migrates legacy declarations,
+and geometry overlays use the stable id before the endpoint-pair compatibility
+fallback, so parallel relationships retain their individual routes.
 
 ---
 

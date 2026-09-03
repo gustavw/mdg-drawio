@@ -97,7 +97,7 @@ def _read_edge_waypoints(cell: ET.Element) -> list[tuple[float, float]]:
 def _read_edge_anchors(
     cell_id: str,
     cell: ET.Element,
-) -> tuple[str, EdgeAnchorOverlay] | None:
+) -> tuple[str, str, EdgeAnchorOverlay] | None:
     """Read exitX/exitY/entryX/entryY and elbow waypoints from an edge cell.
 
     *cell_id* is the effective id (from the object/UserObject wrapper when the
@@ -121,8 +121,8 @@ def _read_edge_anchors(
     if not source or not target:
         if not anchors and not waypoints:
             return None
-    key = f"{source}->{target}" if source and target else cell_id
-    return (key, EdgeAnchorOverlay(
+    pair_key = f"{source}->{target}" if source and target else cell_id
+    return (cell_id, pair_key, EdgeAnchorOverlay(
         exit_x=anchors.get("exitX"),
         exit_y=anchors.get("exitY"),
         entry_x=anchors.get("entryX"),
@@ -168,7 +168,9 @@ def _read_diagram_overlay(diagram: ET.Element) -> GeometryOverlay:
             continue
         edge_anchor = _read_edge_anchors(cell_id, cell)
         if edge_anchor:
-            result.edges.setdefault(edge_anchor[0], []).append(edge_anchor[1])
+            edge_id, pair_key, overlay = edge_anchor
+            result.edges_by_id[edge_id] = overlay
+            result.edges.setdefault(pair_key, []).append(overlay)
     return result
 
 

@@ -964,7 +964,7 @@ def _validate_keyword_args(
         return
     declared = {"variant"} | {str(spec["name"]) for spec in declared_specs}
     if edge_controls:
-        declared.add("visible")
+        declared.update(("edge_id", "visible"))
     keywords = [kw for kw in args if isinstance(kw, ast.keyword)]
     unknown = sorted(kw.arg or "**kwargs" for kw in keywords if kw.arg not in declared)
     if unknown:
@@ -1010,7 +1010,7 @@ def _bind_registry_args(
         a
         for a in args
         if isinstance(a, ast.keyword)
-        and a.arg not in (None, "variant", "visible")
+        and a.arg not in (None, "edge_id", "variant", "visible")
     ]
 
     positional_specs = [s for s in declared_specs if s.get("passing") == "positional"]
@@ -1098,7 +1098,8 @@ def _normalize_registry_args(
     normalized.extend(
         kw
         for kw in args
-        if isinstance(kw, ast.keyword) and kw.arg in ("variant", "visible")
+        if isinstance(kw, ast.keyword)
+        and kw.arg in ("edge_id", "variant", "visible")
     )
     return normalized
 
@@ -1293,9 +1294,14 @@ def _build_passthrough_edge(
         if spec_name in ("source", "target", "label") or spec_name not in bound:
             continue
         extra[spec_name] = literal_value(bound[spec_name], spec_name, blocks)
+    edge_id = _edge_id(args, line_number)
     visible = _edge_visibility(args, line_number)
     edge = Edge(
-        id=f"palette-edge-{len(edges) + 1}" if unconnected else "",
+        id=(
+            edge_id
+            or (f"palette-edge-{len(edges) + 1}" if unconnected else "")
+        ),
+        id_is_explicit=edge_id is not None,
         type=f"{ns}.{name}",
         source_id=source_id,
         target_id=target_id,
@@ -1304,6 +1310,20 @@ def _build_passthrough_edge(
         extra=extra,
     )
     edges.append(edge)
+
+
+def _edge_id(
+    args: list[ast.AST | ast.keyword], line_number: int
+) -> str | None:
+    """Parse the common persistent ``edge_id=`` control keyword."""
+    for arg in args:
+        if not isinstance(arg, ast.keyword) or arg.arg != "edge_id":
+            continue
+        value = literal_value(arg.value, "edge_id")
+        if not isinstance(value, str) or not value:
+            raise DslError("edge_id= must be a non-empty string", line_number)
+        return value
+    return None
 
 
 def _edge_visibility(

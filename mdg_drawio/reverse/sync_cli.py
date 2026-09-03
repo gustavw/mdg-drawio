@@ -9,8 +9,8 @@ never touches ``EXISTING.mdg``. ``--write`` re-parses the result through the
 same parser the real pipeline uses (:func:`mdg_drawio.reverse.merge.validate`)
 before writing anything -- if it doesn't parse cleanly, the file is left
 untouched and the error is reported. See :func:`mdg_drawio.reverse.merge.
-plan_sync` for what "removed" means and its limits (an edge's identity is a
-(source, target) pair, not a stable id -- see that module's docstring).
+plan_sync` for the reconciliation rules. Relationships use their draw.io cell
+id as persistent ``edge_id``; legacy declarations are migrated on first sync.
 
 Unlike ``mdg merge`` (which only ever adds), ``sync`` also DELETES existing
 ``.mdg`` content: any vertex or edge whose draw.io cell no longer exists is
@@ -86,6 +86,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {reason}", file=sys.stderr)
 
     updated_label_count = len(plan.node_label_rewrites)
+    updated_edge_count = len(plan.edge_token_rewrites)
     if (
         not plan.merge_plan.insertions
         and not plan.removed_ranges
@@ -120,6 +121,7 @@ def main(argv: list[str] | None = None) -> int:
             f"{plan.merge_plan.new_edge_count} new edge(s), "
             f"{plan.removed_vertex_count} removed element(s), "
             f"{plan.removed_edge_count} removed edge(s), "
+            f"{updated_edge_count} updated edge(s), "
             f"{updated_label_count} updated label(s) -- "
             "dry run, use --write to apply."
         )
@@ -146,6 +148,7 @@ def main(argv: list[str] | None = None) -> int:
         f"{plan.merge_plan.new_edge_count} new edge(s), "
         f"{plan.removed_vertex_count} removed element(s), "
         f"{plan.removed_edge_count} removed edge(s), "
+        f"{updated_edge_count} updated edge(s), "
         f"{updated_label_count} updated label(s) to {args.mdg}{rename_note}"
     )
     return 0
