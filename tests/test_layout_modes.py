@@ -468,15 +468,12 @@ def test_process_still_routes_edges() -> None:
     assert result.edges[0].waypoints, "process mode must still route"
 
 
-def test_layered_restores_back_edge_orientation_on_the_emitted_edge() -> None:
-    """A reversed back edge must be emitted with its declared orientation.
+def test_layered_keeps_cycle_edges_visible_and_in_declared_orientation() -> None:
+    """Cycle removal must only mutate the temporary ranking graph.
 
-    Cycle removal swaps a back edge's endpoints so ranking sees a DAG. The
-    restore used to run *after* routing, which copies each edge — so it only
-    ever fixed the originals, which are then discarded, and the emitted copy
-    kept the swapped endpoints. It stayed invisible because a reversed edge is
-    also marked hidden, so draw.io never drew the wrong orientation; the id
-    (``b->a``) still disagreed with the emitted source/target.
+    A back edge is reversed internally so ranking sees a DAG, but every
+    authored relationship must still be emitted visibly in its declared
+    orientation.
     """
     nodes = [_node("a"), _node("b")]
     edges = [
@@ -487,7 +484,8 @@ def test_layered_restores_back_edge_orientation_on_the_emitted_edge() -> None:
 
     back_edge = next(e for e in result.edges if e.id == "b->a")
     assert (back_edge.source_id, back_edge.target_id) == ("b", "a")
-    assert back_edge.hidden
+    assert not back_edge.hidden
+    assert all(not edge.hidden for edge in result.edges)
 
 
 # ---------------------------------------------------------------------------

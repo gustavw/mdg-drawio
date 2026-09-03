@@ -2,7 +2,7 @@
 orthogonal edge routing.
 
 The algorithm produces a directed acyclic graph layout:
-1. Cycle removal via back-edge reversal (bad edges marked hidden).
+1. Cycle removal via back-edge reversal in a temporary ranking graph.
 2. Longest-path ranking: every node gets a rank (layer) number.
 3. Barycenter sweep: 4 passes (alternating up/down) to reduce crossings.
 4. Position assignment with column packing.
@@ -87,9 +87,14 @@ class LayeredLayout(BaseLayout):
         node_by_id = {n.id: n for n in nodes}
         layout_nodes = container_state.top_level_nodes
 
-        edges, reversed_ids = _remove_cycles(edges, node_by_id)
+        # Cycle removal is an implementation detail of ranking. Work on
+        # copies so reversing a back edge can never mutate an authored
+        # relationship that will be emitted to the generated diagram.
+        ranking_edges = _remove_cycles(
+            [replace(edge) for edge in edges], node_by_id
+        )
         layout_edges = _collapse_edges_to_layout_units(
-            edges,
+            ranking_edges,
             container_state.top_level_by_id,
         )
         layers = _assign_layers(layout_nodes, layout_edges)
@@ -103,10 +108,6 @@ class LayeredLayout(BaseLayout):
             column_gap=cfg.column_gap,
         )
         node_boxes = absolute_node_boxes(nodes)
-        # Ranking reversed back edges in place; restore their declared
-        # orientation before anything downstream reads or copies them.
-        _restore_reversed_edges(edges, reversed_ids)
-
         if self.route_edges:
             result_edges = _route_edges(
                 edges,
@@ -229,29 +230,26 @@ def _find_back_edges(
 def _reverse_back_edges(
     edges: list[Edge],
     back_edges: list[Edge],
-) -> tuple[list[Edge], set[int]]:
-    """Hide and reverse back edges before ranking.
+) -> list[Edge]:
+    """Reverse back edges in the temporary ranking graph.
 
     Reversed edges are tracked by object identity (``id(edge)``), not
     ``edge.id`` — passthrough edges share an empty id, so an id-based set would
     match every one of them.
     """
     back_edge_ids = {id(e) for e in back_edges}
-    reversed_ids: set[int] = set()
     result: list[Edge] = []
     for edge in edges:
         if id(edge) in back_edge_ids:
-            edge.hidden = True
             edge.source_id, edge.target_id = edge.target_id, edge.source_id
-            reversed_ids.add(id(edge))
         result.append(edge)
-    return result, reversed_ids
+    return result
 
 
 def _remove_cycles(
     edges: list[Edge],
     node_by_id: dict[str, Node],
-) -> tuple[list[Edge], set[int]]:
+) -> list[Edge]:
     back_edges = _find_back_edges(_edge_adjacency(edges), node_by_id)
     return _reverse_back_edges(edges, back_edges)
 
@@ -884,25 +882,6 @@ def _route_edges(
         )
 
     return routed
-
-
-def _restore_reversed_edges(edges: list[Edge], reversed_ids: set[int]) -> None:
-    """Un-swap the endpoints of back edges after ranking, in place.
-
-    Cycle removal reverses back edges so ranking sees a DAG. Their original
-    orientation must be restored before anything downstream reads them —
-    otherwise a back edge is emitted with swapped source/target (and, for
-    passthrough edges whose id is derived from the endpoints, a duplicate id
-    that collides with its counterpart). ``hidden`` is left untouched.
-
-    This runs *before* routing, not after: routing copies each edge, so a
-    restore that happened afterwards only ever fixed the originals, which are
-    then discarded. It went unnoticed because a reversed edge is also marked
-    hidden, so draw.io never drew the wrongly-oriented copy.
-    """
-    for edge in edges:
-        if id(edge) in reversed_ids:
-            edge.source_id, edge.target_id = edge.target_id, edge.source_id
 
 
 LAYOUT_MODE = "layered"

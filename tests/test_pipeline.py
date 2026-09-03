@@ -460,6 +460,22 @@ def test_edge_between_direct_parent_child_is_hidden(tmp_path: Path) -> None:
     assert _edge_hidden(tmp_path / "hide_direct.drawio", "gp1", "bf1")
 
 
+def test_cycle_edges_stay_visible_in_layered_layout(tmp_path: Path) -> None:
+    """Breaking a cycle for ranking must not hide a domain relationship."""
+    src = tmp_path / "visible_cycle.mdg"
+    src.write_text(
+        'c4.Person(a, "A")\n'
+        'c4.Person(b, "B")\n'
+        'c4.Rel(a, b, "calls")\n'
+        'c4.Rel(b, a, "replies")\n',
+        encoding="utf-8",
+    )
+    output = tmp_path / "visible_cycle.drawio"
+    assert _run_convert(src, output) == 0
+    assert not _edge_hidden(output, "a", "b")
+    assert not _edge_hidden(output, "b", "a")
+
+
 def test_edge_between_grandparent_grandchild_stays_visible(tmp_path: Path) -> None:
     """A relationship edge between a grandparent and grandchild (not a direct
     nesting pair) is a real cross-level relationship and must stay visible."""
