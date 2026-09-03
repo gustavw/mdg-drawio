@@ -269,6 +269,7 @@ SYMBOL_ALLOWLIST: dict[str, dict[str, set[str]]] = {
             "PAGE_CELL_ID", "PALETTE_MODE", "ROOT_CELL_ID",
             "Anchor", "ChildCell", "Document", "Edge", "GeometryChild", "Node",
             "NodeChildCell",
+            "derived_edge_id",
             "index_shapes_by_function",
         },
     },
@@ -313,6 +314,7 @@ SYMBOL_ALLOWLIST: dict[str, dict[str, set[str]]] = {
         "mdg_drawio.contracts": {
             "PAGE_PREFIX_LENGTH", "QUOTE_OFFSET",
             "Diagram", "Document", "Edge", "MultiPageDocument", "Node",
+            "derived_edge_id",
         },
     },
     "notation/_core/registry.py": {
@@ -322,6 +324,7 @@ SYMBOL_ALLOWLIST: dict[str, dict[str, set[str]]] = {
         "mdg_drawio.contracts": {
             "C4_SCALER_SUBTITLE_KEY",
             "Diagram", "Document", "Edge", "MultiPageDocument", "Node",
+            "derived_edge_id",
         },
     },
 }

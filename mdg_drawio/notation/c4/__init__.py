@@ -26,6 +26,7 @@ from mdg_drawio.contracts import (
     Edge,
     MultiPageDocument,
     Node,
+    derived_edge_id,
 )
 
 from .._core import (
@@ -267,9 +268,9 @@ def _parse_edge(
     variant = _select_rel_variant(kw_args, technology, rel_text, line_number)
     visible_value = kw_args.get("visible")
     visible = visible_value if isinstance(visible_value, bool) else None
-    explicit_edge_id = kw_args.get("edge_id")
-    if explicit_edge_id is not None and (
-        not isinstance(explicit_edge_id, str) or not explicit_edge_id
+    legacy_edge_id = kw_args.get("edge_id")
+    if legacy_edge_id is not None and (
+        not isinstance(legacy_edge_id, str) or not legacy_edge_id
     ):
         raise DslError("edge_id= must be a non-empty string", line_number)
 
@@ -289,14 +290,13 @@ def _parse_edge(
     # An unconnected palette edge has no endpoints to derive an id from --
     # the line number is stable and unique (one call per source line), same
     # role as the shared passthrough builder's "palette-edge-N" counter.
-    edge_id = explicit_edge_id or (
+    edge_id = (
         f"palette-edge-line{line_number}"
         if unconnected
-        else f"{source_id}->{target_id}"
+        else derived_edge_id(source_id, target_id)
     )
     return Edge(
         id=edge_id,
-        id_is_explicit=explicit_edge_id is not None,
         type=f"{_NAMESPACE}.{function}",
         source_id=source_id,
         target_id=target_id,

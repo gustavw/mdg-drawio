@@ -31,6 +31,7 @@ from mdg_drawio.contracts import (
     Edge,
     MultiPageDocument,
     Node,
+    derived_edge_id,
 )
 
 # The DSL engine holds no registry cache of its own: it reads through
@@ -693,6 +694,7 @@ def _process_block_call(
                 declared_specs,
                 blocks,
             )
+            _raise_if_duplicate_relationship(edges, line_number)
         else:
             node = _build_passthrough_node(
                 call.namespace,
@@ -753,6 +755,7 @@ def _process_block_call(
 
     if is_edge(call.name, args):
         edges.append(build_edge(call.name, args, line_number))
+        _raise_if_duplicate_relationship(edges, line_number)
         return
 
     node = build_node(call.name, args, line_number)
@@ -1294,14 +1297,14 @@ def _build_passthrough_edge(
         if spec_name in ("source", "target", "label") or spec_name not in bound:
             continue
         extra[spec_name] = literal_value(bound[spec_name], spec_name, blocks)
-    edge_id = _edge_id(args, line_number)
+    _edge_id(args, line_number)
     visible = _edge_visibility(args, line_number)
     edge = Edge(
         id=(
-            edge_id
-            or (f"palette-edge-{len(edges) + 1}" if unconnected else "")
+            f"palette-edge-{len(edges) + 1}"
+            if unconnected
+            else derived_edge_id(source_id, target_id)
         ),
-        id_is_explicit=edge_id is not None,
         type=f"{ns}.{name}",
         source_id=source_id,
         target_id=target_id,
@@ -1315,7 +1318,7 @@ def _build_passthrough_edge(
 def _edge_id(
     args: list[ast.AST | ast.keyword], line_number: int
 ) -> str | None:
-    """Parse the common persistent ``edge_id=`` control keyword."""
+    """Validate the deprecated ``edge_id=`` keyword during migration."""
     for arg in args:
         if not isinstance(arg, ast.keyword) or arg.arg != "edge_id":
             continue
@@ -1324,6 +1327,23 @@ def _edge_id(
             raise DslError("edge_id= must be a non-empty string", line_number)
         return value
     return None
+
+
+def _raise_if_duplicate_relationship(edges: list[Edge], line_number: int) -> None:
+    """Enforce one directed relationship for each endpoint pair."""
+    edge = edges[-1]
+    if not edge.source_id or not edge.target_id:
+        return
+    if any(
+        candidate.source_id == edge.source_id
+        and candidate.target_id == edge.target_id
+        for candidate in edges[:-1]
+    ):
+        raise DslError(
+            f"duplicate relationship {edge.source_id} -> {edge.target_id}; "
+            "only one directed relationship may exist between the same nodes",
+            line_number,
+        )
 
 
 def _edge_visibility(

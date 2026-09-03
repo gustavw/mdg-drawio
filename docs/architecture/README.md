@@ -184,7 +184,7 @@ contract-boundary mismatch in callers, not a defect here.
 | **P1** | **`vertex` flag set from the `PAGE_CELL_ID` constant.** Every node cell emits `vertex=PAGE_CELL_ID`; it's valid only because that constant *coincidentally* equals `"1"`. Changing the id constant (its entire purpose) would make draw.io stop treating nodes as vertices. | `generator/generator.py:304` | Use the literal `"1"` (as child cells at `:457` and edge children at `:643` already do). | S |
 | P2 | Same class of bug: `math` graph attr set from `ROOT_CELL_ID` (works only because it equals `"0"`). | `generator/generator.py:770` | Use the literal `"0"`. | S |
 | P2 | Inverse inconsistency: node parent falls back to hardcoded `"1"` instead of `PAGE_CELL_ID`. | `generator/generator.py:342` | `node.parent_id or PAGE_CELL_ID`. | S |
-| P2 | Overlay edge key `f"{source}->{target}"` collides for parallel edges — only one edge's manual waypoints survive a round-trip. | `generator/overlay.py:95,139` | Include the edge id in the key on both read/write sides, or document the limitation. | M |
+| P2 | Overlay edge identity was ambiguous when parallel edges shared endpoints. | `generator/overlay.py`, `generator/generator.py` | Enforce one directed relationship per endpoint pair and derive its id as `<source>-<target>`. | M |
 | P2 | No duplicate-cell-id / dangling-edge detection at generation (draw.io tolerates → silent corruption). | `generator/generator.py:518` | Debug-time guard: assert unique emitted ids and edge endpoints exist. | M |
 | P2 | Malformed overlay XML → bare `ParseError` with no path context. | `generator/overlay.py:149` | Re-raise `ValueError(f"Malformed overlay XML in {path!r}: …")`. | S |
 | P2 | `int(edge.extra.get("variant", 1))` → uninformative `ValueError` on non-numeric variant. | `generator/generator.py:551` | Coerce defensively / name the edge. | S |
@@ -240,10 +240,11 @@ Components at review time — now have direct unit tests
 per-Component floor via `make coverage-gate` (`COVERAGE_MIN` = 60%, a ratchet;
 see §2).
 
-**Parallel-edge follow-up (completed).** Relationships now support persistent
-`edge_id` values matching draw.io cell ids. Sync migrates legacy declarations,
-and geometry overlays use the stable id before the endpoint-pair compatibility
-fallback, so parallel relationships retain their individual routes.
+**Relationship-identity follow-up (completed).** A connected relationship's
+identity is derived from its unique directed endpoint pair as
+`<source>-<target>`. Sync normalizes draw.io ids and removes legacy `edge_id`
+keywords. Parallel relationships are rejected explicitly instead of relying on
+order-sensitive suffixes.
 
 ---
 

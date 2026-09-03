@@ -9,8 +9,8 @@ never touches ``EXISTING.mdg``. ``--write`` re-parses the result through the
 same parser the real pipeline uses (:func:`mdg_drawio.reverse.merge.validate`)
 before writing anything -- if it doesn't parse cleanly, the file is left
 untouched and the error is reported. See :func:`mdg_drawio.reverse.merge.
-plan_sync` for the reconciliation rules. Relationships use their draw.io cell
-id as persistent ``edge_id``; legacy declarations are migrated on first sync.
+plan_sync` for the reconciliation rules. Relationship ids are derived from
+their unique directed endpoint pair and normalized in draw.io during sync.
 
 Unlike ``mdg merge`` (which only ever adds), ``sync`` also DELETES existing
 ``.mdg`` content: any vertex or edge whose draw.io cell no longer exists is
@@ -78,7 +78,11 @@ def main(argv: list[str] | None = None) -> int:
     with open(args.mdg, encoding="utf-8") as handle:
         existing_text = handle.read()
 
-    plan, synced_text = _plan(existing_text, args.drawio, index)
+    try:
+        plan, synced_text = _plan(existing_text, args.drawio, index)
+    except ValueError as exc:
+        print(f"cannot sync: {exc}", file=sys.stderr)
+        return 1
 
     if plan.merge_plan.skipped:
         print("skipped (could not derive a shape):", file=sys.stderr)
@@ -92,6 +96,7 @@ def main(argv: list[str] | None = None) -> int:
         and not plan.removed_ranges
         and not plan.node_label_rewrites
         and not plan.edge_token_rewrites
+        and not plan.drawio_id_renames
     ):
         print("nothing to sync -- already up to date.")
         return 0
@@ -101,12 +106,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"sync would produce invalid .mdg -- aborting: {error}", file=sys.stderr)
         return 1
 
-    # Every newly-minted node gets its .drawio cell id renamed to match --
-    # otherwise the NEXT plain regenerate's geometry overlay (which matches
-    # a node by id) can never find that cell again, and it silently loses
-    # whatever manual layout it has the moment sync runs.
-    synced_drawio = rewrite_cell_ids(args.drawio, plan.merge_plan.renamed_ids)
-    renamed_count = len(plan.merge_plan.renamed_ids) if synced_drawio else 0
+    # New nodes receive their semantic ids, and edges receive the id derived
+    # from their unique directed endpoint pair. References are rewritten too.
+    synced_drawio = rewrite_cell_ids(args.drawio, plan.drawio_id_renames)
+    renamed_count = len(plan.drawio_id_renames) if synced_drawio else 0
 
     if not args.write:
         diff = difflib.unified_diff(

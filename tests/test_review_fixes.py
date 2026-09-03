@@ -161,38 +161,25 @@ def _generate_c4_xml(source: str) -> str:
     return generate(doc, provider)
 
 
-def test_parallel_native_edges_get_disambiguated_generated_ids() -> None:
-    """Two c4.Rel calls between the same (source, target) pair both compute
-    the identical `f"{source}->{target}"` id at parse time -- without
-    disambiguation at generation, this is a duplicate cell id."""
-    xml = _generate_c4_xml(
-        'c4.Person(a, "A")\n'
-        'c4.System(b, "B")\n'
-        'c4.Rel(a, b, "one")\n'
-        'c4.Rel(a, b, "two")'
-    )
-    assert validate_generated_xml(xml) == []
-    root = ET.fromstring(xml)
-    # A c4 Rel is wrapped in a <UserObject> (label-template substitution);
-    # the id lives there, not on the plain mxCell nested inside it.
-    edge_ids = [
-        obj.get("id") for obj in root.iter("UserObject") if "source" in obj[0].attrib
-    ]
-    assert edge_ids == ["a->b", "a->b-2"]
+def test_parallel_native_edges_are_rejected() -> None:
+    with pytest.raises(DslError, match="duplicate relationship a -> b"):
+        _generate_c4_xml(
+            'c4.Person(a, "A")\n'
+            'c4.System(b, "B")\n'
+            'c4.Rel(a, b, "one")\n'
+            'c4.Rel(a, b, "two")'
+        )
 
 
-def test_parallel_passthrough_edges_get_disambiguated_generated_ids() -> None:
-    """Foreign-namespace edges leave ``Edge.id`` empty and rely on the
-    generator's own fallback (``f"e_{source}->{target}"``) -- the same
-    collision as the native case above, one layer later."""
-    xml = _generate_c4_xml(
-        'use bpmn2\n'
-        'bpmn2.User(a, "A")\n'
-        'bpmn2.User(b, "B")\n'
-        'bpmn2.Association(a, b)\n'
-        'bpmn2.MessageFlow(a, b)'
-    )
-    assert validate_generated_xml(xml) == []
+def test_parallel_passthrough_edges_are_rejected() -> None:
+    with pytest.raises(DslError, match="duplicate relationship a -> b"):
+        _generate_c4_xml(
+            'use bpmn2\n'
+            'bpmn2.User(a, "A")\n'
+            'bpmn2.User(b, "B")\n'
+            'bpmn2.Association(a, b)\n'
+            'bpmn2.MessageFlow(a, b)'
+        )
 
 
 def _generate_document_xml(document: Document) -> str:
@@ -203,7 +190,7 @@ def _generate_document_xml(document: Document) -> str:
     return generate(document, create_style_provider(registries, styles))
 
 
-def test_edge_id_does_not_collide_with_authored_node_id() -> None:
+def test_connected_edge_id_is_derived_from_endpoints() -> None:
     document = Document(
         diagram=Diagram(),
         nodes=[
@@ -217,16 +204,17 @@ def test_edge_id_does_not_collide_with_authored_node_id() -> None:
     xml = _generate_document_xml(document)
 
     assert validate_generated_xml(xml) == []
-    assert 'id="same-2"' in xml
+    assert 'id="a-b"' in xml
+    assert 'id="same-2"' not in xml
 
 
-def test_explicit_edge_id_collision_fails_instead_of_changing_identity() -> None:
-    with pytest.raises(ValueError, match="explicit edge_id 'same' is already in use"):
-        _generate_c4_xml(
-            'c4.Person(a, "A")\n'
-            'c4.System(same, "B")\n'
-            'c4.Rel(a, same, edge_id="same")'
-        )
+def test_legacy_edge_id_is_ignored_in_generated_identity() -> None:
+    xml = _generate_c4_xml(
+        'c4.Person(a, "A")\n'
+        'c4.System(same, "B")\n'
+        'c4.Rel(a, same, edge_id="legacy")'
+    )
+    assert 'id="a-same"' in xml
 
 
 def test_generated_edge_carries_type_and_variant_provenance() -> None:
@@ -234,7 +222,7 @@ def test_generated_edge_carries_type_and_variant_provenance() -> None:
         _generate_c4_xml(
             'c4.Person(a, "A")\n'
             'c4.System(b, "B")\n'
-            'c4.Rel(a, b, variant=2, edge_id="relationship-1")'
+            'c4.Rel(a, b, variant=2)'
         )
     )
     edge = next(cell for cell in root.iter("mxCell") if cell.get("edge") == "1")

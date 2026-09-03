@@ -32,6 +32,19 @@ from .constants import (
 type StyleDict = dict[str, str | int | float | None]
 
 
+def derived_edge_id(source_id: str, target_id: str) -> str:
+    """Return a deterministic, collision-free id for one directed edge.
+
+    The readable ``source-target`` form covers normal identifier-safe node
+    ids. MDG also accepts hyphenated node ids, where plain concatenation is
+    ambiguous; a source-length prefix makes those pairs unambiguous while
+    keeping the common form compact.
+    """
+    if "-" in source_id or "-" in target_id:
+        return f"{len(source_id)}-{source_id}-{target_id}"
+    return f"{source_id}-{target_id}"
+
+
 def index_shapes_by_function(
     shapes: Iterable[dict[str, Any]],
 ) -> dict[str, list[dict[str, Any]]]:
@@ -199,11 +212,11 @@ class Edge:
     """A diagram edge — relationship, association, or flow.
 
     ``type`` is required (validated in __post_init__).
-    ``id`` is optional — auto-generated if absent.
+    ``id`` is optional for programmatic callers. Parsed connected edges use
+    the deterministic ``<source>-<target>`` convention.
     """
 
     id: str = ""
-    id_is_explicit: bool = False
     type: str = ""
     source_id: str = ""
     target_id: str = ""

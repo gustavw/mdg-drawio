@@ -217,13 +217,11 @@ def test_sync_rewrites_a_surviving_edges_stale_token_when_its_endpoint_is_rename
     assert "bob" in by_id
     new_person = next(n for n in document.nodes if n.id != "bob")
     rel_lines = [line for line in synced.splitlines() if line.startswith("c4.Rel(")]
-    assert rel_lines == [
-        f'c4.Rel({new_person.id}, bob, "calls", edge_id="e1")'
-    ]
+    assert rel_lines == [f'c4.Rel({new_person.id}, bob, "calls")']
 
 
 @needs_data
-def test_sync_migrates_a_surviving_legacy_edge_to_stable_identity() -> None:
+def test_sync_normalizes_a_surviving_edge_id_in_drawio() -> None:
     person = fx.get(INDEX, "c4.person.v1")
     rel = fx.get(INDEX, "c4.rel.v1")
     existing_text = (
@@ -240,10 +238,8 @@ def test_sync_migrates_a_surviving_legacy_edge_to_stable_identity() -> None:
     _, plan, synced = _run_sync_pipeline(existing_text, doc)
     assert plan.removed_edge_count == 0
     assert plan.merge_plan.new_edge_count == 0
-    assert (
-        'c4.Rel(alice, bob, "custom hand-authored label", edge_id="e1")'
-        in synced.splitlines()
-    )
+    assert 'c4.Rel(alice, bob, "custom hand-authored label")' in synced.splitlines()
+    assert plan.drawio_id_renames == {"e1": "alice-bob"}
 
     _, second_plan, second_sync = _run_sync_pipeline(synced, doc)
     assert not second_plan.edge_token_rewrites
@@ -251,17 +247,7 @@ def test_sync_migrates_a_surviving_legacy_edge_to_stable_identity() -> None:
 
 
 @needs_data
-def test_sync_adds_a_second_distinct_edge_drawn_between_an_already_connected_pair() -> (
-    None
-):
-    """A pair that already has one surviving edge line gets a SECOND,
-    differently-labeled edge cell drawn between the very same two nodes
-    (e.g. hand-drawing an additional relationship without deleting the
-    first). The (source, target) pair is not a unique identity once more
-    than one edge connects it -- the surviving line's pair must only budget
-    OUT the one current cell it already accounts for, not every current
-    cell that happens to share that pair, or the second, genuinely new edge
-    is silently dropped and `mdg sync` wrongly reports nothing changed."""
+def test_sync_rejects_a_second_edge_between_the_same_nodes() -> None:
     person = fx.get(INDEX, "c4.person.v1")
     rel = fx.get(INDEX, "c4.rel.v1")
     existing_text = (
@@ -281,24 +267,12 @@ def test_sync_adds_a_second_distinct_edge_drawn_between_an_already_connected_pai
         fx.edge_cell_xml("e1", source="alice", target="bob", style=rel.style),
         second_edge,
     )
-    _, plan, synced = _run_sync_pipeline(existing_text, doc)
-    assert plan.removed_edge_count == 0
-    assert plan.merge_plan.new_edge_count == 1
-    assert merge.validate(synced) is None
-    assert 'c4.Rel(alice, bob, "calls", edge_id="e1")' in synced
-    assert 'c4.Rel(alice, bob, "emails", edge_id="e2")' in synced
+    with pytest.raises(ValueError, match="duplicate relationship alice -> bob"):
+        _run_sync_pipeline(existing_text, doc)
 
 
 @needs_data
-def test_sync_removes_only_the_deleted_edge_from_a_pair_that_had_two() -> None:
-    """Two existing lines already connect the same pair (e.g. left over from
-    the scenario above). The user deletes just ONE of the two edge cells in
-    the .drawio, keeping the other. A plain pair-membership check would see
-    the pair is still "present" (the surviving edge) and wrongly leave BOTH
-    existing lines untouched -- the deleted relationship would never
-    disappear from the .mdg no matter how many times sync runs. Only the
-    excess line beyond the current cell count must go; the survivor keeps
-    its exact text."""
+def test_sync_rejects_existing_duplicate_relationships() -> None:
     person = fx.get(INDEX, "c4.person.v1")
     rel = fx.get(INDEX, "c4.rel.v1")
     existing_text = (
@@ -313,15 +287,12 @@ def test_sync_removes_only_the_deleted_edge_from_a_pair_that_had_two() -> None:
         fx.entry_cell(person, cell_id="bob", parent="1", x=300),
         fx.edge_cell_xml("e1", source="alice", target="bob", style=rel.style),
     )
-    _, plan, synced = _run_sync_pipeline(existing_text, doc)
-    assert plan.removed_edge_count == 1
-    assert plan.merge_plan.new_edge_count == 0
-    assert 'c4.Rel(alice, bob, "calls", edge_id="e1")' in synced
-    assert 'c4.Rel(alice, bob, "emails")' not in synced
+    with pytest.raises(ValueError, match="duplicate relationship alice -> bob"):
+        _run_sync_pipeline(existing_text, doc)
 
 
 @needs_data
-def test_sync_legacy_parallel_delete_keeps_the_cell_with_matching_semantics() -> None:
+def test_sync_rejects_legacy_parallel_relationships() -> None:
     person = fx.get(INDEX, "c4.person.v1")
     rel = fx.get(INDEX, "c4.rel.v1")
     existing_text = (
@@ -341,14 +312,8 @@ def test_sync_legacy_parallel_delete_keeps_the_cell_with_matching_semantics() ->
         remaining,
     )
 
-    _, plan, synced = _run_sync_pipeline(existing_text, doc)
-
-    assert plan.removed_edge_count == 1
-    assert '"calls"' not in synced
-    assert (
-        'c4.Rel(alice, bob, "emails", edge_id="alice->bob-2")'
-        in synced.splitlines()
-    )
+    with pytest.raises(ValueError, match="duplicate relationship alice -> bob"):
+        _run_sync_pipeline(existing_text, doc)
 
 
 @needs_data
@@ -374,7 +339,8 @@ def test_sync_updates_only_the_identity_matched_edge_label() -> None:
     _, plan, synced = _run_sync_pipeline(existing_text, doc)
 
     assert plan.removed_edge_count == 0
-    assert 'c4.Rel(alice, bob, "new", edge_id="rel-1")' in synced.splitlines()
+    assert 'c4.Rel(alice, bob, "new")' in synced.splitlines()
+    assert plan.drawio_id_renames == {"rel-1": "alice-bob"}
 
 
 @needs_data
@@ -401,8 +367,10 @@ def test_sync_updates_identity_matched_edge_endpoints() -> None:
 
     _, plan, synced = _run_sync_pipeline(existing_text, doc)
 
-    assert plan.removed_edge_count == 0
-    assert 'c4.Rel(alice, carol, "calls", edge_id="rel-1")' in synced.splitlines()
+    assert plan.removed_edge_count == 1
+    assert plan.merge_plan.new_edge_count == 1
+    assert 'c4.Rel(alice, carol, "calls")' in synced.splitlines()
+    assert plan.drawio_id_renames == {"rel-1": "alice-carol"}
 
 
 @needs_data
@@ -430,7 +398,7 @@ def test_sync_updates_identity_matched_edge_variant() -> None:
 
     assert plan.removed_edge_count == 0
     assert (
-        'c4.Rel(alice, bob, "calls", edge_id="rel-1", variant=2)'
+        'c4.Rel(alice, bob, "calls", variant=2)'
         in synced.splitlines()
     )
 
@@ -459,7 +427,7 @@ def test_sync_updates_identity_matched_edge_type() -> None:
     _, plan, synced = _run_sync_pipeline(existing_text, doc)
 
     assert plan.removed_edge_count == 0
-    assert 'erd.OptionalRel(alice, bob, edge_id="rel-1")' in synced.splitlines()
+    assert 'erd.OptionalRel(alice, bob)' in synced.splitlines()
     assert merge.validate(synced) is None
 
 
@@ -487,7 +455,7 @@ def test_sync_updates_identity_matched_edge_visibility() -> None:
 
     assert plan.removed_edge_count == 0
     assert (
-        'c4.Rel(alice, bob, "calls", edge_id="rel-1", visible=False)'
+        'c4.Rel(alice, bob, "calls", visible=False)'
         in synced.splitlines()
     )
 
@@ -558,10 +526,7 @@ def test_sync_reparents_a_survivor_dragged_into_a_new_container() -> None:
     _, plan, synced = _run_sync_pipeline(existing_text, doc)
     assert merge.validate(synced) is None
     # The edge's exact existing text must be preserved, not removed+recreated.
-    assert (
-        'c4.Rel(alice, bob, "custom hand-authored label", edge_id="e1")'
-        in synced.splitlines()
-    )
+    assert 'c4.Rel(alice, bob, "custom hand-authored label")' in synced.splitlines()
     assert plan.removed_edge_count == 0
 
     document = parse_mdg(synced)
@@ -745,6 +710,66 @@ def test_sync_cli_write_renames_the_new_cells_drawio_id_to_match(
     assert new_id in ids, "new cell's .drawio id not renamed to match"
     assert "raw123" not in ids
     assert "alice" in ids, "an already-represented cell's id must be left alone"
+
+
+@needs_data
+def test_sync_cli_derives_edge_id_and_removes_legacy_mdg_keyword(
+    tmp_path: Path,
+) -> None:
+    person = fx.get(INDEX, "c4.person.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
+    edge = (
+        f'<mxCell id="random-edge" style="{rel.style}" edge="1" parent="1" '
+        'source="alice" target="bob" value="calls">'
+        '<mxGeometry relative="1" as="geometry"/></mxCell>'
+        '<mxCell id="edge-label" parent="random-edge" value="label">'
+        '<mxGeometry relative="1" as="geometry"/></mxCell>'
+    )
+    doc = fx.document(
+        fx.entry_cell(person, cell_id="alice", parent="1"),
+        fx.entry_cell(person, cell_id="bob", parent="1", x=300),
+        edge,
+    )
+    mdg_text = (
+        'c4.Person(alice, "Alice")\n'
+        'c4.Person(bob, "Bob")\n'
+        'c4.Rel(alice, bob, "calls", edge_id="random-edge")\n'
+    )
+    mdg_path = _write(tmp_path, "existing.mdg", mdg_text)
+    drawio_path = _write(tmp_path, "diagram.drawio", doc)
+
+    assert sync_main([str(mdg_path), str(drawio_path), "--write"]) == 0
+
+    assert mdg_path.read_text(encoding="utf-8") == (
+        'c4.Person(alice, "Alice")\n'
+        'c4.Person(bob, "Bob")\n'
+        'c4.Rel(alice, bob, "calls")\n'
+    )
+    root = ET.parse(drawio_path).getroot()
+    assert any(cell.get("id") == "alice-bob" for cell in root.iter())
+    assert not any(cell.get("id") == "random-edge" for cell in root.iter())
+    label = next(cell for cell in root.iter() if cell.get("id") == "edge-label")
+    assert label.get("parent") == "alice-bob"
+
+
+@needs_data
+def test_sync_cli_rejects_duplicate_drawio_relationships(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    person = fx.get(INDEX, "c4.person.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
+    doc = fx.document(
+        fx.entry_cell(person, cell_id="alice", parent="1"),
+        fx.entry_cell(person, cell_id="bob", parent="1", x=300),
+        fx.edge_cell_xml("edge-1", source="alice", target="bob", style=rel.style),
+        fx.edge_cell_xml("edge-2", source="alice", target="bob", style=rel.style),
+    )
+    mdg_path = _write(tmp_path, "existing.mdg", _TWO_SYSTEM_MDG)
+    drawio_path = _write(tmp_path, "diagram.drawio", doc)
+
+    assert sync_main([str(mdg_path), str(drawio_path), "--write"]) == 1
+    assert "duplicate relationship alice -> bob in draw.io" in capsys.readouterr().err
+    assert mdg_path.read_text(encoding="utf-8") == _TWO_SYSTEM_MDG
 
 
 def _geometry(root: ET.Element, cell_id: str) -> ET.Element:
