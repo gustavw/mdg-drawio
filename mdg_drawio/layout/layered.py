@@ -836,14 +836,15 @@ def _route_edges(
     # A node referenced as some other node's parent is a container -- routing
     # through it (e.g. a Lane) is expected, so it never counts as a blocker.
     container_ids = {n.parent_id for n in node_by_id.values() if n.parent_id}
+    visible_edges = [edge for edge in edges if not edge.hidden]
     out_degree: dict[str, int] = defaultdict(int)
     in_degree: dict[str, int] = defaultdict(int)
-    for edge in edges:
+    for edge in visible_edges:
         if edge.source_id and edge.target_id:
             out_degree[edge.source_id] += 1
             in_degree[edge.target_id] += 1
     primary_incoming = _compute_primary_incoming(
-        edges, node_by_id, in_degree, node_boxes, horizontal=horizontal
+        visible_edges, node_by_id, in_degree, node_boxes, horizontal=horizontal
     )
 
     routed: list[Edge] = []

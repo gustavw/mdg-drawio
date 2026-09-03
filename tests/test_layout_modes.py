@@ -24,7 +24,7 @@ from mdg_drawio.contracts import (
     Node,
 )
 from mdg_drawio.layout.config import Config
-from mdg_drawio.layout.layered import LayeredLayout, _order_layers
+from mdg_drawio.layout.layered import LayeredLayout, _order_layers, _route_edges
 from mdg_drawio.layout.palette import PaletteLayout
 from mdg_drawio.layout.process import ProcessLayout
 from mdg_drawio.layout.sequence import SequenceLayout
@@ -503,6 +503,29 @@ def test_layered_barycenter_sweeps_downward_then_upward() -> None:
         ["a", "b"],
         ["y", "x"],
     ]
+
+
+def test_hidden_edge_does_not_change_visible_edge_routing() -> None:
+    """An edge that is not rendered must not affect fan-in or fan-out."""
+    nodes = [_node(node_id, width=100, height=50) for node_id in ("a", "b", "c")]
+    nodes[1].x, nodes[1].y = 200, 100
+    nodes[2].y = 200
+    node_by_id = {node.id: node for node in nodes}
+    visible = Edge(id="visible", type="c4.Rel", source_id="a", target_id="b")
+    hidden = Edge(
+        id="hidden",
+        type="c4.Rel",
+        source_id="a",
+        target_id="c",
+        hidden=True,
+    )
+
+    baseline = _route_edges([visible], node_by_id, direction="LR")[0]
+    with_hidden = _route_edges([visible, hidden], node_by_id, direction="LR")[0]
+
+    assert with_hidden.waypoints == baseline.waypoints
+    assert with_hidden.source_anchor == baseline.source_anchor
+    assert with_hidden.target_anchor == baseline.target_anchor
 
 
 # ---------------------------------------------------------------------------
