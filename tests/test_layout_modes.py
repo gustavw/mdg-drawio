@@ -24,7 +24,7 @@ from mdg_drawio.contracts import (
     Node,
 )
 from mdg_drawio.layout.config import Config
-from mdg_drawio.layout.layered import LayeredLayout
+from mdg_drawio.layout.layered import LayeredLayout, _order_layers
 from mdg_drawio.layout.palette import PaletteLayout
 from mdg_drawio.layout.process import ProcessLayout
 from mdg_drawio.layout.sequence import SequenceLayout
@@ -486,6 +486,23 @@ def test_layered_keeps_cycle_edges_visible_and_in_declared_orientation() -> None
     assert (back_edge.source_id, back_edge.target_id) == ("b", "a")
     assert not back_edge.hidden
     assert all(not edge.hidden for edge in result.edges)
+
+
+def test_layered_barycenter_sweeps_downward_then_upward() -> None:
+    """Both sweep directions must use neighbors from the adjacent layer."""
+    a, b, x, y = (_node(node_id) for node_id in ("a", "b", "x", "y"))
+    layers = [[a, b], [x, y]]
+    edges = [
+        Edge(id="a->y", type="c4.Rel", source_id="a", target_id="y"),
+        Edge(id="b->x", type="c4.Rel", source_id="b", target_id="x"),
+    ]
+
+    ordered = _order_layers(layers, edges)
+
+    assert [[node.id for node in layer] for layer in ordered] == [
+        ["a", "b"],
+        ["y", "x"],
+    ]
 
 
 # ---------------------------------------------------------------------------

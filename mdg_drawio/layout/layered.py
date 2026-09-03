@@ -399,20 +399,21 @@ def _order_layers(
         return scores
 
     for _ in range(2):
-        for up_pass in (False, True):
-            for i in (
-                reversed(range(1, len(layers)))
-                if up_pass
-                else range(1, len(layers))
-            ):
-                upper = layers[i - 1] if up_pass else layers[i]
-                lower = layers[i] if up_pass else layers[i - 1]
-                ref_layer = lower if up_pass else upper
-                neighbors = in_adj if up_pass else out_adj
-                ref_pos = {n.id: float(idx) for idx, n in enumerate(ref_layer)}
-                scores = barycenter(upper if up_pass else lower, neighbors, ref_pos)
-                target = upper if up_pass else lower
-                target.sort(key=lambda n: scores.get(n.id, float("inf")))
+        # Downward: place each layer near its predecessors in the layer above.
+        for i in range(1, len(layers)):
+            ref_pos = {
+                node.id: float(idx) for idx, node in enumerate(layers[i - 1])
+            }
+            scores = barycenter(layers[i], in_adj, ref_pos)
+            layers[i].sort(key=lambda node: scores[node.id])
+
+        # Upward: place each layer near its successors in the layer below.
+        for i in reversed(range(1, len(layers))):
+            ref_pos = {
+                node.id: float(idx) for idx, node in enumerate(layers[i])
+            }
+            scores = barycenter(layers[i - 1], out_adj, ref_pos)
+            layers[i - 1].sort(key=lambda node: scores[node.id])
 
     return layers
 
