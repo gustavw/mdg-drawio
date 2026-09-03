@@ -1115,7 +1115,10 @@ def plan_sync(
     remaining_pair_budget = Counter(current_pair_counts)
     removed_edge_lines: list[int] = []
     for edge in existing_edges:
-        if edge.source_token in truly_removed_roots or edge.target_token in truly_removed_roots:
+        if (
+            edge.source_token in truly_removed_roots
+            or edge.target_token in truly_removed_roots
+        ):
             removed_edge_lines.append(edge.line_index)
             continue
         pair = (edge.source_token, edge.target_token)
