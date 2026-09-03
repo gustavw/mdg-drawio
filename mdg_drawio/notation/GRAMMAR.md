@@ -49,6 +49,10 @@ c4.C4("Payment system — container view")
 - **`variant=N`** selects which palette shape of a function family to render
   (default 1). Variants are listed in `related.variants`; how they differ is
   in each entry's `discriminator`.
+- **`edge_id="..."`** gives an edge persistent identity across draw.io syncs.
+  `mdg sync` adds it automatically when migrating a legacy edge declaration.
+- **`visible=True|False`** explicitly controls edge visibility. Omitting it
+  leaves visibility automatic, including containment-derived hiding.
 - **Keyword args** commonly carry fixed template parts (e.g. `keyword=`,
   `name=`, `entry=`, `technology=`). Consult `passing` rather than assuming a
   parameter is keyword-only from its name. Repeating/scaling content goes in
@@ -115,6 +119,8 @@ c4.Rel(p1, api, "Uses", technology="HTTPS")
 ```
 
 - First two positional args are `source` and `target` node ids.
+- `edge_id` values are stable draw.io cell ids and must not collide with any
+  other generated cell id.
 - `None, None` is the unconnected form used in palette/coverage sheets where
   no real nodes exist; real documents should reference node ids.
 - Edges take no block (no rows, no containment).

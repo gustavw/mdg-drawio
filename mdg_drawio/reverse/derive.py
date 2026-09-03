@@ -81,6 +81,11 @@ class Cell:
     # Used to keep an edge cell from ever resolving to a vertex-kind shape (or
     # vice versa): see the kind filter in :func:`_near_candidates`.
     is_edge: bool = False
+    actual_visible: bool = True
+    mdg_visibility: str | None = None
+    mdg_expected_visible: bool | None = None
+    mdg_type: str | None = None
+    mdg_variant: int | None = None
 
 
 @dataclass(frozen=True)
@@ -321,6 +326,19 @@ def load_cells(source: str) -> list[Cell]:
                     tokens=parse_style(style),
                     object_attrs=object_attrs.get(cell_id, {}),
                     is_edge=element.get("edge") == "1",
+                    actual_visible=element.get("visible") != "0",
+                    mdg_visibility=element.get("mdgVisibility"),
+                    mdg_expected_visible=(
+                        element.get("mdgExpectedVisible") == "1"
+                        if element.get("mdgExpectedVisible") in ("0", "1")
+                        else None
+                    ),
+                    mdg_type=element.get("mdgType"),
+                    mdg_variant=(
+                        int(element.get("mdgVariant", ""))
+                        if element.get("mdgVariant", "").isdigit()
+                        else None
+                    ),
                 )
             )
     return cells

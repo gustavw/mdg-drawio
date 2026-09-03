@@ -2,7 +2,7 @@
 orthogonal edge routing.
 
 The algorithm produces a directed acyclic graph layout:
-1. Cycle removal via back-edge reversal (bad edges marked hidden).
+1. Cycle removal via back-edge reversal in a temporary ranking graph.
 2. Longest-path ranking: every node gets a rank (layer) number.
 3. Barycenter sweep: 4 passes (alternating up/down) to reduce crossings.
 4. Position assignment with column packing.
@@ -12,12 +12,15 @@ The algorithm produces a directed acyclic graph layout:
 from __future__ import annotations
 
 from collections import defaultdict, deque
-from collections.abc import Iterator
 from dataclasses import replace
 
 from mdg_drawio.contracts import DEFAULT_PAGE_HEIGHT, DEFAULT_PAGE_WIDTH, Anchor
 
-from ._container_layout import absolute_node_boxes, apply_container_layout
+from ._container_layout import (
+    absolute_node_boxes,
+    apply_container_layout,
+    break_cycles,
+)
 from ._types import (
     BaseLayout,
     Edge,
@@ -84,14 +87,23 @@ class LayeredLayout(BaseLayout):
             grid=cfg.grid,
         )
 
-        node_by_id = {n.id: n for n in nodes}
         layout_nodes = container_state.top_level_nodes
 
-        edges, reversed_ids = _remove_cycles(edges, node_by_id)
+        # Cycle removal is an implementation detail of ranking. Work on
+        # copies so reversing a back edge can never mutate an authored
+        # relationship that will be emitted to the generated diagram.
         layout_edges = _collapse_edges_to_layout_units(
-            edges,
+            [replace(edge) for edge in edges],
             container_state.top_level_by_id,
         )
+        pairs = break_cycles(
+            [node.id for node in layout_nodes],
+            [(edge.source_id, edge.target_id) for edge in layout_edges],
+        )
+        layout_edges = [
+            replace(edge, source_id=source, target_id=target)
+            for edge, (source, target) in zip(layout_edges, pairs, strict=True)
+        ]
         layers = _assign_layers(layout_nodes, layout_edges)
         ordered_layers = _order_layers(layers, layout_edges)
         _assign_positions(
@@ -103,11 +115,8 @@ class LayeredLayout(BaseLayout):
             column_gap=cfg.column_gap,
         )
         node_boxes = absolute_node_boxes(nodes)
-        # Ranking reversed back edges in place; restore their declared
-        # orientation before anything downstream reads or copies them.
-        _restore_reversed_edges(edges, reversed_ids)
-
         if self.route_edges:
+            node_by_id = {n.id: n for n in nodes}
             result_edges = _route_edges(
                 edges,
                 node_by_id,
@@ -172,88 +181,6 @@ def _content_extents(
 # ---------------------------------------------------------------------------
 # Algorithm steps (unchanged logic, parameterized by caller)
 # ---------------------------------------------------------------------------
-
-
-def _edge_adjacency(edges: list[Edge]) -> dict[str, list[Edge]]:
-    """Build outgoing edge adjacency keyed by source id."""
-    adj: dict[str, list[Edge]] = defaultdict(list)
-    for edge in edges:
-        if edge.source_id and edge.target_id:
-            adj[edge.source_id].append(edge)
-    return adj
-
-
-def _find_back_edges(
-    adj: dict[str, list[Edge]],
-    node_by_id: dict[str, Node],
-) -> list[Edge]:
-    """Find DFS back edges that would create cycles.
-
-    Iterative (explicit stack) so a deep dependency chain cannot blow Python's
-    recursion limit. ``gray`` = on the current DFS path, so an edge into a gray
-    node is a back edge.
-    """
-    white, gray, black = 0, 1, 2
-    color: dict[str, int] = {node_id: white for node_id in node_by_id}
-    back_edges: list[Edge] = []
-
-    for root in node_by_id:
-        if color[root] != white:
-            continue
-        color[root] = gray
-        stack: list[tuple[str, Iterator[Edge]]] = [
-            (root, iter(adj.get(root, [])))
-        ]
-        while stack:
-            node_id, edge_iter = stack[-1]
-            descended = False
-            for edge in edge_iter:
-                target_id = edge.target_id
-                if target_id not in color:
-                    continue
-                target_color = color[target_id]
-                if target_color == gray:
-                    back_edges.append(edge)
-                elif target_color == white:
-                    color[target_id] = gray
-                    stack.append((target_id, iter(adj.get(target_id, []))))
-                    descended = True
-                    break
-            if not descended:
-                color[node_id] = black
-                stack.pop()
-
-    return back_edges
-
-
-def _reverse_back_edges(
-    edges: list[Edge],
-    back_edges: list[Edge],
-) -> tuple[list[Edge], set[int]]:
-    """Hide and reverse back edges before ranking.
-
-    Reversed edges are tracked by object identity (``id(edge)``), not
-    ``edge.id`` — passthrough edges share an empty id, so an id-based set would
-    match every one of them.
-    """
-    back_edge_ids = {id(e) for e in back_edges}
-    reversed_ids: set[int] = set()
-    result: list[Edge] = []
-    for edge in edges:
-        if id(edge) in back_edge_ids:
-            edge.hidden = True
-            edge.source_id, edge.target_id = edge.target_id, edge.source_id
-            reversed_ids.add(id(edge))
-        result.append(edge)
-    return result, reversed_ids
-
-
-def _remove_cycles(
-    edges: list[Edge],
-    node_by_id: dict[str, Node],
-) -> tuple[list[Edge], set[int]]:
-    back_edges = _find_back_edges(_edge_adjacency(edges), node_by_id)
-    return _reverse_back_edges(edges, back_edges)
 
 
 def _layer_graph(
@@ -362,14 +289,7 @@ def _collapse_edges_to_layout_units(
         if not source_id or not target_id or source_id == target_id:
             continue
         collapsed.append(
-            Edge(
-                id=edge.id,
-                type=edge.type,
-                source_id=source_id,
-                target_id=target_id,
-                hidden=edge.hidden,
-                description=edge.description,
-            )
+            replace(edge, source_id=source_id, target_id=target_id)
         )
     return collapsed
 
@@ -401,20 +321,21 @@ def _order_layers(
         return scores
 
     for _ in range(2):
-        for up_pass in (False, True):
-            for i in (
-                reversed(range(1, len(layers)))
-                if up_pass
-                else range(1, len(layers))
-            ):
-                upper = layers[i - 1] if up_pass else layers[i]
-                lower = layers[i] if up_pass else layers[i - 1]
-                ref_layer = lower if up_pass else upper
-                neighbors = in_adj if up_pass else out_adj
-                ref_pos = {n.id: float(idx) for idx, n in enumerate(ref_layer)}
-                scores = barycenter(upper if up_pass else lower, neighbors, ref_pos)
-                target = upper if up_pass else lower
-                target.sort(key=lambda n: scores.get(n.id, float("inf")))
+        # Downward: place each layer near its predecessors in the layer above.
+        for i in range(1, len(layers)):
+            ref_pos = {
+                node.id: float(idx) for idx, node in enumerate(layers[i - 1])
+            }
+            scores = barycenter(layers[i], in_adj, ref_pos)
+            layers[i].sort(key=lambda node: scores[node.id])
+
+        # Upward: place each layer near its successors in the layer below.
+        for i in reversed(range(1, len(layers))):
+            ref_pos = {
+                node.id: float(idx) for idx, node in enumerate(layers[i])
+            }
+            scores = barycenter(layers[i - 1], out_adj, ref_pos)
+            layers[i - 1].sort(key=lambda node: scores[node.id])
 
     return layers
 
@@ -837,14 +758,15 @@ def _route_edges(
     # A node referenced as some other node's parent is a container -- routing
     # through it (e.g. a Lane) is expected, so it never counts as a blocker.
     container_ids = {n.parent_id for n in node_by_id.values() if n.parent_id}
+    visible_edges = [edge for edge in edges if not edge.effective_hidden]
     out_degree: dict[str, int] = defaultdict(int)
     in_degree: dict[str, int] = defaultdict(int)
-    for edge in edges:
+    for edge in visible_edges:
         if edge.source_id and edge.target_id:
             out_degree[edge.source_id] += 1
             in_degree[edge.target_id] += 1
     primary_incoming = _compute_primary_incoming(
-        edges, node_by_id, in_degree, node_boxes, horizontal=horizontal
+        visible_edges, node_by_id, in_degree, node_boxes, horizontal=horizontal
     )
 
     routed: list[Edge] = []
@@ -884,25 +806,6 @@ def _route_edges(
         )
 
     return routed
-
-
-def _restore_reversed_edges(edges: list[Edge], reversed_ids: set[int]) -> None:
-    """Un-swap the endpoints of back edges after ranking, in place.
-
-    Cycle removal reverses back edges so ranking sees a DAG. Their original
-    orientation must be restored before anything downstream reads them —
-    otherwise a back edge is emitted with swapped source/target (and, for
-    passthrough edges whose id is derived from the endpoints, a duplicate id
-    that collides with its counterpart). ``hidden`` is left untouched.
-
-    This runs *before* routing, not after: routing copies each edge, so a
-    restore that happened afterwards only ever fixed the originals, which are
-    then discarded. It went unnoticed because a reversed edge is also marked
-    hidden, so draw.io never drew the wrongly-oriented copy.
-    """
-    for edge in edges:
-        if id(edge) in reversed_ids:
-            edge.source_id, edge.target_id = edge.target_id, edge.source_id
 
 
 LAYOUT_MODE = "layered"

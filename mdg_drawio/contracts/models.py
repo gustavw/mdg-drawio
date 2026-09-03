@@ -203,6 +203,7 @@ class Edge:
     """
 
     id: str = ""
+    id_is_explicit: bool = False
     type: str = ""
     source_id: str = ""
     target_id: str = ""
@@ -224,7 +225,13 @@ class Edge:
 
     # Flags
     palette_decoration: bool = False
+    # ``visible`` is the authored tri-state: ``None`` delegates visibility to
+    # derived rules, while True/False explicitly overrides them. ``hidden``
+    # remains the legacy programmatic hide flag; containment has its own
+    # recomputed field so presentation state never becomes sticky.
+    visible: bool | None = None
     hidden: bool = False
+    hidden_by_containment: bool = False
 
     # Extra passthrough
     extra: dict[str, Any] = field(default_factory=dict)
@@ -240,6 +247,12 @@ class Edge:
             raise ValueError(
                 f"Edge {self.id!r}: target_id set but source_id is empty"
             )
+
+    @property
+    def effective_hidden(self) -> bool:
+        if self.visible is not None:
+            return not self.visible
+        return self.hidden or self.hidden_by_containment
 
 
 @dataclass
@@ -272,6 +285,7 @@ class GeometryOverlay:
     """
     nodes: dict[str, dict[str, float]] = field(default_factory=dict)
     node_styles: dict[str, dict[str, str]] = field(default_factory=dict)
+    edges_by_id: dict[str, EdgeAnchorOverlay] = field(default_factory=dict)
     # Endpoint identity is not unique: parallel relationships are legal.
     # Preserve overlays in draw.io document order so each authored edge gets
     # its own anchors and route during regeneration.
@@ -296,4 +310,3 @@ class MultiPageDocument:
     def __post_init__(self) -> None:
         if not self.pages:
             raise ValueError("MultiPageDocument.pages must not be empty")
-

@@ -24,7 +24,7 @@ from mdg_drawio.contracts import (
     Node,
 )
 from mdg_drawio.layout.config import Config
-from mdg_drawio.layout.layered import LayeredLayout
+from mdg_drawio.layout.layered import LayeredLayout, _order_layers, _route_edges
 from mdg_drawio.layout.palette import PaletteLayout
 from mdg_drawio.layout.process import ProcessLayout
 from mdg_drawio.layout.sequence import SequenceLayout
@@ -468,15 +468,12 @@ def test_process_still_routes_edges() -> None:
     assert result.edges[0].waypoints, "process mode must still route"
 
 
-def test_layered_restores_back_edge_orientation_on_the_emitted_edge() -> None:
-    """A reversed back edge must be emitted with its declared orientation.
+def test_layered_keeps_cycle_edges_visible_and_in_declared_orientation() -> None:
+    """Cycle removal must only mutate the temporary ranking graph.
 
-    Cycle removal swaps a back edge's endpoints so ranking sees a DAG. The
-    restore used to run *after* routing, which copies each edge — so it only
-    ever fixed the originals, which are then discarded, and the emitted copy
-    kept the swapped endpoints. It stayed invisible because a reversed edge is
-    also marked hidden, so draw.io never drew the wrong orientation; the id
-    (``b->a``) still disagreed with the emitted source/target.
+    A back edge is reversed internally so ranking sees a DAG, but every
+    authored relationship must still be emitted visibly in its declared
+    orientation.
     """
     nodes = [_node("a"), _node("b")]
     edges = [
@@ -487,7 +484,106 @@ def test_layered_restores_back_edge_orientation_on_the_emitted_edge() -> None:
 
     back_edge = next(e for e in result.edges if e.id == "b->a")
     assert (back_edge.source_id, back_edge.target_id) == ("b", "a")
-    assert back_edge.hidden
+    assert not back_edge.hidden
+    assert all(not edge.hidden for edge in result.edges)
+
+
+def test_layered_breaks_cycles_created_by_collapsing_containers() -> None:
+    """The graph must become acyclic after endpoints become layout units."""
+    container_a = _node("A")
+    a1 = _node("a1")
+    a1.parent_id = "A"
+    a2 = _node("a2")
+    a2.parent_id = "A"
+    container_b = _node("B")
+    b1 = _node("b1")
+    b1.parent_id = "B"
+    b2 = _node("b2")
+    b2.parent_id = "B"
+    edges = [
+        Edge(id="a1->b1", type="c4.Rel", source_id="a1", target_id="b1"),
+        Edge(id="b2->a2", type="c4.Rel", source_id="b2", target_id="a2"),
+    ]
+    cfg = Config(direction="LR")
+
+    result = LayeredLayout().apply(
+        [container_a, a1, a2, container_b, b1, b2], edges, _size_of, cfg
+    )
+    by_id = {node.id: node for node in result.nodes}
+
+    assert min(by_id["A"].x, by_id["B"].x) == cfg.margin_x
+    assert abs(by_id["A"].x - by_id["B"].x) == by_id["A"].width + cfg.rank_gap
+    assert [(edge.source_id, edge.target_id) for edge in result.edges] == [
+        ("a1", "b1"),
+        ("b2", "a2"),
+    ]
+    assert all(not edge.hidden for edge in result.edges)
+
+
+def test_layered_breaks_cycles_between_siblings_inside_a_container() -> None:
+    """Container-local ranking must not fall back to declaration order."""
+    parent = _node("parent")
+    a, c, b = (_node(node_id) for node_id in ("a", "c", "b"))
+    for node in (a, b, c):
+        node.parent_id = parent.id
+    edges = [
+        Edge(id="a->b", type="c4.Rel", source_id="a", target_id="b"),
+        Edge(id="b->c", type="c4.Rel", source_id="b", target_id="c"),
+        Edge(id="c->a", type="c4.Rel", source_id="c", target_id="a"),
+    ]
+
+    result = LayeredLayout().apply(
+        [parent, a, c, b], edges, _size_of, Config(direction="LR")
+    )
+    by_id = {node.id: node for node in result.nodes}
+
+    assert by_id["a"].x < by_id["b"].x < by_id["c"].x
+    assert [(edge.source_id, edge.target_id) for edge in result.edges] == [
+        ("a", "b"),
+        ("b", "c"),
+        ("c", "a"),
+    ]
+    assert all(not edge.hidden for edge in result.edges)
+
+
+def test_layered_barycenter_sweeps_downward_then_upward() -> None:
+    """Both sweep directions must use neighbors from the adjacent layer."""
+    a, b, x, y = (_node(node_id) for node_id in ("a", "b", "x", "y"))
+    layers = [[a, b], [x, y]]
+    edges = [
+        Edge(id="a->y", type="c4.Rel", source_id="a", target_id="y"),
+        Edge(id="b->x", type="c4.Rel", source_id="b", target_id="x"),
+    ]
+
+    ordered = _order_layers(layers, edges)
+
+    assert [[node.id for node in layer] for layer in ordered] == [
+        ["a", "b"],
+        ["y", "x"],
+    ]
+
+
+def test_hidden_edge_does_not_change_visible_edge_routing() -> None:
+    """An edge that is not rendered must not affect fan-in or fan-out."""
+    nodes = [_node(node_id, width=100, height=50) for node_id in ("a", "b", "c")]
+    nodes[1].x, nodes[1].y = 200, 100
+    nodes[2].y = 200
+    node_by_id = {node.id: node for node in nodes}
+    visible = Edge(id="visible", type="c4.Rel", source_id="a", target_id="b")
+    hidden = Edge(
+        id="hidden",
+        type="c4.Rel",
+        source_id="a",
+        target_id="c",
+        hidden=True,
+    )
+
+    baseline = _route_edges([visible], node_by_id, direction="LR")[0]
+    with_hidden = _route_edges([visible, hidden], node_by_id, direction="LR")[0]
+
+    assert with_hidden.waypoints == baseline.waypoints
+    assert with_hidden.source_anchor == baseline.source_anchor
+    assert with_hidden.target_anchor == baseline.target_anchor
 
 
 # ---------------------------------------------------------------------------

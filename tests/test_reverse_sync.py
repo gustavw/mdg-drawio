@@ -217,14 +217,13 @@ def test_sync_rewrites_a_surviving_edges_stale_token_when_its_endpoint_is_rename
     assert "bob" in by_id
     new_person = next(n for n in document.nodes if n.id != "bob")
     rel_lines = [line for line in synced.splitlines() if line.startswith("c4.Rel(")]
-    assert rel_lines == [f'c4.Rel({new_person.id}, bob, "calls")']
+    assert rel_lines == [
+        f'c4.Rel({new_person.id}, bob, "calls", edge_id="e1")'
+    ]
 
 
 @needs_data
-def test_sync_keeps_an_edge_whose_pair_still_exists_untouched() -> None:
-    """A survives, b survives, the connector between them still exists in
-    the .drawio -- the existing edge line must be left exactly as-is, even
-    though nothing here checks its label."""
+def test_sync_migrates_a_surviving_legacy_edge_to_stable_identity() -> None:
     person = fx.get(INDEX, "c4.person.v1")
     rel = fx.get(INDEX, "c4.rel.v1")
     existing_text = (
@@ -241,7 +240,14 @@ def test_sync_keeps_an_edge_whose_pair_still_exists_untouched() -> None:
     _, plan, synced = _run_sync_pipeline(existing_text, doc)
     assert plan.removed_edge_count == 0
     assert plan.merge_plan.new_edge_count == 0
-    assert synced.rstrip() == existing_text.rstrip()
+    assert (
+        'c4.Rel(alice, bob, "custom hand-authored label", edge_id="e1")'
+        in synced.splitlines()
+    )
+
+    _, second_plan, second_sync = _run_sync_pipeline(synced, doc)
+    assert not second_plan.edge_token_rewrites
+    assert second_sync == synced
 
 
 @needs_data
@@ -279,8 +285,8 @@ def test_sync_adds_a_second_distinct_edge_drawn_between_an_already_connected_pai
     assert plan.removed_edge_count == 0
     assert plan.merge_plan.new_edge_count == 1
     assert merge.validate(synced) is None
-    assert 'c4.Rel(alice, bob, "calls")' in synced
-    assert 'c4.Rel(alice, bob, "emails")' in synced
+    assert 'c4.Rel(alice, bob, "calls", edge_id="e1")' in synced
+    assert 'c4.Rel(alice, bob, "emails", edge_id="e2")' in synced
 
 
 @needs_data
@@ -310,8 +316,180 @@ def test_sync_removes_only_the_deleted_edge_from_a_pair_that_had_two() -> None:
     _, plan, synced = _run_sync_pipeline(existing_text, doc)
     assert plan.removed_edge_count == 1
     assert plan.merge_plan.new_edge_count == 0
-    assert 'c4.Rel(alice, bob, "calls")' in synced
+    assert 'c4.Rel(alice, bob, "calls", edge_id="e1")' in synced
     assert 'c4.Rel(alice, bob, "emails")' not in synced
+
+
+@needs_data
+def test_sync_legacy_parallel_delete_keeps_the_cell_with_matching_semantics() -> None:
+    person = fx.get(INDEX, "c4.person.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
+    existing_text = (
+        'c4.Person(alice, "Alice")\n'
+        'c4.Person(bob, "Bob")\n'
+        'c4.Rel(alice, bob, "calls")\n'
+        'c4.Rel(alice, bob, "emails")\n'
+    )
+    remaining = (
+        f'<mxCell id="alice-&gt;bob-2" style="{rel.style}" edge="1" parent="1" '
+        'source="alice" target="bob" value="emails">'
+        '<mxGeometry relative="1" as="geometry"/></mxCell>'
+    )
+    doc = fx.document(
+        fx.entry_cell(person, cell_id="alice", parent="1"),
+        fx.entry_cell(person, cell_id="bob", parent="1", x=300),
+        remaining,
+    )
+
+    _, plan, synced = _run_sync_pipeline(existing_text, doc)
+
+    assert plan.removed_edge_count == 1
+    assert '"calls"' not in synced
+    assert (
+        'c4.Rel(alice, bob, "emails", edge_id="alice->bob-2")'
+        in synced.splitlines()
+    )
+
+
+@needs_data
+def test_sync_updates_only_the_identity_matched_edge_label() -> None:
+    person = fx.get(INDEX, "c4.person.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
+    existing_text = (
+        'c4.Person(alice, "Alice")\n'
+        'c4.Person(bob, "Bob")\n'
+        'c4.Rel(alice, bob, "old", edge_id="rel-1")\n'
+    )
+    changed = (
+        f'<mxCell id="rel-1" style="{rel.style}" edge="1" parent="1" '
+        'source="alice" target="bob" value="new">'
+        '<mxGeometry relative="1" as="geometry"/></mxCell>'
+    )
+    doc = fx.document(
+        fx.entry_cell(person, cell_id="alice", parent="1"),
+        fx.entry_cell(person, cell_id="bob", parent="1", x=300),
+        changed,
+    )
+
+    _, plan, synced = _run_sync_pipeline(existing_text, doc)
+
+    assert plan.removed_edge_count == 0
+    assert 'c4.Rel(alice, bob, "new", edge_id="rel-1")' in synced.splitlines()
+
+
+@needs_data
+def test_sync_updates_identity_matched_edge_endpoints() -> None:
+    person = fx.get(INDEX, "c4.person.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
+    existing_text = (
+        'c4.Person(alice, "Alice")\n'
+        'c4.Person(bob, "Bob")\n'
+        'c4.Person(carol, "Carol")\n'
+        'c4.Rel(alice, bob, "calls", edge_id="rel-1")\n'
+    )
+    changed = (
+        f'<mxCell id="rel-1" style="{rel.style}" edge="1" parent="1" '
+        'source="alice" target="carol" value="calls">'
+        '<mxGeometry relative="1" as="geometry"/></mxCell>'
+    )
+    doc = fx.document(
+        fx.entry_cell(person, cell_id="alice", parent="1"),
+        fx.entry_cell(person, cell_id="bob", parent="1", x=300),
+        fx.entry_cell(person, cell_id="carol", parent="1", x=600),
+        changed,
+    )
+
+    _, plan, synced = _run_sync_pipeline(existing_text, doc)
+
+    assert plan.removed_edge_count == 0
+    assert 'c4.Rel(alice, carol, "calls", edge_id="rel-1")' in synced.splitlines()
+
+
+@needs_data
+def test_sync_updates_identity_matched_edge_variant() -> None:
+    person = fx.get(INDEX, "c4.person.v1")
+    rel_v2 = fx.get(INDEX, "c4.rel.v2")
+    existing_text = (
+        'c4.Person(alice, "Alice")\n'
+        'c4.Person(bob, "Bob")\n'
+        'c4.Rel(alice, bob, "calls", edge_id="rel-1")\n'
+    )
+    changed = (
+        f'<mxCell id="rel-1" style="{rel_v2.style}" edge="1" parent="1" '
+        'mdgType="c4.Rel" mdgVariant="2" '
+        'source="alice" target="bob" value="calls">'
+        '<mxGeometry relative="1" as="geometry"/></mxCell>'
+    )
+    doc = fx.document(
+        fx.entry_cell(person, cell_id="alice", parent="1"),
+        fx.entry_cell(person, cell_id="bob", parent="1", x=300),
+        changed,
+    )
+
+    _, plan, synced = _run_sync_pipeline(existing_text, doc)
+
+    assert plan.removed_edge_count == 0
+    assert (
+        'c4.Rel(alice, bob, "calls", edge_id="rel-1", variant=2)'
+        in synced.splitlines()
+    )
+
+
+@needs_data
+def test_sync_updates_identity_matched_edge_type() -> None:
+    person = fx.get(INDEX, "c4.person.v1")
+    optional_rel = fx.get(INDEX, "erd.optionalrel.v1")
+    existing_text = (
+        'use erd\n'
+        'c4.Person(alice, "Alice")\n'
+        'c4.Person(bob, "Bob")\n'
+        'erd.Rel(alice, bob, edge_id="rel-1")\n'
+    )
+    changed = (
+        f'<mxCell id="rel-1" style="{optional_rel.style}" edge="1" parent="1" '
+        'source="alice" target="bob">'
+        '<mxGeometry relative="1" as="geometry"/></mxCell>'
+    )
+    doc = fx.document(
+        fx.entry_cell(person, cell_id="alice", parent="1"),
+        fx.entry_cell(person, cell_id="bob", parent="1", x=300),
+        changed,
+    )
+
+    _, plan, synced = _run_sync_pipeline(existing_text, doc)
+
+    assert plan.removed_edge_count == 0
+    assert 'erd.OptionalRel(alice, bob, edge_id="rel-1")' in synced.splitlines()
+    assert merge.validate(synced) is None
+
+
+@needs_data
+def test_sync_updates_identity_matched_edge_visibility() -> None:
+    person = fx.get(INDEX, "c4.person.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
+    existing_text = (
+        'c4.Person(alice, "Alice")\n'
+        'c4.Person(bob, "Bob")\n'
+        'c4.Rel(alice, bob, "calls", edge_id="rel-1")\n'
+    )
+    changed = (
+        f'<mxCell id="rel-1" style="{rel.style}" edge="1" parent="1" '
+        'source="alice" target="bob" value="calls" visible="0">'
+        '<mxGeometry relative="1" as="geometry"/></mxCell>'
+    )
+    doc = fx.document(
+        fx.entry_cell(person, cell_id="alice", parent="1"),
+        fx.entry_cell(person, cell_id="bob", parent="1", x=300),
+        changed,
+    )
+
+    _, plan, synced = _run_sync_pipeline(existing_text, doc)
+
+    assert plan.removed_edge_count == 0
+    assert (
+        'c4.Rel(alice, bob, "calls", edge_id="rel-1", visible=False)'
+        in synced.splitlines()
+    )
 
 
 @needs_data
@@ -380,7 +558,10 @@ def test_sync_reparents_a_survivor_dragged_into_a_new_container() -> None:
     _, plan, synced = _run_sync_pipeline(existing_text, doc)
     assert merge.validate(synced) is None
     # The edge's exact existing text must be preserved, not removed+recreated.
-    assert 'c4.Rel(alice, bob, "custom hand-authored label")' in synced.splitlines()
+    assert (
+        'c4.Rel(alice, bob, "custom hand-authored label", edge_id="e1")'
+        in synced.splitlines()
+    )
     assert plan.removed_edge_count == 0
 
     document = parse_mdg(synced)
