@@ -7,7 +7,7 @@ Pure geometry helpers; does not depend on any notation.
 from __future__ import annotations
 
 from collections import defaultdict, deque
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from math import ceil
 
@@ -27,6 +27,52 @@ _DEFAULT_FONT_SIZE = 11
 _RELATIVE_CHILDREN_KEY = "_layout_children_relative"
 
 Box = tuple[float, float, float, float]
+
+
+def break_cycles(
+    node_ids: list[str], pairs: list[tuple[str, str]]
+) -> list[tuple[str, str]]:
+    """Return endpoint pairs with DFS back edges reversed.
+
+    The returned list is a temporary ranking graph. Authored edges are never
+    mutated, and pair order/duplicates are retained so callers can map the
+    result back to richer edge objects when needed.
+    """
+    node_id_set = set(node_ids)
+    adjacency: dict[str, list[tuple[int, str]]] = defaultdict(list)
+    for index, (source, target) in enumerate(pairs):
+        if source in node_id_set and target in node_id_set and source != target:
+            adjacency[source].append((index, target))
+
+    white, gray, black = 0, 1, 2
+    color = {node_id: white for node_id in node_ids}
+    reversed_indexes: set[int] = set()
+    for root in node_ids:
+        if color[root] != white:
+            continue
+        color[root] = gray
+        stack: list[tuple[str, Iterator[tuple[int, str]]]] = [
+            (root, iter(adjacency.get(root, [])))
+        ]
+        while stack:
+            node_id, outgoing = stack[-1]
+            descended = False
+            for edge_index, target in outgoing:
+                if color[target] == gray:
+                    reversed_indexes.add(edge_index)
+                elif color[target] == white:
+                    color[target] = gray
+                    stack.append((target, iter(adjacency.get(target, []))))
+                    descended = True
+                    break
+            if not descended:
+                color[node_id] = black
+                stack.pop()
+
+    return [
+        (target, source) if index in reversed_indexes else (source, target)
+        for index, (source, target) in enumerate(pairs)
+    ]
 
 
 @dataclass(frozen=True)
@@ -910,23 +956,29 @@ def _topological_ranks(
     edges: list[Edge],
     parent_by_id: dict[str, str],
     order: dict[str, int],
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Longest-path rank for each id in *sibling_ids*.
 
     An edge endpoint outside the set collapses to its nearest ancestor that
     IS in the set (:func:`_sibling_owner`), so a deeply-nested descendant's
-    edge still counts at its owning sibling's level. ``None`` if a cycle
-    among the siblings prevents every id from being ranked (caller decides
-    the fallback).
+    edge still counts at its owning sibling's level. Cycles are broken only
+    in this temporary endpoint graph; the authored edges remain unchanged.
     """
-    outgoing: dict[str, list[str]] = defaultdict(list)
-    indegree: dict[str, int] = defaultdict(int)
-
+    pairs: list[tuple[str, str]] = []
     for edge in edges:
         source = _sibling_owner(edge.source_id, sibling_ids, parent_by_id)
         target = _sibling_owner(edge.target_id, sibling_ids, parent_by_id)
         if source is None or target is None or source == target:
             continue
+        pair = (source, target)
+        if pair not in pairs:
+            pairs.append(pair)
+
+    ordered_ids = sorted(sibling_ids, key=order.__getitem__)
+    acyclic_pairs = break_cycles(ordered_ids, pairs)
+    outgoing: dict[str, list[str]] = defaultdict(list)
+    indegree: dict[str, int] = defaultdict(int)
+    for source, target in acyclic_pairs:
         if target not in outgoing[source]:
             outgoing[source].append(target)
             indegree[target] += 1
@@ -951,7 +1003,7 @@ def _topological_ranks(
                 queue.append(target)
 
     if len(visited) != len(sibling_ids):
-        return None
+        raise RuntimeError("cycle removal left a cyclic sibling ranking graph")
     return ranks
 
 
@@ -969,8 +1021,6 @@ def _rank_sibling_nodes(
     sibling_ids = set(node_by_id)
 
     ranks = _topological_ranks(sibling_ids, edges, parent_by_id, order)
-    if ranks is None:
-        return [[node] for node in nodes]
 
     rank_numbers = sorted(set(ranks.values()))
     return [
@@ -993,16 +1043,12 @@ def _shared_rank_plan(
 ) -> _SharedRankPlan | None:
     """A cross-container rank/offset scale for *nodes* -- the COMBINED
     children of every container-sibling under one parent (e.g. every Lane's
-    tasks under a Pool). ``None`` if there's nothing to rank, or a cycle
-    spans the combined set (falls back to each container ranking its own
-    content in isolation, same as before this existed)."""
+    tasks under a Pool). ``None`` only if there is nothing to rank."""
     if not nodes:
         return None
     order = {n.id: idx for idx, n in enumerate(nodes)}
     sibling_ids = set(order)
     ranks = _topological_ranks(sibling_ids, edges, parent_by_id, order)
-    if ranks is None:
-        return None
 
     horizontal = options.direction != "TB"
     by_rank: dict[int, list[Node]] = defaultdict(list)

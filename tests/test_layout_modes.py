@@ -520,6 +520,32 @@ def test_layered_breaks_cycles_created_by_collapsing_containers() -> None:
     assert all(not edge.hidden for edge in result.edges)
 
 
+def test_layered_breaks_cycles_between_siblings_inside_a_container() -> None:
+    """Container-local ranking must not fall back to declaration order."""
+    parent = _node("parent")
+    a, c, b = (_node(node_id) for node_id in ("a", "c", "b"))
+    for node in (a, b, c):
+        node.parent_id = parent.id
+    edges = [
+        Edge(id="a->b", type="c4.Rel", source_id="a", target_id="b"),
+        Edge(id="b->c", type="c4.Rel", source_id="b", target_id="c"),
+        Edge(id="c->a", type="c4.Rel", source_id="c", target_id="a"),
+    ]
+
+    result = LayeredLayout().apply(
+        [parent, a, c, b], edges, _size_of, Config(direction="LR")
+    )
+    by_id = {node.id: node for node in result.nodes}
+
+    assert by_id["a"].x < by_id["b"].x < by_id["c"].x
+    assert [(edge.source_id, edge.target_id) for edge in result.edges] == [
+        ("a", "b"),
+        ("b", "c"),
+        ("c", "a"),
+    ]
+    assert all(not edge.hidden for edge in result.edges)
+
+
 def test_layered_barycenter_sweeps_downward_then_upward() -> None:
     """Both sweep directions must use neighbors from the adjacent layer."""
     a, b, x, y = (_node(node_id) for node_id in ("a", "b", "x", "y"))

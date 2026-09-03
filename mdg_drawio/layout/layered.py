@@ -12,12 +12,15 @@ The algorithm produces a directed acyclic graph layout:
 from __future__ import annotations
 
 from collections import defaultdict, deque
-from collections.abc import Iterator
 from dataclasses import replace
 
 from mdg_drawio.contracts import DEFAULT_PAGE_HEIGHT, DEFAULT_PAGE_WIDTH, Anchor
 
-from ._container_layout import absolute_node_boxes, apply_container_layout
+from ._container_layout import (
+    absolute_node_boxes,
+    apply_container_layout,
+    break_cycles,
+)
 from ._types import (
     BaseLayout,
     Edge,
@@ -93,9 +96,14 @@ class LayeredLayout(BaseLayout):
             [replace(edge) for edge in edges],
             container_state.top_level_by_id,
         )
-        layout_edges = _remove_cycles(
-            layout_edges, {node.id: node for node in layout_nodes}
+        pairs = break_cycles(
+            [node.id for node in layout_nodes],
+            [(edge.source_id, edge.target_id) for edge in layout_edges],
         )
+        layout_edges = [
+            replace(edge, source_id=source, target_id=target)
+            for edge, (source, target) in zip(layout_edges, pairs, strict=True)
+        ]
         layers = _assign_layers(layout_nodes, layout_edges)
         ordered_layers = _order_layers(layers, layout_edges)
         _assign_positions(
@@ -173,85 +181,6 @@ def _content_extents(
 # ---------------------------------------------------------------------------
 # Algorithm steps (unchanged logic, parameterized by caller)
 # ---------------------------------------------------------------------------
-
-
-def _edge_adjacency(edges: list[Edge]) -> dict[str, list[Edge]]:
-    """Build outgoing edge adjacency keyed by source id."""
-    adj: dict[str, list[Edge]] = defaultdict(list)
-    for edge in edges:
-        if edge.source_id and edge.target_id:
-            adj[edge.source_id].append(edge)
-    return adj
-
-
-def _find_back_edges(
-    adj: dict[str, list[Edge]],
-    node_by_id: dict[str, Node],
-) -> list[Edge]:
-    """Find DFS back edges that would create cycles.
-
-    Iterative (explicit stack) so a deep dependency chain cannot blow Python's
-    recursion limit. ``gray`` = on the current DFS path, so an edge into a gray
-    node is a back edge.
-    """
-    white, gray, black = 0, 1, 2
-    color: dict[str, int] = {node_id: white for node_id in node_by_id}
-    back_edges: list[Edge] = []
-
-    for root in node_by_id:
-        if color[root] != white:
-            continue
-        color[root] = gray
-        stack: list[tuple[str, Iterator[Edge]]] = [
-            (root, iter(adj.get(root, [])))
-        ]
-        while stack:
-            node_id, edge_iter = stack[-1]
-            descended = False
-            for edge in edge_iter:
-                target_id = edge.target_id
-                if target_id not in color:
-                    continue
-                target_color = color[target_id]
-                if target_color == gray:
-                    back_edges.append(edge)
-                elif target_color == white:
-                    color[target_id] = gray
-                    stack.append((target_id, iter(adj.get(target_id, []))))
-                    descended = True
-                    break
-            if not descended:
-                color[node_id] = black
-                stack.pop()
-
-    return back_edges
-
-
-def _reverse_back_edges(
-    edges: list[Edge],
-    back_edges: list[Edge],
-) -> list[Edge]:
-    """Reverse back edges in the temporary ranking graph.
-
-    Reversed edges are tracked by object identity (``id(edge)``), not
-    ``edge.id`` — passthrough edges share an empty id, so an id-based set would
-    match every one of them.
-    """
-    back_edge_ids = {id(e) for e in back_edges}
-    result: list[Edge] = []
-    for edge in edges:
-        if id(edge) in back_edge_ids:
-            edge.source_id, edge.target_id = edge.target_id, edge.source_id
-        result.append(edge)
-    return result
-
-
-def _remove_cycles(
-    edges: list[Edge],
-    node_by_id: dict[str, Node],
-) -> list[Edge]:
-    back_edges = _find_back_edges(_edge_adjacency(edges), node_by_id)
-    return _reverse_back_edges(edges, back_edges)
 
 
 def _layer_graph(
