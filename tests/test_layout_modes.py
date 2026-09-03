@@ -488,6 +488,38 @@ def test_layered_keeps_cycle_edges_visible_and_in_declared_orientation() -> None
     assert all(not edge.hidden for edge in result.edges)
 
 
+def test_layered_breaks_cycles_created_by_collapsing_containers() -> None:
+    """The graph must become acyclic after endpoints become layout units."""
+    container_a = _node("A")
+    a1 = _node("a1")
+    a1.parent_id = "A"
+    a2 = _node("a2")
+    a2.parent_id = "A"
+    container_b = _node("B")
+    b1 = _node("b1")
+    b1.parent_id = "B"
+    b2 = _node("b2")
+    b2.parent_id = "B"
+    edges = [
+        Edge(id="a1->b1", type="c4.Rel", source_id="a1", target_id="b1"),
+        Edge(id="b2->a2", type="c4.Rel", source_id="b2", target_id="a2"),
+    ]
+    cfg = Config(direction="LR")
+
+    result = LayeredLayout().apply(
+        [container_a, a1, a2, container_b, b1, b2], edges, _size_of, cfg
+    )
+    by_id = {node.id: node for node in result.nodes}
+
+    assert min(by_id["A"].x, by_id["B"].x) == cfg.margin_x
+    assert abs(by_id["A"].x - by_id["B"].x) == by_id["A"].width + cfg.rank_gap
+    assert [(edge.source_id, edge.target_id) for edge in result.edges] == [
+        ("a1", "b1"),
+        ("b2", "a2"),
+    ]
+    assert all(not edge.hidden for edge in result.edges)
+
+
 def test_layered_barycenter_sweeps_downward_then_upward() -> None:
     """Both sweep directions must use neighbors from the adjacent layer."""
     a, b, x, y = (_node(node_id) for node_id in ("a", "b", "x", "y"))

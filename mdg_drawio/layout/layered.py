@@ -84,18 +84,17 @@ class LayeredLayout(BaseLayout):
             grid=cfg.grid,
         )
 
-        node_by_id = {n.id: n for n in nodes}
         layout_nodes = container_state.top_level_nodes
 
         # Cycle removal is an implementation detail of ranking. Work on
         # copies so reversing a back edge can never mutate an authored
         # relationship that will be emitted to the generated diagram.
-        ranking_edges = _remove_cycles(
-            [replace(edge) for edge in edges], node_by_id
-        )
         layout_edges = _collapse_edges_to_layout_units(
-            ranking_edges,
+            [replace(edge) for edge in edges],
             container_state.top_level_by_id,
+        )
+        layout_edges = _remove_cycles(
+            layout_edges, {node.id: node for node in layout_nodes}
         )
         layers = _assign_layers(layout_nodes, layout_edges)
         ordered_layers = _order_layers(layers, layout_edges)
@@ -109,6 +108,7 @@ class LayeredLayout(BaseLayout):
         )
         node_boxes = absolute_node_boxes(nodes)
         if self.route_edges:
+            node_by_id = {n.id: n for n in nodes}
             result_edges = _route_edges(
                 edges,
                 node_by_id,
