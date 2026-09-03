@@ -71,16 +71,13 @@ ALLOWLIST: dict[str, str] = {
         "ABC; concrete layouts (Layered/Sequence/...) are what run",
     "mdg_drawio.layout._types:BaseLayout.apply":
         "@abstractmethod; overridden by every concrete layout",
-    # --- public registry/layout API, exercised at import time or by tests,
-    #     never by the convert pipeline itself.
+    # --- public registry/layout API, exercised outside a traced CLI action.
     "mdg_drawio.layout:modes":
-        "public registry API; called by tooling/tests, not convert",
+        "public registry API; called while permutations are built, before tracing",
     "mdg_drawio.layout:register_layout":
         "self-registration runs at import, before tracing starts",
     "mdg_drawio.notation._core.registry:registry_path":
         "file-fallback for standalone parse(); convert injects preloaded registries",
-    "mdg_drawio.notation._core.registry:shapes_by_id":
-        "public registry API used by tests/build-data, not convert",
     # --- notation build-data pipeline (scripts/build_notation_styles.py and
     #     scripts/migrate_registry_v2.py), not the convert path.
     "mdg_drawio.notation._core.normalize:normalize_style":

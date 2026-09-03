@@ -3,9 +3,10 @@
 per permutation, the ordered sequence of ``mdg_drawio`` classes/functions that
 execute.
 
-The ``mdg`` CLI exposes a single action (``convert``), but the pipeline branches
-on real input dimensions:
+The ``mdg`` CLI exposes conversion and reverse-editing actions. The sweep
+branches on their real input dimensions:
 
+* **action** — ``convert`` plus representative ``derive`` / ``merge`` / ``sync``
 * **fixture** — every ``*_shapes_coverage.mdg`` and every architecture ``.mdg``
 * **notation** — derived from the fixture; notation coverage sheets exercise
   the shared parser, including clean rejection of still-unsupported constructs
@@ -50,7 +51,7 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import CodeType, FrameType
-from typing import Any
+from typing import Any, Literal
 
 import mdg_drawio.layout as layout_pkg
 from mdg_drawio.cli import main as cli_main
@@ -68,6 +69,8 @@ PKG_PREFIX = str(PKG_DIR) + os.sep
 
 DIRECTIONS = ("TB", "LR")
 DEFAULT_ARTIFACT = ROOT / "action_trace.json"
+Action = Literal["convert", "derive", "merge", "sync"]
+REVERSE_ACTIONS: tuple[Action, ...] = ("derive", "merge", "sync")
 
 
 # ---------------------------------------------------------------------------
@@ -152,6 +155,7 @@ class Permutation:
 
     fixture: Path
     force: bool
+    action: Action = "convert"
     layout: str | None = None
     direction: str | None = None
     overlay: bool = False  # non-force pass that re-reads a prior output
@@ -159,7 +163,7 @@ class Permutation:
     @property
     def label(self) -> str:
         rel = self.fixture.relative_to(ROOT)
-        parts = [rel.as_posix()]
+        parts = [self.action, rel.as_posix()]
         parts.append(self.layout or "auto")
         parts.append(self.direction or "auto")
         parts.append("force" if self.force else "overlay" if self.overlay else "fresh")
@@ -171,7 +175,9 @@ def build_permutations(*, full: bool) -> list[Permutation]:
 
     Covering mode touches every dimension value at least once; full mode is the
     cartesian product of ``mode x direction x force`` for each C4 fixture.
-    Other notation fixtures contribute one representative run each.
+    Other notation fixtures contribute one representative convert run each.
+    One C4 fixture additionally exercises every reverse CLI action against a
+    real generated draw.io document.
     """
     fixtures = discover_fixtures()
     modes = sorted(layout_pkg.modes())
@@ -205,6 +211,13 @@ def build_permutations(*, full: bool) -> list[Permutation]:
         for direction in DIRECTIONS:
             perms.append(Permutation(fixture, force=True, direction=direction))
         perms.append(Permutation(fixture, force=False, overlay=True))
+
+    reverse_fixture = next((fixture for fixture in fixtures if _is_c4(fixture)), None)
+    if reverse_fixture is not None:
+        perms.extend(
+            Permutation(reverse_fixture, force=False, action=action)
+            for action in REVERSE_ACTIONS
+        )
 
     return perms
 
@@ -279,6 +292,7 @@ def _make_tracer(record: list[str]) -> Callable[[FrameType, str, object], None]:
 class TraceResult:
     label: str
     fixture: str
+    action: Action
     force: bool
     layout: str | None
     direction: str | None
@@ -304,7 +318,7 @@ def _temp_input(perm: Permutation) -> Iterator[tuple[Path, Path]]:
         yield input_path, output_path
 
 
-def _argv(input_path: Path, output_path: Path, force: bool) -> list[str]:
+def _convert_argv(input_path: Path, output_path: Path, force: bool) -> list[str]:
     """CLI arguments for one convert invocation."""
     argv = [str(input_path), str(output_path)]
     if force:
@@ -312,25 +326,37 @@ def _argv(input_path: Path, output_path: Path, force: bool) -> list[str]:
     return argv
 
 
+def _argv(perm: Permutation, input_path: Path, output_path: Path) -> list[str]:
+    """CLI arguments for the action represented by *perm*."""
+    if perm.action == "convert":
+        return _convert_argv(input_path, output_path, perm.force)
+    if perm.action == "derive":
+        return ["derive", str(output_path), "--json"]
+    return [perm.action, str(input_path), str(output_path)]
+
+
 def trace_permutation(perm: Permutation, *, quiet: bool = True) -> TraceResult:
     """Run one permutation through the CLI under the tracer.
 
     The pipeline is driven the way a user drives it — ``cli.main(argv)`` — so
-    the CLI shell is part of what gets traced. Overlay permutations first do an
-    untraced ``--force`` pass to seed the output geometry, so the traced
-    non-force pass exercises the overlay read/inject path. The previous tracer
-    is saved and restored so this never clobbers an enclosing coverage run.
+    the CLI shell is part of what gets traced. Overlay and reverse-action
+    permutations first do an untraced ``--force`` pass to seed the output
+    geometry. The previous tracer is saved and restored so this never clobbers
+    an enclosing coverage run.
     """
     record: list[str] = []
     stderr_sink = io.StringIO() if quiet else sys.stderr
+    stdout_sink = io.StringIO() if quiet else sys.stdout
 
     with _temp_input(perm) as (input_path, output_path):
-        with contextlib.redirect_stderr(stderr_sink):
-            if perm.overlay:
+        with contextlib.redirect_stderr(stderr_sink), contextlib.redirect_stdout(
+            stdout_sink
+        ):
+            if perm.overlay or perm.action != "convert":
                 # Seed geometry (untraced) so the traced pass reads an overlay.
-                cli_main(_argv(input_path, output_path, True))
+                cli_main(_convert_argv(input_path, output_path, True))
 
-            argv = _argv(input_path, output_path, perm.force)
+            argv = _argv(perm, input_path, output_path)
             previous = sys.gettrace()
             sys.settrace(_make_tracer(record))
             try:
@@ -347,6 +373,7 @@ def trace_permutation(perm: Permutation, *, quiet: bool = True) -> TraceResult:
     return TraceResult(
         label=perm.label,
         fixture=perm.fixture.relative_to(ROOT).as_posix(),
+        action=perm.action,
         force=perm.force,
         layout=perm.layout,
         direction=perm.direction,
@@ -476,6 +503,7 @@ def to_artifact(results: list[TraceResult], *, full: bool) -> dict:
             {
                 "label": r.label,
                 "fixture": r.fixture,
+                "action": r.action,
                 "force": r.force,
                 "layout": r.layout,
                 "direction": r.direction,
