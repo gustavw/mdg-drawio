@@ -284,6 +284,37 @@ def test_sync_adds_a_second_distinct_edge_drawn_between_an_already_connected_pai
 
 
 @needs_data
+def test_sync_removes_only_the_deleted_edge_from_a_pair_that_had_two() -> None:
+    """Two existing lines already connect the same pair (e.g. left over from
+    the scenario above). The user deletes just ONE of the two edge cells in
+    the .drawio, keeping the other. A plain pair-membership check would see
+    the pair is still "present" (the surviving edge) and wrongly leave BOTH
+    existing lines untouched -- the deleted relationship would never
+    disappear from the .mdg no matter how many times sync runs. Only the
+    excess line beyond the current cell count must go; the survivor keeps
+    its exact text."""
+    person = fx.get(INDEX, "c4.person.v1")
+    rel = fx.get(INDEX, "c4.rel.v1")
+    existing_text = (
+        '---\ntitle: "T"\npage: "P"\nmode: layered\n---\n\n'
+        'c4.Person(alice, "Alice")\n'
+        'c4.Person(bob, "Bob")\n'
+        "c4.Rel(alice, bob, \"calls\")\n"
+        "c4.Rel(alice, bob, \"emails\")\n"
+    )
+    doc = fx.document(
+        fx.entry_cell(person, cell_id="alice", parent="1"),
+        fx.entry_cell(person, cell_id="bob", parent="1", x=300),
+        fx.edge_cell_xml("e1", source="alice", target="bob", style=rel.style),
+    )
+    _, plan, synced = _run_sync_pipeline(existing_text, doc)
+    assert plan.removed_edge_count == 1
+    assert plan.merge_plan.new_edge_count == 0
+    assert 'c4.Rel(alice, bob, "calls")' in synced
+    assert 'c4.Rel(alice, bob, "emails")' not in synced
+
+
+@needs_data
 def test_sync_removes_an_edge_whose_endpoint_was_removed() -> None:
     """"bob" itself is gone -- the edge referencing it must go too, even
     though nothing else about the edge's pair changed."""
