@@ -27,10 +27,9 @@ themselves resolve to a known node -- either newly assigned in this run, or
 already declared in the existing file -- otherwise it is skipped and reported,
 same as an unresolved vertex.
 
-Vertices and edges both use their draw.io cell id as persistent identity.
-Edge declarations store it in the common ``edge_id=`` keyword. Legacy edge
-declarations without that keyword are matched semantically during their first
-sync and migrated in place, preserving compatible formatting and extra kwargs.
+Vertex identity is its semantic node id. Edge identity is derived from its
+unique directed endpoint pair as ``<source>-<target>``; it is never persisted
+as metadata in the ``.mdg``. Sync normalizes the corresponding draw.io cell id.
 
 :func:`plan_sync`/:func:`render_sync` (the `mdg sync` verb) extend this with
 removal: draw.io as the sole source of truth, so a vertex or edge no longer
@@ -41,11 +40,10 @@ text instead of a freshly-derived cell.
 """
 from __future__ import annotations
 
-import ast
 import re
 from dataclasses import dataclass, field
 
-from mdg_drawio.contracts import Document
+from mdg_drawio.contracts import Document, derived_edge_id
 from mdg_drawio.markup import html_to_markdown
 from mdg_drawio.notation import parse as parse_mdg
 from mdg_drawio.notation import shapes_by_function
@@ -77,7 +75,7 @@ def _is_edge_call(ns: str | None, func: str) -> bool:
     keeps generic (vertex-like) behaviour rather than erroring. Used by
     :func:`index_existing` so an edge's own line is never mistaken for a
     vertex declaration naming its first argument: an edge's args are
-    references to OTHER nodes' ids, not the edge's persistent ``edge_id``.
+    references to OTHER nodes' ids, not a declaration of the edge itself.
     Without this, a vertex whose real declaration line is lost
     (e.g. to an earlier bug) but whose edges survive looks "already
     represented" forever, by the edge line's own source token -- sync can
@@ -396,7 +394,6 @@ def _render_edge_declaration(
     shape_id: str,
     source_node_id: str,
     target_node_id: str,
-    edge_id: str | None = None,
 ) -> str | None:
     """An edge declaration, flat and top-level (edges take no block, no
     indent, per GRAMMAR.md). Only ``source``, ``target``, and ``label`` are
@@ -414,12 +411,9 @@ def _render_edge_declaration(
     variant_suffix = f", variant={variant}" if variant != 1 else ""
     visible = _edge_visibility_for(cell)
     visible_suffix = f", visible={visible}" if visible is not None else ""
-    edge_id_suffix = (
-        f', edge_id="{_escape_dsl_string(edge_id)}"' if edge_id else ""
-    )
     return (
         f"{library}.{function}({', '.join(args)}"
-        f"{variant_suffix}{visible_suffix}{edge_id_suffix})"
+        f"{variant_suffix}{visible_suffix})"
     )
 
 
@@ -468,10 +462,9 @@ class MergePlan:
     changed.
 
     ``renamed_ids`` (draw.io cell_id -> the fresh semantic node_id just
-    minted for it) covers every newly-added VERTEX. Edge cell ids are instead
-    persisted verbatim as ``edge_id=`` and are never rename targets.
-    ``mdg sync --write`` applies
-    this to the ``.drawio`` file itself (:func:`~mdg_drawio.reverse.derive.
+    minted for it) covers every newly-added VERTEX. ``mdg sync --write`` also
+    derives edge renames from their endpoint pairs and applies all renames to
+    the ``.drawio`` file itself (:func:`~mdg_drawio.reverse.derive.
     rewrite_cell_ids`) so a later plain regenerate's geometry overlay can
     still find the cell by id."""
 
@@ -689,24 +682,13 @@ def _build_edge_insertion(
     """
     lines: list[str] = []
     for edge in new_edges:
-        legacy_line = _render_edge_declaration(
-            cells_by_id[edge.cell_id],
-            edge.shape_id,
-            edge.source_node_id,
-            edge.target_node_id,
-        )
         line = _render_edge_declaration(
             cells_by_id[edge.cell_id],
             edge.shape_id,
             edge.source_node_id,
             edge.target_node_id,
-            edge.cell_id,
         )
-        if (
-            line is None
-            or line in existing.clean_lines
-            or legacy_line in existing.clean_lines
-        ):
+        if line is None or line in existing.clean_lines:
             continue
         lines.append(line)
     if not lines:
@@ -837,10 +819,7 @@ class ExistingEdge:
     shape_id: str
     source_token: str
     target_token: str
-    label: str
     variant: int
-    visible: bool | None
-    edge_id: str | None
 
 
 def _argument_token(args: list[str], name: str, position: int) -> str | None:
@@ -852,16 +831,6 @@ def _argument_token(args: list[str], name: str, position: int) -> str | None:
             return value.strip()
     positional = [argument for argument in args if not _KWARG_RE.match(argument)]
     return positional[position] if position < len(positional) else None
-
-
-def _string_token(token: str | None) -> str:
-    if token is None:
-        return ""
-    try:
-        value = ast.literal_eval(token)
-    except (SyntaxError, ValueError):
-        return token.strip().strip("\"'")
-    return value if isinstance(value, str) else str(value)
 
 
 def _existing_edges(existing: ExistingIndex) -> list[ExistingEdge]:
@@ -895,25 +864,17 @@ def _existing_edges(existing: ExistingIndex) -> list[ExistingEdge]:
         target = _argument_token(args, "target", 1)
         if source is None or target is None:
             continue
-        label = _string_token(_argument_token(args, "label", 2))
-        visible_token = _argument_token(args, "visible", len(args) + 1)
-        visible = (
-            visible_token.strip() == "True"
-            if visible_token is not None
-            and visible_token.strip() in ("True", "False")
-            else None
-        )
-        edge_id_token = _argument_token(args, "edge_id", len(args) + 1)
+        # Endpoint-free palette examples are not document relationships and
+        # deliberately share the synthetic (None, None) pair.
+        if source.strip() == "None" and target.strip() == "None":
+            continue
         edges.append(
             ExistingEdge(
                 i,
                 str(entry["id"]),
                 source,
                 target,
-                label,
                 variant,
-                visible,
-                _string_token(edge_id_token) or None,
             )
         )
     return edges
@@ -980,7 +941,6 @@ def _rewrite_matched_edge(
             current.shape_id or existing_edge.shape_id,
             current.source_node_id,
             current.target_node_id,
-            current.cell_id,
         )
         return f"{rendered}{comment}" if rendered is not None else None
 
@@ -1021,7 +981,7 @@ def _rewrite_matched_edge(
         "visible",
         str(current.visible) if current.visible is not None else None,
     )
-    _replace_keyword(args, "edge_id", f'"{_escape_dsl_string(current.cell_id)}"')
+    _replace_keyword(args, "edge_id", None)
     ns, function = match.group("ns"), match.group("function")
     return f"{ns}.{function}({', '.join(args)}){comment}"
 
@@ -1116,8 +1076,8 @@ class SyncPlan:
 
     ``node_label_rewrites`` applies labels edited in draw.io to SURVIVING node
     declarations without re-deriving/reordering them. ``edge_token_rewrites``
-    covers all semantic updates to an identity-matched edge: migration to an
-    ``edge_id``, endpoints, label, type/variant, and authored visibility.
+    covers all semantic updates to an endpoint-matched edge, including removal
+    of a legacy ``edge_id`` keyword, label, type/variant, and visibility.
     """
 
     merge_plan: MergePlan
@@ -1126,6 +1086,7 @@ class SyncPlan:
     removed_edge_count: int
     node_label_rewrites: dict[int, str]
     edge_token_rewrites: dict[int, str]
+    drawio_id_renames: dict[str, str]
 
 
 @dataclass(frozen=True)
@@ -1188,48 +1149,47 @@ def _current_edges(
 def _match_edges(
     existing_edges: list[ExistingEdge], current_edges: list[CurrentEdge]
 ) -> dict[int, CurrentEdge]:
-    """Match persistent IDs first, then migrate legacy edges semantically."""
-    unmatched = {edge.cell_id: edge for edge in current_edges}
+    """Match the one allowed edge for each directed endpoint pair."""
+    existing_by_pair: dict[tuple[str, str], ExistingEdge] = {}
+    for existing_edge in existing_edges:
+        pair = (existing_edge.source_token, existing_edge.target_token)
+        if pair in existing_by_pair:
+            raise ValueError(
+                f"duplicate relationship {pair[0]} -> {pair[1]} in .mdg; "
+                "only one directed relationship may exist between the same nodes"
+            )
+        existing_by_pair[pair] = existing_edge
+
+    current_by_pair: dict[tuple[str, str], CurrentEdge] = {}
+    for current_edge in current_edges:
+        pair = (current_edge.source_node_id, current_edge.target_node_id)
+        if pair in current_by_pair:
+            raise ValueError(
+                f"duplicate relationship {pair[0]} -> {pair[1]} in draw.io; "
+                "only one directed relationship may exist between the same nodes"
+            )
+        current_by_pair[pair] = current_edge
+
     matches: dict[int, CurrentEdge] = {}
-
-    for existing_edge in existing_edges:
-        if existing_edge.edge_id is None:
-            continue
-        current = unmatched.pop(existing_edge.edge_id, None)
-        if current is not None:
-            matches[existing_edge.line_index] = current
-
-    for existing_edge in existing_edges:
-        if existing_edge.line_index in matches or existing_edge.edge_id is not None:
-            continue
-        exact = next(
-            (
-                current
-                for current in unmatched.values()
-                if current.shape_id == existing_edge.shape_id
-                and current.raw_source_id == existing_edge.source_token
-                and current.raw_target_id == existing_edge.target_token
-                and (
-                    current.label is None
-                    or current.label == existing_edge.label
-                )
-                and current.visible == existing_edge.visible
-            ),
-            None,
-        )
-        current = exact or next(
-            (
-                candidate
-                for candidate in unmatched.values()
-                if candidate.raw_source_id == existing_edge.source_token
-                and candidate.raw_target_id == existing_edge.target_token
-            ),
-            None,
-        )
-        if current is not None:
-            matches[existing_edge.line_index] = current
-            unmatched.pop(current.cell_id)
-
+    consumed_cell_ids: set[str] = set()
+    for pair, existing in existing_by_pair.items():
+        current = current_by_pair.get(pair)
+        if current is None:
+            current = next(
+                (
+                    candidate
+                    for candidate in current_edges
+                    if (
+                        candidate.raw_source_id,
+                        candidate.raw_target_id,
+                    )
+                    == pair
+                ),
+                None,
+            )
+        if current is not None and current.cell_id not in consumed_cell_ids:
+            matches[existing.line_index] = current
+            consumed_cell_ids.add(current.cell_id)
     return matches
 
 
@@ -1324,11 +1284,10 @@ def plan_sync(
     Existing declarations retain their formatting, comments, and compatible
     extra arguments. Semantic edits made in draw.io are applied in place:
     node labels and an edge's endpoints, label, type/variant, visibility, and
-    persistent ``edge_id``. A vertex whose OWN cell_id is gone takes its whole
-    nested subtree with it (:func:`_block_range`). Edges match first by stable
-    ``edge_id``; legacy declarations without one are matched semantically, with
-    an endpoint-pair fallback, and migrated on their first sync. Any unmatched
-    existing edge is removed and any unmatched current edge is added.
+    derived draw.io id. A vertex whose OWN cell_id is gone takes its whole
+    nested subtree with it (:func:`_block_range`). Edges match by their unique
+    directed endpoint pair. Any unmatched existing edge is removed and any
+    unmatched current edge is added.
 
     A survivor whose CONTAINER changed (:func:`_reparented_survivor_ids`) --
     still present, own id unchanged, just moved to sit under a different
@@ -1392,6 +1351,14 @@ def plan_sync(
     merge_plan = plan_merge(
         reduced_existing, cells, reduced_result, node_ids, containments, raw_cells
     )
+    drawio_id_renames = dict(merge_plan.renamed_ids)
+    for current_edge in current_edges:
+        derived_id = derived_edge_id(
+            current_edge.source_node_id, current_edge.target_node_id
+        )
+        bare_cell_id = re.sub(r"^\d+:", "", current_edge.cell_id, count=1)
+        if bare_cell_id != derived_id:
+            drawio_id_renames[current_edge.cell_id] = derived_id
 
     node_label_rewrites = _surviving_node_label_rewrites(
         existing, cells, surviving_ids
@@ -1399,24 +1366,27 @@ def plan_sync(
 
     edge_token_rewrites: dict[int, str] = {}
     cells_by_id = {cell.cell_id: cell for cell in cells}
-    for edge in existing_edges:
-        if edge.line_index in removed_edge_line_set:
+    for existing_edge in existing_edges:
+        if existing_edge.line_index in removed_edge_line_set:
             continue
-        current = edge_matches.get(edge.line_index)
+        current = edge_matches.get(existing_edge.line_index)
         if current is None:
             continue
         cell = cells_by_id.get(current.cell_id)
         if cell is None:
             continue
         rewritten = _rewrite_matched_edge(
-            edge,
+            existing_edge,
             current,
             cell,
-            existing.lines[edge.line_index],
-            existing.clean_lines[edge.line_index],
+            existing.lines[existing_edge.line_index],
+            existing.clean_lines[existing_edge.line_index],
         )
-        if rewritten is not None and rewritten != existing.lines[edge.line_index]:
-            edge_token_rewrites[edge.line_index] = rewritten
+        if (
+            rewritten is not None
+            and rewritten != existing.lines[existing_edge.line_index]
+        ):
+            edge_token_rewrites[existing_edge.line_index] = rewritten
 
     return SyncPlan(
         merge_plan,
@@ -1425,6 +1395,7 @@ def plan_sync(
         len(removed_edge_lines),
         node_label_rewrites,
         edge_token_rewrites,
+        drawio_id_renames,
     )
 
 

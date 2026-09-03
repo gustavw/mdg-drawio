@@ -284,12 +284,12 @@ It works in two layers:
    mdg sync path/to/existing.mdg path/to/diagram.drawio --write   # applies it
    ```
 
-   An edge's identity is its draw.io cell id, persisted as the common
-   `edge_id="..."` keyword. On the first sync, legacy declarations without an
-   `edge_id` are matched by type, endpoints, label and visibility (with an
-   endpoint-pair fallback), then migrated in place. Later syncs can therefore
-   update or remove the correct relationship even when parallel edges share
-   endpoints. A shape
+   An edge's identity is derived from its directed endpoint pair. For example,
+   `Rel(customer, service)` becomes the draw.io cell id `customer-service`.
+   Sync normalizes existing draw.io ids to that convention and removes legacy
+   `edge_id="..."` keywords from the MDG. Only one directed relationship may
+   connect the same source and target; duplicates produce a clear validation
+   error. A shape
    whose old declaration was removed only because its *container* was
    deleted, but that individually still exists in the `.drawio`, is
    re-derived under a fresh name at its current position rather than lost.

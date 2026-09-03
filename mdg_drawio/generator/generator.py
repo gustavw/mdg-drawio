@@ -29,6 +29,7 @@ from mdg_drawio.contracts import (
     GeometryChild,
     Node,
     NodeChildCell,
+    derived_edge_id,
     index_shapes_by_function,
 )
 
@@ -337,19 +338,8 @@ class _GenCtx:
         self.used_cell_ids.add(candidate)
         return candidate
 
-    def unique_edge_id(self, base_id: str, *, explicit: bool = False) -> str:
-        """Disambiguate an edge cell id against every id already emitted.
-
-        Multiple edges between the same (source, target) pair are legal --
-        e.g. two distinct ArchiMate relationships between the same two
-        elements -- but they compute the identical id under both the c4-native
-        scheme (``f"{source}->{target}"``, assigned at parse time) and the
-        passthrough fallback (``f"e_{source}->{target}"``, assigned here).
-        Without disambiguation, the second such edge collides with the first
-        as a duplicate cell id.
-        """
-        if explicit and base_id in self.used_cell_ids:
-            raise ValueError(f"explicit edge_id {base_id!r} is already in use")
+    def unique_palette_edge_id(self, base_id: str) -> str:
+        """Disambiguate an endpoint-free palette edge cell id."""
         candidate = base_id
         suffix = 2
         while candidate in self.used_cell_ids:
@@ -777,12 +767,18 @@ def _coerce_variant(edge: Edge) -> int:
 
 def _append_edge(mx_root: ET.Element, edge: Edge, ctx: _GenCtx) -> None:
     """Append a single edge to the mxGraphModel root."""
-    edge_id = ctx.unique_edge_id(
-        edge.id or f"e_{edge.source_id}->{edge.target_id}",
-        explicit=edge.id_is_explicit,
-    )
     source_id = edge.source_id
     target_id = edge.target_id
+    if source_id and target_id:
+        edge_id = derived_edge_id(source_id, target_id)
+        if edge_id in ctx.used_cell_ids:
+            raise ValueError(
+                f"duplicate relationship {source_id} -> {target_id}; "
+                "only one directed relationship may exist between the same nodes"
+            )
+        ctx.used_cell_ids.add(edge_id)
+    else:
+        edge_id = ctx.unique_palette_edge_id(edge.id or "palette-edge")
 
     variant = _coerce_variant(edge)
     full_style = _build_edge_style(edge, ctx, variant)

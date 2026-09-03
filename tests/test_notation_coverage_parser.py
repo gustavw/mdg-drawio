@@ -170,6 +170,12 @@ def test_passthrough_edge_accepts_unquoted_hyphenated_endpoints() -> None:
     assert (edge.source_id, edge.target_id) == ("a-1", "b-2")
 
 
+def test_hyphenated_endpoint_pairs_have_distinct_derived_edge_ids() -> None:
+    doc = parse("c4.Rel(a-b, c)\nc4.Rel(a, b-c)")
+    assert isinstance(doc, Document)
+    assert [edge.id for edge in doc.edges] == ["3-a-b-c", "1-a-b-c"]
+
+
 # ---------------------------------------------------------------------------
 # C4's own edge builder: None, None unconnected palette-edge form
 # ---------------------------------------------------------------------------
@@ -469,11 +475,11 @@ def test_visible_control_requires_a_boolean() -> None:
     'c4.Rel(a, b, "calls", edge_id="relationship-1")',
     'use erd\nerd.Rel(a, b, "calls", edge_id="relationship-1")',
 ])
-def test_registered_edges_accept_persistent_edge_id(source: str) -> None:
+def test_registered_edges_ignore_legacy_edge_id(source: str) -> None:
+    """Legacy files still parse, but their stored identity is ignored."""
     doc = parse(source)
     assert isinstance(doc, Document)
-    assert doc.edges[0].id == "relationship-1"
-    assert doc.edges[0].id_is_explicit
+    assert doc.edges[0].id == "a-b"
 
 
 def test_edge_id_is_rejected_on_nodes() -> None:
@@ -667,7 +673,7 @@ def test_erd_rel_renders_authored_cardinality_labels() -> None:
         'erd.Table(b, "B")\n'
         'erd.Rel(a, b, "omfattas av", target_label="0..n", variant=4)'
     )
-    edge_id = _cell(root, "e_a->b").get("id")
+    edge_id = _cell(root, "a-b").get("id")
     assert edge_id is not None
     labels = _children_of(root, edge_id)
     assert [c.get("value") for c in labels] == ["0..n"]
@@ -682,7 +688,7 @@ def test_erd_rel_renders_both_endpoint_labels() -> None:
         'erd.Table(b, "B")\n'
         'erd.Rel(a, b, "", source_label="M", target_label="N", variant=4)'
     )
-    edge_id = _cell(root, "e_a->b").get("id")
+    edge_id = _cell(root, "a-b").get("id")
     assert edge_id is not None
     labels = _children_of(root, edge_id)
     assert {c.get("value") for c in labels} == {"M", "N"}

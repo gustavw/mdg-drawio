@@ -61,6 +61,7 @@ from .models import (
     MultiPageDocument,
     Node,
     NodeChildCell,
+    derived_edge_id,
     index_shapes_by_function,
 )
 
@@ -117,5 +118,6 @@ __all__ = [
     "MultiPageDocument",
     "Node",
     "NodeChildCell",
+    "derived_edge_id",
     "index_shapes_by_function",
 ]
