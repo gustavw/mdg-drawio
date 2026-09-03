@@ -662,7 +662,14 @@ def _process_block_call(
         )
         declared_specs = _declared_args(call.namespace, call.name, registry_entry)
         _validate_keyword_args(
-            call.namespace, call.name, foreign_args, declared_specs, line_number
+            call.namespace,
+            call.name,
+            foreign_args,
+            declared_specs,
+            line_number,
+            edge_controls=bool(
+                registry_entry and registry_entry.get("kind") == "edge"
+            ),
         )
         _validate_nested_call(
             container_stack,
@@ -722,6 +729,9 @@ def _process_block_call(
         args,
         declared_specs,
         line_number,
+        edge_controls=bool(
+            registry_entry and registry_entry.get("kind") == "edge"
+        ),
     )
     if declared_specs is not None:
         args = _normalize_registry_args(
@@ -946,11 +956,15 @@ def _validate_keyword_args(
     args: list[ast.AST | ast.keyword],
     declared_specs: list[dict[str, object]] | None,
     line_number: int,
+    *,
+    edge_controls: bool = False,
 ) -> None:
     """Reject undeclared keywords for registered shapes and row types."""
     if declared_specs is None:
         return
     declared = {"variant"} | {str(spec["name"]) for spec in declared_specs}
+    if edge_controls:
+        declared.add("visible")
     keywords = [kw for kw in args if isinstance(kw, ast.keyword)]
     unknown = sorted(kw.arg or "**kwargs" for kw in keywords if kw.arg not in declared)
     if unknown:
@@ -993,7 +1007,10 @@ def _bind_registry_args(
     """
     pos_args = [a for a in args if not isinstance(a, ast.keyword)]
     kw_args = [
-        a for a in args if isinstance(a, ast.keyword) and a.arg not in (None, "variant")
+        a
+        for a in args
+        if isinstance(a, ast.keyword)
+        and a.arg not in (None, "variant", "visible")
     ]
 
     positional_specs = [s for s in declared_specs if s.get("passing") == "positional"]
@@ -1081,7 +1098,7 @@ def _normalize_registry_args(
     normalized.extend(
         kw
         for kw in args
-        if isinstance(kw, ast.keyword) and kw.arg == "variant"
+        if isinstance(kw, ast.keyword) and kw.arg in ("variant", "visible")
     )
     return normalized
 
@@ -1276,15 +1293,31 @@ def _build_passthrough_edge(
         if spec_name in ("source", "target", "label") or spec_name not in bound:
             continue
         extra[spec_name] = literal_value(bound[spec_name], spec_name, blocks)
+    visible = _edge_visibility(args, line_number)
     edge = Edge(
         id=f"palette-edge-{len(edges) + 1}" if unconnected else "",
         type=f"{ns}.{name}",
         source_id=source_id,
         target_id=target_id,
         label=label,
+        visible=visible,
         extra=extra,
     )
     edges.append(edge)
+
+
+def _edge_visibility(
+    args: list[ast.AST | ast.keyword], line_number: int
+) -> bool | None:
+    """Parse the common edge-only ``visible=`` control keyword."""
+    for arg in args:
+        if not isinstance(arg, ast.keyword) or arg.arg != "visible":
+            continue
+        value = literal_value(arg.value, "visible")
+        if not isinstance(value, bool):
+            raise DslError("visible= must be True or False", line_number)
+        return value
+    return None
 
 
 def _ensure_endpoint_free_edge_ids_are_unique(

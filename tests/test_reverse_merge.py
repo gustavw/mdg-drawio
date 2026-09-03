@@ -422,6 +422,24 @@ def test_render_edge_uses_c4_description_as_label(
     )
 
 
+def test_render_edge_preserves_a_manual_visibility_override(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(merge, "_shape_meta", lambda _shape_id: ("c4", "Rel", 1))
+    cell = Cell(
+        cell_id="edge1",
+        style="edgeStyle=orthogonalEdgeStyle;",
+        value="calls",
+        tokens={},
+        is_edge=True,
+        actual_visible=False,
+    )
+
+    assert merge._render_edge_declaration(cell, "c4.rel.v1", "a", "b") == (
+        'c4.Rel(a, b, "calls", visible=False)'
+    )
+
+
 def test_build_forest_groups_new_cells_by_nearest_existing_anchor() -> None:
     new_cells = [_result("p1", "lib.person.v1"), _result("p2", "lib.person.v1")]
     containments = {

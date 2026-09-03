@@ -19,7 +19,10 @@ from mdg_drawio import main
 from mdg_drawio.contracts import (
     C4_SCALER_MAX_WIDTH,
     C4_SCALER_PERSON_ASPECT_RATIO,
+    Edge,
+    Node,
 )
+from mdg_drawio.engine.convert import _hide_implied_containment_edges
 from mdg_drawio.engine.validate import _iter_edge_cells
 from mdg_drawio.notation import DATA_DIR
 
@@ -458,6 +461,45 @@ def test_edge_between_direct_parent_child_is_hidden(tmp_path: Path) -> None:
     )
     assert _run_convert(src, tmp_path / "hide_direct.drawio") == 0
     assert _edge_hidden(tmp_path / "hide_direct.drawio", "gp1", "bf1")
+
+
+def test_explicit_visibility_overrides_containment_and_normal_defaults(
+    tmp_path: Path,
+) -> None:
+    src = tmp_path / "visibility_overrides.mdg"
+    src.write_text(
+        'general.VerticalContainer(parent, "Parent"):\n'
+        '    erd.EntityRect(child, "Child")\n'
+        'erd.EntityRect(other, "Other")\n'
+        'erd.Rel(parent, child, "show", visible=True)\n'
+        'erd.Rel(child, other, "hide", visible=False)\n',
+        encoding="utf-8",
+    )
+    output = tmp_path / "visibility_overrides.drawio"
+    assert _run_convert(src, output) == 0
+    assert not _edge_hidden(output, "parent", "child")
+    assert _edge_hidden(output, "child", "other")
+
+
+def test_containment_visibility_is_recomputed_after_reparenting() -> None:
+    parent = Node(id="parent", type="general.VerticalContainer")
+    child = Node(id="child", type="erd.EntityRect", parent_id="parent")
+    edge = Edge(
+        id="parent->child",
+        type="erd.Rel",
+        source_id="parent",
+        target_id="child",
+    )
+
+    _hide_implied_containment_edges([parent, child], [edge])
+    assert edge.hidden_by_containment
+    assert edge.effective_hidden
+
+    child.parent_id = None
+    _hide_implied_containment_edges([parent, child], [edge])
+
+    assert not edge.hidden_by_containment
+    assert not edge.effective_hidden
 
 
 def test_cycle_edges_stay_visible_in_layered_layout(tmp_path: Path) -> None:

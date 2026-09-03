@@ -307,6 +307,23 @@ def _edge_label_for(cell: Cell) -> str | None:
     return _label_for(cell)
 
 
+def _edge_visibility_for(cell: Cell) -> bool | None:
+    """Recover authored visibility, separating it from generated hiding."""
+    marker = cell.mdg_visibility
+    expected = cell.mdg_expected_visible
+    if marker in ("auto", "visible", "hidden") and expected is not None:
+        if cell.actual_visible != expected:
+            return cell.actual_visible
+        if marker == "visible":
+            return True
+        if marker == "hidden":
+            return False
+        return None
+    # Markerless legacy XML has no provenance. A visible edge used the default;
+    # a hidden edge is conservatively treated as an authored choice.
+    return None if cell.actual_visible else False
+
+
 def _escape_dsl_string(text: str) -> str:
     """Escape ``text`` for embedding in a ``.mdg`` double-quoted string
     literal (parsed via Python's ``ast``, per dsl_engine.py) -- NOT XML
@@ -364,7 +381,12 @@ def _render_edge_declaration(
     if label is not None:
         args.append(f'"{_escape_dsl_string(label)}"')
     variant_suffix = f", variant={variant}" if variant != 1 else ""
-    return f"{library}.{function}({', '.join(args)}{variant_suffix})"
+    visible = _edge_visibility_for(cell)
+    visible_suffix = f", visible={visible}" if visible is not None else ""
+    return (
+        f"{library}.{function}({', '.join(args)}"
+        f"{variant_suffix}{visible_suffix})"
+    )
 
 
 @dataclass

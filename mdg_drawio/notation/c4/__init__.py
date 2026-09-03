@@ -72,7 +72,7 @@ _C4_APPLICATION: dict[str, str] = {
     "System_Boundary": "Software System",
     "Container_Boundary": "Container",
 }
-type _KeywordValue = str | int | float
+type _KeywordValue = str | int | float | bool
 
 
 def _node_type(function: str) -> str:
@@ -104,7 +104,10 @@ def _parse_keyword_args(
         if not isinstance(kw, ast.keyword) or kw.arg is None:
             continue
         value = literal_value(kw.value, kw.arg, blocks)
-        if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+        if kw.arg == "visible":
+            if not isinstance(value, bool):
+                raise DslError("visible= must be True or False", line_number)
+        elif isinstance(value, bool) or not isinstance(value, (str, int, float)):
             raise DslError(
                 f"{kw.arg}= must be a string, identifier, or number",
                 line_number,
@@ -262,6 +265,8 @@ def _parse_edge(
         raise DslError("description= must be a string or identifier", line_number)
     rel_text = label or description
     variant = _select_rel_variant(kw_args, technology, rel_text, line_number)
+    visible_value = kw_args.get("visible")
+    visible = visible_value if isinstance(visible_value, bool) else None
 
     extra: dict[str, object] = {}
     if technology:
@@ -291,6 +296,7 @@ def _parse_edge(
         target_id=target_id,
         label=label,
         description=description,
+        visible=visible,
         extra=extra,
         object_attributes=obj_attrs,
     )

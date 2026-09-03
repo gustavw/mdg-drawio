@@ -224,7 +224,13 @@ class Edge:
 
     # Flags
     palette_decoration: bool = False
+    # ``visible`` is the authored tri-state: ``None`` delegates visibility to
+    # derived rules, while True/False explicitly overrides them. ``hidden``
+    # remains the legacy programmatic hide flag; containment has its own
+    # recomputed field so presentation state never becomes sticky.
+    visible: bool | None = None
     hidden: bool = False
+    hidden_by_containment: bool = False
 
     # Extra passthrough
     extra: dict[str, Any] = field(default_factory=dict)
@@ -240,6 +246,12 @@ class Edge:
             raise ValueError(
                 f"Edge {self.id!r}: target_id set but source_id is empty"
             )
+
+    @property
+    def effective_hidden(self) -> bool:
+        if self.visible is not None:
+            return not self.visible
+        return self.hidden or self.hidden_by_containment
 
 
 @dataclass
@@ -296,4 +308,3 @@ class MultiPageDocument:
     def __post_init__(self) -> None:
         if not self.pages:
             raise ValueError("MultiPageDocument.pages must not be empty")
-

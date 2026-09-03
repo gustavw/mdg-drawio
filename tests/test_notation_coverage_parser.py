@@ -445,6 +445,26 @@ def test_native_c4_edge_uses_registry_keyword_binding() -> None:
     assert (edge.source_id, edge.target_id, edge.label) == ("a", "b", "calls")
 
 
+@pytest.mark.parametrize("source", [
+    'c4.Rel(a, b, "calls", visible=False)',
+    'use erd\nerd.Rel(a, b, "calls", visible=False)',
+])
+def test_registered_edges_accept_common_visible_control(source: str) -> None:
+    doc = parse(source)
+    assert isinstance(doc, Document)
+    assert doc.edges[0].visible is False
+
+
+def test_visible_control_is_rejected_on_nodes() -> None:
+    with pytest.raises(DslError, match="unknown keyword argument.*visible"):
+        parse('c4.Person(a, "A", visible=False)')
+
+
+def test_visible_control_requires_a_boolean() -> None:
+    with pytest.raises(DslError, match="visible= must be True or False"):
+        parse('c4.Rel(a, b, "calls", visible="no")')
+
+
 def test_native_c4_call_rejects_excess_positional_arguments() -> None:
     with pytest.raises(DslError, match="too many positional arguments"):
         parse('c4.Person(person, "Person", "Bio", "extra")')

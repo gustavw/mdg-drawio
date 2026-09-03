@@ -455,8 +455,9 @@ def _hide_implied_containment_edges(nodes: list[Node], edges: list[Edge]) -> Non
         for child_id, parent_id in parent_by_id.items()
     }
     for edge in edges:
-        if frozenset((edge.source_id, edge.target_id)) in direct_pairs:
-            edge.hidden = True
+        edge.hidden_by_containment = (
+            frozenset((edge.source_id, edge.target_id)) in direct_pairs
+        )
 
 
 # draw.io colour style keys read into the overlay (see generator/overlay.py's

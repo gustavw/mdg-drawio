@@ -790,7 +790,13 @@ def _append_edge(mx_root: ET.Element, edge: Edge, ctx: _GenCtx) -> None:
         "source": source_id,
         "target": target_id,
     }
-    if edge.hidden:
+    edge_attrs["mdgVisibility"] = (
+        "auto"
+        if edge.visible is None
+        else ("visible" if edge.visible else "hidden")
+    )
+    edge_attrs["mdgExpectedVisible"] = "0" if edge.effective_hidden else "1"
+    if edge.effective_hidden:
         # draw.io hides a cell via the mxCell `visible` attribute, not a style
         # token -- a style-only "hidden=1" is inert and still renders.
         edge_attrs["visible"] = "0"

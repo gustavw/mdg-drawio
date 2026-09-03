@@ -289,14 +289,7 @@ def _collapse_edges_to_layout_units(
         if not source_id or not target_id or source_id == target_id:
             continue
         collapsed.append(
-            Edge(
-                id=edge.id,
-                type=edge.type,
-                source_id=source_id,
-                target_id=target_id,
-                hidden=edge.hidden,
-                description=edge.description,
-            )
+            replace(edge, source_id=source_id, target_id=target_id)
         )
     return collapsed
 
@@ -765,7 +758,7 @@ def _route_edges(
     # A node referenced as some other node's parent is a container -- routing
     # through it (e.g. a Lane) is expected, so it never counts as a blocker.
     container_ids = {n.parent_id for n in node_by_id.values() if n.parent_id}
-    visible_edges = [edge for edge in edges if not edge.hidden]
+    visible_edges = [edge for edge in edges if not edge.effective_hidden]
     out_degree: dict[str, int] = defaultdict(int)
     in_degree: dict[str, int] = defaultdict(int)
     for edge in visible_edges:
