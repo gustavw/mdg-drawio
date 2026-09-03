@@ -1321,17 +1321,14 @@ def plan_sync(
     """Compute :func:`plan_merge`'s usual additions PLUS removal of any
     existing vertex or edge no longer present in the current ``.drawio``.
 
-    Vertices/edges that persist keep their exact existing text untouched --
-    same "don't disturb what's already there" contract as ``plan_merge``;
-    only genuinely gone content is deleted and genuinely new content is
-    added. A vertex whose OWN cell_id is gone takes its whole nested subtree
-    with it (:func:`_block_range`); an edge is removed if either endpoint is
-    gone, or if its (source, target) pair has fewer current edge cells than
-    existing declared lines -- per-pair COUNT, not membership, since more
-    than one edge can share a pair (see
-    :func:`_split_surviving_and_extra_cells`): the earliest-declared lines
-    for a pair survive first, any excess beyond the current cell count is
-    removed.
+    Existing declarations retain their formatting, comments, and compatible
+    extra arguments. Semantic edits made in draw.io are applied in place:
+    node labels and an edge's endpoints, label, type/variant, visibility, and
+    persistent ``edge_id``. A vertex whose OWN cell_id is gone takes its whole
+    nested subtree with it (:func:`_block_range`). Edges match first by stable
+    ``edge_id``; legacy declarations without one are matched semantically, with
+    an endpoint-pair fallback, and migrated on their first sync. Any unmatched
+    existing edge is removed and any unmatched current edge is added.
 
     A survivor whose CONTAINER changed (:func:`_reparented_survivor_ids`) --
     still present, own id unchanged, just moved to sit under a different

@@ -82,6 +82,30 @@ def test_touched_union_covers_the_core_pipeline(results: list[TraceResult]) -> N
         assert expected in touched, f"expected live symbol not traced: {expected}"
 
 
+def test_touched_union_covers_every_pipeline_cli_action(
+    results: list[TraceResult],
+) -> None:
+    touched = touched_union(results)
+    for expected in (
+        "mdg_drawio.reverse.derive_cli:main",
+        "mdg_drawio.reverse.merge_cli:main",
+        "mdg_drawio.reverse.sync_cli:main",
+        "mdg_drawio.reverse.merge:plan_sync",
+    ):
+        assert expected in touched, f"expected CLI action not traced: {expected}"
+
+
+def test_covering_permutations_include_every_cli_action(
+    results: list[TraceResult],
+) -> None:
+    assert {result.action for result in results} == {
+        "convert",
+        "derive",
+        "merge",
+        "sync",
+    }
+
+
 def test_compound_row_rendering_is_traced_when_available(
     results: list[TraceResult],
 ) -> None:
