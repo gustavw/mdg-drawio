@@ -1073,8 +1073,12 @@ def plan_sync(
     only genuinely gone content is deleted and genuinely new content is
     added. A vertex whose OWN cell_id is gone takes its whole nested subtree
     with it (:func:`_block_range`); an edge is removed if either endpoint is
-    gone, or if it survives but no current edge cell connects that same
-    (source, target) pair any more.
+    gone, or if its (source, target) pair has fewer current edge cells than
+    existing declared lines -- per-pair COUNT, not membership, since more
+    than one edge can share a pair (see
+    :func:`_split_surviving_and_extra_cells`): the earliest-declared lines
+    for a pair survive first, any excess beyond the current cell count is
+    removed.
 
     A survivor whose CONTAINER changed (:func:`_reparented_survivor_ids`) --
     still present, own id unchanged, just moved to sit under a different
@@ -1095,18 +1099,33 @@ def plan_sync(
     vertex_ranges = [_block_range(existing, node_id) for node_id in removed_roots]
 
     existing_edges = _existing_edges(existing)
-    current_edge_pairs = {
+    current_pair_counts = Counter(
         (raw.source_id, raw.target_id)
         for raw in raw_cells.values()
         if raw.is_edge and raw.source_id and raw.target_id
-    }
-    removed_edge_lines = [
-        edge.line_index
-        for edge in existing_edges
-        if edge.source_token in truly_removed_roots
-        or edge.target_token in truly_removed_roots
-        or (edge.source_token, edge.target_token) not in current_edge_pairs
-    ]
+    )
+    # A pair's current cell count is a BUDGET of how many EXISTING lines for
+    # that pair still survive, not a plain membership test: once more than
+    # one edge can share a (source, target) pair (see
+    # :func:`_split_surviving_and_extra_cells`), deleting just one of several
+    # same-pair edges in the .drawio must remove exactly one of that pair's
+    # existing lines -- a bare "pair still present?" check would see the
+    # OTHER surviving edge's pair and wrongly leave every line for that pair
+    # untouched, silently keeping a relation the user just deleted.
+    remaining_pair_budget = Counter(current_pair_counts)
+    removed_edge_lines: list[int] = []
+    for edge in existing_edges:
+        if (
+            edge.source_token in truly_removed_roots
+            or edge.target_token in truly_removed_roots
+        ):
+            removed_edge_lines.append(edge.line_index)
+            continue
+        pair = (edge.source_token, edge.target_token)
+        if remaining_pair_budget.get(pair, 0) > 0:
+            remaining_pair_budget[pair] -= 1
+        else:
+            removed_edge_lines.append(edge.line_index)
     edge_ranges = [(i, i + 1) for i in removed_edge_lines]
 
     removed_ranges = _merge_ranges(vertex_ranges + edge_ranges)
