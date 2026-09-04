@@ -103,6 +103,7 @@ def test_covering_permutations_include_every_cli_action(
         "derive",
         "merge",
         "sync",
+        "notation",
     }
 
 

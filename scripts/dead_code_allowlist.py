@@ -10,7 +10,13 @@ by that sweep:
 * the standalone ``parse()`` public API and its module-global fallback, which
   the injected-port pipeline never exercises;
 * layout helpers only reached by notation-native documents that the sweep's
-  fixtures happen not to contain.
+  fixtures happen not to contain;
+* pure ``@dataclass`` containers built only where neither runtime signal can
+  see them: the CLI sweep's merge/sync actions always diff a freshly
+  generated document against its own source (zero delta by construction), and
+  the regression-suite trace's ``sys.monitoring`` callback gets no frame, so
+  it can never inspect ``self`` to attribute a dataclass ``__init__`` to its
+  class (see :func:`scripts.trace_actions.trace_regression_suite`).
 
 Each entry maps ``"module:qualname"`` -> reason. The reason is mandatory: an
 allowlist without justification is just suppressed signal.
@@ -171,4 +177,36 @@ ALLOWLIST: dict[str, str] = {
         "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
     "mdg_drawio.markup._inline:_escape_markdown_text":
         "not yet wired into the DSL/generator; reached only from tests/test_markup.py",
+    # --- pure @dataclass containers only ever instantiated where neither
+    #     runtime signal can see it: sys.monitoring's PY_START callback
+    #     (scripts/trace_actions.py:trace_regression_suite) gets no frame, so
+    #     it can never inspect ``self`` and attribute a dataclass __init__ to
+    #     its class -- the ONLY signal that can is the CLI sweep's settrace
+    #     self-inspection (_class_key), and merge/sync always diff a
+    #     freshly-`--force`-generated .drawio against its own source (zero
+    #     delta by construction), so the "new element"/"current edge" branches
+    #     that build these never run there either. All five are real,
+    #     exercised code (see mdg_drawio/reverse/merge.py's _build_forest,
+    #     _build_insertions, _build_edge_insertion, _current_edges,
+    #     _existing_edges, and tests/test_reverse_merge.py's direct
+    #     construction), just structurally invisible to both signals.
+    "mdg_drawio.reverse.merge:NewNode":
+        "dataclass; self-inspection blind spot + merge sweep always diffs zero-delta",
+    "mdg_drawio.reverse.merge:Insertion":
+        "dataclass; self-inspection blind spot + merge sweep always diffs zero-delta",
+    "mdg_drawio.reverse.merge:NewEdge":
+        "dataclass; self-inspection blind spot + merge sweep always diffs zero-delta",
+    "mdg_drawio.reverse.merge:CurrentEdge":
+        "dataclass; self-inspection blind spot + sync sweep always diffs zero-delta",
+    "mdg_drawio.reverse.merge:ExistingEdge":
+        "dataclass; self-inspection blind spot + sync sweep always diffs zero-delta",
+    # --- same self-inspection blind spot: Weights is only ever built once, as
+    #     the DEFAULT_WEIGHTS module constant (scoring.py), which runs at
+    #     import time before the CLI-sweep tracer attaches. Every later call
+    #     site (derive.py, style_index.py) reuses that constant as a default
+    #     argument rather than constructing a new Weights -- so no call site
+    #     left in production code can ever be caught by either signal.
+    "mdg_drawio.reverse.scoring:Weights":
+        "dataclass; only built once, as a module-level default, "
+        "before the tracer attaches",
 }

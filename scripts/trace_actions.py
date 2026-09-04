@@ -6,10 +6,12 @@ execute.
 The ``mdg`` CLI exposes conversion and reverse-editing actions. The sweep
 branches on their real input dimensions:
 
-* **action** — ``convert`` plus representative ``derive`` / ``merge`` / ``sync``
+* **action** — ``convert`` plus representative ``derive`` / ``merge`` / ``sync`` /
+  ``notation`` (the last takes no fixture: it lists every registered library)
 * **fixture** — every ``*_shapes_coverage.mdg`` and every architecture ``.mdg``
-* **notation** — derived from the fixture; notation coverage sheets exercise
-  the shared parser, including clean rejection of still-unsupported constructs
+* **notation library** — derived from the fixture; notation coverage sheets
+  exercise the shared parser, including clean rejection of still-unsupported
+  constructs
 * **layout mode** — ``layered`` / ``palette`` / ``process`` / ``sequence``
   (injected into frontmatter for c4 fixtures)
 * **direction** — ``TB`` / ``LR`` (injected into frontmatter)
@@ -69,7 +71,7 @@ PKG_PREFIX = str(PKG_DIR) + os.sep
 
 DIRECTIONS = ("TB", "LR")
 DEFAULT_ARTIFACT = ROOT / "action_trace.json"
-Action = Literal["convert", "derive", "merge", "sync"]
+Action = Literal["convert", "derive", "merge", "sync", "notation"]
 REVERSE_ACTIONS: tuple[Action, ...] = ("derive", "merge", "sync")
 
 
@@ -218,6 +220,9 @@ def build_permutations(*, full: bool) -> list[Permutation]:
             Permutation(reverse_fixture, force=False, action=action)
             for action in REVERSE_ACTIONS
         )
+        # notation reads no fixture (it lists every registered library); the
+        # c4 fixture above is reused only to satisfy Permutation.fixture/label.
+        perms.append(Permutation(reverse_fixture, force=False, action="notation"))
 
     return perms
 
@@ -332,6 +337,8 @@ def _argv(perm: Permutation, input_path: Path, output_path: Path) -> list[str]:
         return _convert_argv(input_path, output_path, perm.force)
     if perm.action == "derive":
         return ["derive", str(output_path), "--json"]
+    if perm.action == "notation":
+        return ["notation"]  # no library: lists every registered library
     return [perm.action, str(input_path), str(output_path)]
 
 
@@ -341,8 +348,9 @@ def trace_permutation(perm: Permutation, *, quiet: bool = True) -> TraceResult:
     The pipeline is driven the way a user drives it — ``cli.main(argv)`` — so
     the CLI shell is part of what gets traced. Overlay and reverse-action
     permutations first do an untraced ``--force`` pass to seed the output
-    geometry. The previous tracer is saved and restored so this never clobbers
-    an enclosing coverage run.
+    geometry (``notation`` takes no fixture, so it skips this seeding). The
+    previous tracer is saved and restored so this never clobbers an enclosing
+    coverage run.
     """
     record: list[str] = []
     stderr_sink = io.StringIO() if quiet else sys.stderr
@@ -352,7 +360,7 @@ def trace_permutation(perm: Permutation, *, quiet: bool = True) -> TraceResult:
         with contextlib.redirect_stderr(stderr_sink), contextlib.redirect_stdout(
             stdout_sink
         ):
-            if perm.overlay or perm.action != "convert":
+            if perm.overlay or perm.action not in ("convert", "notation"):
                 # Seed geometry (untraced) so the traced pass reads an overlay.
                 cli_main(_convert_argv(input_path, output_path, True))
 
