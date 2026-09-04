@@ -1,0 +1,30 @@
+---
+title: "Layered Routing Edge Cases"
+mode: process
+direction: TB
+---
+
+use c4
+
+# p1 -> p3 is a skip edge that shares p1/p3's column with p2, which sits
+# directly between them -- triggers mdg_drawio.layout.layered's
+# _obstruction_route (an arc around the blocking box).
+c4.System(p1, "P1", "", technology="")
+c4.System(p2, "P2", "", technology="")
+c4.System(p3, "P3", "", technology="")
+c4.Rel(p1, p2, "step", description="")
+c4.Rel(p2, p3, "step", description="")
+c4.Rel(p1, p3, "skip", description="")
+
+# a branches to x and y (out_degree 2); y is ALSO fed by b, ranked earlier
+# than a, so b->y is y's primary entry and a->y is not -- triggers
+# _fan_out_route (the paired, forced-off-default-port entry for a later
+# branch landing on an already-claimed target).
+c4.System(b, "B", "", technology="")
+c4.System(a, "A", "", technology="")
+c4.System(x, "X", "", technology="")
+c4.System(y, "Y", "", technology="")
+c4.Rel(b, a, "order", description="")
+c4.Rel(a, x, "branch1", description="")
+c4.Rel(a, y, "branch2", description="")
+c4.Rel(b, y, "skip-to-y", description="")
