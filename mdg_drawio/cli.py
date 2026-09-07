@@ -38,6 +38,7 @@ usage:
   mdg sync <existing.mdg> <diagram.drawio> [--write]
   mdg derive <diagram.drawio> [--json]
   mdg notation [library] [--json]
+  mdg notation --grammar
 
 commands:
   (default)  Convert an .mdg file to a .drawio diagram. Output is optional --
@@ -59,8 +60,12 @@ commands:
              decided). Writes nothing.
   notation   List the available notation libraries (c4, erd, uml, ...), or
              `mdg notation <library>` to print its full DSL palette --
-             every function/variant with a ready-to-adapt example call.
-             --json for machine-readable output.
+             every function/variant with a ready-to-adapt example call, plus
+             the library's root builder, grammar notes, and row types.
+             `mdg notation --grammar` prints the canonical .mdg DSL grammar
+             spec (document structure, calls, nesting, edges, ids) -- read
+             this first when you don't already know the DSL. --json for
+             machine-readable output.
 
 Run `mdg <command> --help` for that command's full option list.
 """
@@ -87,7 +92,8 @@ def _build_convert_parser() -> argparse.ArgumentParser:
         description="Convert an MDG notation file to a draw.io diagram.",
         epilog="Also available: `mdg merge EXISTING.mdg NEW.drawio [--write]`, "
         "`mdg sync EXISTING.mdg DIAGRAM.drawio [--write]`, "
-        "`mdg derive DIAGRAM.drawio [--json]`, `mdg notation [library]`. "
+        "`mdg derive DIAGRAM.drawio [--json]`, `mdg notation [library]`, "
+        "`mdg notation --grammar`. "
         "Run `mdg` with no arguments for an overview of all commands.",
     )
     parser.add_argument(

@@ -54,12 +54,17 @@ mdg merge existing.mdg new.drawio [--write]  # ADD hand-drawn cells into existin
 mdg sync existing.mdg diagram.drawio [--write]  # ADD + REMOVE -- draw.io as sole source of truth
 mdg derive diagram.drawio [--json]           # print which registry shape each cell derives to
 mdg notation [library] [--json]              # list libraries, or a library's full DSL palette
+mdg notation --grammar                       # the canonical .mdg DSL grammar spec (GRAMMAR.md)
 ```
 
-`mdg notation <library>` (e.g. `mdg notation c4`) is the fastest way to see
-every callable function/variant for a notation plus a ready-to-adapt example
-call — read this before guessing DSL syntax from memory. `mdg notation`
-alone lists all seven libraries with their shape counts. Run `mdg` with no
+`mdg notation --grammar` prints the language spec itself (document structure,
+call syntax, ids, rows-vs-containment nesting, edges, block variables) —
+read this first if you don't already know the DSL, since it's reachable even
+when working outside this repo (GRAMMAR.md ships as package data). `mdg
+notation <library>` (e.g. `mdg notation c4`) then covers one library's
+palette: every callable function/variant with a ready-to-adapt example call,
+plus its root builder, grammar notes, and row types. `mdg notation` alone
+lists all seven libraries with their shape counts. Run `mdg` with no
 arguments for a one-screen overview of every command.
 
 `merge` vs `sync`: both splice new hand-drawn cells into an existing `.mdg`

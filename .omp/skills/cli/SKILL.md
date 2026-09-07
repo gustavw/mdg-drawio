@@ -37,6 +37,7 @@ mdg merge <existing.mdg> <new.drawio> [--write]
 mdg sync <existing.mdg> <diagram.drawio> [--write]
 mdg derive <diagram.drawio> [--json]
 mdg notation [library] [--json]
+mdg notation --grammar
 mdg                          # or `mdg -h` / `mdg --help`: overview of all commands
 ```
 
@@ -69,7 +70,9 @@ All pipeline logic lives in `mdg_drawio.engine`:
   (adds AND removes -- draw.io as the sole source of truth)
 - `derive.main(argv)` — re-export of `mdg_drawio.reverse.derive_cli.main`
 - `notation_info.main(argv)` — lists notation libraries, or one library's
-  full DSL palette (function/variant + example call), from its registry
+  full DSL palette (function/variant + example call, root builder, grammar
+  notes, row types), from its registry; `--grammar` prints `GRAMMAR.md`
+  verbatim instead
 - `preload_core()` — load registries and styles into memory
 - `_generate_multipage(pages, size_of, overlays)` — produce multi-diagram mxfile
 - `validate_generated_xml(xml_string)` — pre-write validation
