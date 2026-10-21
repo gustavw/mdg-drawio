@@ -871,3 +871,102 @@ def test_sync_cli_returns_error_when_no_style_data(
     rc = sync_main([str(mdg_path), str(drawio_path)])
     assert rc == 2
     assert "make build-data" in capsys.readouterr().err
+
+
+_ERD_TABLE_MDG = (
+    "use erd\n\n"
+    'erd.Table(t1, "Entity"):\n'
+    '    erd.RowKey(t1_pk, "id", key="PK")\n'
+    '    erd.Row(t1_col, "name")\n'
+    '    erd.RowKey(t1_fk, "other_id", key="FK")\n'
+)
+
+
+def _cell_by_id(root: ET.Element, cell_id: str) -> ET.Element:
+    return next(c for c in root.iter("mxCell") if c.get("id") == cell_id)
+
+
+@needs_data
+def test_sync_cli_keeps_unmodified_erd_table_rows(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Regression: an erd Table's Row/RowKey cells (and their key/text
+    sub-cells) never resolved to a shape, so sync saw every row as moved out
+    of its table and deleted it from the ``.mdg``, reporting each sub-cell
+    as "could not derive a shape". An untouched round trip must be a no-op."""
+    mdg_path = _write(tmp_path, "existing.mdg", _ERD_TABLE_MDG)
+    drawio_path = tmp_path / "diagram.drawio"
+    assert convert_main([str(mdg_path), str(drawio_path)]) == 0
+
+    rc = sync_main([str(mdg_path), str(drawio_path)])
+    captured = capsys.readouterr()
+    assert rc == 0
+    assert "could not derive" not in captured.err
+    assert "nothing to sync" in captured.out
+    assert mdg_path.read_text(encoding="utf-8") == _ERD_TABLE_MDG
+
+
+@needs_data
+def test_sync_cli_applies_erd_row_text_and_key_edits(tmp_path: Path) -> None:
+    """A row's text and key tag live in its sub-cells, not on the row cell."""
+    mdg_path = _write(tmp_path, "existing.mdg", _ERD_TABLE_MDG)
+    drawio_path = tmp_path / "diagram.drawio"
+    assert convert_main([str(mdg_path), str(drawio_path)]) == 0
+
+    tree = ET.parse(drawio_path)
+    _cell_by_id(tree.getroot(), "t1_col__c1").set("value", "full_name")
+    _cell_by_id(tree.getroot(), "t1_fk__c0").set("value", "FK1")
+    tree.write(drawio_path, encoding="unicode")
+
+    assert sync_main([str(mdg_path), str(drawio_path), "--write"]) == 0
+    synced = mdg_path.read_text(encoding="utf-8")
+    assert '    erd.Row(t1_col, "full_name")\n' in synced
+    assert '    erd.RowKey(t1_fk, "other_id", key="FK1")\n' in synced
+    assert '    erd.RowKey(t1_pk, "id", key="PK")\n' in synced
+
+
+@needs_data
+def test_sync_cli_adds_a_hand_drawn_erd_row_inside_its_table(tmp_path: Path) -> None:
+    """A row copied in draw.io lands nested under its table, typed by its key
+    tag (RowKey with one, Row without), never as stray sub-cell nodes."""
+    mdg_path = _write(tmp_path, "existing.mdg", _ERD_TABLE_MDG)
+    drawio_path = tmp_path / "diagram.drawio"
+    assert convert_main([str(mdg_path), str(drawio_path)]) == 0
+
+    tree = ET.parse(drawio_path)
+    page_root = next(tree.getroot().iter("root"))
+    for suffix, parent, value in (
+        ("", "t1", None),
+        ("__c0", "hand", "FK2"),
+        ("__c1", "hand", "third_id"),
+    ):
+        copied = ET.fromstring(
+            ET.tostring(_cell_by_id(tree.getroot(), f"t1_fk{suffix}"))
+        )
+        copied.set("id", f"hand{suffix}")
+        copied.set("parent", parent)
+        if value is not None:
+            copied.set("value", value)
+        page_root.append(copied)
+    tree.write(drawio_path, encoding="unicode")
+
+    assert sync_main([str(mdg_path), str(drawio_path), "--write"]) == 0
+    synced = mdg_path.read_text(encoding="utf-8")
+    assert merge.validate(synced) is None
+    document = parse_mdg(synced)
+    assert isinstance(document, Document)
+    by_id = {n.id: n for n in document.nodes}
+    new_ids = set(by_id) - {"t1", "t1_pk", "t1_col", "t1_fk"}
+    assert len(new_ids) == 1
+    (new_id,) = new_ids
+    assert by_id[new_id].parent_id == "t1"
+    assert f'    erd.RowKey({new_id}, "third_id", key="FK2")' in synced
+
+
+def test_rewrite_node_label_line_leaves_a_block_reference_label_alone() -> None:
+    """Replacing a ``block`` reference with an inline string would silently
+    detach the node from its block."""
+    line = "general.Text(legend, legend_text)"
+    assert merge._rewrite_node_label_line(line, line, "inline text") is None
+    kwarg_line = "general.Text(legend, label=legend_text)"
+    assert merge._rewrite_node_label_line(kwarg_line, kwarg_line, "x") is None

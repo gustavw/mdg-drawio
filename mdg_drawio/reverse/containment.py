@@ -27,6 +27,13 @@ skipped, with a warning recorded so a human can review the source file:
 * an ancestor that resolved to a shape without ``contains.allowed`` (e.g. a
   cell accidentally nested inside a Person in the source file).
 
+A compartment row (a cell :mod:`~mdg_drawio.reverse.derive` resolved to a
+row type, e.g. an erd Table's Row/RowKey) is the one exception: its nearest
+real ancestor is its container when that ancestor's registry ``rows.allowed``
+names the row's type -- the forward parser nests rows under their table
+exactly like contained children, so anything else would make every row look
+moved out of its table.
+
 A cycle in the raw ``parent=`` chain (malformed/adversarial input) is detected
 and stops the climb with a warning rather than looping.
 """
@@ -36,7 +43,7 @@ from dataclasses import dataclass, field
 
 from .derive import Candidate, DocumentResult, RawCell
 from .scoring import BARE, parse_style
-from .style_index import registry_entry
+from .style_index import allowed_rows, registry_entry, row_type_spec
 
 # Hard ceiling on ancestry-chain length. The per-call `visited` set already
 # guarantees termination (a repeat MUST occur within len(raw_cells) steps), so
@@ -84,6 +91,12 @@ class Containment:
     warnings: tuple[str, ...] = field(default_factory=tuple)
 
 
+def _row_name(chosen: Candidate | None) -> str | None:
+    """The registry row type name a resolved cell is a row of, if any."""
+    spec = row_type_spec(chosen.shape_id) if chosen is not None else None
+    return str(spec["name"]) if spec is not None else None
+
+
 def _climb(
     cell_id: str,
     raw_cells: dict[str, RawCell],
@@ -91,6 +104,7 @@ def _climb(
 ) -> tuple[list[str], list[str]]:
     """Every legitimate container ancestor's cell_id, nearest first, plus any
     warnings recorded for anomalies skipped along the way."""
+    row_name = _row_name(chosen_by_id.get(cell_id))
     warnings: list[str] = []
     containers: list[str] = []
     visited = {cell_id}
@@ -117,6 +131,14 @@ def _climb(
             )
             parent_id = raw_parent.parent_id
             continue
+        if row_name is not None:
+            # Only the row's own (nearest real) ancestor can hold it as a row.
+            takes_row = row_name in allowed_rows(chosen.shape_id)
+            row_name = None
+            if takes_row:
+                containers.append(parent_id)
+                parent_id = raw_parent.parent_id
+                continue
         if not _is_container_capable(chosen.shape_id):
             warnings.append(
                 f"ancestor {parent_id!r} resolved to {chosen.shape_id!r}, "

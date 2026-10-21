@@ -9,6 +9,10 @@ then resolve ambiguity with library voting + a version-recency prior:
 2. ``library_score = anchor_votes + recency_prior``.
 3. Each cell resolves to the highest-scoring library among its candidates, then
    to the best-scoring shape within that library.
+4. A cell nested directly inside a resolved shape that declares compartment
+   rows (``rows.allowed``, e.g. an erd Table) resolves to one of those row
+   types instead (see :func:`_resolve_rows`); a compound row's own leaf
+   sub-cells (erd's key tag + text label) are folded into it.
 
 So a lone UML lifeline (ambiguous uml/uml25, no anchors) falls to the recency
 prior -> uml25; add any uml-only shape and its anchor vote pulls the lifeline
@@ -24,8 +28,8 @@ from itertools import chain
 from urllib.parse import unquote
 from xml.etree import ElementTree as ET
 
-from .scoring import DEFAULT_WEIGHTS, Weights, parse_style
-from .style_index import StyleIndex, recency_prior
+from .scoring import DEFAULT_WEIGHTS, Weights, parse_style, similarity
+from .style_index import RowTypeEntry, StyleIndex, allowed_rows, recency_prior
 
 # How close to the top similarity a candidate must be to count as a near-tie.
 DEFAULT_BAND = 0.02
@@ -60,6 +64,13 @@ _CONFIDENCE: dict[str, float] = {
     "none": _CONFIDENCE_NONE,
 }
 
+# How a compartment row and its folded-in sub-cells are labelled (see
+# :func:`_resolve_rows`). A "row-part" cell has no shape of its own -- it IS
+# part of its row -- so consumers drop it silently instead of reporting it
+# as unresolved.
+RESOLVED_ROW = "row"
+RESOLVED_ROW_PART = "row-part"
+
 
 @dataclass(frozen=True)
 class Cell:
@@ -86,6 +97,8 @@ class Cell:
     mdg_expected_visible: bool | None = None
     mdg_type: str | None = None
     mdg_variant: int | None = None
+    # Raw draw.io parent id, page-prefixed the same as ``cell_id``.
+    parent_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -103,6 +116,10 @@ class CellResult:
     chosen: Candidate | None
     resolved_by: str
     confidence: float
+    # A compound compartment row's values, read back from its leaf sub-cells
+    # (erd Row/RowKey: ``{"key": ..., "text": ...}``) -- the row cell's own
+    # ``value`` is always empty for these. Empty for every other cell.
+    row_fields: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -339,6 +356,11 @@ def load_cells(source: str) -> list[Cell]:
                         if element.get("mdgVariant", "").isdigit()
                         else None
                     ),
+                    parent_id=(
+                        prefix + element.get("parent", "")
+                        if element.get("parent")
+                        else None
+                    ),
                 )
             )
     return cells
@@ -458,6 +480,107 @@ def _resolve_cell(
     return chosen, decided
 
 
+def _compound_fields(parts: list[Cell]) -> dict[str, str]:
+    """A compound row's values from its two leaf sub-cells, in document order
+    -- the inverse of ``generator._compound_row_override``, which emits the
+    key tag first and the text label second."""
+    key_cell, text_cell = parts[0], parts[1]
+    return {"key": key_cell.value.strip(), "text": text_cell.value.strip()}
+
+
+def _pick_row_type(
+    cell: Cell,
+    types: list[RowTypeEntry],
+    fields: dict[str, str],
+    weights: Weights,
+    floor: float,
+) -> tuple[RowTypeEntry, float] | None:
+    """The row type *cell* best matches, or ``None`` below ``floor``.
+
+    A compound row's key tag is the semantic tie-breaker style alone can't
+    supply: draw.io renders Row and RowKey from near-identical tableRow
+    styles, but only a row type declaring ``key`` can carry a non-empty one
+    (and a row without one is the plain type, when the parent allows it).
+    """
+    has_key = bool(fields.get("key"))
+    keyed = [t for t in types if ("key" in t.arg_names) == has_key]
+    pool = keyed or types
+    scored = [(t, similarity(cell.tokens, t.tokens, weights)) for t in pool]
+    best = max(scored, key=lambda pair: pair[1], default=None)
+    if best is None or best[1] < floor:
+        return None
+    return best
+
+
+def _row_types_for(
+    parent: CellResult | None, index: StyleIndex
+) -> list[RowTypeEntry]:
+    """The row types a resolved *parent* accepts (its ``rows.allowed``)."""
+    if parent is None or parent.chosen is None:
+        return []
+    allowed = allowed_rows(parent.chosen.shape_id)
+    return [
+        t
+        for t in index.row_types
+        if t.library == parent.chosen.library and t.name in allowed
+    ]
+
+
+def _mark_row_part(result: CellResult) -> None:
+    result.chosen = None
+    result.candidates = []
+    result.resolved_by = RESOLVED_ROW_PART
+    result.confidence = _CONFIDENCE_NONE
+
+
+def _resolve_rows(
+    cells: list[Cell],
+    results: list[CellResult],
+    index: StyleIndex,
+    weights: Weights,
+    floor: float,
+) -> None:
+    """Re-resolve, in place, every cell sitting directly inside a resolved
+    shape that declares compartment rows (``rows.allowed``) to its row type.
+
+    Row types have no standalone palette entry, so the ordinary scoring pass
+    can never resolve one: an erd Table's Row/RowKey cells came back
+    unresolved, and ``mdg sync`` then treated every existing row as gone
+    from its table and dropped it from the ``.mdg``. A compound row's leaf
+    sub-cells are marked :data:`RESOLVED_ROW_PART` so they are neither
+    reported as unresolved nor ever emitted as nodes of their own.
+    """
+    if not index.row_types:
+        return
+    by_id = {r.cell_id: r for r in results}
+    parts_of: dict[str, list[Cell]] = defaultdict(list)
+    for cell in cells:
+        if cell.parent_id is not None and not cell.is_edge:
+            parts_of[cell.parent_id].append(cell)
+    for cell in cells:
+        if cell.is_edge or cell.parent_id is None:
+            continue
+        types = _row_types_for(by_id.get(cell.parent_id), index)
+        if not types:
+            continue
+        parts = parts_of.get(cell.cell_id, [])
+        compound = all(t.cell_count >= 2 for t in types) and len(parts) == 2
+        fields = _compound_fields(parts) if compound else {}
+        picked = _pick_row_type(cell, types, fields, weights, floor)
+        if picked is None:
+            continue
+        row_type, sim = picked
+        result = by_id[cell.cell_id]
+        result.chosen = Candidate(row_type.shape_id, row_type.library, sim)
+        result.candidates = [result.chosen]
+        result.resolved_by = RESOLVED_ROW
+        result.confidence = round(sim, 3)
+        result.row_fields = fields
+        if compound:
+            for part in parts:
+                _mark_row_part(by_id[part.cell_id])
+
+
 # How many near-candidates a cell keeps for its ``alternatives`` display --
 # just enough for a human to sanity-check an ambiguous resolution.
 _MAX_DISPLAYED_CANDIDATES = 8
@@ -491,4 +614,5 @@ def derive(
                 confidence=confidence,
             )
         )
+    _resolve_rows(cells, results, index, weights, sim_floor)
     return DocumentResult(results, scores, anchor_votes)
