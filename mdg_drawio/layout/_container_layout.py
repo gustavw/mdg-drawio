@@ -649,6 +649,23 @@ def _regrow_one_container(
 _STACK_TEXT_PADDING = 8.0
 _STACK_WIDTH_CUSHION = 1.15
 
+# erd table rows are a key cell (PK/FK) followed by a text cell, and RowKey
+# text is bold. The stack width has to hold both cells, and every row of a
+# table shares one key-cell width so the columns line up; the generator
+# reads it back from ``extra["key_cell_width"]`` when it emits the cells.
+ERD_ROW_TYPES = frozenset({"erd.Row", "erd.RowKey"})
+_ERD_KEY_ROW_TYPE = "erd.RowKey"
+_ERD_KEY_CELL_MIN_WIDTH = 30.0
+_ERD_KEY_CELL_PADDING = 10.0
+
+
+def erd_key_cell_width(key: str) -> float:
+    """Width of an erd row's key cell that fits *key* (e.g. "PK,FK")."""
+    if not key:
+        return _ERD_KEY_CELL_MIN_WIDTH
+    text = estimate_text_width(key, bold=True) * _STACK_WIDTH_CUSHION
+    return max(_ERD_KEY_CELL_MIN_WIDTH, text + _ERD_KEY_CELL_PADDING)
+
 
 def _stack_children(parent: Node, children: list[Node]) -> None:
     """Lay children out as a tight vertical stack, matching draw.io's
@@ -676,8 +693,20 @@ def _stack_children(parent: Node, children: list[Node]) -> None:
     if parent.label:
         title = estimate_text_width(parent.label, bold=True) + _STACK_TEXT_PADDING
         needed_width = max(needed_width, title)
+    key_width = max(
+        (
+            erd_key_cell_width(str(c.extra.get("key", "")))
+            for c in children
+            if c.type in ERD_ROW_TYPES
+        ),
+        default=0.0,
+    )
     for child in children:
-        row = estimate_text_width(child.label) * _STACK_WIDTH_CUSHION
+        bold = child.type == _ERD_KEY_ROW_TYPE
+        row = estimate_text_width(child.label, bold=bold) * _STACK_WIDTH_CUSHION
+        if child.type in ERD_ROW_TYPES:
+            row += key_width
+            child.extra["key_cell_width"] = key_width
         needed_width = max(needed_width, row + _STACK_TEXT_PADDING, child.width)
     parent.width = needed_width
 

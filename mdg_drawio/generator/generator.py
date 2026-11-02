@@ -482,6 +482,12 @@ def _child_geometry(
     return geometry, children
 
 
+def _geometry_number(value: float) -> str:
+    """Format a geometry number the way draw.io writes it ("30", "152.5")."""
+    rounded = round(float(value), 2)
+    return str(int(rounded)) if rounded.is_integer() else str(rounded)
+
+
 def _compound_row_override(
     node: Node, styles: StyleProvider
 ) -> tuple[str, list[NodeChildCell]] | None:
@@ -509,6 +515,17 @@ def _compound_row_override(
     text_geometry, text_geometry_children = _child_geometry(
         text_cell.get("geometry")
     )
+    # Fit the two cells to the row the layout sized (see
+    # layout._container_layout.erd_key_cell_width): the palette template's
+    # fixed widths would clip long keys ("PK,FK") and long row labels.
+    key_width = node.extra.get("key_cell_width")
+    if key_width and node.width:
+        key_geometry = {**key_geometry, "width": _geometry_number(key_width)}
+        text_geometry = {
+            **text_geometry,
+            "x": _geometry_number(key_width),
+            "width": _geometry_number(node.width - key_width),
+        }
     leaf_cells = [
         NodeChildCell(
             label=str(node.extra.get("key", "")),

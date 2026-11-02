@@ -106,3 +106,21 @@ def test_notation_json_is_parseable(capsys: pytest.CaptureFixture[str]) -> None:
     data = json.loads(capsys.readouterr().out)
     assert isinstance(data, list)
     assert any(entry["function"] == "Person" for entry in data)
+
+
+def test_notation_library_prints_root_builder_and_row_types(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert main(["notation", "uml25"]) == 0
+    out = capsys.readouterr().out
+    assert "Root builder: uml25.UML25(...)" in out
+    assert "uml25.Divider(node_id, text, dashed=...)" in out
+
+
+def test_notation_grammar_prints_grammar_spec(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert main(["notation", "--grammar"]) == 0
+    out = capsys.readouterr().out
+    assert "# MDG DSL" in out
+    assert "Nesting: rows vs containment" in out

@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from mdg_drawio.notation import shapes_by_id
+from mdg_drawio.notation import load_registry, shapes_by_id
 
 from .scoring import DEFAULT_WEIGHTS, Weights, parse_style, similarity
 
@@ -49,6 +49,78 @@ def registry_entry(shape_id: str) -> dict[str, Any] | None:
         return None
 
 
+# Marks a compartment row type's synthetic shape id (``erd.rowkey.row``). Row
+# types (``erd.Row``/``erd.RowKey``, ``uml25.Item``, ...) have no registry
+# shape entry of their own -- they only exist nested inside a parent whose
+# ``rows.allowed`` names them -- so they need an id that can never collide
+# with a real ``<library>.<function>.v<N>`` shape id, while still giving
+# :func:`~mdg_drawio.reverse.naming.semantic_base` its usual middle segment.
+_ROW_SUFFIX = "row"
+
+
+def row_shape_id(library: str, name: str) -> str:
+    """The synthetic shape id for row type *name* in *library*."""
+    return f"{library}.{name.lower()}.{_ROW_SUFFIX}"
+
+
+def row_type_spec(shape_id: str) -> dict[str, Any] | None:
+    """The registry ``row_types`` entry a :func:`row_shape_id` names (its
+    ``name`` in the registry's own spelling, plus its ``args``), or ``None``
+    if *shape_id* is not a row id or names no registered row type."""
+    parts = shape_id.split(".")
+    if len(parts) != 3 or parts[2] != _ROW_SUFFIX:
+        return None
+    try:
+        registry = load_registry(parts[0])
+    except (KeyError, FileNotFoundError):
+        return None
+    for spec in registry.get("row_types", []):
+        if isinstance(spec, dict) and str(spec.get("name", "")).lower() == parts[1]:
+            return spec
+    return None
+
+
+def allowed_rows(shape_id: str) -> list[str]:
+    """The row type names *shape_id*'s registry entry accepts as compartment
+    rows (``rows.allowed``) -- empty for a shape that takes none."""
+    entry = registry_entry(shape_id)
+    if entry is None:
+        return []
+    rows = entry.get("rows") or {}
+    return [str(name) for name in rows.get("allowed") or []]
+
+
+@dataclass(frozen=True)
+class RowTypeEntry:
+    """One compartment row type's canonical tableRow style, parsed and ready
+    to score, plus what reverse needs to read its sub-cells back.
+
+    ``cell_count`` is how many leaf sub-cells the forward generator emits for
+    the row (erd's Row/RowKey: two -- a key tag and a text label; see
+    ``generator._compound_row_override``); ``0`` for a plain row whose text
+    lives on the row cell itself. ``arg_names`` are the registry's declared
+    argument names for the row type.
+    """
+
+    library: str
+    name: str
+    tokens: dict[str, object] = field(compare=False)
+    cell_count: int = 0
+    arg_names: frozenset[str] = frozenset()
+
+    @property
+    def shape_id(self) -> str:
+        return row_shape_id(self.library, self.name)
+
+
+def _row_arg_names(library: str, name: str) -> frozenset[str]:
+    spec = row_type_spec(row_shape_id(library, name))
+    args = spec.get("args", []) if spec else []
+    return frozenset(
+        str(arg["name"]) for arg in args if isinstance(arg, dict) and "name" in arg
+    )
+
+
 @dataclass(frozen=True)
 class ShapeEntry:
     """One registry shape's canonical style, parsed and ready to score."""
@@ -76,12 +148,18 @@ class Scored:
 class StyleIndex:
     """All registry shapes, scorable against a query style."""
 
-    def __init__(self, entries: list[ShapeEntry]) -> None:
+    def __init__(
+        self,
+        entries: list[ShapeEntry],
+        row_types: list[RowTypeEntry] | None = None,
+    ) -> None:
         self.entries = entries
+        self.row_types = row_types or []
 
     @classmethod
     def load(cls, data_dir: Path | None = None) -> StyleIndex:
-        """Load every ``<lib>_styles.json`` under ``generated_data/notation``."""
+        """Load every ``<lib>_styles.json`` (shapes) and ``<lib>_row_types.json``
+        (compartment row types) under ``generated_data/notation``."""
         if data_dir is None:
             from mdg_drawio.notation import DATA_DIR
 
@@ -105,7 +183,24 @@ class StyleIndex:
                         kind=str(rec.get("kind") or "vertex"),
                     )
                 )
-        return cls(entries)
+        row_types: list[RowTypeEntry] = []
+        for path in sorted(notation.glob("*_row_types.json")):
+            library = path.stem.removesuffix("_row_types")
+            records: dict[str, dict[str, object]] = json.loads(
+                path.read_text(encoding="utf-8")
+            )
+            for name, rec in records.items():
+                cells = rec.get("cells")
+                row_types.append(
+                    RowTypeEntry(
+                        library=library,
+                        name=name,
+                        tokens=parse_style(str(rec.get("style") or "")),
+                        cell_count=len(cells) if isinstance(cells, list) else 0,
+                        arg_names=_row_arg_names(library, name),
+                    )
+                )
+        return cls(entries, row_types)
 
     def libraries(self) -> set[str]:
         return {e.library for e in self.entries}

@@ -100,7 +100,15 @@ Explore a registry from the CLI instead of reading the YAML directly:
 mdg notation                # list all libraries with their shape counts
 mdg notation c4              # every function/variant + a ready-to-adapt example call
 mdg notation c4 --json       # machine-readable
+mdg notation --grammar       # the canonical .mdg DSL grammar spec (GRAMMAR.md), verbatim
 ```
+
+`mdg notation --grammar` is the one command that works without any other
+project context -- `GRAMMAR.md` ships as package data, so it's reachable from
+an installed `mdg` even outside this repository. Read it first when you don't
+already know the DSL; `mdg notation <library>` then covers the per-shape
+palette (also printing that library's root builder, grammar notes, and row
+types).
 
 ## Dead-code analysis
 

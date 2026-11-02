@@ -49,10 +49,32 @@ from mdg_drawio.notation import parse as parse_mdg
 from mdg_drawio.notation import shapes_by_function
 
 from .containment import Containment
-from .derive import Cell, CellResult, DocumentResult, RawCell
-from .style_index import registry_entry
+from .derive import RESOLVED_ROW_PART, Cell, CellResult, DocumentResult, RawCell
+from .style_index import registry_entry, row_type_spec
 
 INDENT_STEP = "    "
+
+_PAGE_PREFIX_RE = re.compile(r"^\d+:")
+
+
+def strip_page_prefix(cell_id: str) -> str:
+    """Strip the ``"N:"`` page-index prefix :func:`~mdg_drawio.reverse.
+    derive._page_prefix` adds to every cell id on a MULTI-page ``.drawio``
+    (``load_cells``/``parent_map``/``assign_semantic_ids`` all carry it, so
+    it shows up on ``Cell.cell_id``, edge endpoint ids, and semantic-id
+    ``cell_id``s alike). ``.mdg`` text has no notion of pages at all -- a
+    declared node_id is always bare -- so anything derived from a
+    page-prefixed drawio id must be stripped back to bare form before it is
+    compared against, or used to look up, an :class:`ExistingIndex`'s
+    ids. Skipping this (as every one of the comparisons below once did)
+    means a page-prefixed id can never equal a bare existing id, so a
+    multi-page sync sees every already-declared node as gone and every
+    current cell as brand new -- the whole document gets removed and
+    re-added under fresh ids, landing whatever page a top-level insertion
+    defaults to. A no-op for single-page documents, whose ids are never
+    prefixed to begin with.
+    """
+    return _PAGE_PREFIX_RE.sub("", cell_id, count=1)
 
 # Mirrors CALL_RE's shape (dsl_engine.py) independently -- mdg_drawio/reverse may
 # not import a leading-underscore module member across the package boundary
@@ -366,24 +388,38 @@ def _shape_meta(shape_id: str) -> tuple[str, str, int] | None:
     """(library, function name, variant) from the registry, or ``None`` if
     the shape id doesn't resolve (defensive; should not happen for a shape
     that came from the loaded StyleIndex)."""
+    library = shape_id.split(".")[0]
+    row_spec = row_type_spec(shape_id)
+    if row_spec is not None:
+        # Row types take no variant (see derive._resolve_rows).
+        return library, str(row_spec["name"]), 1
     entry = registry_entry(shape_id)
     if entry is None:
         return None
-    library = shape_id.split(".")[0]
     return library, str(entry["function"]), int(entry.get("variant", 1))
 
 
 def _render_declaration(
-    cell: Cell, shape_id: str, node_id: str, indent: str, opens_block: bool
+    cell: Cell,
+    shape_id: str,
+    node_id: str,
+    indent: str,
+    opens_block: bool,
+    row_fields: dict[str, str] | None = None,
 ) -> str | None:
+    """One vertex declaration. A compound row's text and key tag come from
+    *row_fields* (its leaf sub-cells, see derive._resolve_rows), never from
+    the row cell itself, whose own ``value`` is always empty."""
     meta = _shape_meta(shape_id)
     if meta is None:
         return None
     library, function, variant = meta
     args = [node_id]
-    label = _label_for(cell)
+    label = row_fields.get("text") or None if row_fields else _label_for(cell)
     if label is not None:
         args.append(f'"{_escape_dsl_string(label)}"')
+    if row_fields and row_fields.get("key"):
+        args.append(f'key="{_escape_dsl_string(row_fields["key"])}"')
     variant_suffix = f", variant={variant}" if variant != 1 else ""
     colon = ":" if opens_block else ""
     return f"{indent}{library}.{function}({', '.join(args)}{variant_suffix}){colon}"
@@ -432,6 +468,7 @@ class NewNode:
     node_id: str
     shape_id: str
     children: list[NewNode] = field(default_factory=list)
+    row_fields: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -492,7 +529,9 @@ def _build_forest(
     node_of: dict[str, NewNode] = {}
     for c in new_cells:
         assert c.chosen is not None  # precondition, see docstring
-        node_of[c.cell_id] = NewNode(c.cell_id, c.cell_id, c.chosen.shape_id)
+        node_of[c.cell_id] = NewNode(
+            c.cell_id, c.cell_id, c.chosen.shape_id, row_fields=c.row_fields
+        )
     roots_by_anchor: dict[str | None, list[NewNode]] = {}
 
     for cell in new_cells:
@@ -506,7 +545,23 @@ def _build_forest(
         if container_cell_id is not None and container_cell_id in new_by_cell_id:
             node_of[container_cell_id].children.append(node_of[cell.cell_id])
         else:
-            anchor = container_cell_id if container_cell_id in existing_ids else None
+            # container_cell_id is the container's raw/page-prefixed cell id
+            # (recovered via the id_of_node_id round-trip above), which is
+            # what new_by_cell_id's keys use -- but existing.node_line (and
+            # therefore existing_ids and the anchor this returns) is always
+            # bare, page-unaware, since .mdg text has no notion of pages.
+            # On a single-page document container_cell_id is already bare
+            # (a no-op strip), so this only changes behaviour for multi-page:
+            # without it, an existing multi-page container never matches
+            # existing_ids, so every new cell misses its real anchor and
+            # falls to top-level (anchor=None) -- appended at the physical
+            # end of the file instead of nested where it belongs.
+            bare_container_id = (
+                strip_page_prefix(container_cell_id)
+                if container_cell_id is not None
+                else None
+            )
+            anchor = bare_container_id if bare_container_id in existing_ids else None
             roots_by_anchor.setdefault(anchor, []).append(node_of[cell.cell_id])
 
     return roots_by_anchor
@@ -521,6 +576,7 @@ def _render_subtree(
         node_ids[node.cell_id],
         indent,
         opens_block=bool(node.children),
+        row_fields=node.row_fields,
     )
     if line is None:
         return []
@@ -582,7 +638,10 @@ def _classify_new_cells(
     new_edges: list[NewEdge] = []
     skipped: list[str] = []
     for cell in result.cells:
-        if cell.cell_id in existing_ids:
+        if (
+            strip_page_prefix(cell.cell_id) in existing_ids
+            or cell.resolved_by == RESOLVED_ROW_PART
+        ):
             continue
         raw = raw_cells.get(cell.cell_id)
         if raw is not None and raw.is_edge:
@@ -777,6 +836,8 @@ _NS_FUNCTION_RE = re.compile(
 _VARIANT_KWARG_RE = re.compile(r"^variant\s*=\s*(\d+)$")
 _LABEL_KWARG_RE = re.compile(r"^label\s*=")
 _KWARG_RE = re.compile(r"^[A-Za-z_]\w*\s*=")
+# A bare-identifier argument: a ``block`` reference, never an inline string.
+_BLOCK_REF_RE = re.compile(r"^[A-Za-z_]\w*$")
 
 
 def _split_top_level_args(args: str) -> list[str]:
@@ -989,14 +1050,20 @@ def _rewrite_matched_edge(
 def _rewrite_node_label_line(
     raw_line: str,
     clean_line: str,
-    new_label: str,
+    new_label: str | None,
+    keywords: dict[str, str | None] | None = None,
 ) -> str | None:
     """Replace one surviving node declaration's label and preserve its shape.
 
     The node id, function, description/other arguments, block colon, indentation,
     and trailing comment remain intact. Both the normal positional label and the
-    registry-supported ``label=`` spelling are handled. ``None`` is defensive:
-    callers leave an unparseable line untouched rather than risking corruption.
+    registry-supported ``label=`` spelling are handled. *new_label* ``None``
+    leaves the label alone; *keywords* (name -> already-rendered value, or
+    ``None`` to drop it) are set via :func:`_replace_keyword`. ``None`` is
+    defensive: callers leave an unparseable line untouched rather than
+    risking corruption -- including a label given as a ``block`` reference
+    (a bare identifier, e.g. ``general.Text(legend, legend_text)``), which
+    an inline string would silently detach from its block.
     """
     match = _NS_FUNCTION_RE.match(clean_line)
     if match is None:
@@ -1005,17 +1072,24 @@ def _rewrite_node_label_line(
     if not args:
         return None
 
-    rendered_label = f'"{_escape_dsl_string(new_label)}"'
-    label_kwarg = next(
-        (i for i, argument in enumerate(args) if _LABEL_KWARG_RE.match(argument)),
-        None,
-    )
-    if label_kwarg is not None:
-        args[label_kwarg] = f"label={rendered_label}"
-    elif len(args) >= 2 and _KWARG_RE.match(args[1]) is None:
-        args[1] = rendered_label
-    else:
-        args.insert(1, rendered_label)
+    if new_label is not None:
+        rendered_label = f'"{_escape_dsl_string(new_label)}"'
+        label_kwarg = next(
+            (i for i, argument in enumerate(args) if _LABEL_KWARG_RE.match(argument)),
+            None,
+        )
+        if label_kwarg is not None:
+            if _BLOCK_REF_RE.match(args[label_kwarg].split("=", 1)[1].strip()):
+                return None
+            args[label_kwarg] = f"label={rendered_label}"
+        elif len(args) >= 2 and _KWARG_RE.match(args[1]) is None:
+            if _BLOCK_REF_RE.match(args[1]):
+                return None
+            args[1] = rendered_label
+        else:
+            args.insert(1, rendered_label)
+    for name, rendered_value in (keywords or {}).items():
+        _replace_keyword(args, name, rendered_value)
 
     indent_width = len(raw_line) - len(raw_line.lstrip(" \t"))
     indent = raw_line[:indent_width]
@@ -1215,8 +1289,11 @@ def _surviving_node_label_rewrites(
     existing: ExistingIndex,
     cells: list[Cell],
     surviving_ids: set[str],
+    result: DocumentResult | None = None,
 ) -> dict[int, str]:
-    """Line rewrites for surviving nodes whose draw.io label was edited."""
+    """Line rewrites for surviving nodes whose draw.io label was edited --
+    and, for a compound row (whose text and key tag live in its sub-cells,
+    see derive._resolve_rows), whose key tag was edited."""
     try:
         document = parse_mdg("\n".join(existing.lines))
     except Exception:
@@ -1224,19 +1301,39 @@ def _surviving_node_label_rewrites(
     if not isinstance(document, Document):
         return {}
 
-    old_labels = {node.id: node.label for node in document.nodes}
+    old_by_id = {node.id: node for node in document.nodes}
     cells_by_id = {cell.cell_id: cell for cell in cells if not cell.is_edge}
+    row_fields_by_id = {
+        c.cell_id: c.row_fields
+        for c in (result.cells if result else [])
+        if c.row_fields
+    }
     rewrites: dict[int, str] = {}
     for node_id in surviving_ids:
         cell = cells_by_id.get(node_id)
-        if cell is None:
+        old = old_by_id.get(node_id)
+        if cell is None or old is None:
             continue
-        new_label = _label_for(cell)
-        if new_label is None or new_label == old_labels.get(node_id):
+        row_fields = row_fields_by_id.get(node_id)
+        new_label = row_fields.get("text") or None if row_fields else _label_for(cell)
+        if new_label == old.label:
+            new_label = None
+        keywords: dict[str, str | None] = {}
+        if row_fields is not None:
+            new_key = row_fields.get("key") or None
+            old_key = old.extra.get("key")
+            if new_key != (str(old_key) if old_key else None):
+                keywords["key"] = (
+                    f'"{_escape_dsl_string(new_key)}"' if new_key else None
+                )
+        if new_label is None and not keywords:
             continue
         line_index = existing.node_line[node_id]
         rewritten = _rewrite_node_label_line(
-            existing.lines[line_index], existing.clean_lines[line_index], new_label
+            existing.lines[line_index],
+            existing.clean_lines[line_index],
+            new_label,
+            keywords,
         )
         if rewritten is not None:
             rewrites[line_index] = rewritten
@@ -1299,7 +1396,7 @@ def plan_sync(
     out): they reference it by id, unaffected by where its declaration now
     lives in the file.
     """
-    current_cell_ids = {c.cell_id for c in cells}
+    current_cell_ids = {strip_page_prefix(c.cell_id) for c in cells}
     truly_removed_roots = existing.node_ids() - current_cell_ids
     reparented_roots = _reparented_survivor_ids(
         existing, current_cell_ids, containments
@@ -1356,12 +1453,12 @@ def plan_sync(
         derived_id = derived_edge_id(
             current_edge.source_node_id, current_edge.target_node_id
         )
-        bare_cell_id = re.sub(r"^\d+:", "", current_edge.cell_id, count=1)
+        bare_cell_id = strip_page_prefix(current_edge.cell_id)
         if bare_cell_id != derived_id:
             drawio_id_renames[current_edge.cell_id] = derived_id
 
     node_label_rewrites = _surviving_node_label_rewrites(
-        existing, cells, surviving_ids
+        existing, cells, surviving_ids, result
     )
 
     edge_token_rewrites: dict[int, str] = {}
