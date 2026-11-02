@@ -21,7 +21,7 @@ from pathlib import Path
 import pytest
 
 from mdg_drawio import main as convert_main
-from mdg_drawio.contracts import Document
+from mdg_drawio.contracts import Document, MultiPageDocument
 from mdg_drawio.notation import parse as parse_mdg
 from mdg_drawio.reverse import fixtures as fx
 from mdg_drawio.reverse import merge
@@ -74,16 +74,19 @@ def _run_sync_pipeline(
 ) -> tuple[merge.ExistingIndex, merge.SyncPlan, str]:
     # Mirrors sync_cli._plan's real node_ids construction (an already-
     # existing cell keeps its own id, never a freshly-minted one) so this
-    # test helper exercises the same path the CLI actually runs.
+    # test helper exercises the same path the CLI actually runs. A
+    # multi-page drawio's cell_id is page-prefixed ("N:..."), .mdg text
+    # never is, so the "already declared" check compares the BARE id (see
+    # merge.strip_page_prefix).
     existing = merge.index_existing(existing_text)
     cells = load_cells(drawio_doc)
     result = derive(cells, INDEX)
     reserved = reserved_counters(existing.node_ids())
     existing_ids = existing.node_ids()
-    node_ids = {
-        s.cell_id: s.cell_id if s.cell_id in existing_ids else s.node_id
-        for s in assign_semantic_ids(result, reserved)
-    }
+    node_ids = {}
+    for s in assign_semantic_ids(result, reserved):
+        bare_id = merge.strip_page_prefix(s.cell_id)
+        node_ids[s.cell_id] = bare_id if bare_id in existing_ids else s.node_id
     raw_cells = parent_map(drawio_doc)
     containments = {
         c.cell_id: c for c in resolve_containment(result, raw_cells, node_ids)
@@ -856,6 +859,86 @@ def test_sync_cli_reports_nothing_to_sync_cleanly(
     assert rc == 0
     assert mdg_path.read_text(encoding="utf-8") == _TWO_SYSTEM_MDG
     assert "nothing to sync" in capsys.readouterr().out
+
+
+_TWO_PAGE_MDG = (
+    '---\ntitle: "T"\npage: "1. First"\nmode: layered\n---\n\n'
+    'c4.System_Boundary(box1, "Box 1"):\n'
+    '    c4.Person(alice, "Alice")\n\n'
+    '---\ntitle: "T"\npage: "2. Second"\nmode: layered\n---\n\n'
+    'c4.System_Boundary(box2, "Box 2"):\n'
+    '    c4.Person(bob, "Bob")\n'
+)
+
+
+@needs_data
+def test_sync_cli_multi_page_unmodified_diagram_is_a_no_op(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Regression for a multi-page ``.drawio``'s cell ids being page-prefixed
+    (``"N:..."``, see ``derive._page_prefix``) while ``.mdg`` text never is:
+    every comparison between the two must strip that prefix first, or every
+    already-declared node looks gone and every current cell looks brand new.
+    Round-tripping an untouched multi-page diagram through convert -> sync
+    must report nothing to do, not silently collapse both pages' content
+    into one under freshly-minted ids."""
+    mdg_path = _write(tmp_path, "existing.mdg", _TWO_PAGE_MDG)
+    drawio_path = tmp_path / "diagram.drawio"
+    assert convert_main([str(mdg_path), str(drawio_path)]) == 0
+
+    rc = sync_main([str(mdg_path), str(drawio_path)])
+    assert rc == 0
+    assert mdg_path.read_text(encoding="utf-8") == _TWO_PAGE_MDG
+    assert "nothing to sync" in capsys.readouterr().out
+
+
+@needs_data
+def test_sync_cli_multi_page_new_cell_nests_under_its_own_pages_container(
+    tmp_path: Path,
+) -> None:
+    """A cell hand-drawn inside page 2's container must be added nested
+    under THAT container, on page 2 -- page 1 must survive untouched. Before
+    the page-prefix fix, every survivor misresolved as removed and every
+    new/survivor alike was re-added at the physical end of the file, so
+    this collapsed both pages into whichever came last."""
+    person = fx.get(INDEX, "c4.person.v1")
+    mdg_path = _write(tmp_path, "existing.mdg", _TWO_PAGE_MDG)
+    drawio_path = tmp_path / "diagram.drawio"
+    assert convert_main([str(mdg_path), str(drawio_path)]) == 0
+
+    root = ET.parse(drawio_path).getroot()
+    model = root.findall("diagram")[1].find("mxGraphModel")
+    assert model is not None
+    page_two_root = model.find("root")
+    assert page_two_root is not None
+    new_cell = ET.fromstring(
+        fx.entry_cell(person, cell_id="carol", parent="box2", x=300)
+    )
+    page_two_root.append(new_cell)
+    ET.ElementTree(root).write(drawio_path, encoding="unicode")
+
+    rc = sync_main([str(mdg_path), str(drawio_path), "--write"])
+    assert rc == 0
+    synced = mdg_path.read_text(encoding="utf-8")
+    assert merge.validate(synced) is None
+
+    page_one, page_two = synced.split('page: "2. Second"')
+    # Page 1 survives byte-for-byte -- nothing "removed and re-added" onto it.
+    assert page_one == _TWO_PAGE_MDG.split('page: "2. Second"')[0]
+    assert 'c4.Person(bob, "Bob")' in page_two  # page 2's own survivor, untouched
+
+    document = parse_mdg(synced)
+    assert isinstance(document, MultiPageDocument)
+    page1, page2 = document.pages
+    assert {n.id for n in page1.nodes} == {"box1", "alice"}  # untouched
+    by_id = {n.id: n for n in page2.nodes}
+    new_ids = set(by_id) - {"box2", "bob"}
+    assert len(new_ids) == 1
+    (new_id,) = new_ids
+    assert by_id[new_id].parent_id == "box2"  # nested under page 2's container
+    new_line = next(line for line in page_two.splitlines() if new_id in line)
+    assert new_line.startswith("    ")  # indented, not top-level
 
 
 def test_sync_cli_returns_error_when_no_style_data(

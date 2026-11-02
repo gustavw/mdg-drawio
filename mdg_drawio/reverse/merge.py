@@ -54,6 +54,28 @@ from .style_index import registry_entry, row_type_spec
 
 INDENT_STEP = "    "
 
+_PAGE_PREFIX_RE = re.compile(r"^\d+:")
+
+
+def strip_page_prefix(cell_id: str) -> str:
+    """Strip the ``"N:"`` page-index prefix :func:`~mdg_drawio.reverse.
+    derive._page_prefix` adds to every cell id on a MULTI-page ``.drawio``
+    (``load_cells``/``parent_map``/``assign_semantic_ids`` all carry it, so
+    it shows up on ``Cell.cell_id``, edge endpoint ids, and semantic-id
+    ``cell_id``s alike). ``.mdg`` text has no notion of pages at all -- a
+    declared node_id is always bare -- so anything derived from a
+    page-prefixed drawio id must be stripped back to bare form before it is
+    compared against, or used to look up, an :class:`ExistingIndex`'s
+    ids. Skipping this (as every one of the comparisons below once did)
+    means a page-prefixed id can never equal a bare existing id, so a
+    multi-page sync sees every already-declared node as gone and every
+    current cell as brand new -- the whole document gets removed and
+    re-added under fresh ids, landing whatever page a top-level insertion
+    defaults to. A no-op for single-page documents, whose ids are never
+    prefixed to begin with.
+    """
+    return _PAGE_PREFIX_RE.sub("", cell_id, count=1)
+
 # Mirrors CALL_RE's shape (dsl_engine.py) independently -- mdg_drawio/reverse may
 # not import a leading-underscore module member across the package boundary
 # (enforced by tests/test_architecture.py), so this is a small, purpose-built
@@ -523,7 +545,23 @@ def _build_forest(
         if container_cell_id is not None and container_cell_id in new_by_cell_id:
             node_of[container_cell_id].children.append(node_of[cell.cell_id])
         else:
-            anchor = container_cell_id if container_cell_id in existing_ids else None
+            # container_cell_id is the container's raw/page-prefixed cell id
+            # (recovered via the id_of_node_id round-trip above), which is
+            # what new_by_cell_id's keys use -- but existing.node_line (and
+            # therefore existing_ids and the anchor this returns) is always
+            # bare, page-unaware, since .mdg text has no notion of pages.
+            # On a single-page document container_cell_id is already bare
+            # (a no-op strip), so this only changes behaviour for multi-page:
+            # without it, an existing multi-page container never matches
+            # existing_ids, so every new cell misses its real anchor and
+            # falls to top-level (anchor=None) -- appended at the physical
+            # end of the file instead of nested where it belongs.
+            bare_container_id = (
+                strip_page_prefix(container_cell_id)
+                if container_cell_id is not None
+                else None
+            )
+            anchor = bare_container_id if bare_container_id in existing_ids else None
             roots_by_anchor.setdefault(anchor, []).append(node_of[cell.cell_id])
 
     return roots_by_anchor
@@ -600,7 +638,10 @@ def _classify_new_cells(
     new_edges: list[NewEdge] = []
     skipped: list[str] = []
     for cell in result.cells:
-        if cell.cell_id in existing_ids or cell.resolved_by == RESOLVED_ROW_PART:
+        if (
+            strip_page_prefix(cell.cell_id) in existing_ids
+            or cell.resolved_by == RESOLVED_ROW_PART
+        ):
             continue
         raw = raw_cells.get(cell.cell_id)
         if raw is not None and raw.is_edge:
@@ -1355,7 +1396,7 @@ def plan_sync(
     out): they reference it by id, unaffected by where its declaration now
     lives in the file.
     """
-    current_cell_ids = {c.cell_id for c in cells}
+    current_cell_ids = {strip_page_prefix(c.cell_id) for c in cells}
     truly_removed_roots = existing.node_ids() - current_cell_ids
     reparented_roots = _reparented_survivor_ids(
         existing, current_cell_ids, containments
@@ -1412,7 +1453,7 @@ def plan_sync(
         derived_id = derived_edge_id(
             current_edge.source_node_id, current_edge.target_node_id
         )
-        bare_cell_id = re.sub(r"^\d+:", "", current_edge.cell_id, count=1)
+        bare_cell_id = strip_page_prefix(current_edge.cell_id)
         if bare_cell_id != derived_id:
             drawio_id_renames[current_edge.cell_id] = derived_id
 

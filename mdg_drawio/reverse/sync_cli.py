@@ -46,11 +46,16 @@ def _plan(
     # nested under an otherwise-untouched, already-existing container would
     # falsely look reparented too, purely because of container identity
     # churn its own containment never actually had.
+    #
+    # A multi-page .drawio's cell_id carries a "N:" page-index prefix (see
+    # merge.strip_page_prefix); .mdg text never does, so the "already
+    # declared" check -- and the id we keep when it matches -- must compare
+    # and use the BARE id, not the page-prefixed one.
     existing_ids = existing.node_ids()
-    node_ids = {
-        s.cell_id: s.cell_id if s.cell_id in existing_ids else s.node_id
-        for s in assign_semantic_ids(result, reserved)
-    }
+    node_ids = {}
+    for s in assign_semantic_ids(result, reserved):
+        bare_id = merge.strip_page_prefix(s.cell_id)
+        node_ids[s.cell_id] = bare_id if bare_id in existing_ids else s.node_id
     raw_cells = parent_map(drawio_path)
     containments = {
         c.cell_id: c for c in resolve_containment(result, raw_cells, node_ids)
