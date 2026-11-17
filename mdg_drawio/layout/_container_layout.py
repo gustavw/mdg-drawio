@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections import defaultdict, deque
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
+from itertools import pairwise
 from math import ceil
 
 from ._types import Edge, Node, SizeResolver, resolve_node_size
@@ -659,6 +660,21 @@ _ERD_KEY_CELL_MIN_WIDTH = 30.0
 _ERD_KEY_CELL_PADDING = 10.0
 
 
+def _separate_erd_key_block(rows: list[Node]) -> None:
+    """Draw one line under an erd table's key rows, not one under each.
+
+    draw.io's ER "Table 2" (PK,FK1 / PK,FK2 / Row 3 / Row 4) marks the end of
+    the keys with a single separator: only the last key row has ``bottom=1``,
+    and the table has ``rowLines=0``. The RowKey template carries
+    ``bottom=1`` because "Table 1" has a single key row, so a key row that
+    another key row follows drops the line here; the generator applies the
+    override like any other.
+    """
+    for row, following in pairwise(rows):
+        if row.type == _ERD_KEY_ROW_TYPE and following.type == _ERD_KEY_ROW_TYPE:
+            row.style_overrides["bottom"] = 0
+
+
 def erd_key_cell_width(key: str) -> float:
     """Width of an erd row's key cell that fits *key* (e.g. "PK,FK")."""
     if not key:
@@ -709,6 +725,7 @@ def _stack_children(parent: Node, children: list[Node]) -> None:
             child.extra["key_cell_width"] = key_width
         needed_width = max(needed_width, row + _STACK_TEXT_PADDING, child.width)
     parent.width = needed_width
+    _separate_erd_key_block(children)
 
     y = start
     for child in children:
