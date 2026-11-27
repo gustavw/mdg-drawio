@@ -32,6 +32,8 @@ from mdg_drawio.contracts import (
     SMALL_BOX_SCALER_TITLE_FONT_SIZE,
     SMALL_BOX_SCALER_TITLE_LINE_HEIGHT,
     SMALL_BOX_SCALER_VERTICAL_PADDING,
+    PageLink,
+    page_diagram_id,
 )
 from mdg_drawio.generator import (
     Document,
@@ -438,6 +440,93 @@ def _deduplicate_nodes(page: Document) -> None:
     page.nodes = deduped
 
 
+def _page_name(page: Document, index: int) -> str:
+    """The tab name of the page at *index*, as the generated ``<diagram>`` has it."""
+    return page.diagram.name or f"Page-{index + 1}"
+
+
+def _take_cross_page_edges(pages: list[Document]) -> list[tuple[Edge, int, int]]:
+    """Remove every edge whose endpoints are on different pages.
+
+    Returns each logical edge once, with the page index of its source and of
+    its target. The notation layer has already checked that an endpoint off
+    the edge's page is declared on exactly one other page, and that the same
+    endpoint pair is not declared on two pages. An edge with an endpoint
+    declared nowhere is no cross-page edge and stays where it is.
+
+    An edge from the shared section before the first page is copied onto
+    every page. Where it is drawn (a page holding both endpoints) it needs no
+    link, so its off-page copies are only removed; otherwise one copy is
+    linked. A hidden edge (``visible=False``) is removed without links.
+    """
+    pages_of: dict[str, list[int]] = {}
+    for index, page in enumerate(pages):
+        for node in page.nodes:
+            pages_of.setdefault(node.id, []).append(index)
+
+    def is_cross_page(edge: Edge, on_page: set[str]) -> bool:
+        ends = (edge.source_id, edge.target_id)
+        return (
+            all(ends)
+            and all(end in pages_of for end in ends)
+            and not all(end in on_page for end in ends)
+        )
+
+    drawn: set[tuple[str, str]] = set()
+    for page in pages:
+        on_page = {node.id for node in page.nodes}
+        drawn.update(
+            (edge.source_id, edge.target_id)
+            for edge in page.edges
+            if edge.source_id and not is_cross_page(edge, on_page)
+        )
+
+    taken: list[tuple[Edge, int, int]] = []
+    linked: set[tuple[str, str]] = set()
+    for index, page in enumerate(pages):
+        on_page = {node.id for node in page.nodes}
+        kept: list[Edge] = []
+        for edge in page.edges:
+            if not is_cross_page(edge, on_page):
+                kept.append(edge)
+                continue
+            pair = (edge.source_id, edge.target_id)
+            if edge.visible is False or pair in drawn or pair in linked:
+                continue
+            linked.add(pair)
+            source_page, target_page = (
+                index if end in on_page else pages_of[end][0] for end in pair
+            )
+            taken.append((edge, source_page, target_page))
+        page.edges = kept
+    return taken
+
+
+def _link_cross_page_edges(
+    pages: list[Document], cross_page_edges: list[tuple[Edge, int, int]]
+) -> None:
+    """Give both endpoints of each cross-page edge a link to the other.
+
+    The link is titled with the other node's label, the edge's label and the
+    other node's page, and opens that page with the other node selected.
+    """
+    def first(page: Document, node_id: str) -> Node:
+        # _deduplicate_nodes keeps the first declaration of an id.
+        return next(node for node in page.nodes if node.id == node_id)
+
+    def link_to(node: Node, page_index: int, verb: str) -> PageLink:
+        name = node.label or node.id
+        where = _page_name(pages[page_index], page_index)
+        title = f"{name} \u2013 {verb} ({where})" if verb else f"{name} ({where})"
+        return PageLink(title, page_diagram_id(page_index), node.id)
+
+    for edge, source_page, target_page in cross_page_edges:
+        source = first(pages[source_page], edge.source_id)
+        target = first(pages[target_page], edge.target_id)
+        source.page_links.append(link_to(target, target_page, edge.label))
+        target.page_links.append(link_to(source, source_page, edge.label))
+
+
 def _hide_implied_containment_edges(nodes: list[Node], edges: list[Edge]) -> None:
     """Hide any edge whose endpoints are a direct parent-child pair.
 
@@ -684,6 +773,8 @@ def _generate_multipage(
         "type": "device",
     })
 
+    documents = [page_doc for page_doc, _source in pages]
+    _link_cross_page_edges(documents, _take_cross_page_edges(documents))
     ovs = overlays or []
     if overlays and len(overlays) != len(pages):
         if len(overlays) > len(pages):
@@ -723,9 +814,9 @@ def _generate_multipage(
         # and assign per-page IDs so draw.io doesn't reject duplicates.
         for child in list(page_elem):
             if child.tag == "diagram":
-                child.set("id", f"diagram-{_i}")
+                child.set("id", page_diagram_id(_i))
                 if not child.get("name"):
-                    child.set("name", page_doc.diagram.name or f"Page-{_i + 1}")
+                    child.set("name", _page_name(page_doc, _i))
             root.append(child)
 
     return to_string(root)

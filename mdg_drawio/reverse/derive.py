@@ -28,6 +28,8 @@ from itertools import chain
 from urllib.parse import unquote
 from xml.etree import ElementTree as ET
 
+from mdg_drawio.contracts import strip_page_links_html
+
 from .scoring import DEFAULT_WEIGHTS, Weights, parse_style, similarity
 from .style_index import RowTypeEntry, StyleIndex, allowed_rows, recency_prior
 
@@ -303,7 +305,10 @@ def _object_attrs_by_id(model: ET.Element, prefix: str) -> dict[str, dict[str, s
     for obj in _iter_object_cells(model):
         raw_id = obj.get("id")
         if raw_id:
-            out[prefix + raw_id] = dict(obj.attrib)
+            attrs = dict(obj.attrib)
+            if "label" in attrs:
+                attrs["label"] = strip_page_links_html(attrs["label"])
+            out[prefix + raw_id] = attrs
     return out
 
 
@@ -339,7 +344,8 @@ def load_cells(source: str) -> list[Cell]:
                 Cell(
                     cell_id=cell_id,
                     style=style,
-                    value=element.get("value") or "",
+                    # Links to other pages are generated output, not label text.
+                    value=strip_page_links_html(element.get("value") or ""),
                     tokens=parse_style(style),
                     object_attrs=object_attrs.get(cell_id, {}),
                     is_edge=element.get("edge") == "1",

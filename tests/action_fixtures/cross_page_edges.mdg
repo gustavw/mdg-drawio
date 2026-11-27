@@ -1,0 +1,17 @@
+---
+page: Customer
+---
+# Exercises cross-page edges: an edge whose endpoints are declared on
+# different pages is not drawn; the engine links each endpoint to the other.
+# Drives the action tracer through cross-page validation, edge removal and
+# link rendering.
+general.VerticalContainer(customer, "Customer"):
+    erd.EntityRect(account, "Account")
+erd.ZeroToManyZeroToOne(account, contract, "pays")
+---
+page: Contract
+---
+general.VerticalContainer(contracts, "Contract"):
+    erd.EntityRect(contract, "Contract")
+    erd.EntityRect(appendix, "Appendix")
+erd.OneToMany(contract, appendix, "has")

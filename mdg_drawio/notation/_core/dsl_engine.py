@@ -754,7 +754,9 @@ def _process_block_call(
         return
 
     if is_edge(call.name, args):
-        edges.append(build_edge(call.name, args, line_number))
+        edge = build_edge(call.name, args, line_number)
+        edge.line = line_number
+        edges.append(edge)
         _raise_if_duplicate_relationship(edges, line_number)
         return
 
@@ -1122,6 +1124,73 @@ def _registry_root(ns: str) -> str:
     return str(root) if root else ""
 
 
+def _validate_cross_page_edges(pages: list[Document]) -> None:
+    """Check every edge that joins its own page to another page.
+
+    Each page is parsed on its own, so an edge may name a node declared on
+    another page. The engine then links the two endpoints instead of drawing
+    the edge, which needs the edge to be unambiguous: one endpoint is on the
+    edge's own page, the other is declared on exactly one other page, and the
+    same endpoint pair is not declared again on another page. An endpoint
+    declared nowhere is left alone, as before pages could be joined: checking
+    dangling endpoints is the caller's concern (e.g. the architecture model
+    checker). Errors are reported at the edge's line.
+    """
+    pages_of: dict[str, set[int]] = {}
+    for index, page in enumerate(pages):
+        for node in page.nodes:
+            pages_of.setdefault(node.id, set()).add(index)
+    declared_at: dict[tuple[str, str], int] = {}
+    for page in pages:
+        on_page = {node.id for node in page.nodes}
+        for edge in page.edges:
+            ends = (edge.source_id, edge.target_id)
+            if not all(ends) or any(end not in pages_of for end in ends):
+                continue  # unconnected, or dangling: not a cross-page edge
+            if not all(end in on_page for end in ends):
+                _check_cross_page_edge(edge, on_page, pages_of, declared_at)
+
+
+def _check_cross_page_edge(
+    edge: Edge,
+    on_page: set[str],
+    pages_of: dict[str, set[int]],
+    declared_at: dict[tuple[str, str], int],
+) -> None:
+    """One cross-page edge: anchored on its page, unambiguous, declared once."""
+    ends = (edge.source_id, edge.target_id)
+    where = f"{edge.type}({edge.source_id}, {edge.target_id})"
+    if not any(end in on_page for end in ends):
+        raise DslError(
+            f"{where}: neither node is on this page; declare the edge on the "
+            f"page of one of them",
+            edge.line,
+        )
+    for end in ends:
+        if end not in on_page:
+            _require_one_other_page(edge, end, pages_of[end])
+    # The shared section is copied onto every page with its line numbers, so
+    # the same line seen again is that copy, not a repeat.
+    first = declared_at.setdefault(ends, edge.line)
+    if first != edge.line:
+        raise DslError(
+            f"{where}: the relationship is already declared at line {first}; "
+            f"declare a cross-page edge on one page only",
+            edge.line,
+        )
+
+
+def _require_one_other_page(edge: Edge, endpoint: str, found: set[int]) -> None:
+    """Require *endpoint*, which is not on *edge*'s page, on exactly one page."""
+    if len(found) > 1:
+        raise DslError(
+            f"{edge.type}({edge.source_id}, {edge.target_id}): {endpoint!r} is "
+            f"declared on more than one other page, so the edge cannot tell "
+            f"which one it joins",
+            edge.line,
+        )
+
+
 def _passthrough_variant(
     args: list[ast.AST | ast.keyword], line_number: int
 ) -> int:
@@ -1311,6 +1380,7 @@ def _build_passthrough_edge(
         label=label,
         visible=visible,
         extra=extra,
+        line=line_number,
     )
     edges.append(edge)
 
@@ -1424,16 +1494,17 @@ def build_pages_document(
 ) -> Document | MultiPageDocument:
     """Build a single-page or multi-page document from parsed pages.
 
-    Each page is built independently via *build_page(source, name, index)*.
+    Each page is built independently via *build_page(source, name, index)*;
+    edges whose endpoints are declared on other pages are then checked
+    against all of them (:func:`_validate_cross_page_edges`).
     """
-    if len(pages) > 1:
-        return MultiPageDocument(
-            pages=[
-                build_page(page_source, page_name, index)
-                for index, (page_name, page_source) in enumerate(pages)
-            ]
-        )
-    if pages:
-        page_name, page_source = pages[0]
-        return build_page(page_source, page_name, 0)
+    built = [
+        build_page(page_source, page_name, index)
+        for index, (page_name, page_source) in enumerate(pages)
+    ]
+    _validate_cross_page_edges(built)
+    if len(built) > 1:
+        return MultiPageDocument(pages=built)
+    if built:
+        return built[0]
     return Document(diagram=Diagram(name=""))

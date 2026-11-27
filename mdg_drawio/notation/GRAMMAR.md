@@ -66,6 +66,46 @@ and scale freely. Ids are load-bearing for bidirectional editing: they are
 stable anchors when a diagram is regenerated, so keep them meaningful and do
 not renumber existing ids when editing a document.
 
+## Pages and cross-page edges
+
+A document becomes several draw.io pages (tabs) when page front matter splits
+it. Everything before the first page block is shared by every page:
+
+```mdg
+---
+page: Customer
+---
+general.VerticalContainer(customer, "Customer"):
+    erd.EntityRect(account, "Account")
+erd.ZeroToManyZeroToOne(account, contract, "pays")
+---
+page: Contract
+---
+general.VerticalContainer(contracts, "Contract"):
+    erd.EntityRect(contract, "Contract")
+```
+
+Each page is laid out on its own, so an edge between nodes on two different
+pages cannot be drawn. Write it like any other edge, on either endpoint's
+page; it becomes a **cross-page edge**:
+
+- It is not drawn. Instead each endpoint gets a link to the other, listed
+  under the cell when it is selected in draw.io and titled
+  `<other node> – <edge label> (<other page>)`. Following it opens the other
+  page with the other node selected. A small `↗N` after the label shows how
+  many links a node has.
+- One endpoint must be on the edge's own page and the other declared on
+  exactly one other page, and the edge is declared once (not again on the
+  other page); anything else is an error at the edge's line. An endpoint
+  declared nowhere is left as it is (a dangling edge, as on a single page).
+- `visible=False` hides a cross-page edge completely: no links either.
+- An edge in the shared section before the first page is drawn on the page
+  that holds both endpoints and is never turned into links.
+- The links are generated output. `mdg merge`/`mdg sync` read labels without
+  them, and `mdg sync` keeps a cross-page edge while both endpoints exist in
+  the drawing — it has no cell to compare, so it is changed or removed in the
+  `.mdg`, and it goes when either endpoint is deleted.
+
 ## Nesting: rows vs containment
 
 A **trailing colon** opens a block; children are indented 4 spaces. What the

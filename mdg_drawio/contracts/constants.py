@@ -109,3 +109,15 @@ PALETTE_DEFAULT_PAGE_HEIGHT = 800
 # ---------------------------------------------------------------------------
 PAGE_PREFIX_LENGTH = 5   # len("page ")
 QUOTE_OFFSET = 6         # len('page "')
+
+# ---------------------------------------------------------------------------
+# Multi-page documents and cross-page edges
+# ---------------------------------------------------------------------------
+DIAGRAM_ID_PREFIX = "diagram-"                  # <diagram id="diagram-N">
+DRAWIO_ACTION_LINK_PREFIX = "data:action/json,"  # draw.io custom action link
+DRAWIO_PAGE_LINK_PREFIX = "data:page/id,"        # draw.io link to a page
+# A cross-page edge becomes links in its endpoints' labels, in one <span>
+# marked with this attribute so reverse tooling can strip it again.
+PAGE_LINKS_MARKER_ATTRIBUTE = "data-mdg-page-links"
+PAGE_LINKS_COUNT_SYMBOL = "\u2197"               # NORTH EAST ARROW
+PAGE_LINKS_COUNT_STYLE = "font-size:9px;color:#888888;"

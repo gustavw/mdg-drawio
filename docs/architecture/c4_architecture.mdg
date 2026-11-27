@@ -184,6 +184,7 @@ c4.Rel(reverse_containment_co, reverse_scoring_co, "Parses style for containment
 c4.Rel(reverse_containment_co, reverse_style_index_co, "Looks up contains.allowed via the registry", description="")
 c4.Rel(reverse_derive_co, reverse_scoring_co, "Scores cells against the index", description="")
 c4.Rel(reverse_derive_co, reverse_style_index_co, "Loads the style index", description="")
+c4.Rel(reverse_derive_co, contracts_co_boundary, "Strips generated page links from labels", description="")
 c4.Rel(reverse_naming_co, reverse_derive_co, "Reads resolved cell results", description="")
 c4.Rel(reverse_style_index_co, notation_co_boundary, "Reads registry shapes via shapes_by_id", description="")
 c4.Rel(reverse_style_index_co, reverse_scoring_co, "Parses canonical styles for scoring", description="")

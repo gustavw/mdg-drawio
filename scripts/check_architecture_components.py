@@ -155,8 +155,12 @@ EXPECTED_RELATION_COUNTS: dict[str, int] = {
     # +8: every importing Component now documents its own cross-package edge;
     # package-level coverage may no longer hide a sibling Component's import.
     # -1: semantic naming no longer imports version-recency metadata.
-    "Component": 81,
-    "Code": 74,
+    # +1: reverse/derive.py imports mdg_drawio.contracts (strip_page_links_html,
+    # so labels read back without the generated cross-page links) --
+    # reverse_derive_co -> contracts_co_boundary.
+    "Component": 82,
+    # +1: the same import on the Code page.
+    "Code": 75,
 }
 
 CONTEXT_RELATION_TYPES: set[str] = {
