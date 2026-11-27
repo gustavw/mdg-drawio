@@ -61,8 +61,14 @@ from .models import (
     MultiPageDocument,
     Node,
     NodeChildCell,
+    PageLink,
     derived_edge_id,
     index_shapes_by_function,
+    page_cell_link,
+    page_diagram_id,
+    page_links_count_text,
+    page_links_html,
+    strip_page_links_html,
 )
 
 __all__ = [
@@ -118,6 +124,12 @@ __all__ = [
     "MultiPageDocument",
     "Node",
     "NodeChildCell",
+    "PageLink",
     "derived_edge_id",
     "index_shapes_by_function",
+    "page_cell_link",
+    "page_diagram_id",
+    "page_links_count_text",
+    "page_links_html",
+    "strip_page_links_html",
 ]

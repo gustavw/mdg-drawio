@@ -43,7 +43,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from mdg_drawio.contracts import Document, derived_edge_id
+from mdg_drawio.contracts import Document, MultiPageDocument, derived_edge_id
 from mdg_drawio.markup import html_to_markdown
 from mdg_drawio.notation import parse as parse_mdg
 from mdg_drawio.notation import shapes_by_function
@@ -1367,6 +1367,55 @@ def _reparented_survivor_ids(
     return reparented
 
 
+def _cross_page_pairs(existing: ExistingIndex) -> set[tuple[str, str]]:
+    """The ``(source, target)`` of every edge the ``.mdg`` declares across
+    pages -- the edges the forward generator links instead of drawing.
+
+    Read from the ``.mdg`` itself, never from the drawing: an edge whose
+    endpoints only ended up on different pages in draw.io (a node cut and
+    pasted onto another page deletes its edges) is a same-page edge the user
+    removed, not a cross-page one. Empty when the text does not parse or has
+    one page.
+    """
+    try:
+        document = parse_mdg("\n".join(existing.lines))
+    # Deliberately broad, as in _existing_parent_by_id: a parse failure only
+    # means no edge is kept as cross-page, never that sync itself fails.
+    except Exception:
+        return set()
+    if not isinstance(document, MultiPageDocument):
+        return set()
+    declared = {node.id for page in document.pages for node in page.nodes}
+    drawn: set[tuple[str, str]] = set()
+    across: set[tuple[str, str]] = set()
+    for page in document.pages:
+        on_page = {node.id for node in page.nodes}
+        for edge in page.edges:
+            ends = (edge.source_id, edge.target_id)
+            if not all(end in declared for end in ends):
+                continue
+            (drawn if all(end in on_page for end in ends) else across).add(ends)
+    # A shared-section edge is copied onto every page and drawn where both
+    # endpoints are; that copy decides.
+    return across - drawn
+
+
+def _is_kept_cross_page(
+    edge: ExistingEdge, cross_page: set[tuple[str, str]], current_ids: set[str]
+) -> bool:
+    """True for an existing cross-page edge whose endpoints both still exist.
+
+    The forward generator does not draw it, so draw.io having no edge cell
+    for it is expected, not a deletion. It goes, like any edge, once either
+    endpoint is gone; otherwise it is changed or removed in the ``.mdg``.
+    """
+    return (
+        (edge.source_token, edge.target_token) in cross_page
+        and edge.source_token in current_ids
+        and edge.target_token in current_ids
+    )
+
+
 def plan_sync(
     existing: ExistingIndex,
     cells: list[Cell],
@@ -1409,10 +1458,12 @@ def plan_sync(
         cells, result, raw_cells, node_ids, existing.node_ids()
     )
     edge_matches = _match_edges(existing_edges, current_edges)
+    cross_page = _cross_page_pairs(existing)
     removed_edge_lines = [
         edge.line_index
         for edge in existing_edges
         if edge.line_index not in edge_matches
+        and not _is_kept_cross_page(edge, cross_page, current_cell_ids)
     ]
     edge_ranges = [(i, i + 1) for i in removed_edge_lines]
 

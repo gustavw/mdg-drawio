@@ -271,6 +271,7 @@ SYMBOL_ALLOWLIST: dict[str, dict[str, set[str]]] = {
             "NodeChildCell",
             "derived_edge_id",
             "index_shapes_by_function",
+            "page_links_html",
         },
     },
     "generator/overlay.py": {
@@ -306,6 +307,7 @@ SYMBOL_ALLOWLIST: dict[str, dict[str, set[str]]] = {
         "mdg_drawio.contracts": {
             "DEFAULT_NODE_HEIGHT", "DEFAULT_NODE_WIDTH",
             "index_shapes_by_function",
+            "page_links_count_text",
         },
     },
 

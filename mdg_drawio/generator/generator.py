@@ -9,6 +9,7 @@ import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from functools import cache
+from html import escape
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -31,6 +32,7 @@ from mdg_drawio.contracts import (
     NodeChildCell,
     derived_edge_id,
     index_shapes_by_function,
+    page_links_html,
 )
 
 from .xml_utils import to_string
@@ -379,6 +381,11 @@ def _tokens_to_style(tokens: list[str]) -> str:
     return ";".join(tokens) + ";" if tokens else ""
 
 
+def _style_token_set(style: str) -> set[str]:
+    """The ``key=value`` tokens of *style*, for an exact token test."""
+    return {token.strip() for token in style.split(";") if token.strip()}
+
+
 def _build_node_cell_attrs(
     node: Node,
     node_id: str,
@@ -406,10 +413,18 @@ def _build_node_cell_attrs(
         full_style = _apply_corrections(
             full_style, {"dashed": 1 if node.extra["dashed"] else None}
         )
+    value = node.label if label is None else label
+    if node.page_links:
+        # The links are HTML in the label, which draw.io only reads as HTML
+        # with html=1. A label that was plain text must then stay plain text.
+        if "html=1" not in _style_token_set(full_style):
+            value = escape(value).replace("\n", "<br>")
+            full_style = _apply_corrections(full_style, {"html": 1})
+        value += page_links_html(node.page_links)
 
     attrs: dict[str, str] = {
         "id": node_id,
-        "value": node.label if label is None else label,
+        "value": value,
         "style": full_style,
         # "vertex" is a boolean mxCell flag ("1" = this cell is a vertex); it is
         # unrelated to PAGE_CELL_ID, which only happens to share the value "1".
@@ -417,9 +432,9 @@ def _build_node_cell_attrs(
         "parent": parent_id,
     }
 
-    for key, value in node.object_attributes.items():
-        if value is not None:
-            attrs[key] = str(value)
+    for key, attribute in node.object_attributes.items():
+        if attribute is not None:
+            attrs[key] = str(attribute)
 
     return attrs
 
@@ -587,6 +602,11 @@ def _append_node(mx_root: ET.Element, node: Node, ctx: _GenCtx) -> None:
 
     wrapper = _maybe_wrap_object(mx_root, node, cell_attrs, ctx.styles)
     cell_parent: ET.Element = wrapper if wrapper is not None else mx_root
+    if wrapper is not None and wrapper.get("placeholders") == "1" and node.page_links:
+        # A placeholder shape shows its palette template, not the cell value
+        # the links were added to; add them to the template instead.
+        template = wrapper.get("label", "")
+        wrapper.set("label", template + page_links_html(node.page_links))
 
     if wrapper is not None:
         cell_attrs.pop("id", None)

@@ -18,14 +18,23 @@ bugs in the layout modes more than once (see ``layout/palette.py`` and
 
 from __future__ import annotations
 
+import json
+import re
 from collections.abc import Iterable
 from dataclasses import dataclass, field
+from html import escape
 from typing import Any
 
 from .constants import (
     A4_LANDSCAPE_HEIGHT,
     A4_LANDSCAPE_WIDTH,
     DEFAULT_BOUNDARY_PADDING,
+    DIAGRAM_ID_PREFIX,
+    DRAWIO_ACTION_LINK_PREFIX,
+    DRAWIO_PAGE_LINK_PREFIX,
+    PAGE_LINKS_COUNT_STYLE,
+    PAGE_LINKS_COUNT_SYMBOL,
+    PAGE_LINKS_MARKER_ATTRIBUTE,
 )
 
 # draw.io style tokens are semicolon-delimited key=value pairs.
@@ -60,6 +69,78 @@ def index_shapes_by_function(
     return by_function
 
 
+def page_diagram_id(page_index: int) -> str:
+    """Return the ``<diagram>`` id of the page at *page_index*.
+
+    The single source for page ids: the multi-page generator assigns them and
+    a cross-page reference link points at them, so the two cannot drift.
+    """
+    return f"{DIAGRAM_ID_PREFIX}{page_index}"
+
+
+def page_cell_link(page_id: str, cell_id: str) -> str:
+    """Return a draw.io link that opens page *page_id* and shows *cell_id*.
+
+    draw.io runs the actions of a ``data:action/json`` link in order: ``open``
+    switches to the page, then ``select`` and ``scroll`` bring the target
+    cell into view on it.
+    """
+    actions = [
+        {"open": f"{DRAWIO_PAGE_LINK_PREFIX}{page_id}"},
+        {"select": {"cells": [cell_id]}},
+        {"scroll": {"cells": [cell_id]}},
+    ]
+    return DRAWIO_ACTION_LINK_PREFIX + json.dumps(
+        {"actions": actions}, separators=(",", ":")
+    )
+
+
+def page_links_html(links: Iterable[PageLink]) -> str:
+    """Return the label fragment that carries *links* in a draw.io cell.
+
+    draw.io lists every ``<a>`` in a selected cell's label under the cell,
+    titled with the anchor's text, and follows the one clicked. The anchors
+    are hidden in the drawing itself; a small count shows that they are there.
+    The whole fragment is one ``<span>`` marked with
+    ``PAGE_LINKS_MARKER_ATTRIBUTE`` so ``strip_page_links_html`` can remove it
+    again: it is generated output, never part of the authored label.
+    """
+    ordered = sorted(links, key=lambda link: link.title)
+    if not ordered:
+        return ""
+    anchors = "".join(
+        f'<a href="{escape(page_cell_link(link.page_id, link.cell_id))}" '
+        f'style="display:none">{escape(link.title)}</a>'
+        for link in ordered
+    )
+    return (
+        f'<span {PAGE_LINKS_MARKER_ATTRIBUTE}="{len(ordered)}" '
+        f'style="{PAGE_LINKS_COUNT_STYLE}">'
+        f"{escape(page_links_count_text(len(ordered)))}{anchors}</span>"
+    )
+
+
+def page_links_count_text(count: int) -> str:
+    """The visible text ``page_links_html`` adds after a label for *count*
+    links; size resolution measures it so the label still fits its shape."""
+    return f" {PAGE_LINKS_COUNT_SYMBOL}{count}" if count else ""
+
+
+_PAGE_LINKS_SPAN_RE = re.compile(
+    rf"<span\b[^>]*\b{re.escape(PAGE_LINKS_MARKER_ATTRIBUTE)}\b[^>]*>.*?</span>",
+    re.DOTALL | re.IGNORECASE,
+)
+
+
+def strip_page_links_html(label: str) -> str:
+    """Remove the fragment ``page_links_html`` added to a label.
+
+    The fragment holds no ``<span>`` of its own, so the first ``</span>``
+    after the marker closes it. A label without the marker is returned as is.
+    """
+    return _PAGE_LINKS_SPAN_RE.sub("", label)
+
+
 # ---------------------------------------------------------------------------
 # Leaf types (frozen — hashable, cachable, immutable)
 # ---------------------------------------------------------------------------
@@ -80,6 +161,19 @@ class Anchor:
     dx: float = 0.0
     dy: float = 0.0
     perimeter: float = 0.0
+
+
+@dataclass(frozen=True)
+class PageLink:
+    """A link from a node to a node on another page.
+
+    An edge whose endpoints are declared on different pages is not drawn:
+    each endpoint gets a ``PageLink`` to the other instead. *title* is what
+    draw.io shows for the link; *page_id* and *cell_id* say where it goes.
+    """
+    title: str
+    page_id: str
+    cell_id: str
 
 
 @dataclass(frozen=True)
@@ -197,6 +291,10 @@ class Node:
     element_name: str = ""  # DSL call name this node was authored as
     key_label: str = ""     # Extra label for the key cell in ERD table rows
 
+    # Links to nodes on other pages, one per cross-page edge at this node;
+    # set by the engine, rendered into the label by the generator.
+    page_links: list[PageLink] = field(default_factory=list)
+
     # Extra passthrough for layout/generator round-trips
     extra: dict[str, Any] = field(default_factory=dict)
 
@@ -220,6 +318,9 @@ class Edge:
     type: str = ""
     source_id: str = ""
     target_id: str = ""
+    # Source line of the declaration, for errors from whole-document checks
+    # (0 when the edge was not parsed from a .mdg file).
+    line: int = 0
 
     label: str = ""
     description: str = ""

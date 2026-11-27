@@ -19,6 +19,7 @@ from mdg_drawio.contracts import (
     DEFAULT_NODE_HEIGHT,
     DEFAULT_NODE_WIDTH,
     index_shapes_by_function,
+    page_links_count_text,
 )
 
 from ._container_layout import estimate_text_width
@@ -278,7 +279,9 @@ def _text_fragments(
 ) -> list[_TextFragment]:
     fragments: list[_TextFragment] = []
     if node.label:
-        fragments.extend(_title_fragments(node.label, scaling))
+        # A cross-page link count is drawn after the label's last line.
+        label = node.label + page_links_count_text(len(node.page_links))
+        fragments.extend(_title_fragments(label, scaling))
     fragments.extend(
         _extra_text_fragments(node, scaling.leading_extra_text_keys, scaling)
     )

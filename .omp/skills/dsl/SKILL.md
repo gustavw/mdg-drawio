@@ -55,6 +55,9 @@ Building blocks every notation parser reuses:
 - `node_id` is author-chosen and MUST be unique within the document
 - Ids are load-bearing for bidirectional editing
 - Edge endpoints reference existing node ids
+- An edge may join nodes on two different pages (a cross-page edge);
+  `_validate_cross_page_edges` checks it against the whole document and the
+  engine turns it into label links on both endpoints (see GRAMMAR.md)
 - Never renumber existing ids when editing — keep them stable
 
 ## Conventions
